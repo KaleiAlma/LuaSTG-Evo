@@ -1,44 +1,44 @@
 ﻿#include "Core/FileManager.hpp"
 #include <filesystem>
 #include <fstream>
-#include "utf8.hpp"
-#include "utility/path.hpp"
+// #include "utf8.hpp"
+// #include "utility/path.hpp"
 #include "mz.h"
 #include "mz_strm.h"
 #include "mz_zip.h"
 #include "mz_zip_rw.h"
 
-inline bool is_file_path_case_correct(std::wstring_view file_path)
-{
-    if (file_path.empty()) return false;
+// inline bool is_file_path_case_correct(std::wstring_view file_path)
+// {
+//     if (file_path.empty()) return false;
 
-    DWORD const full_path_size = GetFullPathNameW(file_path.data(), 0, NULL, NULL);
-    if (full_path_size == 0) return false;
-    std::vector<WCHAR> full_path_buffer(full_path_size, L'\0');
-    WCHAR* file_path_ptr = NULL;
-    DWORD const full_path_length = GetFullPathNameW(file_path.data(), full_path_size, full_path_buffer.data(), &file_path_ptr);
-    if (full_path_length == 0) return false;
-    std::wstring_view full_path(full_path_buffer.data(), full_path_length); // GetFullPathNameW 会自动把“/”转“\”
+//     DWORD const full_path_size = GetFullPathNameW(file_path.data(), 0, NULL, NULL);
+//     if (full_path_size == 0) return false;
+//     std::vector<WCHAR> full_path_buffer(full_path_size, L'\0');
+//     WCHAR* file_path_ptr = NULL;
+//     DWORD const full_path_length = GetFullPathNameW(file_path.data(), full_path_size, full_path_buffer.data(), &file_path_ptr);
+//     if (full_path_length == 0) return false;
+//     std::wstring_view full_path(full_path_buffer.data(), full_path_length); // GetFullPathNameW 会自动把“/”转“\”
 
-    Microsoft::WRL::Wrappers::FileHandle file;
-    file.Attach(CreateFileW(file_path.data(), FILE_GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL));
-    if (!file.IsValid()) return false;
+//     Microsoft::WRL::Wrappers::FileHandle file;
+//     file.Attach(CreateFileW(file_path.data(), FILE_GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL));
+//     if (!file.IsValid()) return false;
 
-    DWORD const final_path_size = GetFinalPathNameByHandleW(file.Get(), NULL, 0, FILE_NAME_NORMALIZED | VOLUME_NAME_DOS);
-    if (final_path_size == 0) return false;
-    std::vector<WCHAR> final_path_buffer(final_path_size, L'\0');
-    DWORD const final_path_length = GetFinalPathNameByHandleW(file.Get(), final_path_buffer.data(), final_path_size, FILE_NAME_NORMALIZED | VOLUME_NAME_DOS);
-    if (final_path_length == 0) return false;
-    std::wstring_view final_path(final_path_buffer.data(), final_path_length);
-    if (final_path.starts_with(L"\\\\?\\")) final_path = final_path.substr(4); // GetFinalPathNameByHandleW 一般会带一个“\\?\”开头
+//     DWORD const final_path_size = GetFinalPathNameByHandleW(file.Get(), NULL, 0, FILE_NAME_NORMALIZED | VOLUME_NAME_DOS);
+//     if (final_path_size == 0) return false;
+//     std::vector<WCHAR> final_path_buffer(final_path_size, L'\0');
+//     DWORD const final_path_length = GetFinalPathNameByHandleW(file.Get(), final_path_buffer.data(), final_path_size, FILE_NAME_NORMALIZED | VOLUME_NAME_DOS);
+//     if (final_path_length == 0) return false;
+//     std::wstring_view final_path(final_path_buffer.data(), final_path_length);
+//     if (final_path.starts_with(L"\\\\?\\")) final_path = final_path.substr(4); // GetFinalPathNameByHandleW 一般会带一个“\\?\”开头
 
-    file.Close();
+//     file.Close();
 
-    bool const equal = (full_path == final_path);
-    if (!equal) spdlog::error("[core] 路径 '{}' 和 '{}' 不匹配，存在大小写一致的部分", utf8::to_string(full_path), utf8::to_string(final_path));
+//     bool const equal = (full_path == final_path);
+//     if (!equal) spdlog::error("[core] 路径 '{}' 和 '{}' 不匹配，存在大小写一致的部分", utf8::to_string(full_path), utf8::to_string(final_path));
 
-    return equal;
-}
+//     return equal;
+// }
 
 namespace Core
 {

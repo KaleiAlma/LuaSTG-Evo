@@ -1,7 +1,7 @@
 ﻿#include "RuntimeCheck.hpp"
 #include "Platform/MessageBox.hpp"
 #include "Platform/WindowsVersion.hpp"
-#include "Platform/CleanWindows.hpp"
+// #include "Platform/CleanWindows.hpp"
 #include "Platform/ModuleLoader.hpp"
 #include "Platform/CommandLineArguments.hpp"
 #include <dxgi1_6.h>

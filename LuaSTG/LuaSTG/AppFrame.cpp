@@ -78,12 +78,12 @@ void AppFrame::SetSplash(bool v)noexcept
 		m_pAppModel->getWindow()->setCursor(m_Setting.show_cursor ? Core::Graphics::WindowCursor::Arrow : Core::Graphics::WindowCursor::None);
 	}
 }
-void AppFrame::SetWindowCornerPreference(bool allow)
-{
-	m_Setting.allow_windows_11_window_corner = allow;
-	if (m_pAppModel)
-		m_pAppModel->getWindow()->setWindowCornerPreference(allow);
-}
+// void AppFrame::SetWindowCornerPreference(bool allow)
+// {
+// 	m_Setting.allow_windows_11_window_corner = allow;
+// 	if (m_pAppModel)
+// 		m_pAppModel->getWindow()->setWindowCornerPreference(allow);
+// }
 
 int AppFrame::LoadTextFile(lua_State* L_, const char* path, const char *packname)noexcept
 {
@@ -172,28 +172,28 @@ bool AppFrame::Init()noexcept
 		
 		OpenInput();
 
-		// 创建手柄输入
-		try
-		{
-			m_DirectInput = std::make_unique<Platform::DirectInput>((ptrdiff_t)m_pAppModel->getWindow()->getNativeHandle());
-			{
-				m_DirectInput->refresh(); // 这里因为窗口还没显示，所以应该会出现一个Aquire设备失败的错误信息，忽略即可
-				uint32_t cnt = m_DirectInput->count();
-				for (uint32_t i = 0; i < cnt; i += 1)
-				{
-					spdlog::info("[luastg] 检测到 {} 控制器 产品名称：{} 设备名称：{}",
-						m_DirectInput->isXInputDevice(i) ? "XInput" : "DirectInput",
-						utf8::to_string(m_DirectInput->getProductName(i)),
-						utf8::to_string(m_DirectInput->getDeviceName(i))
-					);
-				}
-				spdlog::info("[luastg] 成功创建了 {} 个控制器", cnt);
-			}
-		}
-		catch (const std::bad_alloc&)
-		{
-			spdlog::error("[luastg] 无法为 DirectInput 分配内存");
-		}
+		// Create input handle
+		// try
+		// {
+		// 	m_DirectInput = std::make_unique<Platform::DirectInput>((ptrdiff_t)m_pAppModel->getWindow()->getNativeHandle());
+		// 	{
+		// 		m_DirectInput->refresh(); // 这里因为窗口还没显示，所以应该会出现一个Aquire设备失败的错误信息，忽略即可
+		// 		uint32_t cnt = m_DirectInput->count();
+		// 		for (uint32_t i = 0; i < cnt; i += 1)
+		// 		{
+		// 			spdlog::info("[luastg] 检测到 {} 控制器 产品名称：{} 设备名称：{}",
+		// 				m_DirectInput->isXInputDevice(i) ? "XInput" : "DirectInput",
+		// 				utf8::to_string(m_DirectInput->getProductName(i)),
+		// 				utf8::to_string(m_DirectInput->getDeviceName(i))
+		// 			);
+		// 		}
+		// 		spdlog::info("[luastg] 成功创建了 {} 个控制器", cnt);
+		// 	}
+		// }
+		// catch (const std::bad_alloc&)
+		// {
+		// 	spdlog::error("[luastg] 无法为 DirectInput 分配内存");
+		// }
 		
 		// 初始化ImGui
 		#ifdef USING_DEAR_IMGUI
@@ -250,7 +250,7 @@ void AppFrame::Shutdown()noexcept
 	spdlog::info("[luastg] 卸载所有资源包");
 	
 	CloseInput();
-	m_DirectInput = nullptr;
+	// m_DirectInput = nullptr;
 	m_pTextRenderer = nullptr;
 	m_pAppModel = nullptr;
 
@@ -271,7 +271,7 @@ void AppFrame::Run()noexcept
 	m_pAppModel->getSwapChain()->removeEventListener(this);
 	m_pAppModel->getWindow()->removeEventListener(this);
 
-	spdlog::info("[luastg] 结束更新&渲染循环");
+	spdlog::info("[luastg] Exiting Update & Render Loop");
 }
 
 #pragma endregion
@@ -281,24 +281,24 @@ void AppFrame::Run()noexcept
 void AppFrame::onWindowCreate()
 {
 	OpenInput();
-	m_DirectInput = std::make_unique<Platform::DirectInput>((ptrdiff_t)m_pAppModel->getWindow()->getNativeHandle());
-	{
-		m_DirectInput->refresh(); // 这里因为窗口还没显示，所以应该会出现一个Aquire设备失败的错误信息，忽略即可
-		uint32_t cnt = m_DirectInput->count();
-		for (uint32_t i = 0; i < cnt; i += 1)
-		{
-			spdlog::info("[luastg] 检测到 {} 控制器 产品名称：{} 设备名称：{}",
-				m_DirectInput->isXInputDevice(i) ? "XInput" : "DirectInput",
-				utf8::to_string(m_DirectInput->getProductName(i)),
-				utf8::to_string(m_DirectInput->getDeviceName(i))
-			);
-		}
-		spdlog::info("[luastg] 成功创建了 {} 个控制器", cnt);
-	}
+	// m_DirectInput = std::make_unique<Platform::DirectInput>((ptrdiff_t)m_pAppModel->getWindow()->getNativeHandle());
+	// {
+	// 	m_DirectInput->refresh(); // 这里因为窗口还没显示，所以应该会出现一个Aquire设备失败的错误信息，忽略即可
+	// 	uint32_t cnt = m_DirectInput->count();
+	// 	for (uint32_t i = 0; i < cnt; i += 1)
+	// 	{
+	// 		spdlog::info("[luastg] 检测到 {} 控制器 产品名称：{} 设备名称：{}",
+	// 			m_DirectInput->isXInputDevice(i) ? "XInput" : "DirectInput",
+	// 			utf8::to_string(m_DirectInput->getProductName(i)),
+	// 			utf8::to_string(m_DirectInput->getDeviceName(i))
+	// 		);
+	// 	}
+	// 	spdlog::info("[luastg] 成功创建了 {} 个控制器", cnt);
+	// }
 }
 void AppFrame::onWindowDestroy()
 {
-	m_DirectInput = nullptr;
+	// m_DirectInput = nullptr;
 	CloseInput();
 }
 void AppFrame::onWindowActive()
@@ -334,8 +334,8 @@ bool AppFrame::onUpdate()
 		int window_active_changed = m_window_active_changed.exchange(0);
 		if (window_active_changed & 0x2)
 		{
-			if (m_DirectInput)
-				m_DirectInput->reset();
+			// if (m_DirectInput)
+			// 	m_DirectInput->reset();
 
 			lua_pushinteger(L, (lua_Integer)LuaSTG::LuaEngine::EngineEvent::WindowActive);
 			lua_pushboolean(L, false);
@@ -349,8 +349,8 @@ bool AppFrame::onUpdate()
 		}
 		if (window_active_changed & 0x1)
 		{
-			if (m_DirectInput)
-				m_DirectInput->reset();
+			// if (m_DirectInput)
+			// 	m_DirectInput->reset();
 
 			lua_pushinteger(L, (lua_Integer)LuaSTG::LuaEngine::EngineEvent::WindowActive);
 			lua_pushboolean(L, true);
@@ -364,8 +364,8 @@ bool AppFrame::onUpdate()
 		}
 		if (window_active_changed & 0x4)
 		{
-			if (m_DirectInput)
-				m_DirectInput->refresh();
+			// if (m_DirectInput)
+			// 	m_DirectInput->refresh();
 		}
 
 		UpdateInput();

@@ -1,8 +1,9 @@
 ﻿#pragma once
 #include "Core/Object.hpp"
 #include "Core/Graphics/Renderer.hpp"
-#include "Core/Graphics/Device_D3D11.hpp"
-#include "Core/Graphics/Model_D3D11.hpp"
+#include "Core/Graphics/Device_OpenGL.hpp"
+#include "Core/Graphics/Model_OpenGL.hpp"
+#include "glad/gl.h"
 
 #define IDX(x) (size_t)static_cast<uint8_t>(x)
 
@@ -54,15 +55,16 @@ namespace Core::Graphics
 
 	struct VertexIndexBuffer
 	{
-		Microsoft::WRL::ComPtr<ID3D11Buffer> vertex_buffer;
-		Microsoft::WRL::ComPtr<ID3D11Buffer> index_buffer;
-		INT vertex_offset = 0;
-		UINT index_offset = 0;
+		GLuint vertex_buffer = 0;
+		GLuint index_buffer = 0;
+
+		GLint vertex_offset = 0;
+		GLuint index_offset = 0;
 	};
 
 	struct DrawCommand
 	{
-		ScopeObject<Texture2D_D3D11> texture;
+		ScopeObject<Texture2D_OpenGL> texture;
 		uint16_t vertex_count = 0;
 		uint16_t index_count = 0;
 	};
@@ -89,33 +91,32 @@ namespace Core::Graphics
 		} command;
 	};
 
-	class PostEffectShader_D3D11
+	class PostEffectShader_OpenGL
 		: public Object<IPostEffectShader>
 		, IDeviceEventListener
 	{
 	private:
 		struct LocalVariable
 		{
-			UINT offset{};
-			UINT size{};
+			GLuint offset{};
+			GLuint size{};
 		};
 		struct LocalConstantBuffer
 		{
-			UINT index{};
+			GLuint index{};
 			std::vector<uint8_t> buffer;
-			Microsoft::WRL::ComPtr<ID3D11Buffer> d3d11_buffer;
+			// Microsoft::WRL::ComPtr<ID3D11Buffer> d3d11_buffer;
+			GLuint opengl_buffer = 0;
 			std::unordered_map<std::string, LocalVariable> variable;
 		};
 		struct LocalTexture2D
 		{
-			UINT index{};
-			ScopeObject<Texture2D_D3D11> texture;
+			GLuint index{};
+			ScopeObject<Texture2D_OpenGL> texture;
 		};
 	private:
-		ScopeObject<Device_D3D11> m_device;
-		Microsoft::WRL::ComPtr<ID3DBlob> d3d_ps_blob;
-		Microsoft::WRL::ComPtr<ID3D11ShaderReflection> d3d11_ps_reflect;
-		Microsoft::WRL::ComPtr<ID3D11PixelShader> d3d11_ps;
+		ScopeObject<Device_OpenGL> m_device;
+		GLuint opengl_ps;
 		std::unordered_map<std::string, LocalConstantBuffer> m_buffer_map;
 		std::unordered_map<std::string, LocalTexture2D> m_texture2d_map;
 		std::string source;
@@ -127,7 +128,7 @@ namespace Core::Graphics
 		bool findVariable(StringView name, LocalConstantBuffer*& buf, LocalVariable*& val);
 
 	public:
-		ID3D11PixelShader* GetPS() const noexcept { return d3d11_ps.Get(); }
+		GLuint GetPS() const noexcept { return opengl_ps; }
 
 	public:
 		bool setFloat(StringView name, float value);
@@ -138,20 +139,20 @@ namespace Core::Graphics
 		bool apply(IRenderer* p_renderer);
 
 	public:
-		PostEffectShader_D3D11(Device_D3D11* p_device, StringView path, bool is_path_);
-		~PostEffectShader_D3D11();
+		PostEffectShader_OpenGL(Device_OpenGL* p_device, StringView path, bool is_path_);
+		~PostEffectShader_OpenGL();
 	};
 
-	class Renderer_D3D11
+	class Renderer_OpenGL
 		: public Object<IRenderer>
 		, IDeviceEventListener
 	{
 	private:
-		ScopeObject<Device_D3D11> m_device;
-		ScopeObject<ModelSharedComponent_D3D11> m_model_shared;
+		ScopeObject<Device_OpenGL> m_device;
+		ScopeObject<ModelSharedComponent_OpenGL> m_model_shared;
 
-		Microsoft::WRL::ComPtr<ID3D11Buffer> _fx_vbuffer;
-		Microsoft::WRL::ComPtr<ID3D11Buffer> _fx_ibuffer;
+		GLuint _fx_vbuffer = 0;
+		GLuint _fx_ibuffer = 0;
 		VertexIndexBuffer _vi_buffer[1];
 		size_t _vi_buffer_index = 0;
 		const size_t _vi_buffer_count = 1;
@@ -161,21 +162,21 @@ namespace Core::Graphics
 		bool uploadVertexIndexBuffer(bool discard);
 		void clearDrawList();
 
-		Microsoft::WRL::ComPtr<ID3D11Buffer> _vp_matrix_buffer;
-		Microsoft::WRL::ComPtr<ID3D11Buffer> _world_matrix_buffer;
-		Microsoft::WRL::ComPtr<ID3D11Buffer> _camera_pos_buffer; // 在 postEffect 的时候被替换了
-		Microsoft::WRL::ComPtr<ID3D11Buffer> _fog_data_buffer; // 同时也用于储存 postEffect 的 纹理大小和视口范围
-		Microsoft::WRL::ComPtr<ID3D11Buffer> _user_float_buffer; // 在 postEffect 的时候用这个
+		GLuint _vp_matrix_buffer = 0;
+		GLuint _world_matrix_buffer = 0;
+		GLuint _camera_pos_buffer = 0; // Changed with postEffect
+		GLuint _fog_data_buffer = 0; // Also used to store texture size and range of postEffect
+		GLuint _user_float_buffer = 0; // Used with postEffect
 
-		Microsoft::WRL::ComPtr<ID3D11InputLayout> _input_layout;
-		Microsoft::WRL::ComPtr<ID3D11VertexShader> _vertex_shader[IDX(FogState::MAX_COUNT)]; // FogState
-		Microsoft::WRL::ComPtr<ID3D11PixelShader> _pixel_shader[IDX(VertexColorBlendState::MAX_COUNT)][IDX(FogState::MAX_COUNT)][IDX(TextureAlphaType::MAX_COUNT)]; // VertexColorBlendState, FogState, TextureAlphaType
+		// Microsoft::WRL::ComPtr<ID3D11InputLayout> _input_layout;
+		GLuint _vertex_shader[IDX(FogState::MAX_COUNT)]; // FogState
+		GLuint _pixel_shader[IDX(VertexColorBlendState::MAX_COUNT)][IDX(FogState::MAX_COUNT)][IDX(TextureAlphaType::MAX_COUNT)]; // VertexColorBlendState, FogState, TextureAlphaType
 		Microsoft::WRL::ComPtr<ID3D11RasterizerState> _raster_state;
 		ScopeObject<ISamplerState> _sampler_state[IDX(SamplerState::MAX_COUNT)];
 		Microsoft::WRL::ComPtr<ID3D11DepthStencilState> _depth_state[IDX(DepthState::MAX_COUNT)];
 		Microsoft::WRL::ComPtr<ID3D11BlendState> _blend_state[IDX(BlendState::MAX_COUNT)];
 		
-		ScopeObject<Texture2D_D3D11> _state_texture;
+		ScopeObject<Texture2D_OpenGL> _state_texture;
 		CameraStateSet _camera_state_set;
 		RendererStateSet _state_set;
 		bool _state_dirty = false;
@@ -241,11 +242,11 @@ namespace Core::Graphics
 		ISamplerState* getKnownSamplerState(SamplerState state);
 
 	public:
-		Renderer_D3D11(Device_D3D11* p_device);
-		~Renderer_D3D11();
+		Renderer_OpenGL(Device_OpenGL* p_device);
+		~Renderer_OpenGL();
 
 	public:
-		static bool create(Device_D3D11* p_device, Renderer_D3D11** pp_renderer);
+		static bool create(Device_OpenGL* p_device, Renderer_OpenGL** pp_renderer);
 	};
 }
 

@@ -1,5 +1,6 @@
 ﻿#include "Platform/MessageBox.hpp"
 #include "Platform/ApplicationSingleInstance.hpp"
+#include "Platform/CommandLineArguments.hpp"
 #include "Core/InitializeConfigure.hpp"
 #include "Debugger/Logger.hpp"
 #include "SteamAPI/SteamAPI.hpp"
@@ -7,12 +8,17 @@
 #include "AppFrame.h"
 #include "RuntimeCheck.hpp"
 
-int main()
+#include <SDL2/SDL.h>
+
+int main(int argc, char *argv[])
 {
 #ifdef _DEBUG
+#ifdef _WIN32
 	_CrtSetDbgFlag(_CrtSetDbgFlag(_CRTDBG_REPORT_FLAG) | _CRTDBG_LEAK_CHECK_DF);
 	// _CrtSetBreakAlloc(5351);
 #endif
+#endif
+	Platform::CommandLineArguments::Get().Update(argc, argv);
 
 	[[maybe_unused]] Platform::ApplicationSingleInstance single_instance(LUASTG_INFO);
 	Core::InitializeConfigure cfg;
@@ -31,8 +37,8 @@ int main()
 	if (!com_runtime())
 	{
 		Platform::MessageBox::Error(LUASTG_INFO,
-			"引擎初始化失败。\n"
-			"未能正常初始化COM组件库，请尝试重新启动此应用程序。");
+			"Engine Initialization Failed!\n"
+			"Failed to initialize COM runtime, try relaunching.");
 		return EXIT_FAILURE;
 	}
 
@@ -49,9 +55,9 @@ int main()
 		else
 		{
 			Platform::MessageBox::Error(LUASTG_INFO,
-				"引擎初始化失败。\n"
-				"查看日志文件（engine.log，可以用记事本打开）可以获得更多信息。\n"
-				"请尝试重新启动此应用程序，或者联系开发人员。");
+				"Engine Initialization Failed!\n"
+				"See engine.log for details.\n"
+				"Please try relaunching. If the problem persists, try contacting the developer.");
 			result = EXIT_FAILURE;
 		}
 		LAPP.Shutdown();
@@ -67,9 +73,9 @@ int main()
 	return result;
 }
 
-#include "Platform/CleanWindows.hpp"
+// #include "Platform/CleanWindows.hpp"
 
-_Use_decl_annotations_ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
-{
-	return main();
-}
+// _Use_decl_annotations_ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
+// {
+// 	return main();
+// }

@@ -1,5 +1,6 @@
 # steam api
 
+
 if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/SteamworksSDK/sdk/public/steam AND EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/SteamworksSDK/sdk/redistributable_bin)
     # steam api 32
     add_library(steam_api SHARED IMPORTED GLOBAL)
@@ -38,9 +39,11 @@ set_target_properties(lua_steam_api PROPERTIES
     CXX_STANDARD 17
     CXX_STANDARD_REQUIRED ON
 )
-target_compile_options(lua_steam_api PRIVATE
-    "/wd4819"
-)
+if(MSVC)
+    target_compile_options(lua_steam_api PRIVATE
+        "/wd4819"
+    )
+endif()
 target_include_directories(lua_steam_api PUBLIC
     binding
 )
@@ -69,7 +72,8 @@ else()
     message("Ignore Steamworks SDK")
 endif()
 target_link_libraries(lua_steam_api PUBLIC
-    lua51static
+    # lua51static
+    libluajit
 )
 
 set_target_properties(lua_steam_api PROPERTIES FOLDER lualib)
@@ -97,3 +101,4 @@ if(FALSE)
 
     set_target_properties(steam PROPERTIES FOLDER lualib)
 endif()
+

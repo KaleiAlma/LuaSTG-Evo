@@ -1,19 +1,21 @@
 function(luastg_target_common_options __TARGET__)
-    target_compile_options(${__TARGET__} PRIVATE
-        "/MP"
-        "/utf-8"
-        "$<$<CONFIG:Debug>:/ZI>"
-    )
-    target_link_options(${__TARGET__} PRIVATE
-        "/DEPENDENTLOADFLAG:0x800" # Windows 10 1607+ 强制 DLL 搜索目录为系统目录
-    )
-    if(CMAKE_SIZEOF_VOID_P EQUAL 4)
+    if(MSVC)
         target_compile_options(${__TARGET__} PRIVATE
-            "/arch:SSE2"
+            "/MP"
+            "/utf-8"
+            "$<$<CONFIG:Debug>:/ZI>"
         )
         target_link_options(${__TARGET__} PRIVATE
-            "$<$<CONFIG:Debug>:/SAFESEH:NO>"
+            "/DEPENDENTLOADFLAG:0x800" # Windows 10 1607+ 强制 DLL 搜索目录为系统目录
         )
+        if(CMAKE_SIZEOF_VOID_P EQUAL 4)
+            target_compile_options(${__TARGET__} PRIVATE
+                "/arch:SSE2"
+            )
+            target_link_options(${__TARGET__} PRIVATE
+                "$<$<CONFIG:Debug>:/SAFESEH:NO>"
+            )
+        endif()
     endif()
     set_target_properties(${__TARGET__} PROPERTIES
         C_STANDARD 17
@@ -28,21 +30,23 @@ function(luastg_target_common_options __TARGET__)
 endfunction()
 
 function(luastg_target_common_options2 __TARGET__)
-    target_compile_options(${__TARGET__} PRIVATE
-        "/MP"
-        "/utf-8"
-        "$<$<CONFIG:Debug>:/ZI>"
-    )
-    target_link_options(${__TARGET__} PRIVATE
-        "/DEPENDENTLOADFLAG:0x800" # Windows 10 1607+ 强制 DLL 搜索目录为系统目录
-    )
-    if(CMAKE_SIZEOF_VOID_P EQUAL 4)
+    if(MSVC)
         target_compile_options(${__TARGET__} PRIVATE
-            "/arch:SSE2"
+            "/MP"
+            "/utf-8"
+            "$<$<CONFIG:Debug>:/ZI>"
         )
         target_link_options(${__TARGET__} PRIVATE
-            "$<$<CONFIG:Debug>:/SAFESEH:NO>"
+            "/DEPENDENTLOADFLAG:0x800" # Windows 10 1607+ 强制 DLL 搜索目录为系统目录
         )
+        if(CMAKE_SIZEOF_VOID_P EQUAL 4)
+            target_compile_options(${__TARGET__} PRIVATE
+                "/arch:SSE2"
+            )
+            target_link_options(${__TARGET__} PRIVATE
+                "$<$<CONFIG:Debug>:/SAFESEH:NO>"
+            )
+        endif()
     endif()
     set_target_properties(${__TARGET__} PROPERTIES
         C_STANDARD 17
@@ -53,9 +57,11 @@ function(luastg_target_common_options2 __TARGET__)
 endfunction()
 
 function(luastg_target_more_warning __TARGET__)
-    target_compile_options(${__TARGET__} PRIVATE
-        "/W4"
-    )
+    if(MSVC)
+        target_compile_options(${__TARGET__} PRIVATE
+            "/W4"
+        )
+    endif()
 endfunction()
 
 function(luastg_target_copy_to_output_directory __AFTER_TARGET__ __TARGET__)

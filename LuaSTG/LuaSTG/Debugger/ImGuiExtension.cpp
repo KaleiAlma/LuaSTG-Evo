@@ -282,72 +282,72 @@ static int lib_ShowTestInputWindow(lua_State* L)
         return 0;
     }
 }
-static int lib_ShowMemoryUsageWindow(lua_State* L)
-{
-    bool v = (lua_gettop(L) >= 1) ? lua_toboolean(L, 1) : true;
-    if (v)
-    {
-        if (ImGui::Begin("Memory Usage", &v))
-        {
-            MEMORYSTATUSEX info = { sizeof(MEMORYSTATUSEX) };
-            BOOL bret = GlobalMemoryStatusEx(&info);
-            auto gmuinfo = LAPP.GetAppModel()->getDevice()->getMemoryUsageStatistics();
-            if (bret)
-            {
-                static bool more_info = false;
-                ImGui::Checkbox("More Informations", &more_info);
+// static int lib_ShowMemoryUsageWindow(lua_State* L)
+// {
+//     bool v = (lua_gettop(L) >= 1) ? lua_toboolean(L, 1) : true;
+//     if (v)
+//     {
+//         if (ImGui::Begin("Memory Usage", &v))
+//         {
+//             MEMORYSTATUSEX info = { sizeof(MEMORYSTATUSEX) };
+//             BOOL bret = GlobalMemoryStatusEx(&info);
+//             auto gmuinfo = LAPP.GetAppModel()->getDevice()->getMemoryUsageStatistics();
+//             if (bret)
+//             {
+//                 static bool more_info = false;
+//                 ImGui::Checkbox("More Informations", &more_info);
 
-                if (more_info) ImGui::Text("System Memory Usage: %u%%", info.dwMemoryLoad);
-                if (more_info) ImGui::Text("Total Physical Memory: %s", bytes_count_to_string(info.ullTotalPhys).c_str());
-                if (more_info) ImGui::Text("Avalid Physical Memory: %s", bytes_count_to_string(info.ullAvailPhys).c_str());
-                if (more_info) ImGui::Text("Total Page File: %s", bytes_count_to_string(info.ullTotalPageFile).c_str());
-                if (more_info) ImGui::Text("Avalid Page File: %s", bytes_count_to_string(info.ullAvailPageFile).c_str());
-                if (more_info) ImGui::Text("Total User Mode Memory Space: %s", bytes_count_to_string(info.ullTotalVirtual).c_str());
-                ImGui::Text("Avalid User Mode Memory Space: %s", bytes_count_to_string(info.ullAvailVirtual).c_str());
-                ImGui::Text("Alloc* User Mode Memory Space: %s", bytes_count_to_string(info.ullTotalVirtual - info.ullAvailVirtual).c_str());
+//                 if (more_info) ImGui::Text("System Memory Usage: %u%%", info.dwMemoryLoad);
+//                 if (more_info) ImGui::Text("Total Physical Memory: %s", bytes_count_to_string(info.ullTotalPhys).c_str());
+//                 if (more_info) ImGui::Text("Avalid Physical Memory: %s", bytes_count_to_string(info.ullAvailPhys).c_str());
+//                 if (more_info) ImGui::Text("Total Page File: %s", bytes_count_to_string(info.ullTotalPageFile).c_str());
+//                 if (more_info) ImGui::Text("Avalid Page File: %s", bytes_count_to_string(info.ullAvailPageFile).c_str());
+//                 if (more_info) ImGui::Text("Total User Mode Memory Space: %s", bytes_count_to_string(info.ullTotalVirtual).c_str());
+//                 ImGui::Text("Avalid User Mode Memory Space: %s", bytes_count_to_string(info.ullAvailVirtual).c_str());
+//                 ImGui::Text("Alloc* User Mode Memory Space: %s", bytes_count_to_string(info.ullTotalVirtual - info.ullAvailVirtual).c_str());
 
-                lua_State* G_L = LAPP.GetLuaEngine();
-                int lvm_kb = lua_gc(G_L, LUA_GCCOUNT, 0);
-                int lvm_b = lua_gc(G_L, LUA_GCCOUNTB, 0);
-                ImGui::Text("Alloc* Lua Runtime Memory: %s", bytes_count_to_string((DWORDLONG)lvm_kb * (DWORDLONG)1024 + (DWORDLONG)lvm_b).c_str());
+//                 lua_State* G_L = LAPP.GetLuaEngine();
+//                 int lvm_kb = lua_gc(G_L, LUA_GCCOUNT, 0);
+//                 int lvm_b = lua_gc(G_L, LUA_GCCOUNTB, 0);
+//                 ImGui::Text("Alloc* Lua Runtime Memory: %s", bytes_count_to_string((DWORDLONG)lvm_kb * (DWORDLONG)1024 + (DWORDLONG)lvm_b).c_str());
 
-                if (more_info) ImGui::Text("Adapter Local Budget: %s", bytes_count_to_string(gmuinfo.local.budget).c_str());
-                ImGui::Text("Adapter Local Usage: %s", bytes_count_to_string(gmuinfo.local.current_usage).c_str());
-                if (more_info) ImGui::Text("Adapter Local Available For Reservation: %s", bytes_count_to_string(gmuinfo.local.available_for_reservation).c_str());
-                if (more_info) ImGui::Text("Adapter Local Current Reservation: %s", bytes_count_to_string(gmuinfo.local.current_reservation).c_str());
+//                 if (more_info) ImGui::Text("Adapter Local Budget: %s", bytes_count_to_string(gmuinfo.local.budget).c_str());
+//                 ImGui::Text("Adapter Local Usage: %s", bytes_count_to_string(gmuinfo.local.current_usage).c_str());
+//                 if (more_info) ImGui::Text("Adapter Local Available For Reservation: %s", bytes_count_to_string(gmuinfo.local.available_for_reservation).c_str());
+//                 if (more_info) ImGui::Text("Adapter Local Current Reservation: %s", bytes_count_to_string(gmuinfo.local.current_reservation).c_str());
 
-                if (more_info) ImGui::Text("Adapter Non-Local Budget: %s", bytes_count_to_string(gmuinfo.non_local.budget).c_str());
-                ImGui::Text("Adapter Non-Local Usage: %s", bytes_count_to_string(gmuinfo.non_local.current_usage).c_str());
-                if (more_info) ImGui::Text("Adapter Non-Local Available For Reservation: %s", bytes_count_to_string(gmuinfo.non_local.available_for_reservation).c_str());
-                if (more_info) ImGui::Text("Adapter Non-Local Current Reservation: %s", bytes_count_to_string(gmuinfo.non_local.current_reservation).c_str());
+//                 if (more_info) ImGui::Text("Adapter Non-Local Budget: %s", bytes_count_to_string(gmuinfo.non_local.budget).c_str());
+//                 ImGui::Text("Adapter Non-Local Usage: %s", bytes_count_to_string(gmuinfo.non_local.current_usage).c_str());
+//                 if (more_info) ImGui::Text("Adapter Non-Local Available For Reservation: %s", bytes_count_to_string(gmuinfo.non_local.available_for_reservation).c_str());
+//                 if (more_info) ImGui::Text("Adapter Non-Local Current Reservation: %s", bytes_count_to_string(gmuinfo.non_local.current_reservation).c_str());
 
-                if (ImGui::Button("Write To LOG File"))
-                {
-                    spdlog::info("[fancy2d] 系统内存使用情况：\n"
-                        "    使用百分比：{}%\n"
-                        "    总物理内存：{}\n"
-                        "    剩余物理内存：{}\n"
-                        "    当前进程可提交内存限制：{}\n"
-                        "    当前进程剩余的可提交内存：{}\n"
-                        "    当前进程用户模式内存空间限制*1：{}\n"
-                        "    当前进程剩余的用户模式内存空间：{}\n"
-                        "        *1 此项反映此程序实际上能用的最大内存，在 32 位应用程序上此项一般为 2 GB，修改 Windows 操作系统注册表后可能为 1 到 3 GB"
-                        , info.dwMemoryLoad
-                        , bytes_count_to_string(info.ullTotalPhys)
-                        , bytes_count_to_string(info.ullAvailPhys)
-                        , bytes_count_to_string(info.ullTotalPageFile)
-                        , bytes_count_to_string(info.ullAvailPageFile)
-                        , bytes_count_to_string(info.ullTotalVirtual)
-                        , bytes_count_to_string(info.ullAvailVirtual)
-                    );
-                }
-            }
-        }
-        ImGui::End();
-    }
-    lua_pushboolean(L, v);
-    return 1;
-}
+//                 if (ImGui::Button("Write To LOG File"))
+//                 {
+//                     spdlog::info("[fancy2d] 系统内存使用情况：\n"
+//                         "    使用百分比：{}%\n"
+//                         "    总物理内存：{}\n"
+//                         "    剩余物理内存：{}\n"
+//                         "    当前进程可提交内存限制：{}\n"
+//                         "    当前进程剩余的可提交内存：{}\n"
+//                         "    当前进程用户模式内存空间限制*1：{}\n"
+//                         "    当前进程剩余的用户模式内存空间：{}\n"
+//                         "        *1 此项反映此程序实际上能用的最大内存，在 32 位应用程序上此项一般为 2 GB，修改 Windows 操作系统注册表后可能为 1 到 3 GB"
+//                         , info.dwMemoryLoad
+//                         , bytes_count_to_string(info.ullTotalPhys)
+//                         , bytes_count_to_string(info.ullAvailPhys)
+//                         , bytes_count_to_string(info.ullTotalPageFile)
+//                         , bytes_count_to_string(info.ullAvailPageFile)
+//                         , bytes_count_to_string(info.ullTotalVirtual)
+//                         , bytes_count_to_string(info.ullAvailVirtual)
+//                     );
+//                 }
+//             }
+//         }
+//         ImGui::End();
+//     }
+//     lua_pushboolean(L, v);
+//     return 1;
+// }
 static int lib_ShowFrameStatistics(lua_State* L)
 {
     constexpr size_t arr_size = 3600;

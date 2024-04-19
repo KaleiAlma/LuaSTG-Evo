@@ -1,15 +1,15 @@
-﻿#include "Core/Graphics/SwapChain_D3D11.hpp"
-#include "Core/Graphics/Format_D3D11.hpp"
+﻿#include "Core/Graphics/SwapChain_OpenGL.hpp"
+#include "Core/Graphics/Format_OpenGL.hpp"
 #include "Core/i18n.hpp"
-#include "Platform/WindowsVersion.hpp"
+// #include "Platform/WindowsVersion.hpp"
 #include "Platform/CommandLineArguments.hpp"
-#include "Platform/DesktopWindowManager.hpp"
-#include "Platform/Direct3D11.hpp"
-#include "Platform/DXGI.hpp"
-#include "Platform/RuntimeLoader/D3DKMT.hpp"
-#include "utf8.hpp"
+// #include "Platform/DesktopWindowManager.hpp"
+// #include "Platform/Direct3D11.hpp"
+// #include "Platform/DXGI.hpp"
+// #include "Platform/RuntimeLoader/D3DKMT.hpp"
+// #include "utf8.hpp"
 
-#include "ScreenGrab11.h"
+// #include "ScreenGrab11.h"
 
 //#define _log(x) OutputDebugStringA(x "\n")
 #define _log(x)

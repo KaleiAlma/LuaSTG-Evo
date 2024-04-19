@@ -1,13 +1,13 @@
 # LuaSTG configurer
 
 add_subdirectory(Shader)
-include(Platform.cmake)
+# include(Platform.cmake)
 include(Core.cmake)
 add_subdirectory(Configurer)
 
 # LuaSTG Engine
 
-add_executable(LuaSTG WIN32)
+add_executable(LuaSTG)
 
 luastg_target_common_options(LuaSTG)
 luastg_target_more_warning(LuaSTG)
@@ -166,12 +166,17 @@ endif()
 target_link_libraries(LuaSTG PRIVATE
     spdlog
     utility
-    PlatformAPI
-    DirectXTexMini
-    DirectX::ToolKitMini
+    # PlatformAPI
+    # DirectXTexMini
+    # DirectX::ToolKitMini
+    SDL2
+    SDL2_image
+    SDL2_mixer
+    SDL2_ttf
     Core
     xmath
-    lua51static
+    # lua51static
+    libluajit
     imgui
     implot
     lua_cjson
@@ -179,8 +184,8 @@ target_link_libraries(LuaSTG PRIVATE
     luasocket
     #lua_xlsx_csv
     lua_imgui
-    imgui_impl_win32ex
-    imgui_impl_dx11
+    # imgui_impl_win32ex
+    # imgui_impl_dx11
     lua_steam_api
     tracy
     pcg_cpp

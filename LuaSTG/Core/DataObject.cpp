@@ -1,5 +1,6 @@
 ﻿#include "Core/Type.hpp"
 #include "Core/Object.hpp"
+#include <cstdint>
 
 namespace Core
 {
@@ -18,18 +19,18 @@ namespace Core
 			return false;
 		}
 
-	#if (SIZE_T_MAX == 0xffffffffffffffffui64)
-		assert(size <= 0x7fffffffffffffffui64);
-		if (size > 0x7fffffffffffffffui64)
+	#if (SIZE_MAX == UINT64_MAX)
+		assert(size <= INT64_MAX);
+		if (size > INT64_MAX)
 		{
-			spdlog::error("[core] [Core::Data::Data] size is larger than 0x7FFFFFFFFFFFFFFF");
+			spdlog::error("[core] [Core::Data::Data] size is larger than INT64_MAX");
 			return false;
 		}
-	#elif (SIZE_T_MAX == 0xffffffffUL)
-		assert(size <= 0x7fffffffUL);
-		if (size > 0x7fffffffUL)
+	#elif (SIZE_MAX == UINT32_MAX)
+		assert(size <= INT32_MAX);
+		if (size > INT32_MAX)
 		{
-			spdlog::error("[core] [Core::Data::Data] size is larger than 0x7FFFFFFF");
+			spdlog::error("[core] [Core::Data::Data] size is larger than INT32_MAX");
 			return false;
 		}
 	#else
@@ -58,9 +59,9 @@ namespace Core
 	private:
 		uint8_t* m_data;
 		size_t m_aligned : 1;
-	#if (SIZE_T_MAX == 0xffffffffffffffffui64)
+	#if (SIZE_MAX == UINT64_MAX)
 		size_t m_size : 63;
-	#elif (SIZE_T_MAX == 0xffffffffUL)
+	#elif (SIZE_MAX == UINT32_MAX)
 		size_t m_size : 31;
 	#else
 		static_assert(false, "unsupported size_t");
@@ -85,16 +86,16 @@ namespace Core
 		{
 			if (!check_size_and_align(size, align)) return;
 			assert(align > sizeof(std::max_align_t)); // 如果你遇到了这个断言，说明你在做没必要的对齐分配
-			m_data = (uint8_t*)_aligned_malloc(size, align);
+			m_data = (uint8_t*)aligned_alloc(size, align);
 			if (m_data) m_size = size;
 		}
 		virtual ~DataObject()
 		{
 			if (m_data)
 			{
-				if (m_aligned)
-					_aligned_free(m_data);
-				else
+				// if (m_aligned)
+				// 	_aligned_free(m_data);
+				// else
 					std::free(m_data);
 			}
 			m_data = nullptr;

@@ -86,6 +86,10 @@ namespace Core
 		inline Rect operator+(Vector2<T> const& r) const noexcept { return Rect(a + r, b + r); }
 		inline Rect operator-(Vector2<T> const& r) const noexcept { return Rect(a - r, b - r); }
 
+		inline T width() { return b.x - a.x; }
+		inline T height() { return b.y - a.y; }
+		inline T dim() { return b - a; }
+
 		//inline Rect operator*(T const r) const noexcept { return Rect(a * r, b * r); }
 	};
 
@@ -165,8 +169,8 @@ namespace Core
 
 		inline Vector4& operator+=(Vector4 const& r) noexcept { x += r.x; y += r.y; z += r.z; w += r.w; return *this; }
 		inline Vector4& operator-=(Vector4 const& r) noexcept { x -= r.x; y -= r.y; z -= r.z; w -= r.w; return *this; }
-		inline Vector4& operator*=(T const r) noexcept { x *= r; y *= r; z *= z; w *= r; return *this; }
-		inline Vector4& operator/=(T const r) noexcept { x /= r; y /= r; z /= z; w /= r; return *this; }
+		inline Vector4& operator*=(T const r) noexcept { x *= r; y *= r; z *= r; w *= r; return *this; }
+		inline Vector4& operator/=(T const r) noexcept { x /= r; y /= r; z /= r; w /= r; return *this; }
 
 		inline bool operator==(Vector4 const& r) const noexcept { return x == r.x && y == r.y && z == r.z && w == r.w; }
 		inline bool operator!=(Vector4 const& r) const noexcept { return x != r.x || y != r.y || z != r.z || w != r.w; }

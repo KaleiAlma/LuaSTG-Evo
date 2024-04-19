@@ -9,7 +9,7 @@ namespace LuaSTGPlus
 	private:
 		Core::ScopeObject<Core::Graphics::ITexture2D> m_texture;
 		Core::ScopeObject<Core::Graphics::IRenderTarget> m_rt;
-		Core::ScopeObject<Core::Graphics::IDepthStencilBuffer> m_ds;
+		// Core::ScopeObject<Core::Graphics::IDepthStencilBuffer> m_ds;
 		bool m_is_rendertarget{ false };
 		bool m_is_auto_resize{ false };
 		bool m_enable_depthbuffer{ false };
@@ -20,7 +20,7 @@ namespace LuaSTGPlus
 		Core::Graphics::IRenderTarget* GetRenderTarget() { return m_rt.get(); }
 		Core::Graphics::IDepthStencilBuffer* GetDepthStencilBuffer() { return m_ds.get(); }
 		bool IsRenderTarget() { return m_is_rendertarget; }
-		bool HasDepthStencilBuffer() { return m_enable_depthbuffer; }
+		bool HasDepthStencilBuffer() { return m_rt->DepthStencilBufferEnabled(); }
 	public:
 		// 纹理容器
 		ResourceTextureImpl(const char* name, Core::Graphics::ITexture2D* p_texture);

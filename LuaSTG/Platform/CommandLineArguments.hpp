@@ -10,7 +10,7 @@ namespace Platform
     private:
         std::vector<std::string> m_args;
     public:
-        bool Update();
+        bool Update(int argc, char *argv[]);
         bool GetArguments(std::vector<std::string_view>& list);
         bool IsOptionExist(std::string_view option);
     public:

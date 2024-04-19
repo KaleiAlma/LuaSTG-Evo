@@ -1,6 +1,6 @@
 // ImGui Lua API
 
-#define MAKEF(NAME) {#NAME, &lib_##NAME##}
+#define MAKEF(NAME) {#NAME, &lib_##NAME}
 
 static const luaL_Reg lib_fun[] = {
     // Context creation and access

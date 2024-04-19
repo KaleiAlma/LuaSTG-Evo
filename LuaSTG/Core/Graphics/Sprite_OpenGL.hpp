@@ -4,7 +4,7 @@
 
 namespace Core::Graphics
 {
-	class Sprite_D3D11 : public Object<ISprite>
+	class Sprite_OpenGL : public Object<ISprite>
 	{
 	private:
 		ScopeObject<IRenderer> m_renderer;
@@ -68,7 +68,7 @@ namespace Core::Graphics
 		bool clone(ISprite** pp_sprite);
 
 	public:
-		Sprite_D3D11(IRenderer* p_renderer, ITexture2D* p_texture);
-		~Sprite_D3D11();
+		Sprite_OpenGL(IRenderer* p_renderer, ITexture2D* p_texture);
+		~Sprite_OpenGL();
 	};
 }

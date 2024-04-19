@@ -1,28 +1,63 @@
 #include "Shared.hpp"
+#include "spdlog/spdlog.h"
+#include <SDL2/SDL_messagebox.h>
+#include <SDL2/SDL_video.h>
+#include <cstdint>
+#include <sys/types.h>
 #include "MessageBox.hpp"
 
 namespace Platform
 {
-    static bool Show(int type, std::string_view title, std::string_view message, HWND window = NULL)
+    static bool Show(int type, std::string_view title, std::string_view message, SDL_Window* window = NULL)
     {
-        std::wstring wide_title(std::move(to_wide(title)));
-        std::wstring wide_message(std::move(to_wide(message)));
-        UINT flags = 0;
+        std::string str_title(std::move(title));
+        std::string str_message(std::move(message));
+        SDL_MessageBoxData msg_box;
+        msg_box.flags = SDL_MESSAGEBOX_BUTTONS_LEFT_TO_RIGHT;
+        msg_box.window = window;
+        msg_box.title = str_title.c_str();
+        msg_box.message = str_message.c_str();
+        SDL_MessageBoxButtonData* btn;
+
         switch (type)
         {
         case 1:
-            flags |= MB_ICONWARNING;
-            flags |= MB_OKCANCEL;
+            msg_box.flags |= SDL_MESSAGEBOX_WARNING;
+            // msg_box.flags |= MB_OKCANCEL;
+            msg_box.numbuttons = 2;
+            btn = new SDL_MessageBoxButtonData[2];
+            btn[0].flags = SDL_MESSAGEBOX_BUTTON_RETURNKEY_DEFAULT;
+            btn[0].text = "OK";
+            btn[0].buttonid = 0;
+            btn[1].flags = SDL_MESSAGEBOX_BUTTON_ESCAPEKEY_DEFAULT;
+            btn[1].text = "Cancel";
+            btn[1].buttonid = 1;
+            msg_box.buttons = btn;
             break;
         case 2:
-            flags = MB_ICONERROR;
-            flags |= MB_OK;
+            msg_box.flags |= SDL_MESSAGEBOX_ERROR;
+            // msg_box.flags |= MB_OK;
+            msg_box.numbuttons = 1;
+            btn = new SDL_MessageBoxButtonData[1];
+            btn[0].flags = SDL_MESSAGEBOX_BUTTON_RETURNKEY_DEFAULT;
+            btn[0].text = "OK";
+            btn[0].buttonid = 0;
+            msg_box.buttons = btn;
             break;
         default:
             assert(false);
             break;
         }
-        return IDOK == MessageBoxW(window, wide_message.c_str(), wide_title.c_str(), flags);
+
+        int32_t b_id;
+        if (SDL_ShowMessageBox(&msg_box, &b_id))
+        {
+            spdlog::error("[luastg] (GetError = {}) SDL_ShowMessageBox failed", SDL_GetError());
+            assert(false);
+        }
+        return 0 == b_id;
+        // return IDOK == MessageBoxW(window, wide_message.c_str(), wide_title.c_str(), flags);
+        
     }
     bool MessageBox::Warning(std::string_view title, std::string_view message)
     {
@@ -34,10 +69,10 @@ namespace Platform
     }
     bool MessageBox::WarningFromWindow(std::string_view title, std::string_view message, void* window)
     {
-        return Show(1, title, message, (HWND)window);
+        return Show(1, title, message, (SDL_Window*)window);
     }
     void MessageBox::ErrorFromWindow(std::string_view title, std::string_view message, void* window)
     {
-        Show(2, title, message, (HWND)window);
+        Show(2, title, message, (SDL_Window*)window);
     }
 }

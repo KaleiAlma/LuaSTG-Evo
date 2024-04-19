@@ -1,29 +1,28 @@
 cmake_minimum_required(VERSION 3.22)
-project(LuaSTGSub)
+project(LuaSTGSub LANGUAGES C CXX)
 
 #option(LINK_STEAM_API "Enable Steam API" OFF)
 #option(LUASTG_RESDIR "Custom configurations" "res")
 
-option(LUASTG_SUPPORTS_WINDOWS_7 "LuaSTG Sub Windows compatibility: Windows 7" ON)
+# option(LUASTG_SUPPORTS_WINDOWS_7 "LuaSTG Sub Windows compatibility: Windows 7" ON)
 
-if(LUASTG_SUPPORTS_WINDOWS_7)
-    message(STATUS "LuaSTG Sub Windows compatibility: Windows 7")
-    add_compile_definitions(LUASTG_SUPPORTS_WINDOWS_7)
-endif()
+# if(LUASTG_SUPPORTS_WINDOWS_7)
+#     message(STATUS "LuaSTG Sub Windows compatibility: Windows 7")
+#     add_compile_definitions(LUASTG_SUPPORTS_WINDOWS_7)
+# endif()
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 include(cmake/TargetCommonOptions.cmake)
-include(cmake/msvc.crt.cmake)
-#msvc_hybrid_runtime_library()
-msvc_static_runtime_library()
-
+# include(cmake/msvc.crt.cmake)
+# msvc_hybrid_runtime_library()
+# msvc_static_runtime_library()
 include(cmake/loader.cpm.cmake)
 
 CPMInitialize()
 
 include(cmake/packages.cpm.cmake)
-include(cmake/packages.nuget.cmake)
-include(cmake/packages.directx.cmake)
+# include(cmake/packages.nuget.cmake)
+# include(cmake/packages.directx.cmake)
 include(cmake/packages.xiph.cmake)
 include(cmake/packages.z.cmake)
 add_subdirectory(external)
@@ -35,5 +34,5 @@ INTERFACE
 )
 add_subdirectory(imgui)
 
-add_subdirectory(utility)
+# add_subdirectory(utility)
 add_subdirectory(LuaSTG)

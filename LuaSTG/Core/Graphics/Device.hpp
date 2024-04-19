@@ -1,5 +1,6 @@
 ﻿#pragma once
 #include "Core/Type.hpp"
+#include <limits>
 
 namespace Core::Graphics
 {
@@ -54,7 +55,7 @@ namespace Core::Graphics
 
 	struct SamplerState
 	{
-		Filter filer;
+		Filter filter;
 		TextureAddressMode address_u;
 		TextureAddressMode address_v;
 		TextureAddressMode address_w;
@@ -64,25 +65,25 @@ namespace Core::Graphics
 		float max_lod;
 		BorderColor border_color;
 		SamplerState()
-			: filer(Filter::Linear)
+			: filter(Filter::Linear)
 			, address_u(TextureAddressMode::Clamp)
 			, address_v(TextureAddressMode::Clamp)
 			, address_w(TextureAddressMode::Clamp)
 			, mip_lod_bias(0.0f)
 			, max_anisotropy(1u)
-			, min_lod(-FLT_MAX)
-			, max_lod(FLT_MAX)
+			, min_lod(-std::numeric_limits<float>::max())
+			, max_lod(std::numeric_limits<float>::max())
 			, border_color(BorderColor::Black)
 		{}
 		SamplerState(Filter filter_, TextureAddressMode address_)
-			: filer(filter_)
+			: filter(filter_)
 			, address_u(address_)
 			, address_v(address_)
 			, address_w(address_)
 			, mip_lod_bias(0.0f)
 			, max_anisotropy(1u)
-			, min_lod(-FLT_MAX)
-			, max_lod(FLT_MAX)
+			, min_lod(-std::numeric_limits<float>::max())
+			, max_lod(std::numeric_limits<float>::max())
 			, border_color(BorderColor::Black)
 		{}
 	};
@@ -96,8 +97,8 @@ namespace Core::Graphics
 		virtual void* getNativeHandle() = 0;
 
 		virtual bool isDynamic() = 0;
-		virtual bool isPremultipliedAlpha() = 0;
-		virtual void setPremultipliedAlpha(bool v) = 0;
+		// virtual bool isPremultipliedAlpha() = 0;
+		// virtual void setPremultipliedAlpha(bool v) = 0;
 		virtual Vector2U getSize() = 0;
 		virtual bool setSize(Vector2U size) = 0;
 
@@ -114,7 +115,10 @@ namespace Core::Graphics
 	struct IRenderTarget : public IObject
 	{
 		virtual void* getNativeHandle() = 0;
-		virtual void* getNativeBitmapHandle() = 0;
+		// virtual void* getNativeBitmapHandle() = 0;
+
+		virtual bool DepthStencilBufferEnabled() = 0;
+		virtual bool SetDepthStencilBufferEnable(bool enable) = 0;
 
 		virtual bool setSize(Vector2U size) = 0;
 		virtual ITexture2D* getTexture() = 0;
@@ -136,10 +140,10 @@ namespace Core::Graphics
 		virtual DeviceMemoryUsageStatistics getMemoryUsageStatistics() = 0;
 
 		virtual bool recreate() = 0;
-		virtual void setPreferenceGpu(StringView prefered_gpu) = 0;
-		virtual uint32_t getGpuCount() = 0;
-		virtual StringView getGpuName(uint32_t index) = 0;
-		virtual StringView getCurrentGpuName() const noexcept = 0;
+		// virtual void setPreferenceGpu(StringView prefered_gpu) = 0;
+		// virtual uint32_t getGpuCount() = 0;
+		// virtual StringView getGpuName(uint32_t index) = 0;
+		// virtual StringView getCurrentGpuName() const noexcept = 0;
 
 		virtual void* getNativeHandle() = 0;
 		virtual void* getNativeRendererHandle() = 0;
@@ -153,6 +157,6 @@ namespace Core::Graphics
 
 		virtual bool createSamplerState(SamplerState const& def, ISamplerState** pp_sampler) = 0;
 
-		static bool create(StringView prefered_gpu, IDevice** p_device);
+		static bool create(IDevice** p_device);
 	};
 }

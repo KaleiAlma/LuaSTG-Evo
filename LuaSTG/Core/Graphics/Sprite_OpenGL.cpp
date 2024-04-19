@@ -1,8 +1,8 @@
-﻿#include "Core/Graphics/Sprite_D3D11.hpp"
+﻿#include "Core/Graphics/Sprite_OpenGL.hpp"
 
 namespace Core::Graphics
 {
-	void Sprite_D3D11::updateRect()
+	void Sprite_OpenGL::updateRect()
 	{
 		// 纹理坐标系需要归一化
 
@@ -24,23 +24,23 @@ namespace Core::Graphics
 		m_pos_rc.b.y *= -m_scale;
 	}
 
-	void Sprite_D3D11::setTextureRect(RectF const& rc)
+	void Sprite_OpenGL::setTextureRect(RectF const& rc)
 	{
 		m_rect = rc;
 		updateRect();
 	}
-	void Sprite_D3D11::setTextureCenter(Vector2F const& pt)
+	void Sprite_OpenGL::setTextureCenter(Vector2F const& pt)
 	{
 		m_center = pt;
 		updateRect();
 	}
-	void Sprite_D3D11::setUnitsPerPixel(float v)
+	void Sprite_OpenGL::setUnitsPerPixel(float v)
 	{
 		m_scale = v;
 		updateRect();
 	}
 
-	void Sprite_D3D11::draw(RectF const& rc)
+	void Sprite_OpenGL::draw(RectF const& rc)
 	{
 		m_renderer->setTexture(m_texture.get());
 
@@ -53,7 +53,7 @@ namespace Core::Graphics
 
 		m_renderer->drawQuad(vert);
 	}
-	void Sprite_D3D11::draw(Vector3F const& p1, Vector3F const& p2, Vector3F const& p3, Vector3F const& p4)
+	void Sprite_OpenGL::draw(Vector3F const& p1, Vector3F const& p2, Vector3F const& p3, Vector3F const& p4)
 	{
 		m_renderer->setTexture(m_texture.get());
 
@@ -66,15 +66,15 @@ namespace Core::Graphics
 
 		m_renderer->drawQuad(vert);
 	}
-	void Sprite_D3D11::draw(Vector2F const& pos)
+	void Sprite_OpenGL::draw(Vector2F const& pos)
 	{
 		draw(pos, Vector2F(1.0f, 1.0f));
 	}
-	void Sprite_D3D11::draw(Vector2F const& pos, float scale)
+	void Sprite_OpenGL::draw(Vector2F const& pos, float scale)
 	{
 		draw(pos, Vector2F(scale, scale));
 	}
-	void Sprite_D3D11::draw(Vector2F const& pos, float scale, float rotation)
+	void Sprite_OpenGL::draw(Vector2F const& pos, float scale, float rotation)
 	{
 		if (std::abs(rotation) < std::numeric_limits<float>::min())
 		{
@@ -84,7 +84,7 @@ namespace Core::Graphics
 
 		draw(pos, Vector2F(scale, scale), rotation);
 	}
-	void Sprite_D3D11::draw(Vector2F const& pos, Vector2F const& scale)
+	void Sprite_OpenGL::draw(Vector2F const& pos, Vector2F const& scale)
 	{
 		m_renderer->setTexture(m_texture.get());
 
@@ -104,7 +104,7 @@ namespace Core::Graphics
 
 		m_renderer->drawQuad(vert);
 	}
-	void Sprite_D3D11::draw(Vector2F const& pos, Vector2F const& scale, float rotation)
+	void Sprite_OpenGL::draw(Vector2F const& pos, Vector2F const& scale, float rotation)
 	{
 		if (std::abs(rotation) < std::numeric_limits<float>::min())
 		{
@@ -152,12 +152,12 @@ namespace Core::Graphics
 		m_renderer->drawQuad(vert);
 	}
 
-	bool Sprite_D3D11::clone(ISprite** pp_sprite)
+	bool Sprite_OpenGL::clone(ISprite** pp_sprite)
 	{
 		try
 		{
-			*pp_sprite = new Sprite_D3D11(m_renderer.get(), m_texture.get());
-			Sprite_D3D11* right = static_cast<Sprite_D3D11*>(*pp_sprite);
+			*pp_sprite = new Sprite_OpenGL(m_renderer.get(), m_texture.get());
+			Sprite_OpenGL* right = static_cast<Sprite_OpenGL*>(*pp_sprite);
 			right->m_rect = m_rect;
 			right->m_pos_rc = m_pos_rc;
 			right->m_uv = m_uv;
@@ -177,7 +177,7 @@ namespace Core::Graphics
 		}
 	}
 
-	Sprite_D3D11::Sprite_D3D11(IRenderer* p_renderer, ITexture2D* p_texture)
+	Sprite_OpenGL::Sprite_OpenGL(IRenderer* p_renderer, ITexture2D* p_texture)
 		: m_renderer(p_renderer)
 		, m_texture(p_texture)
 		, m_z(0.5f)
@@ -192,7 +192,7 @@ namespace Core::Graphics
 		m_center = Vector2F(m_rect.b.x * 0.5f, m_rect.b.y * 0.5f);
 		updateRect();
 	}
-	Sprite_D3D11::~Sprite_D3D11()
+	Sprite_OpenGL::~Sprite_OpenGL()
 	{
 	}
 
@@ -200,7 +200,7 @@ namespace Core::Graphics
 	{
 		try
 		{
-			*pp_sprite = new Sprite_D3D11(p_renderer, p_texture);
+			*pp_sprite = new Sprite_OpenGL(p_renderer, p_texture);
 			return true;
 		}
 		catch (...)

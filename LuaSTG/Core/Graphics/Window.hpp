@@ -13,7 +13,7 @@ namespace Core::Graphics
 
 		virtual void onWindowSize(Vector2U size) { (void)size; };
 		virtual void onWindowFullscreenStateChange(bool state) { (void)state; }
-		virtual void onWindowDpiChange() {};
+		// virtual void onWindowDpiChange() {};
 
 		virtual void onWindowClose() {};
 
@@ -42,10 +42,10 @@ namespace Core::Graphics
 	{
 		Unknown,
 		Invisible,
-		Bottom,
+		// Bottom,
 		Normal,
 		Top,
-		TopMost,
+		// TopMost,
 	};
 
 	enum class WindowCursor
@@ -68,16 +68,23 @@ namespace Core::Graphics
 		Wait,
 	};
 
+	enum class FullscreenMode
+	{
+		Windowed,
+		Borderless,
+		Exclusive,
+	};
+
 	struct IWindow : public IObject
 	{
 		virtual void addEventListener(IWindowEventListener* e) = 0;
 		virtual void removeEventListener(IWindowEventListener* e) = 0;
 
 		virtual void* getNativeHandle() = 0;
-		virtual void setNativeIcon(void* id) = 0;
+		// virtual void setNativeIcon(void* id) = 0;
 
-		virtual void setIMEState(bool enable) = 0;
-		virtual bool getIMEState() = 0;
+		// virtual void setIMEState(bool enable) = 0;
+		// virtual bool getIMEState() = 0;
 
 		virtual void setTitleText(StringView str) = 0;
 		virtual StringView getTitleText() = 0;
@@ -91,8 +98,8 @@ namespace Core::Graphics
 		virtual WindowLayer getLayer() = 0;
 		virtual bool setLayer(WindowLayer layer) = 0;
 
-		virtual uint32_t getDPI() = 0;
-		virtual float getDPIScaling() = 0;
+		// virtual uint32_t getDPI() = 0;
+		// virtual float getDPIScaling() = 0;
 
 		virtual void setWindowMode(Vector2U size) = 0;
 		virtual void setExclusiveFullScreenMode() = 0;
@@ -103,16 +110,16 @@ namespace Core::Graphics
 		virtual void setMonitorCentered(uint32_t index) = 0;
 		virtual void setMonitorFullScreen(uint32_t index) = 0;
 
-		virtual void setCustomSizeMoveEnable(bool v) = 0;
-		virtual void setCustomMinimizeButtonRect(RectI v) = 0;
-		virtual void setCustomCloseButtonRect(RectI v) = 0;
-		virtual void setCustomMoveButtonRect(RectI v) = 0;
+		// virtual void setCustomSizeMoveEnable(bool v) = 0;
+		// virtual void setCustomMinimizeButtonRect(RectI v) = 0;
+		// virtual void setCustomCloseButtonRect(RectI v) = 0;
+		// virtual void setCustomMoveButtonRect(RectI v) = 0;
 
 		virtual bool setCursor(WindowCursor type) = 0;
 		virtual WindowCursor getCursor() = 0;
 
 		// Windows 11
-		virtual void setWindowCornerPreference(bool allow) = 0;
+		// virtual void setWindowCornerPreference(bool allow) = 0;
 
 		static bool create(IWindow** pp_window);
 		static bool create(Vector2U size, StringView title_text, WindowFrameStyle style, bool show, IWindow** pp_window);

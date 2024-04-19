@@ -1,5 +1,7 @@
 # imgui
 
+find_package(Freetype REQUIRED)
+
 add_library(imgui STATIC)
 luastg_target_common_options(imgui)
 target_compile_definitions(imgui PUBLIC
@@ -13,6 +15,7 @@ target_include_directories(imgui PUBLIC
     imgui
     imgui/misc/cpp
     imgui/misc/freetype
+    ${FREETYPE_INCLUDE_DIRS}
 )
 target_sources(imgui PRIVATE
     imgui/imstb_rectpack.h
@@ -63,56 +66,60 @@ target_link_libraries(implot PUBLIC
 
 set_target_properties(implot PROPERTIES FOLDER external)
 
-# imgui backend dx11
+# imgui backend opengl3
 
-add_library(imgui_impl_dx11 STATIC)
-luastg_target_common_options(imgui_impl_dx11)
-target_include_directories(imgui_impl_dx11 PUBLIC
+add_library(imgui_impl_opengl3 STATIC)
+luastg_target_common_options(imgui_impl_opengl3)
+target_include_directories(imgui_impl_opengl3 PUBLIC
     imgui/backends
 )
-target_sources(imgui_impl_dx11 PRIVATE
-    imgui/backends/imgui_impl_dx11.h
-    #imgui/backends/imgui_impl_dx11.cpp
-    backend/imgui_impl_dx11.cpp
+target_sources(imgui_impl_opengl3 PRIVATE
+    imgui/backends/imgui_impl_opengl3.h
+    imgui/backends/imgui_impl_opengl3.cpp
+    # backend/imgui_impl_opengl3.cpp
 )
-target_link_libraries(imgui_impl_dx11 PUBLIC
+target_link_libraries(imgui_impl_opengl3 PUBLIC
     imgui
     GeneratedShaderHeaders
 )
-set_target_properties(imgui_impl_dx11 PROPERTIES FOLDER external)
+set_target_properties(imgui_impl_opengl3 PROPERTIES FOLDER external)
 
-# imgui backend win32ex
+# imgui backend sdl2
 
-add_library(imgui_impl_win32ex STATIC)
-luastg_target_common_options(imgui_impl_win32ex)
-luastg_target_more_warning(imgui_impl_win32ex)
-target_include_directories(imgui_impl_win32ex PUBLIC
-    backend
+find_package(SDL2 REQUIRED)
+
+add_library(imgui_impl_sdl2 STATIC)
+luastg_target_common_options(imgui_impl_sdl2)
+luastg_target_more_warning(imgui_impl_sdl2)
+target_include_directories(imgui_impl_sdl2 PUBLIC
+    imgui/backends
+    ${SDL2_INCLUDE_DIR}
 )
-target_sources(imgui_impl_win32ex PRIVATE
-    backend/imgui_impl_win32ex.cpp
-    backend/imgui_impl_win32ex.h
+target_sources(imgui_impl_sdl2 PRIVATE
+    imgui/backends/imgui_impl_sdl2.cpp
+    imgui/backends/imgui_impl_sdl2.h
 )
-target_link_libraries(imgui_impl_win32ex PUBLIC
+target_link_libraries(imgui_impl_sdl2 PUBLIC
     imgui
+    SDL2
 )
-set_target_properties(imgui_impl_win32ex PROPERTIES FOLDER external)
+set_target_properties(imgui_impl_sdl2 PROPERTIES FOLDER external)
 
 # imgui backend win32
 
-add_library(imgui_impl_win32 STATIC)
-luastg_target_common_options(imgui_impl_win32)
-target_include_directories(imgui_impl_win32 PUBLIC
-    imgui/backends
-)
-target_sources(imgui_impl_win32 PRIVATE
-    imgui/backends/imgui_impl_win32.cpp
-    imgui/backends/imgui_impl_win32.h
-)
-target_link_libraries(imgui_impl_win32 PUBLIC
-    imgui
-)
-set_target_properties(imgui_impl_win32 PROPERTIES FOLDER external)
+# add_library(imgui_impl_win32 STATIC)
+# luastg_target_common_options(imgui_impl_win32)
+# target_include_directories(imgui_impl_win32 PUBLIC
+#     imgui/backends
+# )
+# target_sources(imgui_impl_win32 PRIVATE
+#     imgui/backends/imgui_impl_win32.cpp
+#     imgui/backends/imgui_impl_win32.h
+# )
+# target_link_libraries(imgui_impl_win32 PUBLIC
+#     imgui
+# )
+# set_target_properties(imgui_impl_win32 PROPERTIES FOLDER external)
 
 # imgui lua binding
 
@@ -148,7 +155,8 @@ target_sources(lua_imgui PRIVATE
 )
 target_link_libraries(lua_imgui PUBLIC
     imgui
-    lua51static
+    # lua51static
+    libluajit
 )
 
 set_target_properties(lua_imgui PROPERTIES FOLDER lualib)

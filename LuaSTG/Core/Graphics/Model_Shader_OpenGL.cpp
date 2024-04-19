@@ -1,4 +1,4 @@
-﻿#include "Core/Graphics/Model_D3D11.hpp"
+﻿#include "Core/Graphics/Model_OpenGL.hpp"
 #include "Platform/RuntimeLoader/Direct3DCompiler.hpp"
 
 static std::string_view const built_in_shader(R"(

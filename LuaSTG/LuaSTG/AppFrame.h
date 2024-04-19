@@ -3,7 +3,7 @@
 #include "Core/Graphics/Font.hpp"
 #include "GameResource/ResourceManager.h"
 #include "GameObject/GameObjectPool.h"
-#include "Platform/DirectInput.hpp"
+// #include "Platform/DirectInput.hpp"
 
 namespace LuaSTGPlus
 {
@@ -100,7 +100,7 @@ namespace LuaSTGPlus
 		bool m_bRenderStarted = false;
 		
 		// 输入设备
-		std::unique_ptr<Platform::DirectInput> m_DirectInput;
+		// std::unique_ptr<Platform::DirectInput> m_DirectInput;
 		
 	public:
 		/// @brief 保护模式执行脚本
@@ -163,7 +163,7 @@ namespace LuaSTGPlus
 		void SetBGMVolume(float v);
 		float GetSEVolume() const noexcept { return m_Setting.volume_sound_effect; }
 		float GetBGMVolume() const noexcept { return m_Setting.volume_music; }
-		void SetWindowCornerPreference(bool allow);
+		// void SetWindowCornerPreference(bool allow);
 
 	public: // 窗口和交换链
 
@@ -288,7 +288,7 @@ namespace LuaSTGPlus
 
 		GameObjectPool& GetGameObjectPool()noexcept{ return *m_GameObjectPool; }
 
-		Platform::DirectInput* GetDInput()noexcept { return m_DirectInput.get(); }
+		// Platform::DirectInput* GetDInput()noexcept { return m_DirectInput.get(); }
 		
 		Core::IApplicationModel* GetAppModel() { return m_pAppModel.get(); }
 		Core::Graphics::IRenderer* GetRenderer2D() { return m_pAppModel->getRenderer(); }

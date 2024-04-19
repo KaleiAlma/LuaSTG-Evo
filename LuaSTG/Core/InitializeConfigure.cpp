@@ -2,7 +2,7 @@
 #include <fstream>
 #include <filesystem>
 #include "nlohmann/json.hpp"
-#include "utf8.hpp"
+// #include "utf8.hpp"
 #include "Platform/KnownDirectory.hpp"
 
 namespace Core
@@ -11,7 +11,7 @@ namespace Core
 
     inline void to_json(nlohmann::json& j, InitializeConfigure const& p)
     {
-    #define SET(name) j[#name] = p.##name;
+    #define SET(name) j[#name] = p.name;
 
         SET(target_graphics_device);
 
@@ -46,7 +46,7 @@ namespace Core
     }
     inline void from_json(nlohmann::json const& j, InitializeConfigure& p)
     {
-    #define GET(name) if (j.contains(#name)) { j.at(#name).get_to(p.##name); }
+    #define GET(name) if (j.contains(#name)) { j.at(#name).get_to(p.name); }
 
         GET(target_graphics_device);
         
@@ -82,13 +82,14 @@ namespace Core
 
     inline bool from_file(nlohmann::json& j, std::string_view const path)
     {
-        std::wstring wpath(utf8::to_wstring(path));
+        // std::wstring wpath(utf8::to_wstring(path));
+        std::string spath(path);
         std::error_code ec;
-        if (!std::filesystem::is_regular_file(wpath, ec))
+        if (!std::filesystem::is_regular_file(path, ec))
         {
             return false;
         }
-        std::ifstream file(wpath, std::ios::in | std::ios::binary);
+        std::ifstream file(spath, std::ios::in | std::ios::binary);
         if (!file.is_open())
         {
             return false;
@@ -98,8 +99,9 @@ namespace Core
     }
     inline bool to_file(nlohmann::json const& j, std::string_view const path)
     {
-        std::wstring wpath(utf8::to_wstring(path));
-        std::ofstream file(wpath, std::ios::out | std::ios::binary | std::ios::trunc);
+        // std::wstring wpath(utf8::to_wstring(path));
+        std::string spath(path);
+        std::ofstream file(spath, std::ios::out | std::ios::binary | std::ios::trunc);
         if (!file.is_open())
         {
             return false;
@@ -200,48 +202,48 @@ namespace Core
 
     inline bool parser_path(std::string_view const path, std::string& buffer)
     {
-        std::string_view const mark_app_data("${AppData}");
-        std::string_view const mark_local_app_data("${LocalAppData}");
-        std::string_view const mark_temp("${Temp}");
+        // std::string_view const mark_app_data("${AppData}");
+        // std::string_view const mark_local_app_data("${LocalAppData}");
+        // std::string_view const mark_temp("${Temp}");
 
         std::string_view path_view(path);
         buffer.clear();
 
-        if (path_view.starts_with(mark_app_data))
-        {
-            std::string path_buffer;
-            Platform::KnownDirectory::getRoamingAppData(path_buffer);
-            if (path_buffer.empty())
-            {
-                path_buffer = "AppData";
-            }
-            buffer.append(path_buffer);
-            path_view = path_view.substr(mark_app_data.size());
-        }
-        else if (path_view.starts_with(mark_local_app_data))
-        {
-            std::string path_buffer;
-            Platform::KnownDirectory::getLocalAppData(path_buffer);
-            if (path_buffer.empty())
-            {
-                path_buffer = "LocalAppData";
-            }
-            buffer.append(path_buffer);
-            path_view = path_view.substr(mark_local_app_data.size());
-        }
-        else if (path_view.starts_with(mark_temp))
-        {
-            std::array<wchar_t, MAX_PATH + 1> wpath_buffer{};
-            DWORD const length = GetTempPathW(MAX_PATH + 1, wpath_buffer.data());
-            std::wstring_view const wpath_buffer_view(wpath_buffer.data(), length);
-            std::string path_buffer(utf8::to_string(wpath_buffer_view));
-            if (path_buffer.empty())
-            {
-                path_buffer = "Temp";
-            }
-            buffer.append(path_buffer);
-            path_view = path_view.substr(mark_temp.size());
-        }
+        // if (path_view.starts_with(mark_app_data))
+        // {
+        //     std::string path_buffer;
+        //     Platform::KnownDirectory::getRoamingAppData(path_buffer);
+        //     if (path_buffer.empty())
+        //     {
+        //         path_buffer = "AppData";
+        //     }
+        //     buffer.append(path_buffer);
+        //     path_view = path_view.substr(mark_app_data.size());
+        // }
+        // else if (path_view.starts_with(mark_local_app_data))
+        // {
+        //     std::string path_buffer;
+        //     Platform::KnownDirectory::getLocalAppData(path_buffer);
+        //     if (path_buffer.empty())
+        //     {
+        //         path_buffer = "LocalAppData";
+        //     }
+        //     buffer.append(path_buffer);
+        //     path_view = path_view.substr(mark_local_app_data.size());
+        // }
+        // else if (path_view.starts_with(mark_temp))
+        // {
+        //     std::array<wchar_t, MAX_PATH + 1> wpath_buffer{};
+        //     DWORD const length = GetTempPathW(MAX_PATH + 1, wpath_buffer.data());
+        //     std::wstring_view const wpath_buffer_view(wpath_buffer.data(), length);
+        //     std::string path_buffer(utf8::to_string(wpath_buffer_view));
+        //     if (path_buffer.empty())
+        //     {
+        //         path_buffer = "Temp";
+        //     }
+        //     buffer.append(path_buffer);
+        //     path_view = path_view.substr(mark_temp.size());
+        // }
 
         buffer.append(path_view);
         return true;
@@ -252,7 +254,7 @@ namespace Core
         std::string buffer;
         if (!parser_path(path, buffer)) return false;
 
-        std::filesystem::path fs_path(utf8::to_wstring(buffer), std::filesystem::path::generic_format);
+        std::filesystem::path fs_path(buffer, std::filesystem::path::generic_format);
         if (create_directories)
         {
             std::error_code ec;
@@ -262,7 +264,7 @@ namespace Core
             }
         }
 
-        buffer__ = utf8::to_string(fs_path.wstring());
+        buffer__ = fs_path.string();
         return true;
     }
     bool InitializeConfigure::parserFilePath(std::string_view const path, std::string& buffer__, bool create_parent_directories) noexcept
@@ -270,7 +272,7 @@ namespace Core
         std::string buffer;
         if (!parser_path(path, buffer)) return false;
 
-        std::filesystem::path fs_path(utf8::to_wstring(buffer), std::filesystem::path::generic_format);
+        std::filesystem::path fs_path(buffer, std::filesystem::path::generic_format);
         if (create_parent_directories && fs_path.has_parent_path())
         {
             std::filesystem::path fs_parent_path(fs_path.parent_path());
@@ -281,7 +283,7 @@ namespace Core
             }
         }
 
-        buffer__ = utf8::to_string(fs_path.wstring());
+        buffer__ = fs_path.string();
         return true;
     }
 }

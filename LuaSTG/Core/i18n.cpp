@@ -58,28 +58,28 @@ static std::unordered_map<std::string_view, i18n_entry_t> const g_i18n_map = {
 		.en_us = "not support (requires Windows 10 or above, and hardware support)",
 	}},
 
-	{"[core].Device_D3D11.start_creating_graphic_components",{
+	{"[core].Device_OpenGL.start_creating_graphic_components",{
 		.zh_cn = "[core] 开始创建图形组件",
 		.en_us = "[core] Start creating graphic components",
 	}},
-	{"[core].Device_D3D11.created_graphic_components",{
+	{"[core].Device_OpenGL.created_graphic_components",{
 		.zh_cn = "[core] 已创建图形组件",
 		.en_us = "[core] Graphic components created",
 	}},
-	{"[core].Device_D3D11.start_creating_basic_DXGI_components",{
+	{"[core].Device_OpenGL.start_creating_basic_DXGI_components",{
 		.zh_cn = "[core] 开始创建基本 DXGI 组件",
 		.en_us = "[core] Start creating basic DXGI components",
 	}},
-	{"[core].Device_D3D11.created_basic_DXGI_components",{
+	{"[core].Device_OpenGL.created_basic_DXGI_components",{
 		.zh_cn = "[core] 已创建基本 DXGI 组件",
 		.en_us = "[core] Basic DXGI components created",
 	}},
 
-	{"[core].Device_D3D11.enum_all_adapters",{
+	{"[core].Device_OpenGL.enum_all_adapters",{
 		.zh_cn = "[core] 枚举所有图形设备",
 		.en_us = "[core] Enumerate all graphics devices",
 	}},
-	{"[core].Device_D3D11.DXGI_detail_fmt",{
+	{"[core].Device_OpenGL.DXGI_detail_fmt",{
 		.zh_cn = "[core] DXGI 组件功能支持：\n"
 			"    立即刷新：{}"
 			,
@@ -109,7 +109,7 @@ static std::unordered_map<std::string_view, i18n_entry_t> const g_i18n_map = {
 		.en_us = " (WARNING: The software or remote device does not have enough performance to run the program smoothly)",
 	}},
 
-	{"[core].Device_D3D11.DXGI_adapter_detail_fmt",{
+	{"[core].Device_OpenGL.DXGI_adapter_detail_fmt",{
 		.zh_cn = "[core] 图形设备[{}]：\n"
 			"    设备名称：{}\n"
 			"    Direct3D 功能级别：{}\n"
@@ -137,20 +137,20 @@ static std::unordered_map<std::string_view, i18n_entry_t> const g_i18n_map = {
 			"    Adapter LUID：{:08X}-{:08X}"
 			,
 	}},
-	{"[core].Device_D3D11.DXGI_adapter_detail_error_fmt",{
+	{"[core].Device_OpenGL.DXGI_adapter_detail_error_fmt",{
 		.zh_cn = "[core] 图形设备[{}]：<无法读取信息>",
 		.en_us = "[core] Graphics Device[{}]: <Unable to read information>",
 	}},
 
-	{"[core].Device_D3D11.select_DXGI_adapter_fmt",{
+	{"[core].Device_OpenGL.select_DXGI_adapter_fmt",{
 		.zh_cn = "[core] 已选择图形设备：{}",
 		.en_us = "[core] Select Graphics Device: {}",
 	}},
-	{"[core].Device_D3D11.no_available_DXGI_adapter",{
+	{"[core].Device_OpenGL.no_available_DXGI_adapter",{
 		.zh_cn = "[core] 没有可用的图形设备",
 		.en_us = "[core] No Graphics Device available",
 	}},
-	{"[core].Device_D3D11.DXGI_adapter_no_output_warning_fmt",{
+	{"[core].Device_OpenGL.DXGI_adapter_no_output_warning_fmt",{
 		.zh_cn = "[core] 图形设备 {} 似乎没有连接到任何显示输出，这可能导致：\n"
 			"    独占全屏时会通过 PCI-E 复制渲染缓冲区\n"
 			"    独占全屏时桌面窗口管理器接管画面合成\n"
@@ -172,7 +172,7 @@ static std::unordered_map<std::string_view, i18n_entry_t> const g_i18n_map = {
 		.en_us = "False",
 	}},
 
-	{"[core].Device_D3D11.DXGI_output_detail_fmt",{
+	{"[core].Device_OpenGL.DXGI_output_detail_fmt",{
 		.zh_cn = "[core] 图形设备[{}] - 显示输出设备[{}]：\n"
 			"    连接状态：{}\n"
 			"    显示区域：({}, {}) ({} x {})\n"
@@ -186,7 +186,7 @@ static std::unordered_map<std::string_view, i18n_entry_t> const g_i18n_map = {
 			"    Hardware Composition: {}"
 			,
 	}},
-	{"[core].Device_D3D11.DXGI_output_detail_fmt2",{
+	{"[core].Device_OpenGL.DXGI_output_detail_fmt2",{
 		.zh_cn = "[core] 图形设备[{}] - 显示输出设备[{}]：\n"
 			"    连接状态：{}\n"
 			"    显示区域：({}, {}) ({} x {})\n"
@@ -204,16 +204,16 @@ static std::unordered_map<std::string_view, i18n_entry_t> const g_i18n_map = {
 			"    Hardware Composition: {}"
 			,
 	}},
-	{"[core].Device_D3D11.DXGI_output_detail_error_fmt",{
+	{"[core].Device_OpenGL.DXGI_output_detail_error_fmt",{
 		.zh_cn = "[core] 图形设备[{}] - 显示输出设备[{}]：<无法读取信息>",
 		.en_us = "[core] Graphics Device[{}] - Display Output[{}]: <Unable to read information>",
 	}},
 
-	{"[core].Device_D3D11.start_creating_basic_D3D11_components",{
+	{"[core].Device_OpenGL.start_creating_basic_OpenGL_components",{
 		.zh_cn = "[core] 开始创建基本 Direct3D 11 组件",
 		.en_us = "[core] Start creating basic Direct3D 11 components",
 	}},
-	{"[core].Device_D3D11.created_basic_D3D11_components",{
+	{"[core].Device_OpenGL.created_basic_OpenGL_components",{
 		.zh_cn = "[core] 已创建基本 Direct3D 11 组件",
 		.en_us = "[core] Basic Direct3D 11 components created",
 	}},
@@ -224,30 +224,30 @@ static std::unordered_map<std::string_view, i18n_entry_t> const g_i18n_map = {
 	// Swapchain DXGI
 	ADD("DXGI.SwapChain.SwapEffect.Discard",
 		.zh_cn = "位块传输模式",
-		.en_us = "Discard",
+		.en_us = "Discard"
 	),
 	ADD("DXGI.SwapChain.SwapEffect.FlipSequential",
 		.zh_cn = "序列交换模式",
-		.en_us = "Flip Sequential",
+		.en_us = "Flip Sequential"
 	),
 	ADD("DXGI.SwapChain.SwapEffect.FlipDiscard",
 		.zh_cn = "快速交换模式",
-		.en_us = "Flip Discard",
+		.en_us = "Flip Discard"
 	),
 	ADD("DXGI.DisplayMode.RefreshRate.Desktop",
 		.zh_cn = "桌面刷新率",
-		.en_us = "Desktop",
+		.en_us = "Desktop"
 	),
 	// Swapchain
-	ADD("[core].SwapChain_D3D11.start_creating_swapchain",
+	ADD("[core].SwapChain_OpenGL.start_creating_swapchain",
 		.zh_cn = "[core] 开始创建 SwapChain",
-		.en_us = "[core] Start creating SwapChain",
+		.en_us = "[core] Start creating SwapChain"
 	),
-	ADD("[core].SwapChain_D3D11.created_swapchain",
+	ADD("[core].SwapChain_OpenGL.created_swapchain",
 		.zh_cn = "[core] 已创建 SwapChain",
-		.en_us = "[core] SwapChain created",
+		.en_us = "[core] SwapChain created"
 	),
-	ADD("[core].SwapChain_D3D11.created_swapchain_info_fmt",
+	ADD("[core].SwapChain_OpenGL.created_swapchain_info_fmt",
 		.zh_cn = "[core] 已创建 SwapChain：\n"
 			"    显示模式：{}x{}@{}\n"
 			"    独占全屏：{}\n"
@@ -259,91 +259,91 @@ static std::unordered_map<std::string_view, i18n_entry_t> const g_i18n_map = {
 			"    Exclusive Fullscreen：{}\n"
 			"    SwapChain swap effect: {}\n"
 			"    Present Allow Tearing: {}\n"
-			"    Frame Latency Waitable Object: {}",
+			"    Frame Latency Waitable Object: {}"
 	),
-	ADD("[core].SwapChain_D3D11.create_swapchain_failed_null_window",
+	ADD("[core].SwapChain_OpenGL.create_swapchain_failed_null_window",
 		.zh_cn = "[core] 无法创建 SwapChain，窗口为空",
-		.en_us = "[core] Failed to create SwapChain, Window is null",
+		.en_us = "[core] Failed to create SwapChain, Window is null"
 	),
-	ADD("[core].SwapChain_D3D11.create_swapchain_failed_null_DXGI",
+	ADD("[core].SwapChain_OpenGL.create_swapchain_failed_null_DXGI",
 		.zh_cn = "[core] 无法创建 SwapChain，DXGI 组件为空",
-		.en_us = "[core] Failed to create SwapChain, DXGI components are null",
+		.en_us = "[core] Failed to create SwapChain, DXGI components are null"
 	),
-	ADD("[core].SwapChain_D3D11.create_swapchain_failed_null_device",
+	ADD("[core].SwapChain_OpenGL.create_swapchain_failed_null_device",
 		.zh_cn = "[core] 无法创建 SwapChain，图形设备为空",
-		.en_us = "[core] Failed to create SwapChain, Device is null",
+		.en_us = "[core] Failed to create SwapChain, Device is null"
 	),
-	ADD("[core].SwapChain_D3D11.create_swapchain_failed_invalid_size_fmt",
+	ADD("[core].SwapChain_OpenGL.create_swapchain_failed_invalid_size_fmt",
 		.zh_cn = "[core] 无法创建大小为 ({}x{}) 的 SwapChain",
-		.en_us = "[core] Cannot create SwapChain with size ({}x{})",
+		.en_us = "[core] Cannot create SwapChain with size ({}x{})"
 	),
-	ADD("[core].SwapChain_D3D11.resize_swapchain_failed_invalid_size_fmt",
+	ADD("[core].SwapChain_OpenGL.resize_swapchain_failed_invalid_size_fmt",
 		.zh_cn = "[core] 无法更改 SwapChain 的大小为 ({}x{})",
-		.en_us = "[core] Cannot resize SwapChain with size ({}x{})",
+		.en_us = "[core] Cannot resize SwapChain with size ({}x{})"
 	),
-	ADD("[core].SwapChain_D3D11.resize_swapchain_failed_null_SwapChain",
+	ADD("[core].SwapChain_OpenGL.resize_swapchain_failed_null_SwapChain",
 		.zh_cn = "[core] 无法更改 SwapChain 的大小，交换链为空",
-		.en_us = "[core] Failed to resize SwapChain, SwapChain is null",
+		.en_us = "[core] Failed to resize SwapChain, SwapChain is null"
 	),
 	// Swapchain Exclusive Fullscreen
-	ADD("[core].SwapChain_D3D11.enter_exclusive_fullscreen",
+	ADD("[core].SwapChain_OpenGL.enter_exclusive_fullscreen",
 		.zh_cn = "[core] 尝试进入独占全屏",
-		.en_us = "[core] Try to enter exclusive fullscreen",
+		.en_us = "[core] Try to enter exclusive fullscreen"
 	),
-	ADD("[core].SwapChain_D3D11.leave_exclusive_fullscreen",
+	ADD("[core].SwapChain_OpenGL.leave_exclusive_fullscreen",
 		.zh_cn = "[core] 尝试退出独占全屏",
-		.en_us = "[core] Try to leave exclusive fullscreen",
+		.en_us = "[core] Try to leave exclusive fullscreen"
 	),
-	ADD("[core].SwapChain_D3D11.exclusive_fullscreen_unavailable",
+	ADD("[core].SwapChain_OpenGL.exclusive_fullscreen_unavailable",
 		.zh_cn = "[core] 独占全屏不可用",
-		.en_us = "[core] Exclusive fullscreen unavailable",
+		.en_us = "[core] Exclusive fullscreen unavailable"
 	),
 	// Swapchain DisplayMode
-	ADD("[core].SwapChain_D3D11.start_enumerating_DisplayMode",
+	ADD("[core].SwapChain_OpenGL.start_enumerating_DisplayMode",
 		.zh_cn = "[core] 开始枚举显示模式",
-		.en_us = "[core] Start enumerating DisplayMode",
+		.en_us = "[core] Start enumerating DisplayMode"
 	),
-	ADD("[core].SwapChain_D3D11.found_N_DisplayMode_fmt",
+	ADD("[core].SwapChain_OpenGL.found_N_DisplayMode_fmt",
 		.zh_cn = "[core] 共找到 {} 个支持的显示模式：",
-		.en_us = "[core] Found {} supported DisplayMode:",
+		.en_us = "[core] Found {} supported DisplayMode:"
 	),
-	ADD("[core].SwapChain_D3D11.enumerating_DisplayMode_failed",
+	ADD("[core].SwapChain_OpenGL.enumerating_DisplayMode_failed",
 		.zh_cn = "[core] 找不到可用的显示模式",
-		.en_us = "[core] No DisplayMode available",
+		.en_us = "[core] No DisplayMode available"
 	),
-	ADD("[core].SwapChain_D3D11.match_DisplayMode_failed_invalid_size_fmt",
+	ADD("[core].SwapChain_OpenGL.match_DisplayMode_failed_invalid_size_fmt",
 		.zh_cn = "[core] 无法匹配大小为 ({}x{}) 的显示模式",
-		.en_us = "[core] Cannot match DisplayMode with size ({}x{})",
+		.en_us = "[core] Cannot match DisplayMode with size ({}x{})"
 	),
-	ADD("[core].SwapChain_D3D11.match_DisplayMode_failed_null_SwapChain",
+	ADD("[core].SwapChain_OpenGL.match_DisplayMode_failed_null_SwapChain",
 		.zh_cn = "[core] 无法匹配显示模式，交换链为空",
 		.en_us = "[core] Failed to match DisplayMode, SwapChain is null"
 	),
-	ADD("[core].SwapChain_D3D11.match_DisplayMode_failed_null_Device",
+	ADD("[core].SwapChain_OpenGL.match_DisplayMode_failed_null_Device",
 		.zh_cn = "[core] 无法匹配显示模式，图形设备为空",
 		.en_us = "[core] Failed to match DisplayMode, Device is null"
 	),
 	// Swapchain RenderAttachment
-	ADD("[core].SwapChain_D3D11.start_creating_RenderAttachment",
+	ADD("[core].SwapChain_OpenGL.start_creating_RenderAttachment",
 		.zh_cn = "[core] 开始创建 RenderAttachment",
 		.en_us = "[core] Start creating RenderAttachment"
 	),
-	ADD("[core].SwapChain_D3D11.created_RenderAttachment",
+	ADD("[core].SwapChain_OpenGL.created_RenderAttachment",
 		.zh_cn = "[core] 已创建 RenderAttachment",
 		.en_us = "[core] RenderAttachment created"
 	),
-	ADD("[core].SwapChain_D3D11.create_RenderAttachment_failed_null_SwapChain",
+	ADD("[core].SwapChain_OpenGL.create_RenderAttachment_failed_null_SwapChain",
 		.zh_cn = "[core] 无法创建 RenderAttachment，交换链为空",
 		.en_us = "[core] Failed to create RenderAttachment, SwapChain is null"
 	),
-	ADD("[core].SwapChain_D3D11.create_RenderAttachment_failed_null_Device",
+	ADD("[core].SwapChain_OpenGL.create_RenderAttachment_failed_null_Device",
 		.zh_cn = "[core] 无法创建 RenderAttachment，图形设备为空",
 		.en_us = "[core] Failed to create RenderAttachment, Device is null"
 	),
 	// Swapchain Canvas
-	ADD("[core].SwapChain_D3D11.resize_canvas_failed_invalid_size_fmt",
+	ADD("[core].SwapChain_OpenGL.resize_canvas_failed_invalid_size_fmt",
 		.zh_cn = "[core] 无法将 Canvas 的尺寸更改为 ({}x{})",
-		.en_us = "[core] Cannot resize SwapChain with size ({}x{})",
+		.en_us = "[core] Cannot resize SwapChain with size ({}x{})"
 	),
 
 #pragma warning(default:4002)

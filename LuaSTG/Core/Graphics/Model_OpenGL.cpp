@@ -1,4 +1,4 @@
-﻿#include "Core/Graphics/Model_D3D11.hpp"
+﻿#include "Core/Graphics/Model_OpenGL.hpp"
 #include "Core/FileManager.hpp"
 
 #define IDX(x) (size_t)static_cast<uint8_t>(x)

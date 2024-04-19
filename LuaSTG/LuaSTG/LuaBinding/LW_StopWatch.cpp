@@ -1,5 +1,5 @@
 ﻿#include "LuaBinding/LuaWrapper.hpp"
-#include "Platform/CleanWindows.hpp"
+// #include "Platform/CleanWindows.hpp"
 
 ////////////////////////////////////////////////////////////////////////////////
 /// @brief 高精度停表类

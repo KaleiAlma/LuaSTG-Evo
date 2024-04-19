@@ -1,10 +1,10 @@
 ﻿#pragma once
 #include "Core/Object.hpp"
 #include "Core/Graphics/SwapChain.hpp"
-#include "Core/Graphics/Window_Win32.hpp"
-#include "Core/Graphics/Device_D3D11.hpp"
-#include "Core/Graphics/Direct3D11/LetterBoxingRenderer.hpp"
-#include "Platform/RuntimeLoader/DirectComposition.hpp"
+#include "Core/Graphics/Window_SDL.hpp"
+#include "Core/Graphics/Device_OpenGL.hpp"
+// #include "Core/Graphics/Direct3D11/LetterBoxingRenderer.hpp"
+// #include "Platform/RuntimeLoader/DirectComposition.hpp"
 
 namespace Core::Graphics
 {
@@ -25,14 +25,14 @@ namespace Core::Graphics
 		}
 	};
 
-	class SwapChain_D3D11
+	class SwapChain_OpenGL
 		: public Object<ISwapChain>
 		, public IWindowEventListener
 		, public IDeviceEventListener
 	{
 	private:
-		ScopeObject<Window_Win32> m_window;
-		ScopeObject<Device_D3D11> m_device;
+		ScopeObject<Window_SDL> m_window;
+		ScopeObject<Device_OpenGL> m_device;
 		Direct3D11::LetterBoxingRenderer m_scaling_renderer;
 		DisplayModeUpdater m_display_mode_updater;
 
@@ -140,9 +140,9 @@ namespace Core::Graphics
 		bool saveSnapshotToFile(StringView path);
 
 	public:
-		SwapChain_D3D11(Window_Win32* p_window, Device_D3D11* p_device);
-		~SwapChain_D3D11();
+		SwapChain_OpenGL(Window_SDL* p_window, Device_OpenGL* p_device);
+		~SwapChain_OpenGL();
 	public:
-		static bool create(Window_Win32* p_window, Device_D3D11* p_device, SwapChain_D3D11** pp_swapchain);
+		static bool create(Window_SDL* p_window, Device_OpenGL* p_device, SwapChain_OpenGL** pp_swapchain);
 	};
 }

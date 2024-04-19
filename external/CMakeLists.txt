@@ -1,11 +1,32 @@
 # ==================== luajit ====================
 
-add_subdirectory(luajit)
-set_target_properties(minilua PROPERTIES FOLDER luajit)
-set_target_properties(buildvm PROPERTIES FOLDER luajit)
-set_target_properties(lua51static PROPERTIES FOLDER luajit)
-set_target_properties(lua51 PROPERTIES FOLDER luajit)
-set_target_properties(luajit PROPERTIES FOLDER luajit)
+add_subdirectory(luajit/luajit)
+# set_target_properties(minilua PROPERTIES FOLDER luajit)
+# set_target_properties(buildvm PROPERTIES FOLDER luajit)
+# set_target_properties(lua51static PROPERTIES FOLDER luajit)
+# set_target_properties(lua51 PROPERTIES FOLDER luajit)
+# set_target_properties(luajit PROPERTIES FOLDER luajit)
+
+
+# set(LUAJIT_SOURCE_DIR "${CMAKE_CURRENT_LIST_DIR}/luajit")
+# set(luajit_lib "${CMAKE_CURRENT_BINARY_DIR}/lib/${CMAKE_STATIC_LIBRARY_PREFIX}luajit$<$<CONFIG:Debug>:d>${CMAKE_STATIC_LIBRARY_SUFFIX}")
+
+# ExternalProject_Add(
+#     LuaJIT_local
+#     PREFIX ${CMAKE_BINARY_DIR}/external/luajit
+#     DOWNLOAD_COMMAND ""
+#     SOURCE_DIR "${LUAJIT_SOURCE_DIR}"
+#     CMAKE_ARGS
+#     "-DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE}"
+#     "-DCMAKE_INSTALL_PREFIX=${CMAKE_CURRENT_BINARY_DIR}"
+#     "-DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}"
+#     "-DCMAKE_CONFIGURATION_TYPES=${CMAKE_CONFIGURATION_TYPES}"
+#     "-DCMAKE_DEBUG_POSTFIX=$<$<CONFIG:Debug>:d>"
+#     "-DCMAKE_POSITION_INDEPENDENT_CODE=ON"
+#     "-DLUAJIT_FORCE_UTF8_FOPEN=ON"
+# BUILD_BYPRODUCTS
+#     "${luajit_lib}"
+# )
 
 # ==================== lua filesystem ====================
 
@@ -13,14 +34,15 @@ add_library(lua_filesystem STATIC)
 luastg_target_common_options(lua_filesystem)
 luastg_target_more_warning(lua_filesystem)
 target_include_directories(lua_filesystem PUBLIC
-    lua-filesystem-lite
+    luafilesystem/src
 )
 target_sources(lua_filesystem PRIVATE
-    lua-filesystem-lite/lfs.h
-    lua-filesystem-lite/lfs.cpp
+    luafilesystem/src/lfs.h
+    luafilesystem/src/lfs.c
 )
 target_link_libraries(lua_filesystem PUBLIC
-    lua51static
+    # lua51static
+    libluajit
 )
 
 set_target_properties(lua_filesystem PROPERTIES FOLDER lualib)
@@ -29,9 +51,11 @@ set_target_properties(lua_filesystem PROPERTIES FOLDER lualib)
 
 add_library(lua_cjson STATIC)
 luastg_target_common_options(lua_cjson)
-target_compile_options(lua_cjson PRIVATE
-    "/wd4090" # 不同的const限定符（指针传递）
-)
+if(MSVC)
+    target_compile_options(lua_cjson PRIVATE
+        "/wd4090" # 不同的const限定符（指针传递）
+    )
+endif()
 target_compile_definitions(lua_cjson PRIVATE
     _CRT_SECURE_NO_WARNINGS
     DISABLE_INVALID_NUMBERS
@@ -52,7 +76,8 @@ target_sources(lua_cjson PRIVATE
     lua-cjson/fpconv.c
 )
 target_link_libraries(lua_cjson PUBLIC
-    lua51static
+# lua51static
+libluajit
 )
 
 set_target_properties(lua_cjson PROPERTIES FOLDER lualib)
@@ -132,34 +157,51 @@ target_include_directories(tracy PUBLIC
 )
 target_sources(tracy PRIVATE
     tracy/public/tracy/Tracy.hpp
-    tracy/public/tracy/TracyD3D11.hpp
+    # tracy/public/tracy/TracyD3D11.hpp
+    tracy/public/tracy/TracyOpenGL.hpp
     tracy/public/TracyClient.cpp
-    tracy-patch/TracyD3D11Ctx.hpp
-    tracy-patch/TracyD3D11Ctx.cpp
+    # tracy-patch/TracyD3D11Ctx.hpp
+    # tracy-patch/TracyD3D11Ctx.cpp
+    # tracy-patch/TracyOpenGLCtx.hpp
+    # tracy-patch/TracyOpenGLCtx.cpp
 )
 
 set_target_properties(tracy PROPERTIES FOLDER external)
 
 # ==================== image qoi ====================
 
-add_library(libqoi STATIC)
-target_compile_definitions(libqoi PRIVATE
-    QOI_NO_STDIO
-    QOI_IMPLEMENTATION
-)
-target_include_directories(libqoi PUBLIC
-    image.qoi
-    image.qoi-patch
-)
-target_sources(libqoi PRIVATE
-    image.qoi/qoi.h
-    image.qoi-patch/qoi.c
-    image.qoi-patch/QOITextureLoader11.h
-    image.qoi-patch/QOITextureLoader11.cpp
-)
+# add_library(libqoi STATIC)
+# target_compile_definitions(libqoi PRIVATE
+#     QOI_NO_STDIO
+#     QOI_IMPLEMENTATION
+# )
+# target_include_directories(libqoi PUBLIC
+#     image.qoi
+#     image.qoi-patch
+# )
+# target_sources(libqoi PRIVATE
+#     image.qoi/qoi.h
+#     image.qoi-patch/qoi.c
+#     image.qoi-patch/QOITextureLoader11.h
+#     image.qoi-patch/QOITextureLoader11.cpp
+# )
 
-set_target_properties(libqoi PROPERTIES FOLDER external)
+# set_target_properties(libqoi PROPERTIES FOLDER external)
 
 # ==================== steam api ====================
 
 add_subdirectory(steam_api)
+
+# ==================== glad ====================
+
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/glad/include)
+file(GLOB BUTTERFLIES_SOURCES_C ${CMAKE_CURRENT_SOURCE_DIR} *.c glad/src/gl.c)
+
+# ==================== sdl2 ====================
+
+set(SDL2MIXER_MOD OFF)
+
+add_subdirectory(sdl2)
+# add_subdirectory(sdl_image)
+add_subdirectory(sdl_mixer)
+add_subdirectory(sdl_ttf)

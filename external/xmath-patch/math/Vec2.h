@@ -12,7 +12,7 @@ namespace cocos2d
 
 		inline bool isZero() const { return x == 0.0f && y == 0.0f; }
 		inline float cross(const Vec2& other) const { return x * other.y - y * other.x; }
-		float length() const { return std::sqrtf(x * x + y * y); }
+		float length() const { return sqrtf(x * x + y * y); }
 		float dot(const Vec2& v) const { return (x * v.x + y * v.y); }
 		void normalize();
 		inline Vec2 rotate(const Vec2& other) const {

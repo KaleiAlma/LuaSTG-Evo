@@ -1,44 +1,46 @@
-﻿#include "Core/Graphics/Renderer_D3D11.hpp"
-#include "Core/Graphics/Model_D3D11.hpp"
+﻿#include "Core/Graphics/Renderer_OpenGL.hpp"
+#include "Core/Graphics/Device_OpenGL.hpp"
+#include "Core/Graphics/Model_OpenGL.hpp"
+#include "glad/gl.h"
 
 #define IDX(x) (size_t)static_cast<uint8_t>(x)
 
 namespace Core::Graphics
 {
-	inline ID3D11ShaderResourceView* get_view(Texture2D_D3D11* p)
+	inline GLuint get_view(Texture2D_OpenGL* p)
 	{
-		return p ? p->GetView() : NULL;
+		return p->GetView();
 	}
-	inline ID3D11ShaderResourceView* get_view(ITexture2D* p)
+	inline GLuint get_view(ITexture2D* p)
 	{
-		return get_view(static_cast<Texture2D_D3D11*>(p));
+		return get_view(static_cast<Texture2D_OpenGL*>(p));
 	}
-	inline ID3D11ShaderResourceView* get_view(ScopeObject<Texture2D_D3D11>& p)
+	inline GLuint get_view(ScopeObject<Texture2D_OpenGL>& p)
 	{
 		return get_view(p.get());
 	}
-	inline ID3D11ShaderResourceView* get_view(ScopeObject<ITexture2D>& p)
+	inline GLuint get_view(ScopeObject<ITexture2D>& p)
 	{
-		return get_view(static_cast<Texture2D_D3D11*>(p.get()));
+		return get_view(static_cast<Texture2D_OpenGL*>(p.get()));
 	}
 
 	inline ID3D11SamplerState* get_sampler(ISamplerState* p_sampler)
 	{
-		return static_cast<SamplerState_D3D11*>(p_sampler)->GetState();
+		return static_cast<SamplerState_OpenGL*>(p_sampler)->GetState();
 	}
 	inline ID3D11SamplerState* get_sampler(ScopeObject<ISamplerState>& p_sampler)
 	{
-		return static_cast<SamplerState_D3D11*>(p_sampler.get())->GetState();
+		return static_cast<SamplerState_OpenGL*>(p_sampler.get())->GetState();
 	}
 }
 
 namespace Core::Graphics
 {
-	void PostEffectShader_D3D11::onDeviceCreate()
+	void PostEffectShader_OpenGL::onDeviceCreate()
 	{
 		createResources();
 	}
-	void PostEffectShader_D3D11::onDeviceDestroy()
+	void PostEffectShader_OpenGL::onDeviceDestroy()
 	{
 		d3d11_ps.Reset();
 		for (auto& v : m_buffer_map)
@@ -47,7 +49,7 @@ namespace Core::Graphics
 		}
 	}
 
-	bool PostEffectShader_D3D11::findVariable(StringView name, LocalConstantBuffer*& buf, LocalVariable*& val)
+	bool PostEffectShader_OpenGL::findVariable(StringView name, LocalConstantBuffer*& buf, LocalVariable*& val)
 	{
 		std::string name_s(name);
 		for (auto& b : m_buffer_map)
@@ -62,7 +64,7 @@ namespace Core::Graphics
 		}
 		return false;
 	}
-	bool PostEffectShader_D3D11::setFloat(StringView name, float value)
+	bool PostEffectShader_OpenGL::setFloat(StringView name, float value)
 	{
 		LocalConstantBuffer* b{};
 		LocalVariable* v{};
@@ -71,7 +73,7 @@ namespace Core::Graphics
 		memcpy(b->buffer.data() + v->offset, &value, v->size);
 		return true;
 	}
-	bool PostEffectShader_D3D11::setFloat2(StringView name, Vector2F value)
+	bool PostEffectShader_OpenGL::setFloat2(StringView name, Vector2F value)
 	{
 		LocalConstantBuffer* b{};
 		LocalVariable* v{};
@@ -80,7 +82,7 @@ namespace Core::Graphics
 		memcpy(b->buffer.data() + v->offset, &value, v->size);
 		return true;
 	}
-	bool PostEffectShader_D3D11::setFloat3(StringView name, Vector3F value)
+	bool PostEffectShader_OpenGL::setFloat3(StringView name, Vector3F value)
 	{
 		LocalConstantBuffer* b{};
 		LocalVariable* v{};
@@ -89,7 +91,7 @@ namespace Core::Graphics
 		memcpy(b->buffer.data() + v->offset, &value, v->size);
 		return true;
 	}
-	bool PostEffectShader_D3D11::setFloat4(StringView name, Vector4F value)
+	bool PostEffectShader_OpenGL::setFloat4(StringView name, Vector4F value)
 	{
 		LocalConstantBuffer* b{};
 		LocalVariable* v{};
@@ -98,16 +100,16 @@ namespace Core::Graphics
 		memcpy(b->buffer.data() + v->offset, &value, v->size);
 		return true;
 	}
-	bool PostEffectShader_D3D11::setTexture2D(StringView name, ITexture2D* p_texture)
+	bool PostEffectShader_OpenGL::setTexture2D(StringView name, ITexture2D* p_texture)
 	{
 		std::string name_s(name);
 		auto it = m_texture2d_map.find(name_s);
 		if (it == m_texture2d_map.end()) { return false; }
-		it->second.texture = dynamic_cast<Texture2D_D3D11*>(p_texture);
+		it->second.texture = dynamic_cast<Texture2D_OpenGL*>(p_texture);
 		if (!it->second.texture) { assert(false); return false; }
 		return true;
 	}
-	bool PostEffectShader_D3D11::apply(IRenderer* p_renderer)
+	bool PostEffectShader_OpenGL::apply(IRenderer* p_renderer)
 	{
 		assert(p_renderer);
 
@@ -140,16 +142,16 @@ namespace Core::Graphics
 		return true;
 	}
 
-	PostEffectShader_D3D11::PostEffectShader_D3D11(Device_D3D11* p_device, StringView path, bool is_path_)
+	PostEffectShader_OpenGL::PostEffectShader_OpenGL(Device_D3D11* p_device, StringView path, bool is_path_)
 		: m_device(p_device)
 		, source(path)
 		, is_path(is_path_)
 	{
 		if (!createResources())
-			throw std::runtime_error("PostEffectShader_D3D11::PostEffectShader_D3D11");
+			throw std::runtime_error("PostEffectShader_OpenGL::PostEffectShader_OpenGL");
 		m_device->addEventListener(this);
 	}
-	PostEffectShader_D3D11::~PostEffectShader_D3D11()
+	PostEffectShader_OpenGL::~PostEffectShader_OpenGL()
 	{
 		m_device->removeEventListener(this);
 	}
@@ -642,7 +644,7 @@ namespace Core::Graphics
 	}
 	void Renderer_D3D11::setSamplerState(SamplerState state, UINT index)
 	{
-		ID3D11SamplerState* d3d11_sampler = static_cast<SamplerState_D3D11*>(_sampler_state[IDX(state)].get())->GetState();
+		ID3D11SamplerState* d3d11_sampler = static_cast<SamplerState_OpenGL*>(_sampler_state[IDX(state)].get())->GetState();
 		m_device->GetD3D11DeviceContext()->PSSetSamplers(index, 1, &d3d11_sampler);
 	}
 	bool Renderer_D3D11::uploadVertexIndexBufferFromDrawList()
@@ -682,7 +684,7 @@ namespace Core::Graphics
 	{
 		ISamplerState* sampler_from_texture = texture ? texture->getSamplerState() : nullptr;
 		ISamplerState* sampler = sampler_from_texture ? sampler_from_texture : _sampler_state[IDX(_state_set.sampler_state)].get();
-		ID3D11SamplerState* d3d11_sampler = static_cast<SamplerState_D3D11*>(sampler)->GetState();
+		ID3D11SamplerState* d3d11_sampler = static_cast<SamplerState_OpenGL*>(sampler)->GetState();
 		m_device->GetD3D11DeviceContext()->PSSetSamplers(0, 1, &d3d11_sampler);
 	}
 	void Renderer_D3D11::bindTextureAlphaType(ITexture2D* texture)
@@ -1111,16 +1113,16 @@ namespace Core::Graphics
 		}
 	}
 
-	inline bool is_same(Texture2D_D3D11* a, ITexture2D* b)
+	inline bool is_same(Texture2D_OpenGL* a, ITexture2D* b)
 	{
 		if (a && b)
-			return a->GetView() == static_cast<Texture2D_D3D11*>(b)->GetView();
+			return a->GetView() == static_cast<Texture2D_OpenGL*>(b)->GetView();
 		else if (!a && !b)
 			return true;
 		else
 			return false;
 	}
-	inline bool is_same(ScopeObject<Texture2D_D3D11>& a, ITexture2D* b)
+	inline bool is_same(ScopeObject<Texture2D_OpenGL>& a, ITexture2D* b)
 	{
 		return is_same(*a, b);
 	}
@@ -1140,14 +1142,14 @@ namespace Core::Graphics
 			}
 			_draw_list.command.size += 1;
 			DrawCommand& cmd_ = _draw_list.command.data[_draw_list.command.size - 1];
-			cmd_.texture = static_cast<Texture2D_D3D11*>(texture);
+			cmd_.texture = static_cast<Texture2D_OpenGL*>(texture);
 			cmd_.vertex_count = 0;
 			cmd_.index_count = 0;
 		}
 		// 更新当前状态的纹理
 		if (!is_same(_state_texture, texture))
 		{
-			_state_texture = static_cast<Texture2D_D3D11*>(texture);
+			_state_texture = static_cast<Texture2D_OpenGL*>(texture);
 		}
 	}
 
@@ -1270,7 +1272,7 @@ namespace Core::Graphics
 	{
 		try
 		{
-			*pp_effect = new PostEffectShader_D3D11(m_device.get(), path, true);
+			*pp_effect = new PostEffectShader_OpenGL(m_device.get(), path, true);
 			return true;
 		}
 		catch (...)
@@ -1441,7 +1443,7 @@ namespace Core::Graphics
 		}
 		ID3D11Buffer* p_psdata[2] = { _user_float_buffer.Get(), _fog_data_buffer.Get() };
 		ctx->PSSetConstantBuffers(0, 2, p_psdata);
-		ctx->PSSetShader(static_cast<PostEffectShader_D3D11*>(p_effect)->GetPS(), NULL, 0);
+		ctx->PSSetShader(static_cast<PostEffectShader_OpenGL*>(p_effect)->GetPS(), NULL, 0);
 
 		ID3D11ShaderResourceView* p_srvs[5] = {};
 		ID3D11SamplerState* p_samplers[5] = {};
@@ -1606,7 +1608,7 @@ namespace Core::Graphics
 			spdlog::error("[core] 无法应用 PostEffectShader 变量");
 			return false;
 		}
-		ctx->PSSetShader(static_cast<PostEffectShader_D3D11*>(p_effect)->GetPS(), NULL, 0);
+		ctx->PSSetShader(static_cast<PostEffectShader_OpenGL*>(p_effect)->GetPS(), NULL, 0);
 		
 		// [Stage OM]
 

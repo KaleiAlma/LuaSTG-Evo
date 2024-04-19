@@ -1,5 +1,5 @@
 # nlohmann json
-# 读取和输出 json 文件
+# JSON parser and writer
 
 CPMAddPackage(
     NAME nlohmann_json
@@ -10,16 +10,27 @@ CPMAddPackage(
 )
 
 # gabime spdlog
-# 打印日志到文件和调试器
+# Logging utility
 
 CPMAddPackage(
     NAME spdlog
     VERSION 1.12.0
     GITHUB_REPOSITORY gabime/spdlog
     OPTIONS
-    "SPDLOG_WCHAR_FILENAMES ON"
-    "SPDLOG_WCHAR_SUPPORT ON"
+    # "SPDLOG_WCHAR_FILENAMES ON"
+    # "SPDLOG_WCHAR_SUPPORT ON"
     "SPDLOG_DISABLE_DEFAULT_LOGGER ON"
+)
+
+# g-truc glm
+# OpenGL math library
+
+CPMAddPackage(
+    NAME glm
+    GITHUB_REPOSITORY g-truc/glm
+    GIT_TAG 1.0.1
+    OPTIONS
+    "GLM_ENABLE_CXX_17 ON"
 )
 
 if(TARGET spdlog)
@@ -32,7 +43,7 @@ if(TARGET spdlog)
 endif()
 
 # pugixml
-# 用于读取 xml 文件
+# XML file support
 
 CPMAddPackage(
     NAME pugixml
@@ -42,7 +53,7 @@ CPMAddPackage(
 )
 
 if(pugixml_ADDED)
-    # pugixml 提供的 CMake 支持有点脏，我们自己来
+    # pugixml's CMake support kinda sucks, so we do it ourself.
     add_library(pugixml STATIC)
     target_include_directories(pugixml PUBLIC
         ${pugixml_SOURCE_DIR}/src
@@ -61,17 +72,17 @@ if(pugixml_ADDED)
 endif()
 
 # nothings stb
-# 各种杂项工具
+# Misc tools
 
 CPMAddPackage(
     NAME nothings_stb
     GITHUB_REPOSITORY nothings/stb
-    GIT_TAG 5736b15f7ea0ffb08dd38af21067c314d6a3aae9
+    GIT_TAG ae721c50eaf761660b4f90cc590453cdb0c2acd0
     DOWNLOAD_ONLY YES
 )
 
 if(nothings_stb_ADDED)
-    # stb 是仅头文件的库，且没有提供 CMake 支持
+    # stb does not come with CMake support
     add_library(nothings_stb STATIC)
     target_include_directories(nothings_stb PUBLIC
         ${nothings_stb_SOURCE_DIR}
@@ -96,7 +107,7 @@ if(nothings_stb_ADDED)
 endif()
 
 # dr_libs
-# 解码 wav 和 mp3 音频文件
+# Decode WAV and MP3 files
 
 CPMAddPackage(
     NAME dr_libs
@@ -106,7 +117,7 @@ CPMAddPackage(
 )
 
 if(dr_libs_ADDED)
-    # dr_libs 是仅头文件的库，且没有提供 CMake 支持
+    # dr_libs does not come with CMake support
     add_library(dr_libs STATIC)
     target_include_directories(dr_libs PUBLIC
         ${dr_libs_SOURCE_DIR}
@@ -129,7 +140,7 @@ if(dr_libs_ADDED)
 endif()
 
 # tinygltf
-# 解析 gltf 2.0 模型格式
+# Parser for gltf 2.0 files
 
 CPMAddPackage(
     NAME tinygltf
@@ -142,12 +153,13 @@ CPMAddPackage(
 )
 
 if(tinygltf_ADDED)
-    # tinygltf 提供的 CMake 支持有点脏，我们自己来
+    # tinygltf's CMake support kinda sucks, so we do it ourself.
     add_library(tinygltf STATIC)
     target_compile_definitions(tinygltf PUBLIC
         TINYGLTF_NO_STB_IMAGE_WRITE
     )
-    # 为了避免其使用自带的 json 和 stb 库，首先得把头文件拉到一个单独的文件夹
+    # In order to avoid using its own JSON and stb libs,
+    # you must first pull the header file to a separate folder
     file(WRITE ${CMAKE_BINARY_DIR}/tinygltf/tiny_gltf.h "PLACEHOLD")
     file(REMOVE
         ${CMAKE_BINARY_DIR}/tinygltf/tiny_gltf.h
@@ -156,10 +168,10 @@ if(tinygltf_ADDED)
         ${tinygltf_SOURCE_DIR}/tiny_gltf.h
         ${CMAKE_BINARY_DIR}/tinygltf/tiny_gltf.h
     )
-    # 配置 include 路径，避免使用自带的 json 和 stb 库
+    # Configure include path to avoid using its own JSON and stb libs
     target_include_directories(tinygltf PUBLIC
         ${CMAKE_BINARY_DIR}/tinygltf
-        ${nlohmann_json_SOURCE_DIR}/include/nlohmann # 非常傻逼
+        ${nlohmann_json_SOURCE_DIR}/include/nlohmann # Very stupid
     )
     target_sources(tinygltf PRIVATE
         ${CMAKE_BINARY_DIR}/tinygltf/tiny_gltf.h
@@ -173,7 +185,7 @@ if(tinygltf_ADDED)
 endif()
 
 # tinyobjloader
-# 解析 obj 模型格式
+# Parser for OBJ files
 
 CPMAddPackage(
     NAME tinyobjloader
@@ -184,7 +196,7 @@ CPMAddPackage(
 )
 
 if(tinyobjloader_ADDED)
-    # tinyobjloader 提供的 CMake 支持有点脏，我们自己来
+    # tinyobjloader's CMake support kinda sucks, so we do it ourself.
     add_library(tinyobjloader STATIC)
     target_include_directories(tinyobjloader PUBLIC
         ${tinyobjloader_SOURCE_DIR}
@@ -197,33 +209,35 @@ if(tinyobjloader_ADDED)
 endif()
 
 # freetype
-# 字体文件解析和字形光栅化
+# Font utilities
 
-CPMAddPackage(
-    NAME freetype
-    VERSION 2.13.1
-    #GITHUB_REPOSITORY freetype/freetype
-    #GIT_TAG VER-2-13-1
-    URL https://gitlab.freedesktop.org/freetype/freetype/-/archive/VER-2-13-1/freetype-VER-2-13-1.zip
-    OPTIONS
-    "FT_DISABLE_ZLIB ON"
-    "FT_DISABLE_BZIP2 ON"
-    "FT_DISABLE_PNG ON"
-    "FT_DISABLE_HARFBUZZ ON"
-    "FT_DISABLE_BROTLI ON"
-)
+# Freetype is included in SDL2_ttf.
 
-if(freetype_ADDED)
-    if(TARGET freetype)
-        target_compile_options(freetype PRIVATE
-            "/utf-8" # Unicode warning
-        )
-        set_target_properties(freetype PROPERTIES FOLDER external)
-    endif()
-endif()
+# CPMAddPackage(
+#     NAME freetype
+#     VERSION 2.13.1
+#     #GITHUB_REPOSITORY freetype/freetype
+#     #GIT_TAG VER-2-13-1
+#     URL https://gitlab.freedesktop.org/freetype/freetype/-/archive/VER-2-13-1/freetype-VER-2-13-1.zip
+#     OPTIONS
+#     "FT_DISABLE_ZLIB ON"
+#     "FT_DISABLE_BZIP2 ON"
+#     "FT_DISABLE_PNG ON"
+#     "FT_DISABLE_HARFBUZZ ON"
+#     "FT_DISABLE_BROTLI ON"
+# )
+
+# if(freetype_ADDED)
+#     if(TARGET freetype)
+#         target_compile_options(freetype PRIVATE
+#             "/utf-8" # Unicode warning
+#         )
+#         set_target_properties(freetype PROPERTIES FOLDER external)
+#     endif()
+# endif()
 
 # pcg random
-# 高质量的随机数发生器
+# High-quality RNG
 
 CPMAddPackage(
     NAME pcg_cpp
@@ -240,7 +254,7 @@ if(pcg_cpp_ADDED)
 endif()
 
 # xxhash
-# 高质量、高性能的非密码安全 hash 库
+# High-quality high-performance hash lib (not password-secure)
 
 CPMAddPackage(
     NAME xxhash

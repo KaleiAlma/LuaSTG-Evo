@@ -1,20 +1,20 @@
 ﻿#pragma once
 #include "Core/Object.hpp"
 #include "Core/Graphics/Renderer.hpp"
-#include "Core/Graphics/Device_D3D11.hpp"
+#include "Core/Graphics/Device_OpenGL.hpp"
 #include "tiny_gltf.h"
 
 #define IDX(x) (size_t)static_cast<uint8_t>(x)
 
 namespace Core::Graphics
 {
-    class ModelSharedComponent_D3D11
+    class ModelSharedComponent_OpenGL
         : public Object<IObject>
         , public IDeviceEventListener
     {
-        friend class Model_D3D11;
+        friend class Model_OpenGL;
     private:
-        ScopeObject<Device_D3D11> m_device;
+        ScopeObject<Device_OpenGL> m_device;
 
         Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> default_image;
         Microsoft::WRL::ComPtr<ID3D11SamplerState> default_sampler;
@@ -56,17 +56,17 @@ namespace Core::Graphics
         void onDeviceDestroy();
 
     public:
-        ModelSharedComponent_D3D11(Device_D3D11* p_device);
-        ~ModelSharedComponent_D3D11();
+        ModelSharedComponent_OpenGL(Device_OpenGL* p_device);
+        ~ModelSharedComponent_OpenGL();
     };
 
-    class Model_D3D11
+    class Model_OpenGL
         : public Object<IModel>
         , public IDeviceEventListener
     {
     private:
-        ScopeObject<Device_D3D11> m_device;
-        ScopeObject<ModelSharedComponent_D3D11> shared_;
+        ScopeObject<Device_OpenGL> m_device;
+        ScopeObject<ModelSharedComponent_OpenGL> shared_;
 
         DirectX::XMMATRIX t_scale_;
         DirectX::XMMATRIX t_trans_;
@@ -169,8 +169,8 @@ namespace Core::Graphics
         void draw(IRenderer::FogState fog);
 
     public:
-        Model_D3D11(Device_D3D11* p_device, ModelSharedComponent_D3D11* p_model_shared, StringView path);
-        ~Model_D3D11();
+        Model_OpenGL(Device_OpenGL* p_device, ModelSharedComponent_OpenGL* p_model_shared, StringView path);
+        ~Model_OpenGL();
     };
 }
 

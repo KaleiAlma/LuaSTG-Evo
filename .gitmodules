@@ -9,7 +9,7 @@
 	url = https://github.com/Legacy-LuaSTG-Engine/lstgx_Math.git
 [submodule "external/luajit/luajit"]
 	path = external/luajit/luajit
-	url = https://github.com/LuaJIT/LuaJIT.git
+	url = https://github.com/WohlSoft/LuaJIT
 [submodule "external/lua-cjson"]
 	path = external/lua-cjson
 	url = https://github.com/openresty/lua-cjson.git
@@ -22,3 +22,15 @@
 [submodule "external/image.qoi"]
 	path = external/image.qoi
 	url = https://github.com/phoboslab/qoi.git
+[submodule "external/sdl2"]
+	path = external/sdl2
+	url = https://github.com/libsdl-org/SDL
+[submodule "external/sdl_mixer"]
+	path = external/sdl_mixer
+	url = https://github.com/libsdl-org/SDL_mixer
+[submodule "external/sdl_ttf"]
+	path = external/sdl_ttf
+	url = https://github.com/libsdl-org/SDL_ttf
+[submodule "external/luafilesystem"]
+	path = external/luafilesystem
+	url = https://github.com/lunarmodules/luafilesystem
