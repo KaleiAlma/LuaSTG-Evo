@@ -1,9 +1,5 @@
 # LuaSTG Evo
 
----
-
-## Introduce
-
 [![C++ CI](https://github.com/KaleiAlma/LuaSTG-Evo/actions/workflows/cpp-ci.yml/badge.svg)](https://github.com/KaleiAlma/LuaSTG-Evo/actions/workflows/cpp-ci.yml)
 
 LuaSTG Evo is a new branch that migrates [LuaSTG Sub](https://github.com/Legacy-LuaSTG-Engine/LuaSTG-Sub) to a cross-platform API.
