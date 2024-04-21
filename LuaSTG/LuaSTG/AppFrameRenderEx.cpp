@@ -33,8 +33,7 @@ namespace LuaSTGPlus
         }
 
         GetRenderer2D()->setRenderAttachment(
-            rt->GetRenderTarget(),
-            rt->GetDepthStencilBuffer()
+            rt->GetRenderTarget()
         );
 
         m_stRenderTargetStack.push_back(rt);
@@ -61,8 +60,7 @@ namespace LuaSTGPlus
         {
             IResourceTexture* rt = *(m_stRenderTargetStack.back());
             GetRenderer2D()->setRenderAttachment(
-                rt->GetRenderTarget(),
-                rt->GetDepthStencilBuffer()
+                rt->GetRenderTarget()
             );
         }
         else

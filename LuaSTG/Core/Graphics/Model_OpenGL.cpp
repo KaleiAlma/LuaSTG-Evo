@@ -1,40 +1,49 @@
 ﻿#include "Core/Graphics/Model_OpenGL.hpp"
 #include "Core/FileManager.hpp"
+#include "glad/gl.h"
+#include "glm/fwd.hpp"
+#include "glm/ext/matrix_transform.hpp"
+#include "glm/ext/vector_float4.hpp"
+#include "glm/gtc/matrix_access.hpp"
+#include "glm/matrix.hpp"
+#define GLM_ENABLE_EXPERIMENTAL
+#include "glm/gtx/quaternion.hpp"
+#include "glm/ext/quaternion_common.hpp"
+#include "glm/ext/quaternion_float.hpp"
+#include <cstdint>
 
 #define IDX(x) (size_t)static_cast<uint8_t>(x)
 
-namespace DirectX
+namespace glm
 {
-    inline XMMATRIX XM_CALLCONV XMMatrixInverseTranspose(DirectX::FXMMATRIX M)
+    inline mat4 inverseTranspose(mat4 M)
     {
-        // 世界矩阵的逆的转置仅针对法向量，我们也不需要世界矩阵的平移分量
-        // 而且不去掉的话，后续再乘上观察矩阵之类的就会产生错误的变换结果
-        XMMATRIX A = M;
-        A.r[3] = g_XMIdentityR3;
-        return XMMatrixTranspose(XMMatrixInverse(NULL, A));
+        // The transpose of the inverse of the world matrix is only for normal vectors,
+        // and we don't need the translation component of the world matrix.
+
+        // If we don't remove it, subsequent multiplication by observation
+        // matrices and such will result in incorrect transformations.
+        mat4 A = row(M, 3, vec4(0.f, 0.f, 0.f , 1.f));
+
+        return transpose(inverse(A));
+    }
+    inline mat4 rotateRollPitchYaw(mat4 M, vec3 R)
+    {
+        M = rotate(M, R.x, vec3(1, 0, 0));
+        M = rotate(M, R.y, vec3(0, 1, 0));
+        M = rotate(M, R.z, vec3(0, 0, 1));
+        return M;
     }
 }
 
 namespace Core::Graphics
 {
-    bool ModelSharedComponent_D3D11::createImage()
+    bool ModelSharedComponent_OpenGL::createImage()
     {
-        auto* device = m_device->GetD3D11Device();
-        assert(device);
-
-        HRESULT hr = S_OK;
-
         // default: purple & black tile image
 
-        auto RGBA = [](uint8_t r_, uint8_t g_, uint8_t b_, uint8_t a_) -> uint32_t
-        {
-            return uint32_t(r_)
-                | (uint32_t(g_) << 8)
-                | (uint32_t(b_) << 16)
-                | (uint32_t(a_) << 24);
-        };
-        uint32_t black = RGBA(0, 0, 0, 255);
-        uint32_t purple = RGBA(255, 0, 255, 255);
+        uint32_t black = 0x000000FFu;
+        uint32_t purple = 0xFF00FFFFu;
         std::vector<uint32_t> pixels(64 * 64);
         uint32_t* ptr = pixels.data();
         for (int i = 0; i < 32; i += 1)
@@ -66,267 +75,77 @@ namespace Core::Graphics
 
         // default: create
 
-        D3D11_TEXTURE2D_DESC def_tex_def = {
-            .Width = 64,
-            .Height = 64,
-            .MipLevels = 1,
-            .ArraySize = 1,
-            .Format = DXGI_FORMAT_R8G8B8A8_UNORM,
-            .SampleDesc = {
-                .Count = 1,
-                .Quality = 0,
-            },
-            .Usage = D3D11_USAGE_DEFAULT,
-            .BindFlags = D3D11_BIND_SHADER_RESOURCE,
-            .CPUAccessFlags = 0,
-            .MiscFlags = 0,
-        };
-        D3D11_SUBRESOURCE_DATA def_dat_def = {
-            .pSysMem = pixels.data(),
-            .SysMemPitch = 64 * 4,
-            .SysMemSlicePitch = 0,
-        };
-        Microsoft::WRL::ComPtr<ID3D11Texture2D> def_texture2d;
-        hr = device->CreateTexture2D(&def_tex_def, &def_dat_def, &def_texture2d);
-        if (FAILED(hr))
-        {
+        glGenTextures(1, &default_image);
+        if (default_image == 0) {
             assert(false);
             return false;
         }
-        D3D11_SHADER_RESOURCE_VIEW_DESC def_srv_def = {
-            .Format = def_tex_def.Format,
-            .ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D,
-            .Texture2D = {
-                .MostDetailedMip = 0,
-                .MipLevels = def_tex_def.MipLevels,
-            },
-        };
-        hr = device->CreateShaderResourceView(def_texture2d.Get(), &def_srv_def, &default_image);
-        if (FAILED(hr))
-        {
-            assert(false);
-            return false;
-        }
+        glBindTexture(GL_TEXTURE_2D, default_image);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 64, 64, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels.data());
 
         return true;
     }
-    bool ModelSharedComponent_D3D11::createSampler()
+    bool ModelSharedComponent_OpenGL::createSampler()
     {
-        auto* device = m_device->GetD3D11Device();
-        assert(device);
-
-        HRESULT hr = S_OK;
-
-        // default: create
-
-        D3D11_SAMPLER_DESC def_samp_def = {
-            .Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR,
-            .AddressU = D3D11_TEXTURE_ADDRESS_WRAP,
-            .AddressV = D3D11_TEXTURE_ADDRESS_WRAP,
-            .AddressW = D3D11_TEXTURE_ADDRESS_WRAP,
-            .MipLODBias = D3D11_DEFAULT_MIP_LOD_BIAS,
-            .MaxAnisotropy = D3D11_DEFAULT_MAX_ANISOTROPY,
-            .ComparisonFunc = D3D11_COMPARISON_ALWAYS,
-            .BorderColor = {},
-            .MinLOD = 0.0f,
-            .MaxLOD = D3D11_FLOAT32_MAX,
-        };
-        hr = device->CreateSamplerState(&def_samp_def, &default_sampler);
-        if (FAILED(hr))
-        {
-            assert(false);
-            return false;
-        }
+        default_sampler.minFilter = TINYGLTF_TEXTURE_FILTER_LINEAR;
+        default_sampler.magFilter = TINYGLTF_TEXTURE_FILTER_LINEAR;
+        default_sampler.wrapS = TINYGLTF_TEXTURE_WRAP_REPEAT;
+        default_sampler.wrapT = TINYGLTF_TEXTURE_WRAP_REPEAT;
 
         return true;
     }
-    bool ModelSharedComponent_D3D11::createConstantBuffer()
+    bool ModelSharedComponent_OpenGL::createConstantBuffer()
     {
-        auto* device = m_device->GetD3D11Device();
-        assert(device);
-
-        HRESULT hr = S_OK;
-
         // built-in: view-proj matrix
 
-        D3D11_BUFFER_DESC cbo_def = {
-            .ByteWidth = sizeof(DirectX::XMFLOAT4X4),
-            .Usage = D3D11_USAGE_DEFAULT,
-            .BindFlags = D3D11_BIND_CONSTANT_BUFFER,
-            .CPUAccessFlags = 0,
-            .MiscFlags = 0,
-            .StructureByteStride = 0,
-        };
-        hr = device->CreateBuffer(&cbo_def, NULL, &cbo_mvp);
-        if (FAILED(hr))
-        {
+        glGenBuffers(1, &ubo_mvp);
+        if (ubo_mvp == 0) {
             assert(false);
             return false;
         }
 
         // built-in: local-world matrix
 
-        cbo_def.ByteWidth = 2 * sizeof(DirectX::XMFLOAT4X4);
-        hr = device->CreateBuffer(&cbo_def, NULL, &cbo_mlw);
-        if (FAILED(hr))
-        {
+        glGenBuffers(1, &ubo_mlw);
+        if (ubo_mlw == 0) {
             assert(false);
             return false;
         }
 
         // built-in: camera info
 
-        cbo_def.ByteWidth = 2 * sizeof(DirectX::XMFLOAT4X4);
-        hr = device->CreateBuffer(&cbo_def, NULL, &cbo_caminfo);
-        if (FAILED(hr))
-        {
+        glGenBuffers(1, &ubo_caminfo);
+        if (ubo_caminfo == 0) {
             assert(false);
             return false;
         }
 
         // // built-in: alpha mask
 
-        cbo_def.ByteWidth = 2 * sizeof(DirectX::XMFLOAT4);
-        hr = device->CreateBuffer(&cbo_def, NULL, &cbo_alpha);
-        if (FAILED(hr))
-        {
+        glGenBuffers(1, &ubo_alpha);
+        if (ubo_alpha == 0) {
             assert(false);
             return false;
         }
 
         // // built-in: light
 
-        cbo_def.ByteWidth = 4 * sizeof(DirectX::XMFLOAT4);
-        hr = device->CreateBuffer(&cbo_def, NULL, &cbo_light);
-        if (FAILED(hr))
-        {
+        glGenBuffers(1, &ubo_light);
+        if (ubo_light == 0) {
             assert(false);
             return false;
         }
 
         return true;
     }
-    bool ModelSharedComponent_D3D11::createState()
+    bool ModelSharedComponent_OpenGL::createState()
     {
-        auto* device = m_device->GetD3D11Device();
-        assert(device);
-
-        HRESULT hr = S_OK;
-
-        //// RS \\\\
-
-        // built-in: cull-none
-
-        D3D11_RASTERIZER_DESC rs_def = {
-            .FillMode = D3D11_FILL_SOLID,
-            .CullMode = D3D11_CULL_NONE,
-            .FrontCounterClockwise = FALSE,
-            .DepthBias = D3D11_DEFAULT_DEPTH_BIAS,
-            .DepthBiasClamp = D3D11_DEFAULT_DEPTH_BIAS_CLAMP,
-            .SlopeScaledDepthBias = D3D11_DEFAULT_SLOPE_SCALED_DEPTH_BIAS,
-            .DepthClipEnable = TRUE,
-            .ScissorEnable = TRUE,
-            .MultisampleEnable = FALSE,
-            .AntialiasedLineEnable = FALSE,
-        };
-        hr = device->CreateRasterizerState(&rs_def, &state_rs_cull_none);
-        if (FAILED(hr))
-        {
-            assert(false);
-            return false;
-        }
-
-        // built-in: cull-back
-
-        rs_def.CullMode = D3D11_CULL_BACK;
-        rs_def.FrontCounterClockwise = TRUE;
-        hr = device->CreateRasterizerState(&rs_def, &state_rs_cull_back);
-        if (FAILED(hr))
-        {
-            assert(false);
-            return false;
-        }
-
-        //// DS \\\\
-
-        // built-in: depth-test
-
-        D3D11_DEPTH_STENCIL_DESC ds_def = {
-            .DepthEnable = TRUE,
-            .DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL,
-            .DepthFunc = D3D11_COMPARISON_LESS_EQUAL,
-            .StencilEnable = FALSE,
-            .StencilReadMask = D3D11_DEFAULT_STENCIL_READ_MASK,
-            .StencilWriteMask = D3D11_DEFAULT_STENCIL_WRITE_MASK,
-            .FrontFace = {
-                .StencilFailOp = D3D11_STENCIL_OP_KEEP,
-                .StencilDepthFailOp = D3D11_STENCIL_OP_KEEP,
-                .StencilPassOp = D3D11_STENCIL_OP_KEEP,
-                .StencilFunc = D3D11_COMPARISON_ALWAYS,
-            },
-            .BackFace = {
-                .StencilFailOp = D3D11_STENCIL_OP_KEEP,
-                .StencilDepthFailOp = D3D11_STENCIL_OP_KEEP,
-                .StencilPassOp = D3D11_STENCIL_OP_KEEP,
-                .StencilFunc = D3D11_COMPARISON_ALWAYS,
-            },
-        };
-        hr = device->CreateDepthStencilState(&ds_def, &state_ds);
-        if (FAILED(hr))
-        {
-            assert(false);
-            return false;
-        }
-
-        //// BLEND \\\\
-
-        // built-in: disable
-
-        D3D11_RENDER_TARGET_BLEND_DESC rt_blend_def = {
-            .BlendEnable = FALSE,
-            .SrcBlend = D3D11_BLEND_ONE,
-            .DestBlend = D3D11_BLEND_INV_SRC_ALPHA,
-            .BlendOp = D3D11_BLEND_OP_ADD,
-            .SrcBlendAlpha = D3D11_BLEND_ONE,
-            .DestBlendAlpha = D3D11_BLEND_INV_SRC_ALPHA,
-            .BlendOpAlpha = D3D11_BLEND_OP_ADD,
-            .RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL,
-        };
-        D3D11_BLEND_DESC blend_def = {
-            .AlphaToCoverageEnable = FALSE,
-            .IndependentBlendEnable = FALSE,
-            .RenderTarget = {},
-        };
-        for (auto& rt_blend : blend_def.RenderTarget)
-        {
-            rt_blend = rt_blend_def;
-        }
-        hr = device->CreateBlendState(&blend_def, &state_blend);
-        if (FAILED(hr))
-        {
-            assert(false);
-            return false;
-        }
-
-        // built-in: alpha-blend
-
-        rt_blend_def.BlendEnable = TRUE;
-        rt_blend_def.SrcBlend = D3D11_BLEND_SRC_ALPHA;
-        for (auto& rt_blend : blend_def.RenderTarget)
-        {
-            rt_blend = rt_blend_def;
-        }
-        hr = device->CreateBlendState(&blend_def, &state_blend_alpha);
-        if (FAILED(hr))
-        {
-            assert(false);
-            return false;
-        }
+        // OpenGL doesn't do state like DirectX
 
         return true;
     }
 
-    bool ModelSharedComponent_D3D11::createResources()
+    bool ModelSharedComponent_OpenGL::createResources()
     {
         // load image to shader resource
 
@@ -350,49 +169,29 @@ namespace Core::Graphics
 
         return true;
     }
-    void ModelSharedComponent_D3D11::onDeviceCreate()
+    void ModelSharedComponent_OpenGL::onDeviceCreate()
     {
         createResources();
     }
-    void ModelSharedComponent_D3D11::onDeviceDestroy()
+    void ModelSharedComponent_OpenGL::onDeviceDestroy()
     {
-        default_image.Reset();
-        default_sampler.Reset();
+        glDeleteTextures(1, &default_image);
 
-        input_layout.Reset();
-        input_layout_vc.Reset();
-        shader_vertex.Reset();
-        shader_vertex_vc.Reset();
-        for (auto& v : shader_pixel) v.Reset();
-        for (auto& v : shader_pixel_alpha) v.Reset();
-        for (auto& v : shader_pixel_nt) v.Reset();
-        for (auto& v : shader_pixel_alpha_nt) v.Reset();
-        for (auto& v : shader_pixel_vc) v.Reset();
-        for (auto& v : shader_pixel_alpha_vc) v.Reset();
-        for (auto& v : shader_pixel_nt_vc) v.Reset();
-        for (auto& v : shader_pixel_alpha_nt_vc) v.Reset();
-
-        state_rs_cull_none.Reset();
-        state_rs_cull_back.Reset();
-        state_ds.Reset();
-        state_blend.Reset();
-        state_blend_alpha.Reset();
-
-        cbo_mvp.Reset();
-        cbo_mlw.Reset();
-        cbo_caminfo.Reset();
-        cbo_alpha.Reset();
-        cbo_light.Reset();
+        glDeleteBuffers(1, &ubo_mvp);
+        glDeleteBuffers(1, &ubo_mlw);
+        glDeleteBuffers(1, &ubo_caminfo);
+        glDeleteBuffers(1, &ubo_alpha);
+        glDeleteBuffers(1, &ubo_light);
     }
 
-    ModelSharedComponent_D3D11::ModelSharedComponent_D3D11(Device_D3D11* p_device)
+    ModelSharedComponent_OpenGL::ModelSharedComponent_OpenGL(Device_OpenGL* p_device)
         : m_device(p_device)
     {
         if (!createResources())
-            throw std::runtime_error("ModelSharedComponent_D3D11::ModelSharedComponent_D3D11");
+            throw std::runtime_error("ModelSharedComponent_OpenGL::ModelSharedComponent_OpenGL");
         m_device->addEventListener(this);
     }
-    ModelSharedComponent_D3D11::~ModelSharedComponent_D3D11()
+    ModelSharedComponent_OpenGL::~ModelSharedComponent_OpenGL()
     {
         m_device->removeEventListener(this);
     }
@@ -400,309 +199,277 @@ namespace Core::Graphics
 
 namespace Core::Graphics
 {
-    void map_sampler_to_d3d11(tinygltf::Sampler& samp, D3D11_SAMPLER_DESC& desc)
+    void map_sampler_to_opengl(tinygltf::Sampler& samp, GLuint tex)
     {
     #define MAKE_FILTER(MIN, MAG_MIP) ((MAG_MIP << 16) | (MIN))
         switch (MAKE_FILTER(samp.minFilter, samp.magFilter))
         {
         default:
-            desc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+            glTextureParameteri(tex, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+            glTextureParameteri(tex, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
             break;
         case MAKE_FILTER(TINYGLTF_TEXTURE_FILTER_NEAREST, TINYGLTF_TEXTURE_FILTER_NEAREST):
-            desc.Filter = D3D11_FILTER_MIN_MAG_MIP_POINT;
-            desc.MinLOD = 0.0f;
-            desc.MaxLOD = 0.0f;
+            glTextureParameteri(tex, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+            glTextureParameteri(tex, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+            glTextureParameteri(tex, GL_TEXTURE_MIN_LOD, 0);
+            glTextureParameteri(tex, GL_TEXTURE_MAX_LOD, 0);
             break;
         case MAKE_FILTER(TINYGLTF_TEXTURE_FILTER_NEAREST, TINYGLTF_TEXTURE_FILTER_LINEAR):
-            desc.Filter = D3D11_FILTER_MIN_POINT_MAG_LINEAR_MIP_POINT;
-            desc.MinLOD = 0.0f;
-            desc.MaxLOD = 0.0f;
+            glTextureParameteri(tex, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+            glTextureParameteri(tex, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+            glTextureParameteri(tex, GL_TEXTURE_MIN_LOD, 0);
+            glTextureParameteri(tex, GL_TEXTURE_MAX_LOD, 0);
             break;
         case MAKE_FILTER(TINYGLTF_TEXTURE_FILTER_NEAREST, TINYGLTF_TEXTURE_FILTER_NEAREST_MIPMAP_NEAREST):
-            desc.Filter = D3D11_FILTER_MIN_MAG_MIP_POINT;
+            glTextureParameteri(tex, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+            glTextureParameteri(tex, GL_TEXTURE_MAG_FILTER, GL_NEAREST_MIPMAP_NEAREST);
             break;
         case MAKE_FILTER(TINYGLTF_TEXTURE_FILTER_NEAREST, TINYGLTF_TEXTURE_FILTER_LINEAR_MIPMAP_NEAREST):
-            desc.Filter = D3D11_FILTER_MIN_POINT_MAG_LINEAR_MIP_POINT;
+            glTextureParameteri(tex, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+            glTextureParameteri(tex, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_NEAREST);
             break;
         case MAKE_FILTER(TINYGLTF_TEXTURE_FILTER_NEAREST, TINYGLTF_TEXTURE_FILTER_NEAREST_MIPMAP_LINEAR):
-            desc.Filter = D3D11_FILTER_MIN_MAG_POINT_MIP_LINEAR;
+            glTextureParameteri(tex, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+            glTextureParameteri(tex, GL_TEXTURE_MAG_FILTER, GL_NEAREST_MIPMAP_LINEAR);
             break;
         case MAKE_FILTER(TINYGLTF_TEXTURE_FILTER_NEAREST, TINYGLTF_TEXTURE_FILTER_LINEAR_MIPMAP_LINEAR):
-            desc.Filter = D3D11_FILTER_MIN_POINT_MAG_MIP_LINEAR;
+            glTextureParameteri(tex, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+            glTextureParameteri(tex, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR);
             break;
         case MAKE_FILTER(TINYGLTF_TEXTURE_FILTER_LINEAR, TINYGLTF_TEXTURE_FILTER_NEAREST):
-            desc.Filter = D3D11_FILTER_MIN_LINEAR_MAG_MIP_POINT;
-            desc.MinLOD = 0.0f;
-            desc.MaxLOD = 0.0f;
+            glTextureParameteri(tex, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+            glTextureParameteri(tex, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+            glTextureParameteri(tex, GL_TEXTURE_MIN_LOD, 0);
+            glTextureParameteri(tex, GL_TEXTURE_MAX_LOD, 0);
             break;
         case MAKE_FILTER(TINYGLTF_TEXTURE_FILTER_LINEAR, TINYGLTF_TEXTURE_FILTER_LINEAR):
-            desc.Filter = D3D11_FILTER_MIN_MAG_LINEAR_MIP_POINT;
-            desc.MinLOD = 0.0f;
-            desc.MaxLOD = 0.0f;
+            glTextureParameteri(tex, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+            glTextureParameteri(tex, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+            glTextureParameteri(tex, GL_TEXTURE_MIN_LOD, 0);
+            glTextureParameteri(tex, GL_TEXTURE_MAX_LOD, 0);
             break;
         case MAKE_FILTER(TINYGLTF_TEXTURE_FILTER_LINEAR, TINYGLTF_TEXTURE_FILTER_NEAREST_MIPMAP_NEAREST):
-            desc.Filter = D3D11_FILTER_MIN_LINEAR_MAG_MIP_POINT;
+            glTextureParameteri(tex, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+            glTextureParameteri(tex, GL_TEXTURE_MAG_FILTER, GL_NEAREST_MIPMAP_NEAREST);
             break;
         case MAKE_FILTER(TINYGLTF_TEXTURE_FILTER_LINEAR, TINYGLTF_TEXTURE_FILTER_LINEAR_MIPMAP_NEAREST):
-            desc.Filter = D3D11_FILTER_MIN_MAG_LINEAR_MIP_POINT;
+            glTextureParameteri(tex, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+            glTextureParameteri(tex, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_NEAREST);
             break;
         case MAKE_FILTER(TINYGLTF_TEXTURE_FILTER_LINEAR, TINYGLTF_TEXTURE_FILTER_NEAREST_MIPMAP_LINEAR):
-            desc.Filter = D3D11_FILTER_MIN_LINEAR_MAG_POINT_MIP_LINEAR;
+            glTextureParameteri(tex, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+            glTextureParameteri(tex, GL_TEXTURE_MAG_FILTER, GL_NEAREST_MIPMAP_LINEAR);
             break;
         case MAKE_FILTER(TINYGLTF_TEXTURE_FILTER_LINEAR, TINYGLTF_TEXTURE_FILTER_LINEAR_MIPMAP_LINEAR):
-            desc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+            glTextureParameteri(tex, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+            glTextureParameteri(tex, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR);
             break;
         }
     #undef MAKE_FILTER
         switch (samp.wrapS)
         {
         default:
-            desc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+            glTextureParameteri(tex, GL_TEXTURE_WRAP_S, GL_REPEAT);
             break;
         case TINYGLTF_TEXTURE_WRAP_REPEAT:
-            desc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+            glTextureParameteri(tex, GL_TEXTURE_WRAP_S, GL_REPEAT);
             break;
         case TINYGLTF_TEXTURE_WRAP_CLAMP_TO_EDGE:
-            desc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
+            glTextureParameteri(tex, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
             break;
         case TINYGLTF_TEXTURE_WRAP_MIRRORED_REPEAT:
-            desc.AddressU = D3D11_TEXTURE_ADDRESS_MIRROR;
+            glTextureParameteri(tex, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
             break;
         }
         switch (samp.wrapT)
         {
         default:
         case -1:
-            desc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+            glTextureParameteri(tex, GL_TEXTURE_WRAP_T, GL_REPEAT);
             break;
         case TINYGLTF_TEXTURE_WRAP_REPEAT:
-            desc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+            glTextureParameteri(tex, GL_TEXTURE_WRAP_T, GL_REPEAT);
             break;
         case TINYGLTF_TEXTURE_WRAP_CLAMP_TO_EDGE:
-            desc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
+            glTextureParameteri(tex, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
             break;
         case TINYGLTF_TEXTURE_WRAP_MIRRORED_REPEAT:
-            desc.AddressV = D3D11_TEXTURE_ADDRESS_MIRROR;
+            glTextureParameteri(tex, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
             break;
         }
     }
-    void map_primitive_topology_to_d3d11(tinygltf::Primitive& prim, D3D11_PRIMITIVE_TOPOLOGY& topo)
+    void map_primitive_topology_to_opengl(tinygltf::Primitive& prim, GLenum& topo)
     {
         switch (prim.mode)
         {
         default:
-            topo = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+            topo = GL_TRIANGLES;
             break;
         case TINYGLTF_MODE_POINTS:
-            topo = D3D11_PRIMITIVE_TOPOLOGY_POINTLIST;
+            topo = GL_POINTS;
             break;
         case TINYGLTF_MODE_LINE:
-            topo = D3D11_PRIMITIVE_TOPOLOGY_LINELIST;
+            topo = GL_LINES;
             break;
         case TINYGLTF_MODE_LINE_LOOP:
-            assert(false);
+            topo = GL_LINE_LOOP;
             break;
         case TINYGLTF_MODE_LINE_STRIP:
-            topo = D3D11_PRIMITIVE_TOPOLOGY_LINESTRIP;
+            topo = GL_LINE_STRIP;
             break;
         case TINYGLTF_MODE_TRIANGLES:
-            topo = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+            topo = GL_TRIANGLES;
             break;
         case TINYGLTF_MODE_TRIANGLE_STRIP:
-            topo = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP;
+            topo = GL_TRIANGLE_STRIP;
             break;
         case TINYGLTF_MODE_TRIANGLE_FAN:
-            assert(false);
+            topo = GL_TRIANGLE_FAN;
             break;
         }
     }
-    DirectX::XMMATRIX XM_CALLCONV get_local_transfrom_from_node(tinygltf::Node& node)
+    glm::mat4 get_local_transfrom_from_node(tinygltf::Node& node)
     {
         if (!node.matrix.empty())
         {
         #pragma warning(disable:4244)
             // [Potential Overflow]
-            DirectX::XMFLOAT4X4 mM(
+            glm::mat4 mM(
                 node.matrix[0], node.matrix[1], node.matrix[2], node.matrix[3],
                 node.matrix[4], node.matrix[5], node.matrix[6], node.matrix[7],
                 node.matrix[8], node.matrix[9], node.matrix[10], node.matrix[11],
                 node.matrix[12], node.matrix[13], node.matrix[14], node.matrix[15]);
         #pragma warning(default:4244)
-            return DirectX::XMLoadFloat4x4(&mM);
+            return mM;
         }
         else
         {
-            DirectX::XMMATRIX mS = DirectX::XMMatrixIdentity();
-            DirectX::XMMATRIX mR = DirectX::XMMatrixIdentity();
-            DirectX::XMMATRIX mT = DirectX::XMMatrixIdentity();
+            glm::mat4 mS = glm::identity<glm::mat4>();
+            glm::mat4 mR = glm::identity<glm::mat4>();
+            glm::mat4 mT = glm::identity<glm::mat4>();
             if (!node.scale.empty())
             {
             #pragma warning(disable:4244)
                 // [Potential Overflow]
-                mS = DirectX::XMMatrixScaling(node.scale[0], node.scale[1], node.scale[2]);
+                mS = glm::scale(mS, glm::vec3(node.scale[0], node.scale[1], node.scale[2]));
             #pragma warning(default:4244)
             }
             if (!node.rotation.empty())
             {
             #pragma warning(disable:4244)
                 // [Potential Overflow]
-                DirectX::XMFLOAT4 quat(node.rotation[0], node.rotation[1], node.rotation[2], node.rotation[3]);
+                glm::quat quat = glm::quat(node.rotation[3], node.rotation[0], node.rotation[1], node.rotation[2]);
             #pragma warning(default:4244)
-                mR = DirectX::XMMatrixRotationQuaternion(DirectX::XMLoadFloat4(&quat));
+                mR = glm::toMat4(quat);
             }
             if (!node.translation.empty())
             {
             #pragma warning(disable:4244)
                 // [Potential Overflow]
-                mT = DirectX::XMMatrixTranslation(node.translation[0], node.translation[1], node.translation[2]);
+                mT = glm::translate(mT, glm::vec3(node.translation[0], node.translation[1], node.translation[2]));
             #pragma warning(default:4244)
             }
-            return DirectX::XMMatrixMultiply(DirectX::XMMatrixMultiply(mS, mR), mT);
+            return mS * mR * mT;
         }
     }
 
-    void Model_D3D11::setAmbient(Vector3F const& color, float brightness)
+    void Model_OpenGL::setAmbient(Vector3F const& color, float brightness)
     {
-        sunshine.ambient = DirectX::XMFLOAT4(color.x, color.y, color.z, brightness);
+        sunshine.ambient = glm::vec4(color.x, color.y, color.z, brightness);
     }
-    void Model_D3D11::setDirectionalLight(Vector3F const& direction, Vector3F const& color, float brightness)
+    void Model_OpenGL::setDirectionalLight(Vector3F const& direction, Vector3F const& color, float brightness)
     {
-        sunshine.dir = DirectX::XMFLOAT4(direction.x, direction.y, direction.z, 0.0f);
-        sunshine.color = DirectX::XMFLOAT4(color.x, color.y, color.z, brightness);
+        sunshine.dir = glm::vec4(direction.x, direction.y, direction.z, 0.0f);
+        sunshine.color = glm::vec4(color.x, color.y, color.z, brightness);
     }
-    void Model_D3D11::setScaling(Vector3F const& scale)
+    void Model_OpenGL::setScaling(Vector3F const& scale)
     {
-        t_scale_ = DirectX::XMMatrixScaling(scale.x, scale.y, scale.z);
+        t_scale_ = glm::scale(glm::identity<glm::mat4>(), glm::vec3(scale.x, scale.y, scale.z));
     }
-    void Model_D3D11::setPosition(Vector3F const& pos)
+    void Model_OpenGL::setPosition(Vector3F const& pos)
     {
-        t_trans_ = DirectX::XMMatrixTranslation(pos.x, pos.y, pos.z);
+        t_trans_ = glm::translate(glm::identity<glm::mat4>(), glm::vec3(pos.x, pos.y, pos.z));
     }
-    void Model_D3D11::setRotationRollPitchYaw(float roll, float pitch, float yaw)
+    void Model_OpenGL::setRotationRollPitchYaw(float roll, float pitch, float yaw)
     {
-        t_mbrot_ = DirectX::XMMatrixRotationRollPitchYaw(pitch, yaw, roll);
+        t_mbrot_ = glm::rotateRollPitchYaw(glm::identity<glm::mat4>(), glm::vec3(pitch, yaw, roll));
     }
-    void Model_D3D11::setRotationQuaternion(Vector4F const& quat)
+    void Model_OpenGL::setRotationQuaternion(Vector4F const& quat)
     {
-        DirectX::XMFLOAT4 const xq(quat.x, quat.y, quat.z, quat.w);
-        t_mbrot_ = DirectX::XMMatrixRotationQuaternion(DirectX::XMLoadFloat4(&xq));
+        glm::quat const xq(quat.w, quat.x, quat.y, quat.z);
+        t_mbrot_ = glm::toMat4(xq);
     }
 
-    bool Model_D3D11::createImage(tinygltf::Model& model)
+    bool Model_OpenGL::createImage(tinygltf::Model& model)
     {
-        auto* device = m_device->GetD3D11Device();
-        auto* context = m_device->GetD3D11DeviceContext();
-
-        HRESULT hr = S_OK;
-
         // gltf: create
 
         image.resize(model.images.size());
+        glGenTextures(model.images.size(), image.data());
         for (size_t idx = 0; idx < model.images.size(); idx += 1)
         {
+            if (image[idx] == 0)
+            {
+                assert(false);
+                return false;
+            }
+
             tinygltf::Image& img = model.images[idx];
 
             if (img.width <= 0 || img.height <= 0)
             {
-                image[idx] = shared_->default_image; // 兄啊，你这纹理好怪哦
-                spdlog::error("[core] 加载纹理 '{}' 失败", img.name);
+                image[idx] = shared_->default_image; // That's a weird texture you got there, man
+                spdlog::error("[core] Load model texture '{}' failed", img.name);
                 continue;
             }
 
-            bool mipmap = true;
-            D3D11_TEXTURE2D_DESC tex_def = {
-                .Width = (UINT)img.width,
-                .Height = (UINT)img.height,
-                .MipLevels = mipmap ? (UINT)0 : (UINT)1,
-                .ArraySize = 1,
-                .Format = DXGI_FORMAT_R8G8B8A8_UNORM,
-                .SampleDesc = {
-                    .Count = 1,
-                    .Quality = 0,
-                },
-                .Usage = D3D11_USAGE_DEFAULT,
-                .BindFlags = D3D11_BIND_SHADER_RESOURCE | (mipmap ? D3D11_BIND_RENDER_TARGET : (UINT)0),
-                .CPUAccessFlags = 0,
-                .MiscFlags = D3D11_RESOURCE_MISC_GENERATE_MIPS,
-            };
-            D3D11_SUBRESOURCE_DATA dat_def = {
-                .pSysMem = img.image.data(),
-                .SysMemPitch = (UINT)(img.width * img.component * img.bits) / 8,
-                .SysMemSlicePitch = (UINT)img.image.size(),
-            };
-            Microsoft::WRL::ComPtr<ID3D11Texture2D> texture2d;
-            hr = device->CreateTexture2D(&tex_def, mipmap ? NULL : &dat_def, &texture2d);
-            if (FAILED(hr))
-            {
-                assert(false);
-                return false;
-            }
-            D3D11_SHADER_RESOURCE_VIEW_DESC srv_def = {
-                .Format = tex_def.Format,
-                .ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D,
-                .Texture2D = {
-                    .MostDetailedMip = 0,
-                    .MipLevels = mipmap ? UINT(-1) : tex_def.MipLevels,
-                },
-            };
-            hr = device->CreateShaderResourceView(texture2d.Get(), &srv_def, &image[idx]);
-            if (FAILED(hr))
-            {
-                assert(false);
-                return false;
-            }
-            if (mipmap)
-            {
-                context->UpdateSubresource(texture2d.Get(), 0, NULL, dat_def.pSysMem, dat_def.SysMemPitch, dat_def.SysMemSlicePitch);
-                context->GenerateMips(image[idx].Get());
-            }
+            glBindTexture(GL_TEXTURE_2D, image[idx]);
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, img.width, img.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, img.image.data());
         }
 
         return true;
     }
-    bool Model_D3D11::createSampler(tinygltf::Model& model)
+    bool Model_OpenGL::createSampler(tinygltf::Model& model)
     {
-        auto* device = m_device->GetD3D11Device();
+        
+        // auto* device = m_device->GetD3D11Device();
 
-        HRESULT hr = S_OK;
+        // HRESULT hr = S_OK;
 
         // gltf: create
 
-        sampler.resize(model.samplers.size());
-        for (size_t idx = 0; idx < model.samplers.size(); idx += 1)
-        {
-            tinygltf::Sampler& samp = model.samplers[idx];
-            D3D11_SAMPLER_DESC samp_def = {
-                .Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR,
-                .AddressU = D3D11_TEXTURE_ADDRESS_WRAP,
-                .AddressV = D3D11_TEXTURE_ADDRESS_WRAP,
-                .AddressW = D3D11_TEXTURE_ADDRESS_WRAP,
-                .MipLODBias = D3D11_DEFAULT_MIP_LOD_BIAS,
-                .MaxAnisotropy = D3D11_DEFAULT_MAX_ANISOTROPY,
-                .ComparisonFunc = D3D11_COMPARISON_ALWAYS,
-                .BorderColor = {},
-                .MinLOD = 0.0f,
-                .MaxLOD = D3D11_FLOAT32_MAX,
-            };
-            map_sampler_to_d3d11(samp, samp_def);
-            samp_def.Filter = D3D11_FILTER_ANISOTROPIC; // TODO: better?
-            hr = device->CreateSamplerState(&samp_def, &sampler[idx]);
-            if (FAILED(hr))
-            {
-                assert(false);
-                return false;
-            }
-        }
+        // sampler.resize(model.samplers.size());
+        // for (size_t idx = 0; idx < model.samplers.size(); idx += 1)
+        // {
+        //     tinygltf::Sampler& samp = model.samplers[idx];
+        //     D3D11_SAMPLER_DESC samp_def = {
+        //         .Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR,
+        //         .AddressU = D3D11_TEXTURE_ADDRESS_WRAP,
+        //         .AddressV = D3D11_TEXTURE_ADDRESS_WRAP,
+        //         .AddressW = D3D11_TEXTURE_ADDRESS_WRAP,
+        //         .MipLODBias = D3D11_DEFAULT_MIP_LOD_BIAS,
+        //         .MaxAnisotropy = D3D11_DEFAULT_MAX_ANISOTROPY,
+        //         .ComparisonFunc = D3D11_COMPARISON_ALWAYS,
+        //         .BorderColor = {},
+        //         .MinLOD = 0.0f,
+        //         .MaxLOD = D3D11_FLOAT32_MAX,
+        //     };
+        //     map_sampler_to_opengl(samp, samp_def);
+        //     samp_def.Filter = D3D11_FILTER_ANISOTROPIC; // TODO: better?
+        //     hr = device->CreateSamplerState(&samp_def, &sampler[idx]);
+        //     if (FAILED(hr))
+        //     {
+        //         assert(false);
+        //         return false;
+        //     }
+        // }
+        sampler = model.samplers;
 
         return true;
     }
-    bool Model_D3D11::processNode(tinygltf::Model& model, tinygltf::Node& node)
+    bool Model_OpenGL::processNode(tinygltf::Model& model, tinygltf::Node& node)
     {
-        auto* device = m_device->GetD3D11Device();
-
-        HRESULT hr = S_OK;
-
-        DirectX::XMMATRIX mTRS = get_local_transfrom_from_node(node);
+        glm::mat4 mTRS = get_local_transfrom_from_node(node);
 
         if (node.mesh >= 0)
         {
@@ -710,41 +477,34 @@ namespace Core::Graphics
             for (tinygltf::Primitive& prim : mesh.primitives)
             {
                 ModelBlock mblock;
-                DirectX::XMMATRIX mTRSw = mTRS;
+                glGenVertexArrays(1, &mblock.vao);
+                if (mblock.vao == 0)
+                {
+                    assert(false);
+                    return false;
+                }
+                glm::mat4 mTRSw = mTRS;
                 for (auto it = mTRS_stack.crbegin(); it != mTRS_stack.crend(); it++)
                 {
-                    mTRSw = DirectX::XMMatrixMultiply(mTRSw, *it);
+                    mTRSw = *it * mTRSw;
                 }
-                mTRSw = DirectX::XMMatrixMultiply(mTRSw, DirectX::XMMatrixScaling(1.0f, 1.0f, -1.0f)); // to left-hand
-                DirectX::XMStoreFloat4x4(&mblock.local_matrix, mTRSw);
-                DirectX::XMStoreFloat4x4(&mblock.local_matrix_normal, DirectX::XMMatrixInverseTranspose(mTRSw)); // face normal
+                mTRSw = glm::scale(mTRSw, glm::vec3(1.0f, 1.0f, -1.0f)); // to left-hand
+                mblock.local_matrix = mTRSw;
+                mblock.local_matrix_normal = glm::inverseTranspose(mTRSw); // face normal
                 if (prim.attributes.contains("POSITION"))
                 {
                     tinygltf::Accessor& accessor = model.accessors[prim.attributes["POSITION"]];
                     tinygltf::BufferView& bufferview = model.bufferViews[accessor.bufferView];
                     tinygltf::Buffer& buffer = model.buffers[bufferview.buffer];
 
-                    D3D11_BUFFER_DESC vbo_def = {
-                        .ByteWidth = (UINT)tinygltf::GetComponentSizeInBytes(accessor.componentType) * (UINT)tinygltf::GetNumComponentsInType(accessor.type) * (UINT)accessor.count,
-                        .Usage = D3D11_USAGE_DEFAULT,
-                        .BindFlags = D3D11_BIND_VERTEX_BUFFER,
-                        .CPUAccessFlags = 0,
-                        .MiscFlags = 0,
-                        .StructureByteStride = 0,
-                    };
-                    D3D11_SUBRESOURCE_DATA dat_def = {
-                        .pSysMem = buffer.data.data() + bufferview.byteOffset + accessor.byteOffset,
-                        .SysMemPitch = 0,
-                        .SysMemSlicePitch = 0,
-                    };
-                    hr = device->CreateBuffer(&vbo_def, &dat_def, &mblock.vertex_buffer);
-                    if (FAILED(hr))
+                    glGenBuffers(1, &mblock.vertex_buffer);
+                    if (mblock.vertex_buffer == 0)
                     {
                         assert(false);
                         return false;
                     }
 
-                    mblock.draw_count = (UINT)accessor.count;
+                    mblock.draw_count = accessor.count;
                 }
                 if (prim.attributes.contains("NORMAL"))
                 {
@@ -752,21 +512,8 @@ namespace Core::Graphics
                     tinygltf::BufferView& bufferview = model.bufferViews[accessor.bufferView];
                     tinygltf::Buffer& buffer = model.buffers[bufferview.buffer];
 
-                    D3D11_BUFFER_DESC vbo_def = {
-                        .ByteWidth = (UINT)tinygltf::GetComponentSizeInBytes(accessor.componentType) * (UINT)tinygltf::GetNumComponentsInType(accessor.type) * (UINT)accessor.count,
-                        .Usage = D3D11_USAGE_DEFAULT,
-                        .BindFlags = D3D11_BIND_VERTEX_BUFFER,
-                        .CPUAccessFlags = 0,
-                        .MiscFlags = 0,
-                        .StructureByteStride = 0,
-                    };
-                    D3D11_SUBRESOURCE_DATA dat_def = {
-                        .pSysMem = buffer.data.data() + bufferview.byteOffset + accessor.byteOffset,
-                        .SysMemPitch = 0,
-                        .SysMemSlicePitch = 0,
-                    };
-                    hr = device->CreateBuffer(&vbo_def, &dat_def, &mblock.normal_buffer);
-                    if (FAILED(hr))
+                    glGenBuffers(1, &mblock.normal_buffer);
+                    if (mblock.normal_buffer == 0)
                     {
                         assert(false);
                         return false;
@@ -778,21 +525,8 @@ namespace Core::Graphics
                     tinygltf::BufferView& bufferview = model.bufferViews[accessor.bufferView];
                     tinygltf::Buffer& buffer = model.buffers[bufferview.buffer];
 
-                    D3D11_BUFFER_DESC vbo_def = {
-                        .ByteWidth = (UINT)tinygltf::GetComponentSizeInBytes(accessor.componentType) * (UINT)tinygltf::GetNumComponentsInType(accessor.type) * (UINT)accessor.count,
-                        .Usage = D3D11_USAGE_DEFAULT,
-                        .BindFlags = D3D11_BIND_VERTEX_BUFFER,
-                        .CPUAccessFlags = 0,
-                        .MiscFlags = 0,
-                        .StructureByteStride = 0,
-                    };
-                    D3D11_SUBRESOURCE_DATA dat_def = {
-                        .pSysMem = buffer.data.data() + bufferview.byteOffset + accessor.byteOffset,
-                        .SysMemPitch = 0,
-                        .SysMemSlicePitch = 0,
-                    };
-                    hr = device->CreateBuffer(&vbo_def, &dat_def, &mblock.color_buffer);
-                    if (FAILED(hr))
+                    glGenBuffers(1, &mblock.color_buffer);
+                    if (mblock.color_buffer == 0)
                     {
                         assert(false);
                         return false;
@@ -804,21 +538,8 @@ namespace Core::Graphics
                     tinygltf::BufferView& bufferview = model.bufferViews[accessor.bufferView];
                     tinygltf::Buffer& buffer = model.buffers[bufferview.buffer];
 
-                    D3D11_BUFFER_DESC vbo_def = {
-                        .ByteWidth = (UINT)tinygltf::GetComponentSizeInBytes(accessor.componentType) * (UINT)tinygltf::GetNumComponentsInType(accessor.type) * (UINT)accessor.count,
-                        .Usage = D3D11_USAGE_DEFAULT,
-                        .BindFlags = D3D11_BIND_VERTEX_BUFFER,
-                        .CPUAccessFlags = 0,
-                        .MiscFlags = 0,
-                        .StructureByteStride = 0,
-                    };
-                    D3D11_SUBRESOURCE_DATA dat_def = {
-                        .pSysMem = buffer.data.data() + bufferview.byteOffset + accessor.byteOffset,
-                        .SysMemPitch = 0,
-                        .SysMemSlicePitch = 0,
-                    };
-                    hr = device->CreateBuffer(&vbo_def, &dat_def, &mblock.uv_buffer);
-                    if (FAILED(hr))
+                    glGenBuffers(1, &mblock.uv_buffer);
+                    if (mblock.uv_buffer == 0)
                     {
                         assert(false);
                         return false;
@@ -830,45 +551,33 @@ namespace Core::Graphics
                     tinygltf::BufferView& bufferview = model.bufferViews[accessor.bufferView];
                     tinygltf::Buffer& buffer = model.buffers[bufferview.buffer];
 
-                    D3D11_BUFFER_DESC ibo_def = {
-                        .ByteWidth = (UINT)tinygltf::GetComponentSizeInBytes(accessor.componentType) * (UINT)tinygltf::GetNumComponentsInType(accessor.type) * (UINT)accessor.count,
-                        .Usage = D3D11_USAGE_DEFAULT,
-                        .BindFlags = D3D11_BIND_INDEX_BUFFER,
-                        .CPUAccessFlags = 0,
-                        .MiscFlags = 0,
-                        .StructureByteStride = 0,
-                    };
-                    D3D11_SUBRESOURCE_DATA dat_def = {
-                        .pSysMem = buffer.data.data() + bufferview.byteOffset + accessor.byteOffset,
-                        .SysMemPitch = 0,
-                        .SysMemSlicePitch = 0,
-                    };
-
                     int32_t index_size = tinygltf::GetComponentSizeInBytes(accessor.componentType);
+                    uint32_t bytewidth = index_size * tinygltf::GetNumComponentsInType(accessor.type) * accessor.count;
+                    void* p_sysmem = buffer.data.data() + bufferview.byteOffset + accessor.byteOffset;
                     std::vector<uint16_t> index_work;
                     if (index_size == 1)
                     {
-                        index_work.resize(ibo_def.ByteWidth);
-                        uint8_t* ptr = (uint8_t*)dat_def.pSysMem;
-                        for (size_t i = 0; i < ibo_def.ByteWidth; i += 1)
+                        index_work.resize(bytewidth);
+                        uint8_t* ptr = (uint8_t*)p_sysmem;
+                        for (size_t i = 0; i < bytewidth; i += 1)
                         {
                             index_work[i] = ptr[i];
                         }
                         index_size = 2;
-                        ibo_def.ByteWidth *= 2;
-                        dat_def.pSysMem = index_work.data();
+                        bytewidth *= 2;
+                        p_sysmem = index_work.data();
                     }
                     assert(index_size == 2 || index_size == 4);
-                    mblock.index_format = index_size == 2 ? DXGI_FORMAT_R16_UINT : DXGI_FORMAT_R32_UINT;
+                    mblock.index_format = index_size == 2 ? GL_UNSIGNED_SHORT : GL_UNSIGNED_INT;
 
-                    hr = device->CreateBuffer(&ibo_def, &dat_def, &mblock.index_buffer);
-                    if (FAILED(hr))
+                    glGenBuffers(1, &mblock.uv_buffer);
+                    if (mblock.uv_buffer == 0)
                     {
                         assert(false);
                         return false;
                     }
 
-                    mblock.draw_count = (UINT)accessor.count;
+                    mblock.draw_count = accessor.count;
                 }
                 if (prim.material >= 0)
                 {
@@ -876,7 +585,7 @@ namespace Core::Graphics
                     auto& bcc = material.pbrMetallicRoughness.baseColorFactor;
                 #pragma warning(disable:4244)
                     // [Potential Overflow]
-                    mblock.base_color = DirectX::XMFLOAT4(bcc[0], bcc[1], bcc[2], bcc[3]);
+                    mblock.base_color = glm::vec4(bcc[0], bcc[1], bcc[2], bcc[3]);
                 #pragma warning(default:4244)
                     tinygltf::TextureInfo& texture_info = material.pbrMetallicRoughness.baseColorTexture;
                     if (texture_info.index >= 0)
@@ -894,16 +603,16 @@ namespace Core::Graphics
                     }
                     else
                     {
-                        //mblock.image = shared_->default_image;
+                        // mblock.image = shared_->default_image;
                         mblock.sampler = shared_->default_sampler;
                     }
                     if (material.alphaMode == "MASK")
                     {
-                        mblock.alpha_cull = TRUE;
+                        mblock.alpha_cull = true;
                     }
                     else if (material.alphaMode == "BLEND")
                     {
-                        mblock.alpha_blend = TRUE;
+                        mblock.alpha_blend = true;
                     }
                     // [Potential Overflow]
                 #pragma warning(disable:4244)
@@ -911,7 +620,7 @@ namespace Core::Graphics
                 #pragma warning(default:4244)
                     mblock.double_side = material.doubleSided;
                 }
-                map_primitive_topology_to_d3d11(prim, mblock.primitive_topology);
+                map_primitive_topology_to_opengl(prim, mblock.primitive_topology);
                 model_block.emplace_back(mblock);
             }
         }
@@ -931,7 +640,7 @@ namespace Core::Graphics
 
         return true;
     };
-    bool Model_D3D11::createModelBlock(tinygltf::Model& model)
+    bool Model_OpenGL::createModelBlock(tinygltf::Model& model)
     {
         int default_scene = model.defaultScene;
         if (default_scene < 0) default_scene = 0;
@@ -947,7 +656,7 @@ namespace Core::Graphics
         return true;
     }
 
-    bool Model_D3D11::createResources()
+    bool Model_OpenGL::createResources()
     {
         struct FileSystemWrapper
         {
@@ -1018,11 +727,11 @@ namespace Core::Graphics
 
         return true;
     }
-    void Model_D3D11::onDeviceCreate()
+    void Model_OpenGL::onDeviceCreate()
     {
         createResources();
     }
-    void Model_D3D11::onDeviceDestroy()
+    void Model_OpenGL::onDeviceDestroy()
     {
         image.clear();
         sampler.clear();
@@ -1030,185 +739,88 @@ namespace Core::Graphics
         model_block.clear();
     }
 
-    void Model_D3D11::draw(IRenderer::FogState fog)
+    void Model_OpenGL::draw(IRenderer::FogState fog)
     {
-        auto* context = m_device->GetD3D11DeviceContext();
-
         // common data
 
-        context->UpdateSubresource(shared_->cbo_light.Get(), 0, NULL, &sunshine, 0, 0);
-        DirectX::XMMATRIX const t_locwo_ = DirectX::XMMatrixMultiply(DirectX::XMMatrixMultiply(t_scale_, t_mbrot_), t_trans_);
+        glm::mat4 const t_locwo_ = t_scale_ * t_mbrot_ * t_trans_;
 
         auto set_state_matrix_from_block = [&](ModelBlock& mblock)
         {
-            // IA
+            GLuint subroutines[4]{
+                (GLuint)IDX(fog),
+                (GLuint)(mblock.image ? 1 : 0) + 4,
+                (GLuint)(mblock.alpha_cull ? 1 : 0) + 6,
+                (GLuint)(mblock.color_buffer ? 1 : 0) + 8
+            };
 
-            if (mblock.color_buffer)
-                context->IASetInputLayout(shared_->input_layout_vc.Get());
-            else
-                context->IASetInputLayout(shared_->input_layout.Get());
-
-            // VS
-
-            if (mblock.color_buffer)
-                context->VSSetShader(shared_->shader_vertex_vc.Get(), NULL, 0);
-            else
-                context->VSSetShader(shared_->shader_vertex.Get(), NULL, 0);
-
-            // PS
-
-            if (!mblock.alpha_cull)
-            {
-                if (mblock.image)
-                {
-                    if (mblock.color_buffer)
-                        context->PSSetShader(shared_->shader_pixel_vc[IDX(fog)].Get(), NULL, 0);
-                    else
-                        context->PSSetShader(shared_->shader_pixel[IDX(fog)].Get(), NULL, 0);
-                }
-                else
-                {
-                    if (mblock.color_buffer)
-                        context->PSSetShader(shared_->shader_pixel_nt_vc[IDX(fog)].Get(), NULL, 0);
-                    else
-                        context->PSSetShader(shared_->shader_pixel_nt[IDX(fog)].Get(), NULL, 0);
-                }
-            }
-            else
-            {
-                if (mblock.image)
-                {
-                    if (mblock.color_buffer)
-                        context->PSSetShader(shared_->shader_pixel_alpha_vc[IDX(fog)].Get(), NULL, 0);
-                    else
-                        context->PSSetShader(shared_->shader_pixel_alpha[IDX(fog)].Get(), NULL, 0);
-                }
-                else
-                {
-                    if (mblock.color_buffer)
-                        context->PSSetShader(shared_->shader_pixel_alpha_nt_vc[IDX(fog)].Get(), NULL, 0);
-                    else
-                        context->PSSetShader(shared_->shader_pixel_alpha_nt[IDX(fog)].Get(), NULL, 0);
-                }
-            }
+            glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 4, &subroutines[0]);
         };
         auto upload_local_world_matrix = [&](ModelBlock& mblock)
         {
             struct
             {
-                DirectX::XMFLOAT4X4 v1;
-                DirectX::XMFLOAT4X4 v2;
+                glm::mat4 v1;
+                glm::mat4 v2;
             } v{};
-            DirectX::XMMATRIX const t_total_ = DirectX::XMMatrixMultiply(DirectX::XMLoadFloat4x4(&mblock.local_matrix), t_locwo_);
-            DirectX::XMStoreFloat4x4(&v.v1, t_total_);
-            DirectX::XMStoreFloat4x4(&v.v2, DirectX::XMMatrixInverseTranspose(t_total_));
-            context->UpdateSubresource(shared_->cbo_mlw.Get(), 0, NULL, &v, 0, 0);
+            glm::mat4 const t_total_ = mblock.local_matrix * t_locwo_;
+            v.v1 = t_total_;
+            v.v2 = glm::inverseTranspose(t_total_);
+            glBindBuffer(GL_UNIFORM_BUFFER, shared_->ubo_mlw);
+            glBufferData(GL_UNIFORM_BUFFER, sizeof(v), &v, GL_STATIC_DRAW);
         };
         auto set_state_from_block = [&](ModelBlock& mblock)
         {
             set_state_matrix_from_block(mblock);
 
-            // IA
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mblock.index_buffer);
 
-            context->IASetPrimitiveTopology(mblock.primitive_topology);
-            ID3D11Buffer* vbo[4] = { mblock.vertex_buffer.Get(), mblock.normal_buffer.Get(), mblock.uv_buffer.Get(), mblock.color_buffer.Get() };
-            UINT stride[4] = { 3 * sizeof(float), 3 * sizeof(float), 2 * sizeof(float), 4 * sizeof(float) };
-            UINT offset[4] = { 0, 0, 0, 0 };
-            context->IASetVertexBuffers(0, 4, vbo, stride, offset);
-            context->IASetIndexBuffer(mblock.index_buffer.Get(), mblock.index_format, 0);
+            glBindBuffer(GL_UNIFORM_BUFFER, shared_->ubo_mlw);
+            glBindBufferBase(GL_UNIFORM_BUFFER, 1, shared_->ubo_mlw);
 
-            // VS
-
-            upload_local_world_matrix(mblock);
-            ID3D11Buffer* vs_cbo[1] = {
-                // view-projection matrix setup by Renderer at register(b0)
-                shared_->cbo_mlw.Get(),
-            };
-            context->VSSetConstantBuffers(1, 1, vs_cbo);
-
-            // RS
-
-            if (mblock.double_side)
-            {
-                context->RSSetState(shared_->state_rs_cull_none.Get());
-            }
-            else
-            {
-                context->RSSetState(shared_->state_rs_cull_back.Get());
-            }
-
-            // PS
-
-            ID3D11SamplerState* ps_samp[1] = { mblock.sampler.Get() };
-            context->PSSetSamplers(0, 1, ps_samp);
-            ID3D11ShaderResourceView* ps_srv[1] = { mblock.image.Get() };
-            context->PSSetShaderResources(0, 1, ps_srv);
+            map_sampler_to_opengl(mblock.sampler, mblock.image);
             if (!mblock.alpha_cull)
             {
-                FLOAT const alpha[8] = {
+                GLfloat const alpha[8] = {
                     mblock.base_color.x, mblock.base_color.y, mblock.base_color.z, mblock.base_color.w,
                     0.5f, 0.0f, 0.0f, 0.0f,
                 };
-                context->UpdateSubresource(shared_->cbo_alpha.Get(), 0, NULL, alpha, 0, 0);
+                glBindBuffer(GL_UNIFORM_BUFFER, shared_->ubo_alpha);
+                glBufferData(GL_UNIFORM_BUFFER, sizeof(alpha), &alpha, GL_STATIC_DRAW);
             }
             else
             {
-                FLOAT const alpha[8] = {
+                GLfloat const alpha[8] = {
                     mblock.base_color.x, mblock.base_color.y, mblock.base_color.z, mblock.base_color.w,
                     mblock.alpha, 0.0f, 0.0f, 0.0f,
                 };
-                context->UpdateSubresource(shared_->cbo_alpha.Get(), 0, NULL, alpha, 0, 0);
+                glBindBuffer(GL_UNIFORM_BUFFER, shared_->ubo_alpha);
+                glBufferData(GL_UNIFORM_BUFFER, sizeof(alpha), &alpha, GL_STATIC_DRAW);
             }
-            ID3D11Buffer* ps_cbo[2] = {
+            GLuint buffers[2] = {
                 // camera position and look to vector are setup by Renderer at register(b0)
-                shared_->cbo_alpha.Get(),
-                shared_->cbo_light.Get(),
+                shared_->ubo_alpha,
+                shared_->ubo_light,
             };
-            context->PSSetConstantBuffers(2, 2, ps_cbo);
+            glBindBuffersBase(GL_UNIFORM_BUFFER, 4, 2, buffers);
 
             // OM
 
-            context->OMSetDepthStencilState(shared_->state_ds.Get(), D3D11_DEFAULT_STENCIL_REFERENCE);
-            FLOAT const blend_factor[4] = {};
+            glEnable(GL_DEPTH_BUFFER_BIT);
             if (mblock.alpha_blend)
             {
-                context->OMSetBlendState(shared_->state_blend_alpha.Get(), blend_factor, D3D11_DEFAULT_SAMPLE_MASK);
+                glEnable(GL_BLEND);
+				glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+				glBlendEquationSeparate(GL_FUNC_ADD, GL_FUNC_ADD);
             }
             else
             {
-                context->OMSetBlendState(shared_->state_blend.Get(), blend_factor, D3D11_DEFAULT_SAMPLE_MASK);
+                glDisable(GL_BLEND);
             }
         };
         auto draw_block = [&](ModelBlock& mblock)
         {
-            if (mblock.index_buffer)
-                context->DrawIndexed(mblock.draw_count, 0, 0);
-            else
-                context->Draw(mblock.draw_count, 0);
-        };
-        auto clear_state = [&]()
-        {
-            // IA
-
-            ID3D11Buffer* vbo_null[4] = { NULL, NULL, NULL, NULL };
-            UINT stride_zero[4] = { 0, 0, 0, 0 };
-            UINT offset_zero[4] = { 0, 0, 0, 0 };
-            context->IASetVertexBuffers(0, 4, vbo_null, stride_zero, offset_zero);
-            context->IASetIndexBuffer(NULL, DXGI_FORMAT_R16_UINT, 0);
-
-            // VS
-
-            ID3D11Buffer* vs_cbo[1] = { NULL };
-            context->VSSetConstantBuffers(1, 1, vs_cbo);
-
-            // PS
-
-            ID3D11SamplerState* ps_samp[1] = { NULL };
-            context->PSSetSamplers(0, 1, ps_samp);
-            ID3D11ShaderResourceView* ps_srv[1] = { NULL };
-            context->PSSetShaderResources(0, 1, ps_srv);
-            ID3D11Buffer* ps_cbo[2] = { NULL, NULL };
-            context->PSSetConstantBuffers(2, 2, ps_cbo);
+            glDrawElements(mblock.primitive_topology, mblock.draw_count, mblock.index_format, 0);
         };
 
         // pass 1 opaque object
@@ -1243,25 +855,21 @@ namespace Core::Graphics
                 draw_block(mblock);
             }
         }
-
-        // unbind
-
-        clear_state();
     }
 
-    Model_D3D11::Model_D3D11(Device_D3D11* p_device, ModelSharedComponent_D3D11* p_model_shared, StringView path)
+    Model_OpenGL::Model_OpenGL(Device_OpenGL* p_device, ModelSharedComponent_OpenGL* p_model_shared, StringView path)
         : m_device(p_device)
         , shared_(p_model_shared)
         , gltf_path(path)
     {
-        t_scale_ = DirectX::XMMatrixIdentity();
-        t_trans_ = DirectX::XMMatrixIdentity();
-        t_mbrot_ = DirectX::XMMatrixIdentity();
+        t_scale_ = glm::identity<glm::mat4>();
+        t_trans_ = glm::identity<glm::mat4>();
+        t_mbrot_ = glm::identity<glm::mat4>();
         if (!createResources())
-            throw std::runtime_error("Model_D3D11::Model_D3D11");
+            throw std::runtime_error("Model_OpenGL::Model_OpenGL");
         m_device->addEventListener(this);
     }
-    Model_D3D11::~Model_D3D11()
+    Model_OpenGL::~Model_OpenGL()
     {
         m_device->removeEventListener(this);
     }

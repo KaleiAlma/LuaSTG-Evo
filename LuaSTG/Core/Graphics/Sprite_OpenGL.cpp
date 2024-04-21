@@ -128,8 +128,8 @@ namespace Core::Graphics
 			IRenderer::DrawVertex(rect.a.x, rect.b.y, m_z, m_uv.a.x, m_uv.b.y, m_color[3].color()),
 		};
 
-		float const sinv = std::sinf(rotation);
-		float const cosv = std::cosf(rotation);
+		float const sinv = sinf(rotation);
+		float const cosv = cosf(rotation);
 
 #define rotate_xy(UNIT) \
 		{\

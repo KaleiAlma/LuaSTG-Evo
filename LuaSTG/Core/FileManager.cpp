@@ -345,12 +345,12 @@ namespace Core
             if (entry.is_regular_file())
             {
                 node.type = FileType::File;
-                node.name = utf8::to_string(entry.path().generic_wstring()).substr(2);
+                node.name = entry.path().generic_string().substr(2);
             }
             else if (entry.is_directory())
             {
                 node.type = FileType::Directory;
-                node.name = utf8::to_string(entry.path().generic_wstring()).substr(2);
+                node.name = entry.path().generic_string().substr(2);
                 node.name.push_back('/');
             }
             else
@@ -384,7 +384,7 @@ namespace Core
     FileType FileManager::getType(std::string_view const& name)
     {
         std::error_code ec;
-        std::wstring name_str(utf8::to_wstring(name));
+        std::string name_str(name);
         if (std::filesystem::is_regular_file(name_str, ec))
         {
             return FileType::File;
@@ -402,21 +402,21 @@ namespace Core
     bool FileManager::contain(std::string_view const& name)
     {
         std::error_code ec;
-        return std::filesystem::is_regular_file(utf8::to_wstring(name), ec);
+        return std::filesystem::is_regular_file(name, ec);
     }
     bool FileManager::load(std::string_view const& name, std::vector<uint8_t>& buffer)
     {
-        std::wstring wide_path(utf8::to_wstring(name));
+        std::string path(name);
         std::error_code ec;
-        if (!std::filesystem::is_regular_file(wide_path, ec))
+        if (!std::filesystem::is_regular_file(path, ec))
         {
             return false;
         }
-        if (!is_file_path_case_correct(wide_path))
-        {
-            return false;
-        }
-        std::ifstream file(wide_path, std::ios::in | std::ios::binary);
+        // if (!is_file_path_case_correct(path))
+        // {
+        //     return false;
+        // }
+        std::ifstream file(path, std::ios::in | std::ios::binary);
         if (!file.is_open())
         {
             return false;
@@ -428,7 +428,7 @@ namespace Core
         auto size = end - beg;
         if (!(size >= 0 && size <= INTPTR_MAX))
         {
-            spdlog::error("[core] [Core::FileManager::load] 无法加载文件 '{}'，大小超过 '{}' 字节", name, INTPTR_MAX);
+            spdlog::error("[core] [Core::FileManager::load] Unable to load file '{}'. Size is below zero or above '{}' bytes.", name, INTPTR_MAX);
             assert(false);
             return false;
         }
@@ -439,17 +439,17 @@ namespace Core
     }
     bool FileManager::load(std::string_view const& name, IData** pp_data)
     {
-        std::wstring wide_path(utf8::to_wstring(name));
+        std::string path(name);
         std::error_code ec;
-        if (!std::filesystem::is_regular_file(wide_path, ec))
+        if (!std::filesystem::is_regular_file(path, ec))
         {
             return false;
         }
-        if (!is_file_path_case_correct(wide_path))
-        {
-            return false;
-        }
-        std::ifstream file(wide_path, std::ios::in | std::ios::binary);
+        // if (!is_file_path_case_correct(path))
+        // {
+        //     return false;
+        // }
+        std::ifstream file(path, std::ios::in | std::ios::binary);
         if (!file.is_open())
         {
             return false;
@@ -676,9 +676,9 @@ namespace Core
     }
     bool FileManager::write(std::string_view const& name, std::vector<uint8_t> const& buffer)
     {
-        std::wstring wide_path(utf8::to_wstring(name));
+        std::string path(name);
         std::error_code ec;
-        std::ofstream file(wide_path, std::ios::out | std::ios::binary | std::ios::trunc);
+        std::ofstream file(path, std::ios::out | std::ios::binary | std::ios::trunc);
         if (!file.is_open())
         {
             return false;
@@ -689,9 +689,9 @@ namespace Core
     }
     bool FileManager::write(std::string_view const& name, IData* p_data)
     {
-        std::wstring wide_path(utf8::to_wstring(name));
+        std::string path(name);
         std::error_code ec;
-        std::ofstream file(wide_path, std::ios::out | std::ios::binary | std::ios::trunc);
+        std::ofstream file(path, std::ios::out | std::ios::binary | std::ios::trunc);
         if (!file.is_open())
         {
             return false;

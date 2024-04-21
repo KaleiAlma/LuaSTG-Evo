@@ -1,4 +1,5 @@
 ﻿#pragma once
+#include "Core/Graphics/Device.hpp"
 #include "Core/Object.hpp"
 #include "Core/Graphics/Renderer.hpp"
 #include "Core/Graphics/Device_OpenGL.hpp"
@@ -105,7 +106,6 @@ namespace Core::Graphics
 		{
 			GLuint index{};
 			std::vector<uint8_t> buffer;
-			// Microsoft::WRL::ComPtr<ID3D11Buffer> d3d11_buffer;
 			GLuint opengl_buffer = 0;
 			std::unordered_map<std::string, LocalVariable> variable;
 		};
@@ -116,7 +116,8 @@ namespace Core::Graphics
 		};
 	private:
 		ScopeObject<Device_OpenGL> m_device;
-		GLuint opengl_ps;
+		// GLuint opengl_frag;
+		GLuint opengl_prgm;
 		std::unordered_map<std::string, LocalConstantBuffer> m_buffer_map;
 		std::unordered_map<std::string, LocalTexture2D> m_texture2d_map;
 		std::string source;
@@ -128,7 +129,7 @@ namespace Core::Graphics
 		bool findVariable(StringView name, LocalConstantBuffer*& buf, LocalVariable*& val);
 
 	public:
-		GLuint GetPS() const noexcept { return opengl_ps; }
+		GLuint GetShader() const noexcept { return opengl_prgm; }
 
 	public:
 		bool setFloat(StringView name, float value);
@@ -153,6 +154,7 @@ namespace Core::Graphics
 
 		GLuint _fx_vbuffer = 0;
 		GLuint _fx_ibuffer = 0;
+		GLuint _vao = 0;
 		VertexIndexBuffer _vi_buffer[1];
 		size_t _vi_buffer_index = 0;
 		const size_t _vi_buffer_count = 1;
@@ -169,12 +171,13 @@ namespace Core::Graphics
 		GLuint _user_float_buffer = 0; // Used with postEffect
 
 		// Microsoft::WRL::ComPtr<ID3D11InputLayout> _input_layout;
-		GLuint _vertex_shader[IDX(FogState::MAX_COUNT)]; // FogState
-		GLuint _pixel_shader[IDX(VertexColorBlendState::MAX_COUNT)][IDX(FogState::MAX_COUNT)][IDX(TextureAlphaType::MAX_COUNT)]; // VertexColorBlendState, FogState, TextureAlphaType
-		Microsoft::WRL::ComPtr<ID3D11RasterizerState> _raster_state;
-		ScopeObject<ISamplerState> _sampler_state[IDX(SamplerState::MAX_COUNT)];
-		Microsoft::WRL::ComPtr<ID3D11DepthStencilState> _depth_state[IDX(DepthState::MAX_COUNT)];
-		Microsoft::WRL::ComPtr<ID3D11BlendState> _blend_state[IDX(BlendState::MAX_COUNT)];
+		// GLuint _vertex_shader[IDX(FogState::MAX_COUNT)]; // FogState
+		// GLuint _pixel_shader[IDX(VertexColorBlendState::MAX_COUNT)][IDX(FogState::MAX_COUNT)][IDX(TextureAlphaType::MAX_COUNT)]; // VertexColorBlendState, FogState, TextureAlphaType
+		GLuint _program;
+		// Microsoft::WRL::ComPtr<ID3D11RasterizerState> _raster_state;
+		Graphics::SamplerState _sampler_state[IDX(SamplerState::MAX_COUNT)];
+		// Microsoft::WRL::ComPtr<ID3D11DepthStencilState> _depth_state[IDX(DepthState::MAX_COUNT)];
+		// Microsoft::WRL::ComPtr<ID3D11BlendState> _blend_state[IDX(BlendState::MAX_COUNT)];
 		
 		ScopeObject<Texture2D_OpenGL> _state_texture;
 		CameraStateSet _camera_state_set;
@@ -186,7 +189,6 @@ namespace Core::Graphics
 		bool createStates();
 		bool createShaders();
 		void initState();
-		void setSamplerState(SamplerState state, UINT index);
 		bool uploadVertexIndexBufferFromDrawList();
 		void bindTextureSamplerState(ITexture2D* texture);
 		void bindTextureAlphaType(ITexture2D* texture);
@@ -197,6 +199,10 @@ namespace Core::Graphics
 		void onDeviceDestroy();
 
 	public:
+		void setSamplerState(IRenderer::SamplerState state, GLuint index);
+		void setSamplerState(Graphics::SamplerState state, GLuint index);
+
+	public:
 		bool beginBatch();
 		bool endBatch();
 		bool isBatchScope() { return _batch_scope; }
@@ -204,7 +210,7 @@ namespace Core::Graphics
 
 		void clearRenderTarget(Color4B const& color);
 		void clearDepthBuffer(float zvalue);
-		void setRenderAttachment(IRenderTarget* p_rt, IDepthStencilBuffer* p_ds);
+		void setRenderAttachment(IRenderTarget* p_rt);
 
 		void setOrtho(BoxF const& box);
 		void setPerspective(Vector3F const& eye, Vector3F const& lookat, Vector3F const& headup, float fov, float aspect, float znear, float zfar);
@@ -239,7 +245,7 @@ namespace Core::Graphics
 		bool createModel(StringView path, IModel** pp_model);
 		bool drawModel(IModel* p_model);
 
-		ISamplerState* getKnownSamplerState(SamplerState state);
+		Graphics::SamplerState getKnownSamplerState(SamplerState state);
 
 	public:
 		Renderer_OpenGL(Device_OpenGL* p_device);

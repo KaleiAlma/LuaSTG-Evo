@@ -1,7 +1,7 @@
 ﻿#pragma once
 #include "Core/Object.hpp"
-#include "Core/Graphics/Window_Win32.hpp"
-#include "Core/Graphics/Device_D3D11.hpp"
+#include "Core/Graphics/Window_SDL.hpp"
+#include "Core/Graphics/Device_OpenGL.hpp"
 
 namespace Core::Graphics
 {

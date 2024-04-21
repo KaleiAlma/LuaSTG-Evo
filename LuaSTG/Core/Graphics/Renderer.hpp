@@ -132,7 +132,7 @@ namespace Core::Graphics
 
 		virtual void clearRenderTarget(Color4B const& color) = 0;
 		virtual void clearDepthBuffer(float zvalue) = 0;
-		virtual void setRenderAttachment(IRenderTarget* p_rt, IDepthStencilBuffer* p_ds) = 0;
+		virtual void setRenderAttachment(IRenderTarget* p_rt) = 0;
 
 		virtual void setOrtho(BoxF const& box) = 0;
 		virtual void setPerspective(Vector3F const& eye, Vector3F const& lookat, Vector3F const& headup, float fov, float aspect, float znear, float zfar) = 0;
@@ -167,7 +167,7 @@ namespace Core::Graphics
 		virtual bool createModel(StringView path, IModel** pp_model) = 0;
 		virtual bool drawModel(IModel* p_model) = 0;
 
-		virtual ISamplerState* getKnownSamplerState(SamplerState state) = 0;
+		virtual Graphics::SamplerState getKnownSamplerState(SamplerState state) = 0;
 
 		static bool create(IDevice* p_device, IRenderer** pp_renderer);
 	};

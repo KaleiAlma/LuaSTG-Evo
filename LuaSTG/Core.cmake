@@ -29,50 +29,31 @@ set(Core_SRC
     Core/InitializeConfigure.cpp
 
     Core/Graphics/Window.hpp
-    # Core/Graphics/Window_Win32.hpp
-    # Core/Graphics/Window_Win32.cpp
     Core/Graphics/Window_SDL.hpp
     Core/Graphics/Window_SDL.cpp
     Core/Graphics/Format.hpp
-    # Core/Graphics/Format_D3D11.hpp
     Core/Graphics/Format_OpenGL.hpp
     Core/Graphics/Device.hpp
-    # Core/Graphics/Device_D3D11.hpp
-    # Core/Graphics/Device_D3D11.cpp
     Core/Graphics/Device_OpenGL.hpp
     Core/Graphics/Device_OpenGL.cpp
     Core/Graphics/SwapChain.hpp
-    # Core/Graphics/SwapChain_D3D11.hpp
-    # Core/Graphics/SwapChain_D3D11.cpp
     Core/Graphics/SwapChain_OpenGL.hpp
     Core/Graphics/SwapChain_OpenGL.cpp
     Core/Graphics/Renderer.hpp
-    # Core/Graphics/Renderer_D3D11.hpp
-    # Core/Graphics/Renderer_D3D11.cpp
     Core/Graphics/Renderer_OpenGL.hpp
     Core/Graphics/Renderer_OpenGL.cpp
-    # Core/Graphics/Renderer_Shader_D3D11.cpp
     Core/Graphics/Renderer_Shader_OpenGL.cpp
-    # Core/Graphics/Model_D3D11.hpp
-    # Core/Graphics/Model_D3D11.cpp
     Core/Graphics/Model_OpenGL.hpp
     Core/Graphics/Model_OpenGL.cpp
-    # Core/Graphics/Model_Shader_D3D11.cpp
     Core/Graphics/Model_Shader_OpenGL.cpp
     Core/Graphics/Sprite.hpp
-    # Core/Graphics/Sprite_D3D11.hpp
-    # Core/Graphics/Sprite_D3D11.cpp
     Core/Graphics/Sprite_OpenGL.hpp
     Core/Graphics/Sprite_OpenGL.cpp
     Core/Graphics/Font.hpp
-    # Core/Graphics/Font_D3D11.hpp
-    # Core/Graphics/Font_D3D11.cpp
     Core/Graphics/Font_OpenGL.hpp
     Core/Graphics/Font_OpenGL.cpp
-    Core/Graphics/DearImGui_Win32_D3D11.hpp
-    Core/Graphics/DearImGui_Win32_D3D11.cpp
-    # Core/Graphics/Direct3D11/LetterBoxingRenderer.hpp
-    # Core/Graphics/Direct3D11/LetterBoxingRenderer.cpp
+    Core/Graphics/DearImGui_SDL_OpenGL.hpp
+    Core/Graphics/DearImGui_SDL_OpenGL.cpp
     Core/Application.hpp
     Core/ApplicationModel.hpp
     Core/ApplicationModel_SDL.hpp
@@ -109,25 +90,16 @@ target_link_libraries(Core PUBLIC
     # util
     utility
     PlatformAPI
-    GeneratedShaderHeaders
-    # win32
-    # winmm.lib
-    # imm32.lib
     # gfx
-    # dxguid.lib
-    # dxgi.lib
-    # d3d11.lib
-    #Microsoft.XAudio2.Redist
-    # Microsoft.Windows.ImplementationLibrary
-    # DirectXTexMini
     # libqoi
-    # math
     SDL2-static
     # SDL2_image
     nothings_stb
     SDL2_mixer
     SDL2_ttf
+    # math
     xmath
+    glm
     # file
     minizip-ng
     # text

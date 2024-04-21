@@ -1,339 +1,370 @@
 ﻿#include "Core/Graphics/Renderer_OpenGL.hpp"
 #include "Core/FileManager.hpp"
-// #include "Platform/RuntimeLoader/Direct3DCompiler.hpp"
 
-#include "luastg/sub/renderer/vertex_shader_def_none.hpp"
-#include "luastg/sub/renderer/vertex_shader_def_fog.hpp"
+#include "Core/Type.hpp"
+#include "glad/gl.h"
+#include "spdlog/spdlog.h"
+#include <vector>
 
-#include "luastg/sub/renderer/pixel_shader_def_zero_none_normal.hpp"
-#include "luastg/sub/renderer/pixel_shader_def_one_none_normal.hpp"
-#include "luastg/sub/renderer/pixel_shader_def_add_none_normal.hpp"
-#include "luastg/sub/renderer/pixel_shader_def_mul_none_normal.hpp"
+// Default Fragment Shader
+const GLchar default_fragment[]{R"(
+#version 450 core
 
-#include "luastg/sub/renderer/pixel_shader_def_zero_linear_normal.hpp"
-#include "luastg/sub/renderer/pixel_shader_def_one_linear_normal.hpp"
-#include "luastg/sub/renderer/pixel_shader_def_add_linear_normal.hpp"
-#include "luastg/sub/renderer/pixel_shader_def_mul_linear_normal.hpp"
+layout(binding = 2) uniform camera_data
+{
+    vec4 camera_pos;
+};
+layout(binding = 3) uniform fog_data
+{
+    vec4 fog_color;
+    vec4 fog_range;
+};
+layout(binding = 0) uniform sampler2D sampler0;
 
-#include "luastg/sub/renderer/pixel_shader_def_zero_exp_normal.hpp"
-#include "luastg/sub/renderer/pixel_shader_def_one_exp_normal.hpp"
-#include "luastg/sub/renderer/pixel_shader_def_add_exp_normal.hpp"
-#include "luastg/sub/renderer/pixel_shader_def_mul_exp_normal.hpp"
+float channel_minimum = 1.0 / 255.0;
 
-#include "luastg/sub/renderer/pixel_shader_def_zero_exp2_normal.hpp"
-#include "luastg/sub/renderer/pixel_shader_def_one_exp2_normal.hpp"
-#include "luastg/sub/renderer/pixel_shader_def_add_exp2_normal.hpp"
-#include "luastg/sub/renderer/pixel_shader_def_mul_exp2_normal.hpp"
+layout(location = 0) in vec4 sxy;
+layout(location = 1) in vec4 pos;
+layout(location = 2) in vec2 uv;
+layout(location = 3) in vec4 col;
 
-#include "luastg/sub/renderer/pixel_shader_def_zero_none_premul.hpp"
-#include "luastg/sub/renderer/pixel_shader_def_one_none_premul.hpp"
-#include "luastg/sub/renderer/pixel_shader_def_add_none_premul.hpp"
-#include "luastg/sub/renderer/pixel_shader_def_mul_none_premul.hpp"
+layout(location = 0) out vec4 col_out;
 
-#include "luastg/sub/renderer/pixel_shader_def_zero_linear_premul.hpp"
-#include "luastg/sub/renderer/pixel_shader_def_one_linear_premul.hpp"
-#include "luastg/sub/renderer/pixel_shader_def_add_linear_premul.hpp"
-#include "luastg/sub/renderer/pixel_shader_def_mul_linear_premul.hpp"
+subroutine vec4 Blend();
+subroutine vec4 Fog(vec4);
 
-#include "luastg/sub/renderer/pixel_shader_def_zero_exp_premul.hpp"
-#include "luastg/sub/renderer/pixel_shader_def_one_exp_premul.hpp"
-#include "luastg/sub/renderer/pixel_shader_def_add_exp_premul.hpp"
-#include "luastg/sub/renderer/pixel_shader_def_mul_exp_premul.hpp"
+layout(location = 0) subroutine uniform Blend blend_uniform;
+layout(location = 1) subroutine uniform Fog fog_uniform;
 
-#include "luastg/sub/renderer/pixel_shader_def_zero_exp2_premul.hpp"
-#include "luastg/sub/renderer/pixel_shader_def_one_exp2_premul.hpp"
-#include "luastg/sub/renderer/pixel_shader_def_add_exp2_premul.hpp"
-#include "luastg/sub/renderer/pixel_shader_def_mul_exp2_premul.hpp"
+layout(index = 0) subroutine(Blend) vec4 vb_zero()
+{
+    vec4 color = texture(sampler0, uv);
+    color.rgb *= color.a;
+    return color;
+}
+
+layout(index = 1) subroutine(Blend) vec4 vb_zero_pmul()
+{
+    return texture(sampler0, uv); // pass through
+}
+
+layout(index = 2) subroutine(Blend) vec4 vb_one()
+{
+    vec4 color = col;
+    color.rgb *= color.a;
+    return color;
+}
+
+layout(index = 3) subroutine(Blend) vec4 vb_one_pmul()
+{
+    return col; // pass through
+}
+
+vec4 add_common(vec4 color) {
+    color.rgb += col.rgb;
+    color.r = min(color.r, 1.0);
+    color.g = min(color.g, 1.0);
+    color.b = min(color.b, 1.0);
+    color.a *= col.a;
+    color.rgb *= col.a;
+    return color;
+}
+
+layout(index = 4) subroutine(Blend) vec4 vb_add()
+{
+    vec4 color = texture(sampler0, uv);
+    return add_common(color);
+}
+
+layout(index = 5) subroutine(Blend) vec4 vb_add_pmul()
+{
+    vec4 color = texture(sampler0, uv);
+
+    // cancel out alpha multiplication
+    if (color.a < channel_minimum)
+    {
+        discard; // avoid division by zero
+    }
+    color.rgb /= color.a;
+
+    return add_common(color);
+}
+
+layout(index = 6) subroutine(Blend) vec4 vb_mul()
+{
+    vec4 color = texture(sampler0, uv) * col;
+    color.rgb *= color.a;
+    return color;
+}
+
+layout(index = 7) subroutine(Blend) vec4 vb_mul_pmul()
+{
+    vec4 color = texture(sampler0, uv) * col;
+    color.rgb *= col.a; // need to multiply with texture alpha
+    return color;
+}
+
+
+layout(index = 8) subroutine(Fog) vec4 fog_none(vec4 color)
+{
+    return color; // pass through
+}
+
+layout(index = 9) subroutine(Fog) vec4 fog_linear(vec4 color)
+{
+    float dist = distance(camera_pos.xyz, pos.xyz);
+    float k = clamp((dist - fog_range.x) / fog_range.w, 0.0, 1.0);
+    float k1 = 1.0 - k;
+    float alpha = k1 * color.a + k * color.a * fog_color.a;
+    float ka = k1 * (k1 + k * fog_color.a);
+    float kb = k * alpha;
+    color = float4(ka * color.rgb + kb * fog_color.rgb, alpha);
+    return color;
+}
+
+layout(index = 10) subroutine(Fog) vec4 fog_exp(vec4 color)
+{
+    float dist = distance(camera_pos.xyz, pos.xyz);
+    float k = clamp(1.0 - exp(-(dist * fog_range.x)), 0.0, 1.0);
+    float k1 = 1.0 - k;
+    float alpha = k1 * color.a + k * color.a * fog_color.a;
+    float ka = k1 * (k1 + k * fog_color.a);
+    float kb = k * alpha;
+    color = float4(ka * color.rgb + kb * fog_color.rgb, alpha);
+    return color;
+}
+
+layout(index = 11) subroutine(Fog) vec4 fog_exp2(vec4 color)
+{
+    float dist = distance(camera_pos.xyz, pos.xyz);
+    float k = clamp(1.0 - exp(-pow(dist * fog_range.x, 2.0)), 0.0, 1.0);
+    float k1 = 1.0 - k;
+    float alpha = k1 * color.a + k * color.a * fog_color.a;
+    float ka = k1 * (k1 + k * fog_color.a);
+    float kb = k * alpha;
+    color = float4(ka * color.rgb + kb * fog_color.rgb, alpha);
+    return color;
+}
+
+void main()
+{
+    col_out = fog_uniform(blend_uniform());
+}
+)"};
+
+// Default Vertex Shader
+const GLchar default_vertex[]{R"(
+#version 450 core
+
+layout(binding = 0) uniform view_proj_buffer
+{
+    mat4 view_proj;
+};
+#if defined(WORLD_MATRIX)
+layout(binding = 1) uniform world_buffer
+{
+    mat4 world;
+};
+#endif
+
+layout(location = 0) in vec3 pos;
+layout(location = 1) in vec2 uv;
+layout(location = 2) in vec4 col;
+
+layout(location = 0) out vec4 sxy_out;
+layout(location = 1) out vec4 pos_out;
+layout(location = 2) out vec2 uv_out;
+layout(location = 3) out vec4 col_out;
+
+void main()
+{
+    vec4 pos_world = vec4(pos, 1.0);
+#if defined(WORLD_MATRIX)
+    pos_world = world * pos_world;
+#endif
+
+    sxy_out = view_proj * pos_world;
+    pos_out = pos_world;
+    uv_out = uv;
+    col_out = col;
+}
+)"};
+
 
 #define IDX(x) (size_t)static_cast<uint8_t>(x)
 
-class D3DIncludeImpl : public ID3DInclude
-{
-public:
-	COM_DECLSPEC_NOTHROW HRESULT WINAPI Open(D3D_INCLUDE_TYPE IncludeType, LPCSTR pFileName, LPCVOID pParentData, LPCVOID* ppData, UINT* pBytes)
-	{
-		UNREFERENCED_PARAMETER(IncludeType); // 我们不关心它是从哪里包含的
-		UNREFERENCED_PARAMETER(pParentData);
-		std::vector<uint8_t> data;
-		if (!GFileManager().loadEx(pFileName, data))
-		{
-			return HRESULT_FROM_WIN32(ERROR_FILE_NOT_FOUND);
-		}
-		void* buffer = malloc(data.size());
-		if (!buffer) return HRESULT_FROM_WIN32(ERROR_NOT_ENOUGH_MEMORY);
-		memcpy(buffer, data.data(), data.size());
-		*ppData = buffer;
-		*pBytes = static_cast<UINT>(data.size());
-		return S_OK;
-	}
-	COM_DECLSPEC_NOTHROW HRESULT WINAPI Close(LPCVOID pData)
-	{
-		assert(pData);
-		free(const_cast<void*>(pData));
-		return S_OK;
-	}
-};
-
-static D3DIncludeImpl g_include_loader;
-static Platform::RuntimeLoader::Direct3DCompiler g_d3dcompiler_loader;
-
 namespace Core::Graphics
 {
-	static bool compileShaderMacro(char const* name, void const* data, size_t size, char const* target, const D3D_SHADER_MACRO* defs, ID3DBlob** ppBlob)
+	static bool compileShaderMacro(const GLchar* data, GLint size, GLenum shadertype, GLuint& shader)
 	{
-		UINT flag_ = D3DCOMPILE_ENABLE_STRICTNESS;
-	#ifdef _DEBUG
-		flag_ |= D3DCOMPILE_DEBUG;
-		flag_ |= D3DCOMPILE_SKIP_OPTIMIZATION;
-	#endif
-		Microsoft::WRL::ComPtr<ID3DBlob> errmsg_;
-		HRESULT hr = gHR = g_d3dcompiler_loader.Compile(data, size, name, defs, &g_include_loader, "main", target, flag_, 0, ppBlob, &errmsg_);
-		if (FAILED(hr))
+		shader = glCreateShader(shadertype);
+		glShaderSource(shader, 1, &data, &size);
+		glCompileShader(shader);
+
+		GLint result;
+		glGetShaderiv(shader, GL_COMPILE_STATUS, &result);
+		if (result == GL_FALSE)
 		{
-			spdlog::error("[core] D3DCompile 调用失败");
-			spdlog::error("[core] 编译着色器 '{}' 失败：{}", name, (char*)errmsg_->GetBufferPointer());
+			GLchar log[1024];
+			int32_t log_len;
+			glGetShaderInfoLog(shader, 1024, &log_len, log);
+			spdlog::error("[core] Failed to compile shader: {}", log);
+			glDeleteShader(shader);
 			return false;
 		}
+
 		return true;
 	}
-	static bool compileVertexShaderMacro11(char const* name, void const* data, size_t size, const D3D_SHADER_MACRO* defs, ID3DBlob** ppBlob)
+	static bool compileVertexShaderMacro(const GLchar* data, GLint size, GLuint& shader)
 	{
-		return compileShaderMacro(name, data, size, "vs_4_0", defs, ppBlob);
+		return compileShaderMacro(data, size, GL_VERTEX_SHADER, shader);
 	}
-	static bool compilePixelShaderMacro11(char const* name, void const* data, size_t size, const D3D_SHADER_MACRO* defs, ID3DBlob** ppBlob)
+	static bool compileFragmentShaderMacro(const GLchar* data, GLint size, GLuint& shader)
 	{
-		return compileShaderMacro(name, data, size, "ps_4_0", defs, ppBlob);
+		return compileShaderMacro(data, size, GL_FRAGMENT_SHADER, shader);
 	}
 
-	bool PostEffectShader_D3D11::createResources()
+	bool PostEffectShader_OpenGL::createResources()
 	{
-		if (!d3d_ps_blob)
+		GLuint opengl_frag = 0;
+		GLuint opengl_vert = 0;
+		if (!opengl_frag)
 		{
 			if (is_path)
 			{
 				std::vector<uint8_t> src;
-				if (!GFileManager().loadEx(source, src))
+				if (!GFileManager().loadEx(source, (IData**)src.data()))
 					return false;
-				if (!compilePixelShaderMacro11(source.c_str(), src.data(), src.size(), NULL, &d3d_ps_blob))
+				if (!compileFragmentShaderMacro((const GLchar*)src.data(), src.size(), opengl_frag))
+					return false;
+				if (!compileVertexShaderMacro(default_vertex, sizeof(default_vertex), opengl_vert))
 					return false;
 			}
 			else
 			{
-				if (!compilePixelShaderMacro11(source.c_str(), source.data(), source.size(), NULL, &d3d_ps_blob))
+				if (!compileFragmentShaderMacro((const GLchar*)source.data(), source.size(), opengl_frag))
+					return false;
+				if (!compileVertexShaderMacro(default_vertex, sizeof(default_vertex), opengl_vert))
 					return false;
 			}
 		}
-		assert(m_device->GetD3D11Device());
-		HRESULT hr = gHR = m_device->GetD3D11Device()->CreatePixelShader(d3d_ps_blob->GetBufferPointer(), d3d_ps_blob->GetBufferSize(), NULL, &d3d11_ps);
-		if (FAILED(hr))
-			return false;
-		M_D3D_SET_DEBUG_NAME_SIMPLE(d3d11_ps.Get());
 
-		// 着色器反射
+		// Link Program
 
-		if (!d3d11_ps_reflect)
+		opengl_prgm = glCreateProgram();
+		glAttachShader(opengl_prgm, opengl_frag);
+		glAttachShader(opengl_prgm, opengl_vert);
+		glLinkProgram(opengl_prgm);
+
+		GLint result;
+		glGetProgramiv(opengl_prgm, GL_LINK_STATUS, &result);
+		if (result == GL_FALSE)
 		{
-			hr = gHR = g_d3dcompiler_loader.Reflect(d3d_ps_blob->GetBufferPointer(), d3d_ps_blob->GetBufferSize(), IID_PPV_ARGS(&d3d11_ps_reflect));
-			if (FAILED(hr)) return false;
+			GLchar log[1024];
+			int32_t log_len;
+			glGetShaderInfoLog(opengl_prgm, 1024, &log_len, log);
+			spdlog::error("[core] Failed to link shader: {}", log);
+			glDeleteShader(opengl_frag);
+			glDeleteShader(opengl_vert);
+			glDeleteProgram(opengl_prgm);
+			return false;
+		}
 
-			// 获得着色器信息
+		glDeleteShader(opengl_frag);
+		glDeleteShader(opengl_vert);
 
-			D3D11_SHADER_DESC shader_info{};
-			hr = gHR = d3d11_ps_reflect->GetDesc(&shader_info);
-			if (FAILED(hr)) return false;
+		// Uniform Blocks
 
-			// 常量缓冲区
+		GLint amt_uniform_blocks = 0;
+		glGetProgramInterfaceiv(opengl_prgm, GL_UNIFORM_BLOCK, GL_ACTIVE_RESOURCES, &amt_uniform_blocks);
 
-			m_buffer_map.reserve(shader_info.ConstantBuffers);
-			for (UINT i = 0; i < shader_info.ConstantBuffers; i += 1)
+		const size_t block_properties_size = 4;
+		GLenum block_properties[block_properties_size] = { GL_BUFFER_BINDING, GL_BUFFER_DATA_SIZE, GL_NUM_ACTIVE_VARIABLES, GL_NAME_LENGTH };
+		GLint block_values[block_properties_size];
+
+		std::vector<GLchar> name_buffer(128);
+
+		for (int block = 0; block < amt_uniform_blocks; block++)
+		{
+			glGetProgramResourceiv(opengl_prgm, GL_UNIFORM_BLOCK, block, block_properties_size, block_properties, block_properties_size, NULL, block_values);
+			name_buffer.resize(block_values[3]);
+			glGetProgramResourceName(opengl_prgm, GL_PROGRAM_INPUT, block, name_buffer.size(), NULL, &name_buffer[0]);
+			std::string name((char*)&name_buffer, name_buffer.size() - 1);
+
+			LocalConstantBuffer local_buffer;
+			local_buffer.index = block_values[0];
+			local_buffer.buffer.resize(block_values[1]);
+			local_buffer.variable.reserve(block_values[2]);
+
+			m_buffer_map.emplace(name, std::move(local_buffer));
+		}
+
+		GLint amt_uniforms = 0;
+		glGetProgramInterfaceiv(opengl_prgm, GL_UNIFORM, GL_ACTIVE_RESOURCES, &amt_uniforms);
+
+		const size_t uniform_properties_size = 5;
+		GLenum uniform_properties[uniform_properties_size] = { GL_TYPE, GL_NAME_LENGTH, GL_OFFSET, GL_ARRAY_SIZE, GL_BLOCK_INDEX };
+		GLint uniform_values[uniform_properties_size];
+
+		GLint amt_samplers = 0;
+		GLuint tex_idx = 0;
+
+		for (int uniform = 0; uniform < amt_uniforms; uniform++)
+		{
+			glGetProgramResourceiv(opengl_prgm, GL_UNIFORM, uniform, uniform_properties_size, uniform_properties, uniform_properties_size, NULL, uniform_values);
+			name_buffer.resize(uniform_values[1]);
+			glGetProgramResourceName(opengl_prgm, GL_PROGRAM_INPUT, uniform, name_buffer.size(), NULL, &name_buffer[0]);
+			std::string name((char*)&name_buffer, name_buffer.size() - 1);
+
+			if (uniform_values[0] == GL_SAMPLER_2D) // Handle Texture Uniforms
 			{
-				auto* constant_buffer = d3d11_ps_reflect->GetConstantBufferByIndex(i);
-
-				D3D11_SHADER_BUFFER_DESC constant_buffer_info{};
-				hr = gHR = constant_buffer->GetDesc(&constant_buffer_info);
-				if (FAILED(hr)) return false;
-
-				D3D11_SHADER_INPUT_BIND_DESC bind_info{};
-				hr = gHR = d3d11_ps_reflect->GetResourceBindingDescByName(constant_buffer_info.Name, &bind_info);
-				if (FAILED(hr)) return false;
-
-				LocalConstantBuffer local_buffer;
-				local_buffer.index = bind_info.BindPoint;
-				local_buffer.buffer.resize(constant_buffer_info.Size);
-				local_buffer.variable.reserve(constant_buffer_info.Variables);
-
-				for (UINT j = 0; j < constant_buffer_info.Variables; j += 1)
-				{
-					auto* variable = constant_buffer->GetVariableByIndex(j);
-
-					D3D11_SHADER_VARIABLE_DESC variable_info{};
-					hr = gHR = variable->GetDesc(&variable_info);
-					if (FAILED(hr)) return false;
-
-					auto* variable_type = variable->GetType();
-
-					D3D11_SHADER_TYPE_DESC variable_type_info{};
-					hr = gHR = variable_type->GetDesc(&variable_type_info);
-					if (FAILED(hr)) return false;
-
-					LocalVariable local_variable;
-					local_variable.offset = variable_info.StartOffset;
-					local_variable.size = variable_info.Size;
-
-					local_buffer.variable.emplace(variable_info.Name, std::move(local_variable));
-				}
-
-				m_buffer_map.emplace(constant_buffer_info.Name, std::move(local_buffer));
-			}
-
-			// 纹理
-
-			m_texture2d_map.reserve(shader_info.BoundResources - shader_info.ConstantBuffers);
-			for (UINT i = 0; i < shader_info.BoundResources; i += 1)
-			{
-				D3D11_SHADER_INPUT_BIND_DESC bind_info{};
-				hr = gHR = d3d11_ps_reflect->GetResourceBindingDesc(i, &bind_info);
-				if (FAILED(hr)) return false;
-
-				if (!(bind_info.Type == D3D_SIT_TEXTURE && bind_info.Dimension == D3D_SRV_DIMENSION_TEXTURE2D))
-				{
-					continue; // 并非所需
-				}
-
 				LocalTexture2D local_texture2d;
-				local_texture2d.index = bind_info.BindPoint;
+				local_texture2d.index = tex_idx;
+				tex_idx++;
 
-				m_texture2d_map.emplace(bind_info.Name, std::move(local_texture2d));
+				m_texture2d_map.emplace(name, std::move(local_texture2d));
+			}
+			else // Handle Uniform Buffers
+			{
+				LocalVariable local_variable;
+				local_variable.offset = uniform_values[2];
+				local_variable.size = uniform_values[3];
+
+				// data structures are different between DirectX and OpenGL, so take a performance hit
+				for (auto& v : m_buffer_map)
+				{
+					if (v.second.index == uniform_values[4])
+					{
+						v.second.variable.emplace(name, std::move(local_variable));
+						break;
+					}
+				}
 			}
 		}
 
-		// 创建缓冲区
+		// Create buffers
 
 		for (auto& v : m_buffer_map)
 		{
-			D3D11_BUFFER_DESC desc_ = {
-				.ByteWidth = static_cast<UINT>(v.second.buffer.size()),
-				.Usage = D3D11_USAGE_DYNAMIC,
-				.BindFlags = D3D11_BIND_CONSTANT_BUFFER,
-				.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE,
-				.MiscFlags = 0,
-				.StructureByteStride = 0,
-			};
-			hr = gHR = m_device->GetD3D11Device()->CreateBuffer(&desc_, NULL, &v.second.d3d11_buffer);
-			if (FAILED(hr))
+			glGenBuffers(1, &v.second.opengl_buffer);
+			if (v.second.opengl_buffer == 0)
 				return false;
 		}
 
 		return true;
 	}
 
-	bool Renderer_D3D11::createShaders()
+	bool Renderer_OpenGL::createShaders()
 	{
-		assert(m_device->GetD3D11Device());
+		GLuint frag, vert;
+		compileFragmentShaderMacro(default_fragment, sizeof(default_fragment), frag);
+		compileVertexShaderMacro(default_vertex, sizeof(default_vertex), vert);
+		glAttachShader(_program, frag);
+		glAttachShader(_program, vert);
+		glLinkProgram(_program);
 
-		HRESULT hr = 0;
-
-		// vertex shader
-		{
-			auto load_ = [&](FogState f, void const* data, size_t size)
-			{
-				hr = gHR = m_device->GetD3D11Device()->CreateVertexShader(
-					data,
-					size,
-					NULL,
-					& _vertex_shader[IDX(f)]);
-			};
-			
-		#define load(f, name)\
-			load_(f, luastg::sub::renderer::vertex_shader_##name, sizeof(luastg::sub::renderer::vertex_shader_##name));\
-			if (FAILED(hr)) return false;\
-			M_D3D_SET_DEBUG_NAME_SIMPLE(_vertex_shader[IDX(f)].Get());
-
-			load(FogState::Disable, def_none);
-			load(FogState::Linear, def_fog);
-			load(FogState::Exp, def_fog);
-			load(FogState::Exp2, def_fog);
-
-		#undef load
-		}
-
-		// input layout
-		{
-			D3D11_INPUT_ELEMENT_DESC layout_[] =
-			{
-				// DrawVertex2D
-				{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0 , D3D11_INPUT_PER_VERTEX_DATA, 0 },
-				{ "COLOR",    0, DXGI_FORMAT_B8G8R8A8_UNORM , 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-				{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT   , 0, 16, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-			};
-			hr = gHR = m_device->GetD3D11Device()->CreateInputLayout(
-				layout_, 3,
-				luastg::sub::renderer::vertex_shader_def_none,
-				sizeof(luastg::sub::renderer::vertex_shader_def_none),
-				&_input_layout);
-			if (FAILED(hr))
-				return false;
-		}
-
-		// pixel shader
-		{
-			auto load_ = [&](VertexColorBlendState v, FogState f, TextureAlphaType t, void const* data, size_t size)
-			{
-				hr = gHR = m_device->GetD3D11Device()->CreatePixelShader(
-					data,
-					size,
-					NULL,
-					&_pixel_shader[IDX(v)][IDX(f)][IDX(t)]
-				);
-			};
-
-		#define load(v, f, t, name)\
-			load_(v, f, t, luastg::sub::renderer::pixel_shader_##name, sizeof(luastg::sub::renderer::pixel_shader_##name));\
-			if (FAILED(hr)) return false;\
-			M_D3D_SET_DEBUG_NAME_SIMPLE(_pixel_shader[IDX(v)][IDX(f)][IDX(t)].Get());
-
-			load(VertexColorBlendState::Zero, FogState::Disable, TextureAlphaType::Normal, def_zero_none_normal);
-			load(VertexColorBlendState::One, FogState::Disable, TextureAlphaType::Normal, def_one_none_normal);
-			load(VertexColorBlendState::Add, FogState::Disable, TextureAlphaType::Normal, def_add_none_normal);
-			load(VertexColorBlendState::Mul, FogState::Disable, TextureAlphaType::Normal, def_mul_none_normal);
-
-			load(VertexColorBlendState::Zero, FogState::Linear, TextureAlphaType::Normal, def_zero_linear_normal);
-			load(VertexColorBlendState::One, FogState::Linear, TextureAlphaType::Normal, def_one_linear_normal);
-			load(VertexColorBlendState::Add, FogState::Linear, TextureAlphaType::Normal, def_add_linear_normal);
-			load(VertexColorBlendState::Mul, FogState::Linear, TextureAlphaType::Normal, def_mul_linear_normal);
-
-			load(VertexColorBlendState::Zero, FogState::Exp, TextureAlphaType::Normal, def_zero_exp_normal);
-			load(VertexColorBlendState::One, FogState::Exp, TextureAlphaType::Normal, def_one_exp_normal);
-			load(VertexColorBlendState::Add, FogState::Exp, TextureAlphaType::Normal, def_add_exp_normal);
-			load(VertexColorBlendState::Mul, FogState::Exp, TextureAlphaType::Normal, def_mul_exp_normal);
-
-			load(VertexColorBlendState::Zero, FogState::Exp2, TextureAlphaType::Normal, def_zero_exp2_normal);
-			load(VertexColorBlendState::One, FogState::Exp2, TextureAlphaType::Normal, def_one_exp2_normal);
-			load(VertexColorBlendState::Add, FogState::Exp2, TextureAlphaType::Normal, def_add_exp2_normal);
-			load(VertexColorBlendState::Mul, FogState::Exp2, TextureAlphaType::Normal, def_mul_exp2_normal);
-
-			load(VertexColorBlendState::Zero, FogState::Disable, TextureAlphaType::PremulAlpha, def_zero_none_premul);
-			load(VertexColorBlendState::One, FogState::Disable, TextureAlphaType::PremulAlpha, def_one_none_premul);
-			load(VertexColorBlendState::Add, FogState::Disable, TextureAlphaType::PremulAlpha, def_add_none_premul);
-			load(VertexColorBlendState::Mul, FogState::Disable, TextureAlphaType::PremulAlpha, def_mul_none_premul);
-
-			load(VertexColorBlendState::Zero, FogState::Linear, TextureAlphaType::PremulAlpha, def_zero_linear_premul);
-			load(VertexColorBlendState::One, FogState::Linear, TextureAlphaType::PremulAlpha, def_one_linear_premul);
-			load(VertexColorBlendState::Add, FogState::Linear, TextureAlphaType::PremulAlpha, def_add_linear_premul);
-			load(VertexColorBlendState::Mul, FogState::Linear, TextureAlphaType::PremulAlpha, def_mul_linear_premul);
-
-			load(VertexColorBlendState::Zero, FogState::Exp, TextureAlphaType::PremulAlpha, def_zero_exp_premul);
-			load(VertexColorBlendState::One, FogState::Exp, TextureAlphaType::PremulAlpha, def_one_exp_premul);
-			load(VertexColorBlendState::Add, FogState::Exp, TextureAlphaType::PremulAlpha, def_add_exp_premul);
-			load(VertexColorBlendState::Mul, FogState::Exp, TextureAlphaType::PremulAlpha, def_mul_exp_premul);
-
-			load(VertexColorBlendState::Zero, FogState::Exp2, TextureAlphaType::PremulAlpha, def_zero_exp2_premul);
-			load(VertexColorBlendState::One, FogState::Exp2, TextureAlphaType::PremulAlpha, def_one_exp2_premul);
-			load(VertexColorBlendState::Add, FogState::Exp2, TextureAlphaType::PremulAlpha, def_add_exp2_premul);
-			load(VertexColorBlendState::Mul, FogState::Exp2, TextureAlphaType::PremulAlpha, def_mul_exp2_premul);
-
-		#undef load
-		}
+		glDeleteShader(frag);
+		glDeleteShader(vert);
 
 		return true;
 	}

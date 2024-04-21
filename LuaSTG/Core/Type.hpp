@@ -86,9 +86,9 @@ namespace Core
 		inline Rect operator+(Vector2<T> const& r) const noexcept { return Rect(a + r, b + r); }
 		inline Rect operator-(Vector2<T> const& r) const noexcept { return Rect(a - r, b - r); }
 
-		inline T width() { return b.x - a.x; }
-		inline T height() { return b.y - a.y; }
-		inline T dim() { return b - a; }
+		inline T width() const noexcept { return b.x - a.x; }
+		inline T height() const noexcept { return b.y - a.y; }
+		inline Vector2<T> dim() const noexcept { return b - a; }
 
 		//inline Rect operator*(T const r) const noexcept { return Rect(a * r, b * r); }
 	};
@@ -186,9 +186,9 @@ namespace Core
 
 	struct alignas(uint32_t) Color4B
 	{
-		uint8_t b;
-		uint8_t g;
 		uint8_t r;
+		uint8_t g;
+		uint8_t b;
 		uint8_t a;
 
 		Color4B() : b(0), g(0), r(0), a(0) {}

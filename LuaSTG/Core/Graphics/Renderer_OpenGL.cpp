@@ -1,9 +1,19 @@
 ﻿#include "Core/Graphics/Renderer_OpenGL.hpp"
+#include "Core/Graphics/Device.hpp"
 #include "Core/Graphics/Device_OpenGL.hpp"
 #include "Core/Graphics/Model_OpenGL.hpp"
+#include "Core/Graphics/Renderer.hpp"
+#include "Core/Type.hpp"
+#include "TracyOpenGL.hpp"
 #include "glad/gl.h"
+#include "glm/glm.hpp"
+#include "glm/ext/matrix_clip_space.hpp"
+#include "glm/ext/matrix_transform.hpp"
+#include <optional>
 
 #define IDX(x) (size_t)static_cast<uint8_t>(x)
+using DrawIndex = uint16_t;
+
 
 namespace Core::Graphics
 {
@@ -24,14 +34,14 @@ namespace Core::Graphics
 		return get_view(static_cast<Texture2D_OpenGL*>(p.get()));
 	}
 
-	inline ID3D11SamplerState* get_sampler(ISamplerState* p_sampler)
-	{
-		return static_cast<SamplerState_OpenGL*>(p_sampler)->GetState();
-	}
-	inline ID3D11SamplerState* get_sampler(ScopeObject<ISamplerState>& p_sampler)
-	{
-		return static_cast<SamplerState_OpenGL*>(p_sampler.get())->GetState();
-	}
+	// inline GLuint get_sampler(ISamplerState* p_sampler)
+	// {
+	// 	return static_cast<SamplerState_OpenGL*>(p_sampler)->GetState();
+	// }
+	// inline GLuint get_sampler(ScopeObject<ISamplerState>& p_sampler)
+	// {
+	// 	return static_cast<SamplerState_OpenGL*>(p_sampler.get())->GetState();
+	// }
 }
 
 namespace Core::Graphics
@@ -42,10 +52,10 @@ namespace Core::Graphics
 	}
 	void PostEffectShader_OpenGL::onDeviceDestroy()
 	{
-		d3d11_ps.Reset();
+		glDeleteProgram(opengl_prgm);
 		for (auto& v : m_buffer_map)
 		{
-			v.second.d3d11_buffer.Reset();
+			glDeleteBuffers(1, &v.second.opengl_buffer);
 		}
 	}
 
@@ -113,36 +123,27 @@ namespace Core::Graphics
 	{
 		assert(p_renderer);
 
-		auto* ctx = m_device->GetD3D11DeviceContext();
-		if (!ctx) { assert(false); return false; }
-		
-		auto* p_sampler = p_renderer->getKnownSamplerState(IRenderer::SamplerState::LinearClamp);
+		auto p_sampler = p_renderer->getKnownSamplerState(IRenderer::SamplerState::LinearClamp);
 
 		for (auto& v : m_buffer_map)
 		{
-			D3D11_MAPPED_SUBRESOURCE res{};
-			HRESULT hr = gHR = ctx->Map(v.second.d3d11_buffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &res);
-			if (FAILED(hr)) { assert(false); return false; }
-			memcpy(res.pData, v.second.buffer.data(), v.second.buffer.size());
-			ctx->Unmap(v.second.d3d11_buffer.Get(), 0);
-
-			ID3D11Buffer* b[1] = { v.second.d3d11_buffer.Get() };
-			ctx->PSSetConstantBuffers(v.second.index, 1, b);
+			glBindBuffer(GL_UNIFORM_BUFFER, v.second.opengl_buffer);
+			glBufferData(GL_UNIFORM_BUFFER, v.second.buffer.size(), v.second.buffer.data(), GL_STATIC_DRAW);
+			glBindBufferBase(GL_UNIFORM_BUFFER, v.second.index, v.second.opengl_buffer);
 		}
 
 		for (auto& v : m_texture2d_map)
 		{
-			ID3D11ShaderResourceView* t[1] = { get_view(v.second.texture) };
-			ctx->PSSetShaderResources(v.second.index, 1, t);
-			auto* p_custom = v.second.texture->getSamplerState();
-			ID3D11SamplerState* s[1] = { p_custom ? get_sampler(p_custom) : get_sampler(p_sampler) };
-			ctx->PSSetSamplers(v.second.index, 1, s);
+			auto p_custom = v.second.texture->getSamplerState();
+			glActiveTexture(GL_TEXTURE0 + v.second.index);
+			glBindTexture(GL_TEXTURE_2D, v.second.texture->GetResource());
+			static_cast<Renderer_OpenGL*>(p_renderer)->setSamplerState(p_custom.value_or(p_sampler), v.second.index);
 		}
 
 		return true;
 	}
 
-	PostEffectShader_OpenGL::PostEffectShader_OpenGL(Device_D3D11* p_device, StringView path, bool is_path_)
+	PostEffectShader_OpenGL::PostEffectShader_OpenGL(Device_OpenGL* p_device, StringView path, bool is_path_)
 		: m_device(p_device)
 		, source(path)
 		, is_path(is_path_)
@@ -159,56 +160,35 @@ namespace Core::Graphics
 
 namespace Core::Graphics
 {
-	void Renderer_D3D11::setVertexIndexBuffer(size_t index)
+	void Renderer_OpenGL::setVertexIndexBuffer(size_t index)
 	{
-		assert(m_device->GetD3D11DeviceContext());
-
-		auto& vi = _vi_buffer[(index == 0xFFFFFFFFu) ? _vi_buffer_index : index];
-		ID3D11Buffer* vbo[1] = { vi.vertex_buffer.Get() };
-		UINT stride[1] = { sizeof(IRenderer::DrawVertex) };
-		UINT offset[1] = { 0 };
-		m_device->GetD3D11DeviceContext()->IASetVertexBuffers(0, 1, vbo, stride, offset);
-
-		constexpr DXGI_FORMAT format = sizeof(DrawIndex) < 4 ? DXGI_FORMAT_R16_UINT : DXGI_FORMAT_R32_UINT;
-		m_device->GetD3D11DeviceContext()->IASetIndexBuffer(vi.index_buffer.Get(), format, 0);
+		index = (index == 0xFFFFFFFFu) ? _vi_buffer_index : index;
+		auto& vi = _vi_buffer[index];
+		
+		glBindVertexArray(_vao);
+		glBindBuffer(GL_ARRAY_BUFFER, vi.vertex_buffer);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vi.index_buffer);
 	}
-	bool Renderer_D3D11::uploadVertexIndexBuffer(bool discard)
+	bool Renderer_OpenGL::uploadVertexIndexBuffer(bool discard)
 	{
-		assert(m_device->GetD3D11DeviceContext());
 		ZoneScoped;
-		TracyD3D11Zone(tracy::xTracyD3D11Ctx(), "UploadVertexIndexBuffer");
-		HRESULT hr = 0;
+		TracyGpuZone("UploadVertexIndexBuffer");
 		auto& vi_ = _vi_buffer[_vi_buffer_index];
-		const D3D11_MAP map_type_ = discard ? D3D11_MAP_WRITE_DISCARD : D3D11_MAP_WRITE_NO_OVERWRITE;
 		// copy vertex data
 		if (_draw_list.vertex.size > 0)
 		{
-			D3D11_MAPPED_SUBRESOURCE res_ = {};
-			hr = gHR = m_device->GetD3D11DeviceContext()->Map(vi_.vertex_buffer.Get(), 0, map_type_, 0, &res_);
-			if (FAILED(hr))
-			{
-				spdlog::error("[core] ID3D11DeviceContext::Map -> #vertex_buffer[{}] 调用失败，无法上传顶点", _vi_buffer_index);
-				return false;
-			}
-			std::memcpy((DrawVertex*)res_.pData + vi_.vertex_offset, _draw_list.vertex.data, _draw_list.vertex.size * sizeof(DrawVertex));
-			m_device->GetD3D11DeviceContext()->Unmap(vi_.vertex_buffer.Get(), 0);
+			glBindBuffer(GL_ARRAY_BUFFER, vi_.vertex_buffer);
+			glBufferData(GL_ARRAY_BUFFER, _draw_list.vertex.size * sizeof(DrawVertex), _draw_list.vertex.data, GL_STATIC_DRAW);
 		}
 		// copy index data
 		if (_draw_list.index.size > 0)
 		{
-			D3D11_MAPPED_SUBRESOURCE res_ = {};
-			hr = gHR = m_device->GetD3D11DeviceContext()->Map(vi_.index_buffer.Get(), 0, map_type_, 0, &res_);
-			if (FAILED(hr))
-			{
-				spdlog::error("[core] ID3D11DeviceContext::Map -> #index_buffer[{}] 调用失败，无法上传顶点索引", _vi_buffer_index);
-				return false;
-			}
-			std::memcpy((DrawIndex*)res_.pData + vi_.index_offset, _draw_list.index.data, _draw_list.index.size * sizeof(DrawIndex));
-			m_device->GetD3D11DeviceContext()->Unmap(vi_.index_buffer.Get(), 0);
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vi_.index_buffer);
+			glBufferData(GL_ELEMENT_ARRAY_BUFFER, _draw_list.index.size * sizeof(DrawIndex), _draw_list.index.data, GL_STATIC_DRAW);
 		}
 		return true;
 	}
-	void Renderer_D3D11::clearDrawList()
+	void Renderer_OpenGL::clearDrawList()
 	{
 		for (size_t j_ = 0; j_ < _draw_list.command.size; j_ += 1)
 		{
@@ -219,404 +199,95 @@ namespace Core::Graphics
 		_draw_list.command.size = 0;
 	}
 
-	bool Renderer_D3D11::createBuffers()
+	bool Renderer_OpenGL::createBuffers()
 	{
-		assert(m_device->GetD3D11Device());
+		glGenVertexArrays(1, &_vao);
+		if (_vao == 0) return false;
 
-		HRESULT hr = 0;
+		glGenBuffers(1, &_fx_vbuffer);
+		if (_fx_vbuffer == 0) return false;
 
-		{
-			{
-				D3D11_BUFFER_DESC desc_ = {
-					.ByteWidth = 4 * sizeof(DrawVertex),
-					.Usage = D3D11_USAGE_DYNAMIC,
-					.BindFlags = D3D11_BIND_VERTEX_BUFFER,
-					.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE,
-					.MiscFlags = 0,
-					.StructureByteStride = 0,
-				};
-				hr = gHR = m_device->GetD3D11Device()->CreateBuffer(&desc_, NULL, &_fx_vbuffer);
-				if (FAILED(hr))
-					return false;
-				M_D3D_SET_DEBUG_NAME_SIMPLE(_fx_vbuffer.Get());
-			}
-			{
-				DrawIndex const idx_[6] = { 0, 1, 2, 0, 2, 3 };
-				D3D11_BUFFER_DESC desc_ = {
-					.ByteWidth = 6 * sizeof(DrawIndex),
-					.Usage = D3D11_USAGE_DEFAULT,
-					.BindFlags = D3D11_BIND_INDEX_BUFFER,
-					.CPUAccessFlags = 0,
-					.MiscFlags = 0,
-					.StructureByteStride = 0,
-				};
-				D3D11_SUBRESOURCE_DATA data_ = {
-					.pSysMem = &idx_,
-					.SysMemPitch = desc_.ByteWidth,
-					.SysMemSlicePitch = desc_.ByteWidth,
-				};
-				hr = gHR = m_device->GetD3D11Device()->CreateBuffer(&desc_, &data_, &_fx_ibuffer);
-				if (FAILED(hr))
-					return false;
-				M_D3D_SET_DEBUG_NAME_SIMPLE(_fx_ibuffer.Get());
-			}
-		}
+		DrawIndex const idx_[6] = { 0, 1, 2, 0, 2, 3 };
+		glGenBuffers(1, &_fx_ibuffer);
+		if (_fx_ibuffer == 0) return false;
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _fx_ibuffer);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, 6 * sizeof(IRenderer::DrawIndex), &idx_, GL_STATIC_DRAW);
 
 		for (auto& vi_ : _vi_buffer)
 		{
-			{
-				D3D11_BUFFER_DESC desc_ = {
-					.ByteWidth = sizeof(_draw_list.vertex.data),
-					.Usage = D3D11_USAGE_DYNAMIC,
-					.BindFlags = D3D11_BIND_VERTEX_BUFFER,
-					.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE,
-					.MiscFlags = 0,
-					.StructureByteStride = 0,
-				};
-				hr = gHR = m_device->GetD3D11Device()->CreateBuffer(&desc_, NULL, &vi_.vertex_buffer);
-				if (FAILED(hr))
-					return false;
-				M_D3D_SET_DEBUG_NAME_SIMPLE(vi_.vertex_buffer.Get());
-			}
-
-			{
-				D3D11_BUFFER_DESC desc_ = {
-					.ByteWidth = sizeof(_draw_list.index.data),
-					.Usage = D3D11_USAGE_DYNAMIC,
-					.BindFlags = D3D11_BIND_INDEX_BUFFER,
-					.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE,
-					.MiscFlags = 0,
-					.StructureByteStride = 0,
-				};
-				hr = gHR = m_device->GetD3D11Device()->CreateBuffer(&desc_, NULL, &vi_.index_buffer);
-				if (FAILED(hr))
-					return false;
-				M_D3D_SET_DEBUG_NAME_SIMPLE(vi_.index_buffer.Get());
-			}
+			glGenBuffers(1, &vi_.vertex_buffer);
+			if (vi_.vertex_buffer == 0) return false;
+			
+			glGenBuffers(1, &vi_.index_buffer);
+			if (vi_.index_buffer == 0) return false;
 		}
 
-		{
-			D3D11_BUFFER_DESC desc_ = {
-				.ByteWidth = sizeof(DirectX::XMFLOAT4X4),
-				.Usage = D3D11_USAGE_DYNAMIC,
-				.BindFlags = D3D11_BIND_CONSTANT_BUFFER,
-				.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE,
-				.MiscFlags = 0,
-				.StructureByteStride = 0,
-			};
-			hr = gHR = m_device->GetD3D11Device()->CreateBuffer(&desc_, NULL, &_vp_matrix_buffer);
-			if (FAILED(hr))
-				return false;
-			M_D3D_SET_DEBUG_NAME_SIMPLE(_vp_matrix_buffer.Get());
+		glGenBuffers(1, &_vp_matrix_buffer);
+		if (_vp_matrix_buffer == 0) return false;
 
-			hr = gHR = m_device->GetD3D11Device()->CreateBuffer(&desc_, NULL, &_world_matrix_buffer);
-			if (FAILED(hr))
-				return false;
-			M_D3D_SET_DEBUG_NAME_SIMPLE(_world_matrix_buffer.Get());
+		glGenBuffers(1, &_world_matrix_buffer);
+		if (_world_matrix_buffer == 0) return false;
 
-			desc_.ByteWidth = 2 * sizeof(DirectX::XMFLOAT4);
-			hr = gHR = m_device->GetD3D11Device()->CreateBuffer(&desc_, NULL, &_camera_pos_buffer);
-			if (FAILED(hr))
-				return false;
-			M_D3D_SET_DEBUG_NAME_SIMPLE(_camera_pos_buffer.Get());
+		glGenBuffers(1, &_camera_pos_buffer);
+		if (_camera_pos_buffer == 0) return false;
 
-			desc_.ByteWidth = 2 * sizeof(DirectX::XMFLOAT4);
-			hr = gHR = m_device->GetD3D11Device()->CreateBuffer(&desc_, NULL, &_fog_data_buffer);
-			if (FAILED(hr))
-				return false;
-			M_D3D_SET_DEBUG_NAME_SIMPLE(_fog_data_buffer.Get());
+		glGenBuffers(1, &_fog_data_buffer);
+		if (_fog_data_buffer == 0) return false;
 
-			desc_.ByteWidth = 8 * sizeof(DirectX::XMFLOAT4); // 用户最多可用 8 个 float4
-			hr = gHR = m_device->GetD3D11Device()->CreateBuffer(&desc_, NULL, &_user_float_buffer);
-			if (FAILED(hr))
-				return false;
-			M_D3D_SET_DEBUG_NAME_SIMPLE(_user_float_buffer.Get());
-		}
+		glGenBuffers(1, &_user_float_buffer);
+		if (_user_float_buffer == 0) return false;
 
 		return true;
 	}
-	bool Renderer_D3D11::createStates()
+	bool Renderer_OpenGL::createStates()
 	{
-		assert(m_device->GetD3D11Device());
-
-		HRESULT hr = 0;
-
 		{
-			D3D11_RASTERIZER_DESC desc_ = {
-				.FillMode = D3D11_FILL_SOLID,
-				.CullMode = D3D11_CULL_NONE, // 2D 图片精灵可能有负缩放
-				.FrontCounterClockwise = FALSE,
-				.DepthBias = D3D11_DEFAULT_DEPTH_BIAS,
-				.DepthBiasClamp = D3D11_DEFAULT_DEPTH_BIAS_CLAMP,
-				.SlopeScaledDepthBias = D3D11_DEFAULT_SLOPE_SCALED_DEPTH_BIAS,
-				.DepthClipEnable = TRUE,
-				.ScissorEnable = TRUE,
-				.MultisampleEnable = FALSE,
-				.AntialiasedLineEnable = FALSE,
-			};
-			hr = gHR = m_device->GetD3D11Device()->CreateRasterizerState(&desc_, &_raster_state);
-			if (FAILED(hr))
-				return false;
-			M_D3D_SET_DEBUG_NAME_SIMPLE(_raster_state.Get());
-		}
-
-		{
-			Graphics::SamplerState sampler_state;
+			// Graphics::SamplerState sampler_state;
 
 			// point
 
-			sampler_state.filer = Filter::Point;
-			sampler_state.address_u = TextureAddressMode::Wrap;
-			sampler_state.address_v = TextureAddressMode::Wrap;
-			sampler_state.address_w = TextureAddressMode::Wrap;
-			if (!m_device->createSamplerState(sampler_state, ~_sampler_state[IDX(SamplerState::PointWrap)]))
-				return false;
+			_sampler_state[IDX(SamplerState::PointWrap)].filter = Filter(FilterMode::Nearest, FilterMode::Nearest);
+			_sampler_state[IDX(SamplerState::PointWrap)].address_u = TextureAddressMode::Wrap;
+			_sampler_state[IDX(SamplerState::PointWrap)].address_v = TextureAddressMode::Wrap;
 
-			sampler_state.filer = Filter::Point;
-			sampler_state.address_u = TextureAddressMode::Clamp;
-			sampler_state.address_v = TextureAddressMode::Clamp;
-			sampler_state.address_w = TextureAddressMode::Clamp;
-			if (!m_device->createSamplerState(sampler_state, ~_sampler_state[IDX(SamplerState::PointClamp)]))
-				return false;
+			_sampler_state[IDX(SamplerState::PointClamp)].filter = Filter(FilterMode::Nearest, FilterMode::Nearest);
+			_sampler_state[IDX(SamplerState::PointClamp)].address_u = TextureAddressMode::Clamp;
+			_sampler_state[IDX(SamplerState::PointClamp)].address_v = TextureAddressMode::Clamp;
 
-			sampler_state.filer = Filter::Point;
-			sampler_state.address_u = TextureAddressMode::Border;
-			sampler_state.address_v = TextureAddressMode::Border;
-			sampler_state.address_w = TextureAddressMode::Border;
-			sampler_state.border_color = BorderColor::Black;
-			if (!m_device->createSamplerState(sampler_state, ~_sampler_state[IDX(SamplerState::PointBorderBlack)]))
-				return false;
+			_sampler_state[IDX(SamplerState::PointBorderBlack)].filter = Filter(FilterMode::Nearest, FilterMode::Nearest);
+			_sampler_state[IDX(SamplerState::PointBorderBlack)].address_u = TextureAddressMode::Border;
+			_sampler_state[IDX(SamplerState::PointBorderBlack)].address_v = TextureAddressMode::Border;
+			_sampler_state[IDX(SamplerState::PointBorderBlack)].border_color = BorderColor::Black;
 
-			sampler_state.filer = Filter::Point;
-			sampler_state.address_u = TextureAddressMode::Border;
-			sampler_state.address_v = TextureAddressMode::Border;
-			sampler_state.address_w = TextureAddressMode::Border;
-			sampler_state.border_color = BorderColor::White;
-			if (!m_device->createSamplerState(sampler_state, ~_sampler_state[IDX(SamplerState::PointBorderWhite)]))
-				return false;
+			_sampler_state[IDX(SamplerState::PointBorderWhite)].filter = Filter(FilterMode::Nearest, FilterMode::Nearest);
+			_sampler_state[IDX(SamplerState::PointBorderWhite)].address_u = TextureAddressMode::Border;
+			_sampler_state[IDX(SamplerState::PointBorderWhite)].address_v = TextureAddressMode::Border;
+			_sampler_state[IDX(SamplerState::PointBorderWhite)].border_color = BorderColor::White;
 
 			// linear
 
-			sampler_state.filer = Filter::Linear;
-			sampler_state.address_u = TextureAddressMode::Wrap;
-			sampler_state.address_v = TextureAddressMode::Wrap;
-			sampler_state.address_w = TextureAddressMode::Wrap;
-			if (!m_device->createSamplerState(sampler_state, ~_sampler_state[IDX(SamplerState::LinearWrap)]))
-				return false;
+			_sampler_state[IDX(SamplerState::LinearWrap)].filter = Filter(FilterMode::Linear, FilterMode::Linear);
+			_sampler_state[IDX(SamplerState::LinearWrap)].address_u = TextureAddressMode::Wrap;
+			_sampler_state[IDX(SamplerState::LinearWrap)].address_v = TextureAddressMode::Wrap;
 
-			sampler_state.filer = Filter::Linear;
-			sampler_state.address_u = TextureAddressMode::Clamp;
-			sampler_state.address_v = TextureAddressMode::Clamp;
-			sampler_state.address_w = TextureAddressMode::Clamp;
-			if (!m_device->createSamplerState(sampler_state, ~_sampler_state[IDX(SamplerState::LinearClamp)]))
-				return false;
+			_sampler_state[IDX(SamplerState::LinearClamp)].filter = Filter(FilterMode::Linear, FilterMode::Linear);
+			_sampler_state[IDX(SamplerState::LinearClamp)].address_u = TextureAddressMode::Clamp;
+			_sampler_state[IDX(SamplerState::LinearClamp)].address_v = TextureAddressMode::Clamp;
 
-			sampler_state.filer = Filter::Linear;
-			sampler_state.address_u = TextureAddressMode::Border;
-			sampler_state.address_v = TextureAddressMode::Border;
-			sampler_state.address_w = TextureAddressMode::Border;
-			sampler_state.border_color = BorderColor::Black;
-			if (!m_device->createSamplerState(sampler_state, ~_sampler_state[IDX(SamplerState::LinearBorderBlack)]))
-				return false;
+			_sampler_state[IDX(SamplerState::LinearBorderBlack)].filter = Filter(FilterMode::Linear, FilterMode::Linear);
+			_sampler_state[IDX(SamplerState::LinearBorderBlack)].address_u = TextureAddressMode::Border;
+			_sampler_state[IDX(SamplerState::LinearBorderBlack)].address_v = TextureAddressMode::Border;
+			_sampler_state[IDX(SamplerState::LinearBorderBlack)].border_color = BorderColor::Black;
 
-			sampler_state.filer = Filter::Linear;
-			sampler_state.address_u = TextureAddressMode::Border;
-			sampler_state.address_v = TextureAddressMode::Border;
-			sampler_state.address_w = TextureAddressMode::Border;
-			sampler_state.border_color = BorderColor::White;
-			if (!m_device->createSamplerState(sampler_state, ~_sampler_state[IDX(SamplerState::LinearBorderWhite)]))
-				return false;
-		}
-
-		{
-			D3D11_DEPTH_STENCIL_DESC desc_ = {
-				.DepthEnable = FALSE,
-				.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL,
-				.DepthFunc = D3D11_COMPARISON_LESS_EQUAL,
-				.StencilEnable = FALSE,
-				.StencilReadMask = D3D11_DEFAULT_STENCIL_READ_MASK,
-				.StencilWriteMask = D3D11_DEFAULT_STENCIL_WRITE_MASK,
-				.FrontFace = D3D11_DEPTH_STENCILOP_DESC{
-					.StencilFailOp = D3D11_STENCIL_OP_KEEP,
-					.StencilDepthFailOp = D3D11_STENCIL_OP_KEEP,
-					.StencilPassOp = D3D11_STENCIL_OP_KEEP,
-					.StencilFunc = D3D11_COMPARISON_ALWAYS,
-				},
-				.BackFace = D3D11_DEPTH_STENCILOP_DESC{
-					.StencilFailOp = D3D11_STENCIL_OP_KEEP,
-					.StencilDepthFailOp = D3D11_STENCIL_OP_KEEP,
-					.StencilPassOp = D3D11_STENCIL_OP_KEEP,
-					.StencilFunc = D3D11_COMPARISON_ALWAYS,
-				},
-			};
-			hr = gHR = m_device->GetD3D11Device()->CreateDepthStencilState(&desc_, &_depth_state[IDX(DepthState::Disable)]);
-			if (FAILED(hr))
-				return false;
-			M_D3D_SET_DEBUG_NAME_SIMPLE(_depth_state[IDX(DepthState::Disable)].Get());
-
-			desc_.DepthEnable = TRUE;
-			hr = gHR = m_device->GetD3D11Device()->CreateDepthStencilState(&desc_, &_depth_state[IDX(DepthState::Enable)]);
-			if (FAILED(hr))
-				return false;
-			M_D3D_SET_DEBUG_NAME_SIMPLE(_depth_state[IDX(DepthState::Enable)].Get());
-		}
-
-		{
-			D3D11_BLEND_DESC desc_ = {
-				.AlphaToCoverageEnable = FALSE,
-				.IndependentBlendEnable = FALSE,
-				.RenderTarget = {},
-			};
-			D3D11_RENDER_TARGET_BLEND_DESC blendt_ = {
-				.BlendEnable = FALSE,
-				.SrcBlend = D3D11_BLEND_ZERO,
-				.DestBlend = D3D11_BLEND_ONE,
-				.BlendOp = D3D11_BLEND_OP_ADD,
-				.SrcBlendAlpha = D3D11_BLEND_ZERO,
-				.DestBlendAlpha = D3D11_BLEND_ONE,
-				.BlendOpAlpha = D3D11_BLEND_OP_ADD,
-				.RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL,
-			};
-			auto copy_ = [&]() -> void
-			{
-				for (auto& v : desc_.RenderTarget)
-				{
-					v = blendt_;
-				}
-			};
-			copy_();
-
-			hr = gHR = m_device->GetD3D11Device()->CreateBlendState(&desc_, &_blend_state[IDX(BlendState::Disable)]);
-			if (FAILED(hr))
-				return false;
-			M_D3D_SET_DEBUG_NAME_SIMPLE(_blend_state[IDX(BlendState::Disable)].Get());
-
-			blendt_.BlendEnable = TRUE;
-
-			blendt_.BlendOp = D3D11_BLEND_OP_ADD;
-			blendt_.SrcBlend = D3D11_BLEND_ONE;
-			blendt_.DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
-			blendt_.BlendOpAlpha = D3D11_BLEND_OP_ADD;
-			blendt_.SrcBlendAlpha = D3D11_BLEND_ONE;
-			blendt_.DestBlendAlpha = D3D11_BLEND_INV_SRC_ALPHA;
-			copy_();
-			hr = gHR = m_device->GetD3D11Device()->CreateBlendState(&desc_, &_blend_state[IDX(BlendState::Alpha)]);
-			if (FAILED(hr))
-				return false;
-			M_D3D_SET_DEBUG_NAME_SIMPLE(_blend_state[IDX(BlendState::Alpha)].Get());
-
-			blendt_.BlendOp = D3D11_BLEND_OP_ADD;
-			blendt_.SrcBlend = D3D11_BLEND_ONE;
-			blendt_.DestBlend = D3D11_BLEND_ZERO;
-			blendt_.BlendOpAlpha = D3D11_BLEND_OP_ADD;
-			blendt_.SrcBlendAlpha = D3D11_BLEND_ONE;
-			blendt_.DestBlendAlpha = D3D11_BLEND_ZERO;
-			copy_();
-			hr = gHR = m_device->GetD3D11Device()->CreateBlendState(&desc_, &_blend_state[IDX(BlendState::One)]);
-			if (FAILED(hr))
-				return false;
-			M_D3D_SET_DEBUG_NAME_SIMPLE(_blend_state[IDX(BlendState::One)].Get());
-
-			blendt_.BlendOp = D3D11_BLEND_OP_MIN;
-			blendt_.SrcBlend = D3D11_BLEND_ONE;
-			blendt_.DestBlend = D3D11_BLEND_ONE;
-			blendt_.BlendOpAlpha = D3D11_BLEND_OP_MIN;
-			blendt_.SrcBlendAlpha = D3D11_BLEND_ONE;
-			blendt_.DestBlendAlpha = D3D11_BLEND_ONE;
-			copy_();
-			hr = gHR = m_device->GetD3D11Device()->CreateBlendState(&desc_, &_blend_state[IDX(BlendState::Min)]);
-			if (FAILED(hr))
-				return false;
-			M_D3D_SET_DEBUG_NAME_SIMPLE(_blend_state[IDX(BlendState::Min)].Get());
-
-			blendt_.BlendOp = D3D11_BLEND_OP_MAX;
-			blendt_.SrcBlend = D3D11_BLEND_ONE;
-			blendt_.DestBlend = D3D11_BLEND_ONE;
-			blendt_.BlendOpAlpha = D3D11_BLEND_OP_MAX;
-			blendt_.SrcBlendAlpha = D3D11_BLEND_ONE;
-			blendt_.DestBlendAlpha = D3D11_BLEND_ONE;
-			copy_();
-			hr = gHR = m_device->GetD3D11Device()->CreateBlendState(&desc_, &_blend_state[IDX(BlendState::Max)]);
-			if (FAILED(hr))
-				return false;
-			M_D3D_SET_DEBUG_NAME_SIMPLE(_blend_state[IDX(BlendState::Max)].Get());
-
-			blendt_.BlendOp = D3D11_BLEND_OP_ADD;
-			blendt_.SrcBlend = D3D11_BLEND_DEST_COLOR;
-			blendt_.DestBlend = D3D11_BLEND_ZERO;
-			blendt_.BlendOpAlpha = D3D11_BLEND_OP_ADD;
-			blendt_.SrcBlendAlpha = D3D11_BLEND_ONE;
-			blendt_.DestBlendAlpha = D3D11_BLEND_INV_SRC_ALPHA;
-			copy_();
-			hr = gHR = m_device->GetD3D11Device()->CreateBlendState(&desc_, &_blend_state[IDX(BlendState::Mul)]);
-			if (FAILED(hr))
-				return false;
-			M_D3D_SET_DEBUG_NAME_SIMPLE(_blend_state[IDX(BlendState::Mul)].Get());
-
-			blendt_.BlendOp = D3D11_BLEND_OP_ADD;
-			blendt_.SrcBlend = D3D11_BLEND_ONE;
-			blendt_.DestBlend = D3D11_BLEND_INV_SRC_COLOR;
-			blendt_.BlendOpAlpha = D3D11_BLEND_OP_ADD;
-			blendt_.SrcBlendAlpha = D3D11_BLEND_ONE;
-			blendt_.DestBlendAlpha = D3D11_BLEND_INV_SRC_ALPHA;
-			copy_();
-			hr = gHR = m_device->GetD3D11Device()->CreateBlendState(&desc_, &_blend_state[IDX(BlendState::Screen)]);
-			if (FAILED(hr))
-				return false;
-			M_D3D_SET_DEBUG_NAME_SIMPLE(_blend_state[IDX(BlendState::Screen)].Get());
-
-			blendt_.BlendOp = D3D11_BLEND_OP_ADD;
-			blendt_.SrcBlend = D3D11_BLEND_ONE;
-			blendt_.DestBlend = D3D11_BLEND_ONE;
-			blendt_.BlendOpAlpha = D3D11_BLEND_OP_ADD;
-			blendt_.SrcBlendAlpha = D3D11_BLEND_ONE;
-			blendt_.DestBlendAlpha = D3D11_BLEND_INV_SRC_ALPHA;
-			copy_();
-			hr = gHR = m_device->GetD3D11Device()->CreateBlendState(&desc_, &_blend_state[IDX(BlendState::Add)]);
-			if (FAILED(hr))
-				return false;
-			M_D3D_SET_DEBUG_NAME_SIMPLE(_blend_state[IDX(BlendState::Add)].Get());
-
-			blendt_.BlendOp = D3D11_BLEND_OP_SUBTRACT;
-			blendt_.SrcBlend = D3D11_BLEND_ONE;
-			blendt_.DestBlend = D3D11_BLEND_ONE;
-			blendt_.BlendOpAlpha = D3D11_BLEND_OP_ADD;
-			blendt_.SrcBlendAlpha = D3D11_BLEND_ONE;
-			blendt_.DestBlendAlpha = D3D11_BLEND_INV_SRC_ALPHA;
-			copy_();
-			hr = gHR = m_device->GetD3D11Device()->CreateBlendState(&desc_, &_blend_state[IDX(BlendState::Sub)]);
-			if (FAILED(hr))
-				return false;
-			M_D3D_SET_DEBUG_NAME_SIMPLE(_blend_state[IDX(BlendState::Sub)].Get());
-
-			blendt_.BlendOp = D3D11_BLEND_OP_REV_SUBTRACT;
-			blendt_.SrcBlend = D3D11_BLEND_ONE;
-			blendt_.DestBlend = D3D11_BLEND_ONE;
-			blendt_.BlendOpAlpha = D3D11_BLEND_OP_ADD;
-			blendt_.SrcBlendAlpha = D3D11_BLEND_ONE;
-			blendt_.DestBlendAlpha = D3D11_BLEND_INV_SRC_ALPHA;
-			copy_();
-			hr = gHR = m_device->GetD3D11Device()->CreateBlendState(&desc_, &_blend_state[IDX(BlendState::RevSub)]);
-			if (FAILED(hr))
-				return false;
-			M_D3D_SET_DEBUG_NAME_SIMPLE(_blend_state[IDX(BlendState::RevSub)].Get());
-
-			blendt_.BlendOp = D3D11_BLEND_OP_REV_SUBTRACT;
-			blendt_.SrcBlend = D3D11_BLEND_INV_DEST_COLOR;
-			blendt_.DestBlend = D3D11_BLEND_INV_SRC_COLOR;
-			blendt_.BlendOpAlpha = D3D11_BLEND_OP_ADD;
-			blendt_.SrcBlendAlpha = D3D11_BLEND_ZERO;
-			blendt_.DestBlendAlpha = D3D11_BLEND_ONE;
-			copy_();
-			hr = gHR = m_device->GetD3D11Device()->CreateBlendState(&desc_, &_blend_state[IDX(BlendState::Inv)]);
-			if (FAILED(hr))
-				return false;
-			M_D3D_SET_DEBUG_NAME_SIMPLE(_blend_state[IDX(BlendState::Inv)].Get());
+			_sampler_state[IDX(SamplerState::LinearBorderWhite)].filter = Filter(FilterMode::Linear, FilterMode::Linear);
+			_sampler_state[IDX(SamplerState::LinearBorderWhite)].address_u = TextureAddressMode::Border;
+			_sampler_state[IDX(SamplerState::LinearBorderWhite)].address_v = TextureAddressMode::Border;
+			_sampler_state[IDX(SamplerState::LinearBorderWhite)].border_color = BorderColor::White;
 		}
 
 		return true;
 	}
-	void Renderer_D3D11::initState()
+	void Renderer_OpenGL::initState()
 	{
 		_state_dirty = true;
 
@@ -632,28 +303,142 @@ namespace Core::Graphics
 		setViewport(_state_set.viewport);
 		setScissorRect(_state_set.scissor_rect);
 
+		glUseProgram(_program);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(DrawVertex), (const GLvoid *)0);
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(DrawVertex), (const GLvoid *)offsetof(DrawVertex, u));
+		glEnableVertexAttribArray(1);
+		glVertexAttribPointer(2, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(DrawVertex), (const GLvoid *)offsetof(DrawVertex, color));
+		glEnableVertexAttribArray(2);
+
 		setVertexColorBlendState(_state_set.vertex_color_blend_state);
+		setTexture(_state_texture.get());
 		setSamplerState(_state_set.sampler_state, 0);
 		setFogState(_state_set.fog_state, _state_set.fog_color, _state_set.fog_near_or_density, _state_set.fog_far);
 		setDepthState(_state_set.depth_state);
 		setBlendState(_state_set.blend_state);
-		setTexture(_state_texture.get());
 		bindTextureAlphaType(_state_texture.get());
 		
 		_state_dirty = false;
 	}
-	void Renderer_D3D11::setSamplerState(SamplerState state, UINT index)
+	void Renderer_OpenGL::setSamplerState(IRenderer::SamplerState state, GLuint index)
 	{
-		ID3D11SamplerState* d3d11_sampler = static_cast<SamplerState_OpenGL*>(_sampler_state[IDX(state)].get())->GetState();
-		m_device->GetD3D11DeviceContext()->PSSetSamplers(index, 1, &d3d11_sampler);
+		// GLuint opengl_sampler = static_cast<SamplerState_OpenGL*>(_sampler_state[IDX(state)].get())->GetState();
+		// glBindSampler(GL_TEXTURE0 + index, opengl_sampler);
+		// glTexParameteri(GL_TEXTURE_2D, );
+		// 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		// 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		setSamplerState(state, index);
 	}
-	bool Renderer_D3D11::uploadVertexIndexBufferFromDrawList()
+	void Renderer_OpenGL::setSamplerState(Graphics::SamplerState state, GLuint index)
+	{
+		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, state.max_anisotropy);
+		switch (state.filter.min)
+		{
+		case FilterMode::Nearest:
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+			break;
+		case FilterMode::NearestMipNearest:
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
+			break;
+		case FilterMode::NearestMipLinear:
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_LINEAR);
+			break;
+		case FilterMode::Linear:
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+			break;
+		case FilterMode::LinearMipNearest:
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
+			break;
+		case FilterMode::LinearMipLinear:
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+			break;
+		}
+		switch (state.filter.mag)
+		{
+		default:
+			assert(false);
+			break;
+		case FilterMode::Nearest:
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+			break;
+		case FilterMode::Linear:
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+			break;
+		}
+
+		switch (state.address_u)
+		{
+		case TextureAddressMode::Wrap:
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+            break;
+        case TextureAddressMode::Mirror:
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+            break;
+        case TextureAddressMode::Clamp:
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+            break;
+        case TextureAddressMode::Border:
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+            break;
+		}
+		switch (state.address_v)
+		{
+		case TextureAddressMode::Wrap:
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+            break;
+        case TextureAddressMode::Mirror:
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
+            break;
+        case TextureAddressMode::Clamp:
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+            break;
+        case TextureAddressMode::Border:
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+            break;
+		}
+
+		if (state.address_u == TextureAddressMode::Border || state.address_v == TextureAddressMode::Border)
+		{
+			float borderColor[4];
+		#define makeColor(r, g, b, a) \
+			borderColor[0] = r;\
+			borderColor[1] = g;\
+			borderColor[2] = b;\
+			borderColor[3] = a;
+
+			switch (state.border_color)
+			{
+			case BorderColor::Black:
+				makeColor(0.0f, 0.0f, 0.0f, 0.0f);
+				break;
+			case BorderColor::OpaqueBlack:
+				makeColor(0.0f, 0.0f, 0.0f, 1.0f);
+				break;
+			case BorderColor::TransparentWhite:
+				makeColor(1.0f, 1.0f, 1.0f, 0.0f);
+				break;
+			case BorderColor::White:
+				makeColor(1.0f, 1.0f, 1.0f, 1.0f);
+				break;
+			}
+
+		#undef makeColor
+			glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, &borderColor[0]);
+		}
+
+		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_LOD_BIAS, state.mip_lod_bias);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC, GL_NEVER);
+		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_LOD, state.min_lod);
+		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_LOD, state.max_lod);
+	}
+	bool Renderer_OpenGL::uploadVertexIndexBufferFromDrawList()
 	{
 		// upload data
 		if ((_draw_list.vertex.capacity - _vi_buffer[_vi_buffer_index].vertex_offset) < _draw_list.vertex.size
 			|| (_draw_list.index.capacity - _vi_buffer[_vi_buffer_index].index_offset) < _draw_list.index.size)
 		{
-			// next  buffer
+			// next buffer
 			_vi_buffer_index = (_vi_buffer_index + 1) % _vi_buffer_count;
 			_vi_buffer[_vi_buffer_index].vertex_offset = 0;
 			_vi_buffer[_vi_buffer_index].index_offset = 0;
@@ -680,35 +465,36 @@ namespace Core::Graphics
 		}
 		return true;
 	}
-	void Renderer_D3D11::bindTextureSamplerState(ITexture2D* texture)
+	void Renderer_OpenGL::bindTextureSamplerState(ITexture2D* texture)
 	{
-		ISamplerState* sampler_from_texture = texture ? texture->getSamplerState() : nullptr;
-		ISamplerState* sampler = sampler_from_texture ? sampler_from_texture : _sampler_state[IDX(_state_set.sampler_state)].get();
-		ID3D11SamplerState* d3d11_sampler = static_cast<SamplerState_OpenGL*>(sampler)->GetState();
-		m_device->GetD3D11DeviceContext()->PSSetSamplers(0, 1, &d3d11_sampler);
+		std::optional<Graphics::SamplerState> sampler_from_texture = texture ? texture->getSamplerState() : std::optional<Graphics::SamplerState>();
+		Graphics::SamplerState sampler = sampler_from_texture.value_or(_sampler_state[IDX(_state_set.sampler_state)]);
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, static_cast<Texture2D_OpenGL*>(texture)->GetResource());
+		setSamplerState(sampler, 0);
+		// glBindSampler(0, static_cast<SamplerState_OpenGL*>(sampler)->GetState());
 	}
-	void Renderer_D3D11::bindTextureAlphaType(ITexture2D* texture)
+	void Renderer_OpenGL::bindTextureAlphaType(ITexture2D* texture)
 	{
-		TextureAlphaType const state = (texture ? texture->isPremultipliedAlpha() : false) ? TextureAlphaType::PremulAlpha : TextureAlphaType::Normal;
+		IRenderer::TextureAlphaType const state = (texture ? texture->isPremultipliedAlpha() : false)
+			? IRenderer::TextureAlphaType::PremulAlpha
+			: IRenderer::TextureAlphaType::Normal;
 		if (_state_dirty || _state_set.texture_alpha_type != state)
 		{
 			_state_set.texture_alpha_type = state;
-			auto* ctx = m_device->GetD3D11DeviceContext();
-			assert(ctx);
-			ctx->PSSetShader(_pixel_shader[IDX(_state_set.vertex_color_blend_state)][IDX(_state_set.fog_state)][IDX(state)].Get(), NULL, 0);
+			GLuint subroutines[2] = { (GLuint)(IDX(_state_set.vertex_color_blend_state) * 2 + IDX(state)), (GLuint)(IDX(_state_set.fog_state) + 8) };
+			glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 2, subroutines);
 		}
 	}
-	bool Renderer_D3D11::batchFlush(bool discard)
+	bool Renderer_OpenGL::batchFlush(bool discard)
 	{
 		ZoneScoped;
 		if (!discard)
 		{
-			TracyD3D11Zone(tracy::xTracyD3D11Ctx(), "BatchFlush");
+			TracyGpuZone("BatchFlush");
 			// upload data
 			if (!uploadVertexIndexBufferFromDrawList()) return false;
 			// draw
-			auto* ctx = m_device->GetD3D11DeviceContext();
-			assert(ctx);
 			if (_draw_list.command.size > 0)
 			{
 				VertexIndexBuffer& vi_ = _vi_buffer[_vi_buffer_index];
@@ -717,19 +503,14 @@ namespace Core::Graphics
 					DrawCommand& cmd_ = _draw_list.command.data[j_];
 					if (cmd_.vertex_count > 0 && cmd_.index_count > 0)
 					{
-						ID3D11ShaderResourceView* srv[1] = { get_view(cmd_.texture) };
-						ctx->PSSetShaderResources(0, 1, srv);
-						bindTextureSamplerState(cmd_.texture.get());
 						bindTextureAlphaType(cmd_.texture.get());
-						ctx->DrawIndexed(cmd_.index_count, vi_.index_offset, vi_.vertex_offset);
+						bindTextureSamplerState(cmd_.texture.get());
+						glDrawElementsBaseVertex(GL_TRIANGLES, cmd_.index_count, GL_UNSIGNED_INT, 0, vi_.index_offset);
 					}
 					vi_.vertex_offset += cmd_.vertex_count;
 					vi_.index_offset += cmd_.index_count;
 				}
 			}
-			// unbound: solve some debug warning
-			ID3D11ShaderResourceView* null_srv[1] = { NULL };
-			ctx->PSSetShaderResources(0, 1, null_srv);
 		}
 		// clear
 		clearDrawList();
@@ -737,132 +518,88 @@ namespace Core::Graphics
 		return true;
 	}
 
-	bool Renderer_D3D11::createResources()
+	bool Renderer_OpenGL::createResources()
 	{
-		assert(m_device->GetD3D11Device());
-
-		spdlog::info("[core] 开始创建渲染器");
+		spdlog::info("[core] Starting Renderer Initialization");
 		
 		if (!createBuffers())
 		{
-			spdlog::error("[core] 无法创建渲染器所需的顶点、索引缓冲区和着色器常量缓冲区");
+			spdlog::error("[core] Unable to create buffers");
 			return false;
 		}
 		if (!createStates())
 		{
-			spdlog::error("[core] 无法创建渲染器所需的渲染状态");
+			spdlog::error("[core] Unable to create render states");
 			return false;
 		}
 		if (!createShaders())
 		{
-			spdlog::error("[core] 无法创建渲染器所需的内置着色器");
+			spdlog::error("[core] Unable to create shaders");
 			return false;
 		}
 
-		spdlog::info("[core] 已创建渲染器");
+		spdlog::info("[core] Renderer Initialized");
 
 		return true;
 	}
-	void Renderer_D3D11::onDeviceCreate()
+	void Renderer_OpenGL::onDeviceCreate()
 	{
 		createResources();
 	}
-	void Renderer_D3D11::onDeviceDestroy()
+	void Renderer_OpenGL::onDeviceDestroy()
 	{
 		batchFlush(true);
 
 		_state_texture.reset();
 
-		_fx_vbuffer.Reset();
-		_fx_ibuffer.Reset();
+		glDeleteBuffers(1, &_fx_vbuffer);
+		glDeleteBuffers(1, &_fx_ibuffer);
 		for (auto& v : _vi_buffer)
 		{
-			v.vertex_buffer.Reset();
-			v.index_buffer.Reset();
+			glDeleteBuffers(1, &v.vertex_buffer);
+			glDeleteBuffers(1, &v.index_buffer);
 			v.vertex_offset = 0;
 			v.index_offset = 0;
 		}
 		_vi_buffer_index = 0;
 
-		_vp_matrix_buffer.Reset();
-		_world_matrix_buffer.Reset();
-		_camera_pos_buffer.Reset();
-		_fog_data_buffer.Reset();
-		_user_float_buffer.Reset();
+		glDeleteBuffers(1, &_vp_matrix_buffer);
+		glDeleteBuffers(1, &_world_matrix_buffer);
+		glDeleteBuffers(1, &_camera_pos_buffer);
+		glDeleteBuffers(1, &_fog_data_buffer);
+		glDeleteBuffers(1, &_user_float_buffer);
 
-		_input_layout.Reset();
-		for (auto& v : _vertex_shader)
-		{
-			v.Reset();
-		}
-		for (auto& i : _pixel_shader)
-		{
-			for (auto& j : i)
-			{
-				for (auto& v : j)
-				{
-					v.Reset();
-				}
-			}
-		}
-		_raster_state.Reset();
-		for (auto& v : _sampler_state)
-		{
-			v.reset();
-		}
-		for (auto& v : _depth_state)
-		{
-			v.Reset();
-		}
-		for (auto& v : _blend_state)
-		{
-			v.Reset();
-		}
+		glDeleteProgram(_program);
+		// for (auto& v : _sampler_state)
+		// {
+		// 	v.reset();
+		// }
 
-		spdlog::info("[core] 已关闭渲染器");
+		spdlog::info("[core] Renderer Destroyed");
 	}
 
-	bool Renderer_D3D11::beginBatch()
+	bool Renderer_OpenGL::beginBatch()
 	{
-		auto* ctx = m_device->GetD3D11DeviceContext();
-		assert(ctx);
-
-		// [IA Stage]
-
-		ctx->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-		ctx->IASetInputLayout(_input_layout.Get());
 		setVertexIndexBuffer();
 
-		// [VS State]
-
-		ID3D11Buffer* mats[2] = {
-			_vp_matrix_buffer.Get(),
-			_world_matrix_buffer.Get(),
+		GLuint mats[2] = {
+			_vp_matrix_buffer,
+			_world_matrix_buffer,
 		};
-		ctx->VSSetConstantBuffers(0, 2, mats);
+		glBindBuffersBase(GL_UNIFORM_BUFFER, 0, 2, mats);
 
-		// [RS Stage]
-
-		ctx->RSSetState(_raster_state.Get());
-
-		// [PS State]
-
-		ID3D11Buffer* psdata[2] = {
-			_camera_pos_buffer.Get(),
-			_fog_data_buffer.Get(),
+		GLuint psdata[2] = {
+			_camera_pos_buffer,
+			_fog_data_buffer,
 		};
-		ctx->PSSetConstantBuffers(0, 2, psdata);
-
-		// [OM Stage]
-
-		// [Internal State]
+		glBindBuffersBase(GL_UNIFORM_BUFFER, 2, 2, psdata);
 
 		initState();
 
 		_batch_scope = true;
 		return true;
 	}
-	bool Renderer_D3D11::endBatch()
+	bool Renderer_OpenGL::endBatch()
 	{
 		_batch_scope = false;
 		if (!batchFlush())
@@ -870,80 +607,48 @@ namespace Core::Graphics
 		_state_texture.reset();
 		return true;
 	}
-	bool Renderer_D3D11::flush()
+	bool Renderer_OpenGL::flush()
 	{
 		return batchFlush();
 	}
 
-	void Renderer_D3D11::clearRenderTarget(Color4B const& color)
+	void Renderer_OpenGL::clearRenderTarget(Color4B const& color)
 	{
 		batchFlush();
-		auto* ctx = m_device->GetD3D11DeviceContext();
-		assert(ctx);
-		ID3D11RenderTargetView* rtv = NULL;
-		ctx->OMGetRenderTargets(1, &rtv, NULL);
-		if (rtv)
-		{
-			FLOAT const clear_color[4] = {
-				(float)color.r / 255.0f,
-				(float)color.g / 255.0f,
-				(float)color.b / 255.0f,
-				(float)color.a / 255.0f,
-			};
-			ctx->ClearRenderTargetView(rtv, clear_color);
-			rtv->Release();
-		}
+		glClearColor(
+			(float)color.r / 255.0f,
+			(float)color.g / 255.0f,
+			(float)color.b / 255.0f,
+			(float)color.a / 255.0f
+		);
+		glClear(GL_COLOR_BUFFER_BIT);
 	}
-	void Renderer_D3D11::clearDepthBuffer(float zvalue)
+	void Renderer_OpenGL::clearDepthBuffer(float zvalue)
 	{
 		batchFlush();
-		auto* ctx = m_device->GetD3D11DeviceContext();
-		assert(ctx);
-		ID3D11DepthStencilView* dsv = NULL;
-		ctx->OMGetRenderTargets(1, NULL, &dsv);
-		if (dsv)
-		{
-			ctx->ClearDepthStencilView(dsv, D3D11_CLEAR_DEPTH, zvalue, D3D11_DEFAULT_STENCIL_REFERENCE);
-			dsv->Release();
-		}
+		glClear(GL_DEPTH_BUFFER_BIT);
 	}
-	void Renderer_D3D11::setRenderAttachment(IRenderTarget* p_rt, IDepthStencilBuffer* p_ds)
+	void Renderer_OpenGL::setRenderAttachment(IRenderTarget* p_rt)
 	{
 		batchFlush();
-		auto* ctx = m_device->GetD3D11DeviceContext();
-		assert(ctx);
-		ID3D11RenderTargetView* rtv[1] = { p_rt ? static_cast<RenderTarget_D3D11*>(p_rt)->GetView() : NULL };
-		ID3D11DepthStencilView* dsv = p_ds ? static_cast<DepthStencilBuffer_D3D11*>(p_ds)->GetView() : NULL;
-		ctx->OMSetRenderTargets(1, rtv, dsv);
+		glBindFramebuffer(GL_FRAMEBUFFER, static_cast<RenderTarget_OpenGL*>(p_rt)->GetFramebuffer());
 	}
 
-	void Renderer_D3D11::setOrtho(BoxF const& box)
+	void Renderer_OpenGL::setOrtho(BoxF const& box)
 	{
 		if (_state_dirty || !_camera_state_set.isEqual(box))
 		{
 			batchFlush();
 			_camera_state_set.ortho = box;
 			_camera_state_set.is_3D = false;
-			DirectX::XMFLOAT4X4 f4x4;
-			DirectX::XMStoreFloat4x4(&f4x4, DirectX::XMMatrixOrthographicOffCenterLH(box.a.x, box.b.x, box.b.y, box.a.y, box.a.z, box.b.z));
+			glm::mat4 m4 = glm::orthoLH_ZO(box.a.x, box.b.x, box.b.y, box.a.y, box.a.z, box.b.z);
 			/* upload vp matrix */ {
-				auto* ctx = m_device->GetD3D11DeviceContext();
-				assert(ctx);
-				D3D11_MAPPED_SUBRESOURCE res_ = {};
-				HRESULT hr = gHR = ctx->Map(_vp_matrix_buffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &res_);
-				if (SUCCEEDED(hr))
-				{
-					std::memcpy(res_.pData, &f4x4, sizeof(f4x4));
-					ctx->Unmap(_vp_matrix_buffer.Get(), 0);
-				}
-				else
-				{
-					spdlog::error("[core] ID3D11DeviceContext::Map -> #view_projection_matrix_buffer 调用失败，无法上传摄像机变换矩阵");
-				}
+				glBindBuffer(GL_UNIFORM_BUFFER, _vp_matrix_buffer);
+				glBufferData(GL_UNIFORM_BUFFER, sizeof(m4), &m4, GL_STATIC_DRAW);
 			}
 		}
 	}
-	void Renderer_D3D11::setPerspective(Vector3F const& eye, Vector3F const& lookat, Vector3F const& headup, float fov, float aspect, float znear, float zfar)
+	void Renderer_OpenGL::setPerspective(Vector3F const& eye, Vector3F const& lookat, Vector3F const& headup, float fov, float aspect, float znear, float zfar)
 	{
 		if (_state_dirty || !_camera_state_set.isEqual(eye, lookat, headup, fov, aspect, znear, zfar))
 		{
@@ -956,86 +661,44 @@ namespace Core::Graphics
 			_camera_state_set.znear = znear;
 			_camera_state_set.zfar = zfar;
 			_camera_state_set.is_3D = true;
-			DirectX::XMFLOAT3 const eyef3(eye.x, eye.y, eye.z);
-			DirectX::XMFLOAT3 const lookatf3(lookat.x, lookat.y, lookat.z);
-			DirectX::XMFLOAT3 const headupf3(headup.x, headup.y, headup.z);
-			DirectX::XMFLOAT4X4 f4x4;
-			DirectX::XMStoreFloat4x4(&f4x4,
-				DirectX::XMMatrixMultiply(
-					DirectX::XMMatrixLookAtLH(DirectX::XMLoadFloat3(&eyef3), DirectX::XMLoadFloat3(&lookatf3), DirectX::XMLoadFloat3(&headupf3)),
-					DirectX::XMMatrixPerspectiveFovLH(fov, aspect, znear, zfar)));
+			glm::vec3 const eyef3(eye.x, eye.y, eye.z);
+			glm::vec3 const lookatf3(lookat.x, lookat.y, lookat.z);
+			glm::vec3 const headupf3(headup.x, headup.y, headup.z);
+			glm::mat4 m4 = glm::lookAtLH(eyef3, lookatf3, headupf3) * glm::perspectiveLH_NO(fov, aspect, znear, zfar);
 			float const camera_pos[8] = {
 				eye.x, eye.y, eye.z, 0.0f,
 				lookatf3.x - eyef3.x, lookatf3.y - eyef3.y, lookatf3.z - eyef3.z, 0.0f,
 			};
-			auto* ctx = m_device->GetD3D11DeviceContext();
-			assert(ctx);
+			// auto* ctx = m_device->GetD3D11DeviceContext();
+			// assert(ctx);
 			/* upload vp matrix */ {
-				D3D11_MAPPED_SUBRESOURCE res_ = {};
-				HRESULT hr = gHR = ctx->Map(_vp_matrix_buffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &res_);
-				if (SUCCEEDED(hr))
-				{
-					std::memcpy(res_.pData, &f4x4, sizeof(f4x4));
-					ctx->Unmap(_vp_matrix_buffer.Get(), 0);
-				}
-				else
-				{
-					spdlog::error("[core] ID3D11DeviceContext::Map -> #view_projection_matrix_buffer 调用失败，无法上传摄像机变换矩阵");
-				}
+				glBindBuffer(GL_UNIFORM_BUFFER, _vp_matrix_buffer);
+				glBufferData(GL_UNIFORM_BUFFER, sizeof(m4), &m4, GL_STATIC_DRAW);
 			}
 			/* upload camera pos */ {
-				D3D11_MAPPED_SUBRESOURCE res_ = {};
-				HRESULT hr = gHR = ctx->Map(_camera_pos_buffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &res_);
-				if (SUCCEEDED(hr))
-				{
-					std::memcpy(res_.pData, camera_pos, sizeof(camera_pos));
-					ctx->Unmap(_camera_pos_buffer.Get(), 0);
-				}
-				else
-				{
-					spdlog::error("[core] ID3D11DeviceContext::Map -> #camera_position_buffer 调用失败，无法上传摄像机位置");
-				}
+				glBindBuffer(GL_UNIFORM_BUFFER, _camera_pos_buffer);
+				glBufferData(GL_UNIFORM_BUFFER, sizeof(camera_pos), &camera_pos, GL_STATIC_DRAW);
 			}
 		}
 	}
 
-	void Renderer_D3D11::setViewport(BoxF const& box)
+	void Renderer_OpenGL::setViewport(BoxF const& box)
 	{
 		if (_state_dirty || _state_set.viewport != box)
 		{
 			batchFlush();
-			_state_set.viewport = box;
-			D3D11_VIEWPORT const vp = {
-				.TopLeftX = box.a.x,
-				.TopLeftY = box.a.y,
-				.Width = box.b.x - box.a.x,
-				.Height = box.b.y - box.a.y,
-				.MinDepth = box.a.z,
-				.MaxDepth = box.b.z,
-			};
-			auto* ctx = m_device->GetD3D11DeviceContext();
-			assert(ctx);
-			ctx->RSSetViewports(1, &vp);
+			glViewport((GLint)box.a.x, (GLint)box.a.y, (GLint)box.b.x - (GLint)box.a.x, (GLint)box.b.y - (GLint)box.a.y);
 		}
 	}
-	void Renderer_D3D11::setScissorRect(RectF const& rect)
+	void Renderer_OpenGL::setScissorRect(RectF const& rect)
 	{
 		if (_state_dirty || _state_set.scissor_rect != rect)
 		{
 			batchFlush();
-			_state_set.scissor_rect = rect;
-			D3D11_RECT const rc = {
-				.left = (LONG)rect.a.x,
-				.top = (LONG)rect.a.y,
-				.right = (LONG)rect.b.x,
-				.bottom = (LONG)rect.b.y,
-			};
-			auto* ctx = m_device->GetD3D11DeviceContext();
-			assert(ctx);
-			ctx->RSSetScissorRects(1, &rc);
+			glScissor((GLint)rect.a.x, (GLint)rect.a.y, (GLint)rect.width(), (GLint)rect.height());
 		}
 	}
-	void Renderer_D3D11::setViewportAndScissorRect()
+	void Renderer_OpenGL::setViewportAndScissorRect()
 	{
 		_state_dirty = true;
 		setViewport(_state_set.viewport);
@@ -1043,18 +706,17 @@ namespace Core::Graphics
 		_state_dirty = false;
 	}
 
-	void Renderer_D3D11::setVertexColorBlendState(VertexColorBlendState state)
+	void Renderer_OpenGL::setVertexColorBlendState(VertexColorBlendState state)
 	{
 		if (_state_dirty || _state_set.vertex_color_blend_state != state)
 		{
 			batchFlush();
 			_state_set.vertex_color_blend_state = state;
-			auto* ctx = m_device->GetD3D11DeviceContext();
-			assert(ctx);
-			ctx->PSSetShader(_pixel_shader[IDX(state)][IDX(_state_set.fog_state)][IDX(_state_set.texture_alpha_type)].Get(), NULL, 0);
+			GLuint subroutines[2] = { (GLuint)(IDX(state) * 2 + IDX(_state_set.texture_alpha_type)), (GLuint)(IDX(_state_set.fog_state) + 8) };
+			glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 2, subroutines);
 		}
 	}
-	void Renderer_D3D11::setFogState(FogState state, Color4B const& color, float density_or_znear, float zfar)
+	void Renderer_OpenGL::setFogState(FogState state, Color4B const& color, float density_or_znear, float zfar)
 	{
 		if (_state_dirty || _state_set.fog_state != state || _state_set.fog_color != color || _state_set.fog_near_or_density != density_or_znear || _state_set.fog_far != zfar)
 		{
@@ -1063,9 +725,6 @@ namespace Core::Graphics
 			_state_set.fog_color = color;
 			_state_set.fog_near_or_density = density_or_znear;
 			_state_set.fog_far = zfar;
-			auto* ctx = m_device->GetD3D11DeviceContext();
-			assert(ctx);
-			ctx->VSSetShader(_vertex_shader[IDX(state)].Get(), NULL, 0);
 			float const fog_color_and_range[8] = {
 				(float)color.r / 255.0f,
 				(float)color.g / 255.0f,
@@ -1074,42 +733,88 @@ namespace Core::Graphics
 				density_or_znear, zfar, 0.0f, zfar - density_or_znear,
 			};
 			/* upload */ {
-				D3D11_MAPPED_SUBRESOURCE res_ = {};
-				HRESULT hr = gHR = ctx->Map(_fog_data_buffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &res_);
-				if (SUCCEEDED(hr))
-				{
-					std::memcpy(res_.pData, fog_color_and_range, sizeof(fog_color_and_range));
-					ctx->Unmap(_fog_data_buffer.Get(), 0);
-				}
-				else
-				{
-					spdlog::error("[core] ID3D11DeviceContext::Map -> #fog_data_buffer 调用失败，无法上传雾颜色、范围和密度信息");
-				}
+				glBindBuffer(GL_UNIFORM_BUFFER, _fog_data_buffer);
+				glBufferData(GL_UNIFORM_BUFFER, sizeof(fog_color_and_range), &fog_color_and_range, GL_STATIC_DRAW);
 			}
-			ctx->PSSetShader(_pixel_shader[IDX(_state_set.vertex_color_blend_state)][IDX(state)][IDX(_state_set.texture_alpha_type)].Get(), NULL, 0);
+
+			GLuint subroutines[2] = { (GLuint)(IDX(_state_set.vertex_color_blend_state) * 2 + IDX(_state_set.texture_alpha_type)), (GLuint)(IDX(state) + 8) };
+			glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 2, subroutines);
 		}
 	}
-	void Renderer_D3D11::setDepthState(DepthState state)
+	void Renderer_OpenGL::setDepthState(DepthState state)
 	{
 		if (_state_dirty || _state_set.depth_state != state)
 		{
 			batchFlush();
 			_state_set.depth_state = state;
-			auto* ctx = m_device->GetD3D11DeviceContext();
-			assert(ctx);
-			ctx->OMSetDepthStencilState(_depth_state[IDX(state)].Get(), D3D11_DEFAULT_STENCIL_REFERENCE);
+			if (state == DepthState::Enable)
+				glEnable(GL_DEPTH_TEST);
+			else
+				glDisable(GL_DEPTH_TEST);
 		}
 	}
-	void Renderer_D3D11::setBlendState(BlendState state)
+	void Renderer_OpenGL::setBlendState(BlendState state)
 	{
 		if (_state_dirty || _state_set.blend_state != state)
 		{
 			batchFlush();
 			_state_set.blend_state = state;
-			auto* ctx = m_device->GetD3D11DeviceContext();
-			assert(ctx);
-			FLOAT const factor[4] = {};
-			ctx->OMSetBlendState(_blend_state[IDX(state)].Get(), factor, D3D11_DEFAULT_SAMPLE_MASK);
+			switch (state) {
+			default: assert(false); break;
+			case BlendState::Disable:
+				glDisable(GL_BLEND);
+				break;
+			case BlendState::Alpha:
+				glEnable(GL_BLEND);
+				glBlendFuncSeparate(GL_ONE, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+				glBlendEquationSeparate(GL_FUNC_ADD, GL_FUNC_ADD);
+				break;
+			case BlendState::One:
+				glEnable(GL_BLEND);
+				glBlendFuncSeparate(GL_ONE, GL_ZERO, GL_ONE, GL_ZERO);
+				glBlendEquationSeparate(GL_FUNC_ADD, GL_FUNC_ADD);
+				break;
+			case BlendState::Min:
+				glEnable(GL_BLEND);
+				glBlendFuncSeparate(GL_ONE, GL_ONE, GL_ONE, GL_ONE);
+				glBlendEquationSeparate(GL_MIN, GL_MIN);
+				break;
+			case BlendState::Max:
+				glEnable(GL_BLEND);
+				glBlendFuncSeparate(GL_ONE, GL_ONE, GL_ONE, GL_ONE);
+				glBlendEquationSeparate(GL_MAX, GL_MAX);
+				break;
+			case BlendState::Mul:
+				glEnable(GL_BLEND);
+				glBlendFuncSeparate(GL_ONE, GL_ZERO, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+				glBlendEquationSeparate(GL_FUNC_ADD, GL_FUNC_ADD);
+				break;
+			case BlendState::Screen:
+				glEnable(GL_BLEND);
+				glBlendFuncSeparate(GL_ONE, GL_ONE_MINUS_SRC_COLOR, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+				glBlendEquationSeparate(GL_FUNC_ADD, GL_FUNC_ADD);
+				break;
+			case BlendState::Add:
+				glEnable(GL_BLEND);
+				glBlendFuncSeparate(GL_ONE, GL_ONE, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+				glBlendEquationSeparate(GL_FUNC_ADD, GL_FUNC_ADD);
+				break;
+			case BlendState::Sub:
+				glEnable(GL_BLEND);
+				glBlendFuncSeparate(GL_ONE, GL_ONE, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+				glBlendEquationSeparate(GL_FUNC_SUBTRACT, GL_FUNC_ADD);
+				break;
+			case BlendState::RevSub:
+				glEnable(GL_BLEND);
+				glBlendFuncSeparate(GL_ONE, GL_ONE, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+				glBlendEquationSeparate(GL_FUNC_REVERSE_SUBTRACT, GL_FUNC_ADD);
+				break;
+			case BlendState::Inv:
+				glEnable(GL_BLEND);
+				glBlendFuncSeparate(GL_ONE_MINUS_DST_COLOR, GL_ONE_MINUS_SRC_COLOR, GL_ZERO, GL_ONE);
+				glBlendEquationSeparate(GL_FUNC_REVERSE_SUBTRACT, GL_FUNC_ADD);
+				break;
+			}
 		}
 	}
 
@@ -1127,18 +832,18 @@ namespace Core::Graphics
 		return is_same(*a, b);
 	}
 
-	void Renderer_D3D11::setTexture(ITexture2D* texture)
+	void Renderer_OpenGL::setTexture(ITexture2D* texture)
 	{
 		if (_draw_list.command.size > 0 && is_same(_draw_list.command.data[_draw_list.command.size - 1].texture, texture))
 		{
-			// 可以合并
+			// Can merge
 		}
 		else
 		{
-			// 新的渲染命令
+			// New render command
 			if ((_draw_list.command.capacity - _draw_list.command.size) < 1)
 			{
-				batchFlush(); // 需要腾出空间
+				batchFlush(); // Free up space
 			}
 			_draw_list.command.size += 1;
 			DrawCommand& cmd_ = _draw_list.command.data[_draw_list.command.size - 1];
@@ -1146,14 +851,16 @@ namespace Core::Graphics
 			cmd_.vertex_count = 0;
 			cmd_.index_count = 0;
 		}
-		// 更新当前状态的纹理
+		// Update texture of current state
 		if (!is_same(_state_texture, texture))
 		{
 			_state_texture = static_cast<Texture2D_OpenGL*>(texture);
 		}
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, static_cast<Texture2D_OpenGL*>(texture)->GetResource());
 	}
 
-	bool Renderer_D3D11::drawTriangle(DrawVertex const& v1, DrawVertex const& v2, DrawVertex const& v3)
+	bool Renderer_OpenGL::drawTriangle(DrawVertex const& v1, DrawVertex const& v2, DrawVertex const& v3)
 	{
 		if ((_draw_list.vertex.capacity - _draw_list.vertex.size) < 3 || (_draw_list.index.capacity - _draw_list.index.size) < 3)
 		{
@@ -1161,7 +868,7 @@ namespace Core::Graphics
 		}
 		assert(_draw_list.command.size > 0);
 		DrawCommand& cmd_ = _draw_list.command.data[_draw_list.command.size - 1];
-		DrawVertex* vbuf_ = _draw_list.vertex.data + _draw_list.vertex.size;
+		IRenderer::DrawVertex* vbuf_ = _draw_list.vertex.data + _draw_list.vertex.size;
 		vbuf_[0] = v1;
 		vbuf_[1] = v2;
 		vbuf_[2] = v3;
@@ -1175,11 +882,11 @@ namespace Core::Graphics
 		cmd_.index_count += 3;
 		return true;
 	}
-	bool Renderer_D3D11::drawTriangle(DrawVertex const* pvert)
+	bool Renderer_OpenGL::drawTriangle(IRenderer::DrawVertex const* pvert)
 	{
 		return drawTriangle(pvert[0], pvert[1], pvert[2]);
 	}
-	bool Renderer_D3D11::drawQuad(DrawVertex const& v1, DrawVertex const& v2, DrawVertex const& v3, DrawVertex const& v4)
+	bool Renderer_OpenGL::drawQuad(IRenderer::DrawVertex const& v1, IRenderer::DrawVertex const& v2, IRenderer::DrawVertex const& v3, IRenderer::DrawVertex const& v4)
 	{
 		if ((_draw_list.vertex.capacity - _draw_list.vertex.size) < 4 || (_draw_list.index.capacity - _draw_list.index.size) < 6)
 		{
@@ -1187,7 +894,7 @@ namespace Core::Graphics
 		}
 		assert(_draw_list.command.size > 0);
 		DrawCommand& cmd_ = _draw_list.command.data[_draw_list.command.size - 1];
-		DrawVertex* vbuf_ = _draw_list.vertex.data + _draw_list.vertex.size;
+		IRenderer::DrawVertex* vbuf_ = _draw_list.vertex.data + _draw_list.vertex.size;
 		vbuf_[0] = v1;
 		vbuf_[1] = v2;
 		vbuf_[2] = v3;
@@ -1205,11 +912,11 @@ namespace Core::Graphics
 		cmd_.index_count += 6;
 		return true;
 	}
-	bool Renderer_D3D11::drawQuad(DrawVertex const* pvert)
+	bool Renderer_OpenGL::drawQuad(IRenderer::DrawVertex const* pvert)
 	{
 		return drawQuad(pvert[0], pvert[1], pvert[2], pvert[3]);
 	}
-	bool Renderer_D3D11::drawRaw(DrawVertex const* pvert, uint16_t nvert, DrawIndex const* pidx, uint16_t nidx)
+	bool Renderer_OpenGL::drawRaw(IRenderer::DrawVertex const* pvert, uint16_t nvert, DrawIndex const* pidx, uint16_t nidx)
 	{
 		if (nvert > _draw_list.vertex.capacity || nidx > _draw_list.index.capacity)
 		{
@@ -1224,8 +931,8 @@ namespace Core::Graphics
 		assert(_draw_list.command.size > 0);
 		DrawCommand& cmd_ = _draw_list.command.data[_draw_list.command.size - 1];
 
-		DrawVertex* vbuf_ = _draw_list.vertex.data + _draw_list.vertex.size;
-		std::memcpy(vbuf_, pvert, nvert * sizeof(DrawVertex));
+		IRenderer::DrawVertex* vbuf_ = _draw_list.vertex.data + _draw_list.vertex.size;
+		std::memcpy(vbuf_, pvert, nvert * sizeof(IRenderer::DrawVertex));
 		_draw_list.vertex.size += nvert;
 
 		DrawIndex* ibuf_ = _draw_list.index.data + _draw_list.index.size;
@@ -1240,7 +947,7 @@ namespace Core::Graphics
 
 		return true;
 	}
-	bool Renderer_D3D11::drawRequest(uint16_t nvert, uint16_t nidx, DrawVertex** ppvert, DrawIndex** ppidx, uint16_t* idxoffset)
+	bool Renderer_OpenGL::drawRequest(uint16_t nvert, uint16_t nidx, IRenderer::DrawVertex** ppvert, DrawIndex** ppidx, uint16_t* idxoffset)
 	{
 		if (nvert > _draw_list.vertex.capacity || nidx > _draw_list.index.capacity)
 		{
@@ -1261,14 +968,14 @@ namespace Core::Graphics
 		*ppidx = _draw_list.index.data + _draw_list.index.size;
 		_draw_list.index.size += nidx;
 
-		*idxoffset = cmd_.vertex_count; // 输出顶点索引偏移
+		*idxoffset = cmd_.vertex_count; // Output vertex offset
 		cmd_.vertex_count += nvert;
 		cmd_.index_count += nidx;
 
 		return true;
 	}
 
-	bool Renderer_D3D11::createPostEffectShader(StringView path, IPostEffectShader** pp_effect)
+	bool Renderer_OpenGL::createPostEffectShader(StringView path, IPostEffectShader** pp_effect)
 	{
 		try
 		{
@@ -1281,9 +988,9 @@ namespace Core::Graphics
 			return false;
 		}
 	}
-	bool Renderer_D3D11::drawPostEffect(
+	bool Renderer_OpenGL::drawPostEffect(
 		IPostEffectShader* p_effect,
-		BlendState blend,
+		IRenderer::BlendState blend,
 		ITexture2D* p_tex, SamplerState rtsv,
 		Vector4F const* cv, size_t cv_n,
 		ITexture2D* const* p_tex_arr, SamplerState const* sv, size_t tv_sv_n)
@@ -1296,187 +1003,149 @@ namespace Core::Graphics
 		
 		// PREPARE
 
-		auto* ctx = m_device->GetD3D11DeviceContext();
-		assert(ctx);
-
-		Microsoft::WRL::ComPtr<ID3D11RenderTargetView> p_d3d11_rtv;
-		Microsoft::WRL::ComPtr<ID3D11DepthStencilView> p_d3d11_dsv;
-
-		float sw_ = 0.0f;
-		float sh_ = 0.0f;
+		GLint w, h;
 		/* get current rendertarget size */ {
-			ID3D11RenderTargetView* rtv_ = NULL;
-			ID3D11DepthStencilView* dsv_ = NULL;
-			ctx->OMGetRenderTargets(1, &rtv_, &dsv_);
-			if (rtv_)
+			GLint rt = 0;
+			glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_NAME, &rt);
+			if (rt == 0)
 			{
-				Microsoft::WRL::ComPtr<ID3D11Resource> res_;
-				rtv_->GetResource(&res_);
-				Microsoft::WRL::ComPtr<ID3D11Texture2D> tex2d_;
-				HRESULT hr = gHR = res_.As(&tex2d_);
-				if (SUCCEEDED(hr))
-				{
-					D3D11_TEXTURE2D_DESC desc_ = {};
-					tex2d_->GetDesc(&desc_);
-					sw_ = (float)desc_.Width;
-					sh_ = (float)desc_.Height;
-				}
-				else
-				{
-					spdlog::error("[core] ID3D11Resource::QueryInterface -> #ID3D11Texture2D 调用失败");
-					return false;
-				}
-				p_d3d11_rtv = rtv_;
-				rtv_->Release();
+				spdlog::error("[core] glGetFrameBufferAttachmentParameteriv failed");
+				return false;
 			}
-			if (dsv_)
-			{
-				p_d3d11_dsv = dsv_;
-				dsv_->Release();
-			}
+
+			glGetTextureLevelParameteriv(rt, 0, GL_TEXTURE_WIDTH, &w);
+			glGetTextureLevelParameteriv(rt, 0, GL_TEXTURE_HEIGHT, &h);
 		}
-		if (sw_ < 1.0f || sh_ < 1.0f)
+		
+		if (w < 1 || h < 1)
 		{
-			spdlog::warn("[core] LuaSTG::Core::Renderer::postEffect 调用提前中止，当前渲染管线未绑定渲染目标");
+			spdlog::warn("[core] LuaSTG::Core::Renderer::postEffect exiting early, as no render target is bound!");
 			return false;
 		}
 
-		ctx->ClearState();
+		glViewport(0, 0, w, h);
+		glScissor(0, 0, w, h);
 
-		// [Stage IA]
+		glUseProgram(static_cast<PostEffectShader_OpenGL*>(p_effect)->GetShader());
 
 		/* upload vertex data */ {
-			D3D11_MAPPED_SUBRESOURCE res_ = {};
-			HRESULT hr = gHR = m_device->GetD3D11DeviceContext()->Map(_fx_vbuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &res_);
-			if (FAILED(hr))
-			{
-				spdlog::error("[core] ID3D11DeviceContext::Map -> #_fx_vbuffer 调用失败，无法上传顶点");
-				return false;
-			}
 			DrawVertex const vertex_data[4] = {
-				DrawVertex(0.f, sh_, 0.0f, 0.0f),
-				DrawVertex(sw_, sh_, 1.0f, 0.0f),
-				DrawVertex(sw_, 0.f, 1.0f, 1.0f),
-				DrawVertex(0.f, 0.f, 0.0f, 1.0f),
+				DrawVertex(0.f,      (float)h, 0.0f, 0.0f),
+				DrawVertex((float)w, (float)h, 1.0f, 0.0f),
+				DrawVertex((float)w, 0.f,      1.0f, 1.0f),
+				DrawVertex(0.f,      0.f,      0.0f, 1.0f),
 			};
-			std::memcpy(res_.pData, vertex_data, sizeof(vertex_data));
-			m_device->GetD3D11DeviceContext()->Unmap(_fx_vbuffer.Get(), 0);
+			glBindBuffer(GL_ARRAY_BUFFER, _fx_vbuffer);
+			glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_data), &vertex_data, GL_STATIC_DRAW);
 		}
-		
-		ctx->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-		ID3D11Buffer* p_d3d11_vbos[1] = { _fx_vbuffer.Get() };
-		UINT const stride = sizeof(DrawVertex);
-		UINT const offset = 0;
-		ctx->IASetVertexBuffers(0, 1, p_d3d11_vbos, &stride, &offset);
-		ctx->IASetIndexBuffer(_fx_ibuffer.Get(), DXGI_FORMAT_R16_UINT, 0);
-		ctx->IASetInputLayout(_input_layout.Get());
 
-		// [Stage VS]
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _fx_ibuffer);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(DrawVertex), (const GLvoid *)0);
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(DrawVertex), (const GLvoid *)offsetof(DrawVertex, u));
+		glEnableVertexAttribArray(1);
+		glVertexAttribPointer(2, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(DrawVertex), (const GLvoid *)offsetof(DrawVertex, color));
+		glEnableVertexAttribArray(2);
 
 		/* upload vp matrix */ {
-			D3D11_MAPPED_SUBRESOURCE res_ = {};
-			HRESULT hr = gHR = ctx->Map(_vp_matrix_buffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &res_);
-			if (SUCCEEDED(hr))
-			{
-				DirectX::XMFLOAT4X4 f4x4;
-				DirectX::XMStoreFloat4x4(&f4x4, DirectX::XMMatrixOrthographicOffCenterLH(0.0f, sw_, 0.0f, sh_, 0.0f, 1.0f));
-				std::memcpy(res_.pData, &f4x4, sizeof(f4x4));
-				ctx->Unmap(_vp_matrix_buffer.Get(), 0);
-			}
-			else
-			{
-				spdlog::error("[core] ID3D11DeviceContext::Map -> #view_projection_matrix_buffer 调用失败，无法上传摄像机变换矩阵");
-			}
+			glm::mat4 mat4 = glm::orthoLH_ZO(0.0f, (float)w, 0.0f, (float)h, 0.0f, 1.0f);
+			glBindBuffer(GL_UNIFORM_BUFFER, _vp_matrix_buffer);
+			glBufferData(GL_UNIFORM_BUFFER, sizeof(mat4), &mat4, GL_STATIC_DRAW);
 		}
 
-		ctx->VSSetShader(_vertex_shader[IDX(FogState::Disable)].Get(), NULL, 0);
-		ID3D11Buffer* p_mvp[1] = {_vp_matrix_buffer.Get()};
-		ctx->VSSetConstantBuffers(0, 1, p_mvp);
-
-		// [Stage RS]
-
-		ctx->RSSetState(_raster_state.Get());
-		D3D11_VIEWPORT viewport = {
-			.TopLeftX = 0.0f,
-			.TopLeftY = 0.0f,
-			.Width = sw_,
-			.Height = sh_,
-			.MinDepth = 0.0f,
-			.MaxDepth = 1.0f,
-		};
-		ctx->RSSetViewports(1, &viewport);
-		D3D11_RECT scissor = {
-			.left = 0,
-			.top = 0,
-			.right = (LONG)sw_,
-			.bottom = (LONG)sh_,
-		};
-		ctx->RSSetScissorRects(1, &scissor);
-
-		// [Stage PS]
+		glBindBufferBase(GL_UNIFORM_BUFFER, 0, _vp_matrix_buffer);
 
 		/* upload built-in value */ if (cv_n > 0) {
-			D3D11_MAPPED_SUBRESOURCE res_ = {};
-			HRESULT hr = gHR = ctx->Map(_user_float_buffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &res_);
-			if (FAILED(hr))
-			{
-				spdlog::error("[core] ID3D11DeviceContext::Map -> #user_float_buffer 调用失败，上传数据失败，LuaSTG::Core::Renderer::postEffect 调用提前中止");
-				return false;
-			}
-			std::memcpy(res_.pData, cv, std::min<UINT>((UINT)cv_n, 8) * sizeof(Vector4F));
-			ctx->Unmap(_user_float_buffer.Get(), 0);
+
+			glBindBuffer(GL_UNIFORM_BUFFER, _user_float_buffer);
+			glBufferData(GL_UNIFORM_BUFFER, std::min<GLuint>((GLuint)cv_n, 8) * sizeof(Vector4F), &cv, GL_STATIC_DRAW);
 		}
 		/* upload built-in value */ {
 			float ps_cbdata[8] = {
-				sw_, sh_, 0.0f, 0.0f,
+				(float)w, (float)h, 0.0f, 0.0f,
 				_state_set.viewport.a.x, _state_set.viewport.a.y, _state_set.viewport.b.x, _state_set.viewport.b.y,
 			};
-			D3D11_MAPPED_SUBRESOURCE res_ = {};
-			HRESULT hr = gHR = ctx->Map(_fog_data_buffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &res_);
-			if (FAILED(hr))
-			{
-				spdlog::error("[core] ID3D11DeviceContext::Map -> #engine_built_in_value_buffer 调用失败，无法上传渲染目标尺寸和视口信息，LuaSTG::Core::Renderer::postEffect 调用提前中止");
-				return false;
-			}
-			std::memcpy(res_.pData, ps_cbdata, sizeof(ps_cbdata));
-			ctx->Unmap(_fog_data_buffer.Get(), 0);
+			glBindBuffer(GL_UNIFORM_BUFFER, _user_float_buffer);
+			glBufferData(GL_UNIFORM_BUFFER, std::min<GLuint>((GLuint)cv_n, 8) * sizeof(Vector4F), &cv, GL_STATIC_DRAW);
 		}
-		ID3D11Buffer* p_psdata[2] = { _user_float_buffer.Get(), _fog_data_buffer.Get() };
-		ctx->PSSetConstantBuffers(0, 2, p_psdata);
-		ctx->PSSetShader(static_cast<PostEffectShader_OpenGL*>(p_effect)->GetPS(), NULL, 0);
+		GLuint frag_bufs[2] = { _user_float_buffer, _fog_data_buffer };
+		glBindBuffersBase(GL_UNIFORM_BUFFER, 2, 2, frag_bufs);
 
-		ID3D11ShaderResourceView* p_srvs[5] = {};
-		ID3D11SamplerState* p_samplers[5] = {};
-		p_srvs[4] = get_view(p_tex);
-		p_samplers[4] = get_sampler(_sampler_state[IDX(rtsv)]);
-		for (DWORD stage = 0; stage < std::min<DWORD>((DWORD)tv_sv_n, 4); stage += 1)
+		for (int stage = 0; stage < std::min<int>((int)tv_sv_n, 4); stage++)
 		{
-			p_srvs[stage] = get_view(p_tex_arr[stage]);
-			p_samplers[stage] = get_sampler(_sampler_state[IDX(sv[stage])]);
+			glActiveTexture(GL_TEXTURE0 + stage);
+			glBindTexture(GL_TEXTURE_2D, static_cast<Texture2D_OpenGL*>(p_tex_arr[stage])->GetResource());
+			setSamplerState(sv[stage], stage);
 		}
-		ctx->PSSetShaderResources(0, 5, p_srvs);
-		ctx->PSSetSamplers(0, 5, p_samplers);
+		glActiveTexture(GL_TEXTURE5);
+		glBindTexture(GL_TEXTURE_2D, static_cast<Texture2D_OpenGL*>(p_tex)->GetResource());
+		setSamplerState(sv[5], 5);
 
-		// [Stage OM]
-
-		ctx->OMSetDepthStencilState(_depth_state[IDX(DepthState::Disable)].Get(), D3D11_DEFAULT_STENCIL_REFERENCE);
-		FLOAT blend_factor[4] = {};
-		ctx->OMSetBlendState(_blend_state[IDX(blend)].Get(), blend_factor, D3D11_DEFAULT_SAMPLE_MASK);
-		ID3D11RenderTargetView* p_d3d11_rtvs[1] = { p_d3d11_rtv.Get() };
-		ctx->OMSetRenderTargets(1, p_d3d11_rtvs, p_d3d11_dsv.Get());
+		glDisable(GL_DEPTH_TEST);
+		switch (blend) {
+		default: assert(false); break;
+		case BlendState::Disable:
+			glDisable(GL_BLEND);
+			break;
+		case BlendState::Alpha:
+			glEnable(GL_BLEND);
+			glBlendFuncSeparate(GL_ONE, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+			glBlendEquationSeparate(GL_FUNC_ADD, GL_FUNC_ADD);
+			break;
+		case BlendState::One:
+			glEnable(GL_BLEND);
+			glBlendFuncSeparate(GL_ONE, GL_ZERO, GL_ONE, GL_ZERO);
+			glBlendEquationSeparate(GL_FUNC_ADD, GL_FUNC_ADD);
+			break;
+		case BlendState::Min:
+			glEnable(GL_BLEND);
+			glBlendFuncSeparate(GL_ONE, GL_ONE, GL_ONE, GL_ONE);
+			glBlendEquationSeparate(GL_MIN, GL_MIN);
+			break;
+		case BlendState::Max:
+			glEnable(GL_BLEND);
+			glBlendFuncSeparate(GL_ONE, GL_ONE, GL_ONE, GL_ONE);
+			glBlendEquationSeparate(GL_MAX, GL_MAX);
+			break;
+		case BlendState::Mul:
+			glEnable(GL_BLEND);
+			glBlendFuncSeparate(GL_ONE, GL_ZERO, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+			glBlendEquationSeparate(GL_FUNC_ADD, GL_FUNC_ADD);
+			break;
+		case BlendState::Screen:
+			glEnable(GL_BLEND);
+			glBlendFuncSeparate(GL_ONE, GL_ONE_MINUS_SRC_COLOR, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+			glBlendEquationSeparate(GL_FUNC_ADD, GL_FUNC_ADD);
+			break;
+		case BlendState::Add:
+			glEnable(GL_BLEND);
+			glBlendFuncSeparate(GL_ONE, GL_ONE, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+			glBlendEquationSeparate(GL_FUNC_ADD, GL_FUNC_ADD);
+			break;
+		case BlendState::Sub:
+			glEnable(GL_BLEND);
+			glBlendFuncSeparate(GL_ONE, GL_ONE, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+			glBlendEquationSeparate(GL_FUNC_SUBTRACT, GL_FUNC_ADD);
+			break;
+		case BlendState::RevSub:
+			glEnable(GL_BLEND);
+			glBlendFuncSeparate(GL_ONE, GL_ONE, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+			glBlendEquationSeparate(GL_FUNC_REVERSE_SUBTRACT, GL_FUNC_ADD);
+			break;
+		case BlendState::Inv:
+			glEnable(GL_BLEND);
+			glBlendFuncSeparate(GL_ONE_MINUS_DST_COLOR, GL_ONE_MINUS_SRC_COLOR, GL_ZERO, GL_ONE);
+			glBlendEquationSeparate(GL_FUNC_REVERSE_SUBTRACT, GL_FUNC_ADD);
+			break;
+		}
 
 		// DRAW
 
-		ctx->DrawIndexed(6, 0, 0);
-		
-		// CLEAR
-
-		ctx->ClearState();
-		ctx->OMSetRenderTargets(1, p_d3d11_rtvs, p_d3d11_dsv.Get());
+		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, NULL);
 
 		return beginBatch();
 	}
-	bool Renderer_D3D11::drawPostEffect(IPostEffectShader* p_effect, BlendState blend)
+	bool Renderer_OpenGL::drawPostEffect(IPostEffectShader* p_effect, BlendState blend)
 	{
 		assert(p_effect);
 
@@ -1484,182 +1153,162 @@ namespace Core::Graphics
 
 		// PREPARE
 
-		auto* ctx = m_device->GetD3D11DeviceContext();
-		assert(ctx);
-
-		Microsoft::WRL::ComPtr<ID3D11RenderTargetView> p_d3d11_rtv;
-		Microsoft::WRL::ComPtr<ID3D11DepthStencilView> p_d3d11_dsv;
-
-		float sw_ = 0.0f;
-		float sh_ = 0.0f;
+		GLint w, h;
 		/* get current rendertarget size */ {
-			ID3D11RenderTargetView* rtv_ = NULL;
-			ID3D11DepthStencilView* dsv_ = NULL;
-			ctx->OMGetRenderTargets(1, &rtv_, &dsv_);
-			if (rtv_)
+			GLint rt = 0;
+			glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_NAME, &rt);
+			if (rt == 0)
 			{
-				Microsoft::WRL::ComPtr<ID3D11Resource> res_;
-				rtv_->GetResource(&res_);
-				Microsoft::WRL::ComPtr<ID3D11Texture2D> tex2d_;
-				HRESULT hr = gHR = res_.As(&tex2d_);
-				if (SUCCEEDED(hr))
-				{
-					D3D11_TEXTURE2D_DESC desc_ = {};
-					tex2d_->GetDesc(&desc_);
-					sw_ = (float)desc_.Width;
-					sh_ = (float)desc_.Height;
-				}
-				else
-				{
-					spdlog::error("[core] ID3D11Resource::QueryInterface -> #ID3D11Texture2D 调用失败");
-					return false;
-				}
-				p_d3d11_rtv = rtv_;
-				rtv_->Release();
+				spdlog::error("[core] glGetFrameBufferAttachmentParameteriv failed");
+				return false;
 			}
-			if (dsv_)
-			{
-				p_d3d11_dsv = dsv_;
-				dsv_->Release();
-			}
+
+			glGetTextureLevelParameteriv(rt, 0, GL_TEXTURE_WIDTH, &w);
+			glGetTextureLevelParameteriv(rt, 0, GL_TEXTURE_HEIGHT, &h);
 		}
-		if (sw_ < 1.0f || sh_ < 1.0f)
+		
+		if (w < 1 || h < 1)
 		{
-			spdlog::warn("[core] LuaSTG::Core::Renderer::postEffect 调用提前中止，当前渲染管线未绑定渲染目标");
+			spdlog::warn("[core] LuaSTG::Core::Renderer::postEffect exiting early, as no render target is bound!");
 			return false;
 		}
 
-		ctx->ClearState();
+		glViewport(0, 0, w, h);
+		glScissor(0, 0, w, h);
 
-		// [Stage IA]
+		glUseProgram(static_cast<PostEffectShader_OpenGL*>(p_effect)->GetShader());
 
+		
 		/* upload vertex data */ {
-			D3D11_MAPPED_SUBRESOURCE res_ = {};
-			HRESULT hr = gHR = m_device->GetD3D11DeviceContext()->Map(_fx_vbuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &res_);
-			if (FAILED(hr))
-			{
-				spdlog::error("[core] ID3D11DeviceContext::Map -> #_fx_vbuffer 调用失败，无法上传顶点");
-				return false;
-			}
 			DrawVertex const vertex_data[4] = {
-				DrawVertex(0.f, sh_, 0.0f, 0.0f),
-				DrawVertex(sw_, sh_, 1.0f, 0.0f),
-				DrawVertex(sw_, 0.f, 1.0f, 1.0f),
-				DrawVertex(0.f, 0.f, 0.0f, 1.0f),
+				DrawVertex(0.f,      (float)h, 0.0f, 0.0f),
+				DrawVertex((float)w, (float)h, 1.0f, 0.0f),
+				DrawVertex((float)w, 0.f,      1.0f, 1.0f),
+				DrawVertex(0.f,      0.f,      0.0f, 1.0f),
 			};
-			std::memcpy(res_.pData, vertex_data, sizeof(vertex_data));
-			m_device->GetD3D11DeviceContext()->Unmap(_fx_vbuffer.Get(), 0);
+			glBindBuffer(GL_ARRAY_BUFFER, _fx_vbuffer);
+			glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_data), &vertex_data, GL_STATIC_DRAW);
 		}
 
-		ctx->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-		ID3D11Buffer* p_d3d11_vbos[1] = { _fx_vbuffer.Get() };
-		UINT const stride = sizeof(DrawVertex);
-		UINT const offset = 0;
-		ctx->IASetVertexBuffers(0, 1, p_d3d11_vbos, &stride, &offset);
-		ctx->IASetIndexBuffer(_fx_ibuffer.Get(), DXGI_FORMAT_R16_UINT, 0);
-		ctx->IASetInputLayout(_input_layout.Get());
-
-		// [Stage VS]
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _fx_ibuffer);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(DrawVertex), (const GLvoid *)0);
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(DrawVertex), (const GLvoid *)offsetof(DrawVertex, u));
+		glEnableVertexAttribArray(1);
+		glVertexAttribPointer(2, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(DrawVertex), (const GLvoid *)offsetof(DrawVertex, color));
+		glEnableVertexAttribArray(2);
 
 		/* upload vp matrix */ {
-			D3D11_MAPPED_SUBRESOURCE res_ = {};
-			HRESULT hr = gHR = ctx->Map(_vp_matrix_buffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &res_);
-			if (SUCCEEDED(hr))
-			{
-				DirectX::XMFLOAT4X4 f4x4;
-				DirectX::XMStoreFloat4x4(&f4x4, DirectX::XMMatrixOrthographicOffCenterLH(0.0f, sw_, 0.0f, sh_, 0.0f, 1.0f));
-				std::memcpy(res_.pData, &f4x4, sizeof(f4x4));
-				ctx->Unmap(_vp_matrix_buffer.Get(), 0);
-			}
-			else
-			{
-				spdlog::error("[core] ID3D11DeviceContext::Map -> #view_projection_matrix_buffer 调用失败，无法上传摄像机变换矩阵");
-			}
+			glm::mat4 mat4 = glm::orthoLH_ZO(0.0f, (float)w, 0.0f, (float)h, 0.0f, 1.0f);
+			glBindBuffer(GL_UNIFORM_BUFFER, _vp_matrix_buffer);
+			glBufferData(GL_UNIFORM_BUFFER, sizeof(mat4), &mat4, GL_STATIC_DRAW);
 		}
 
-		ctx->VSSetShader(_vertex_shader[IDX(FogState::Disable)].Get(), NULL, 0);
-		ID3D11Buffer* p_mvp[1] = { _vp_matrix_buffer.Get() };
-		ctx->VSSetConstantBuffers(0, 1, p_mvp);
-
-		// [Stage RS]
-
-		ctx->RSSetState(_raster_state.Get());
-		D3D11_VIEWPORT viewport = {
-			.TopLeftX = 0.0f,
-			.TopLeftY = 0.0f,
-			.Width = sw_,
-			.Height = sh_,
-			.MinDepth = 0.0f,
-			.MaxDepth = 1.0f,
-		};
-		ctx->RSSetViewports(1, &viewport);
-		D3D11_RECT scissor = {
-			.left = 0,
-			.top = 0,
-			.right = (LONG)sw_,
-			.bottom = (LONG)sh_,
-		};
-		ctx->RSSetScissorRects(1, &scissor);
+		glBindBufferBase(GL_UNIFORM_BUFFER, 0, _vp_matrix_buffer);
 
 		// [Stage PS]
 
 		if (!p_effect->apply(this))
 		{
-			spdlog::error("[core] 无法应用 PostEffectShader 变量");
+			spdlog::error("[core] Cannot apply PostEffectShader variables");
 			return false;
 		}
-		ctx->PSSetShader(static_cast<PostEffectShader_OpenGL*>(p_effect)->GetPS(), NULL, 0);
-		
-		// [Stage OM]
 
-		ctx->OMSetDepthStencilState(_depth_state[IDX(DepthState::Disable)].Get(), D3D11_DEFAULT_STENCIL_REFERENCE);
-		FLOAT blend_factor[4] = {};
-		ctx->OMSetBlendState(_blend_state[IDX(blend)].Get(), blend_factor, D3D11_DEFAULT_SAMPLE_MASK);
-		ID3D11RenderTargetView* p_d3d11_rtvs[1] = { p_d3d11_rtv.Get() };
-		ctx->OMSetRenderTargets(1, p_d3d11_rtvs, p_d3d11_dsv.Get());
+		glDisable(GL_DEPTH_TEST);
+		switch (blend) {
+		default: assert(false); break;
+		case BlendState::Disable:
+			glDisable(GL_BLEND);
+			break;
+		case BlendState::Alpha:
+			glEnable(GL_BLEND);
+			glBlendFuncSeparate(GL_ONE, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+			glBlendEquationSeparate(GL_FUNC_ADD, GL_FUNC_ADD);
+			break;
+		case BlendState::One:
+			glEnable(GL_BLEND);
+			glBlendFuncSeparate(GL_ONE, GL_ZERO, GL_ONE, GL_ZERO);
+			glBlendEquationSeparate(GL_FUNC_ADD, GL_FUNC_ADD);
+			break;
+		case BlendState::Min:
+			glEnable(GL_BLEND);
+			glBlendFuncSeparate(GL_ONE, GL_ONE, GL_ONE, GL_ONE);
+			glBlendEquationSeparate(GL_MIN, GL_MIN);
+			break;
+		case BlendState::Max:
+			glEnable(GL_BLEND);
+			glBlendFuncSeparate(GL_ONE, GL_ONE, GL_ONE, GL_ONE);
+			glBlendEquationSeparate(GL_MAX, GL_MAX);
+			break;
+		case BlendState::Mul:
+			glEnable(GL_BLEND);
+			glBlendFuncSeparate(GL_ONE, GL_ZERO, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+			glBlendEquationSeparate(GL_FUNC_ADD, GL_FUNC_ADD);
+			break;
+		case BlendState::Screen:
+			glEnable(GL_BLEND);
+			glBlendFuncSeparate(GL_ONE, GL_ONE_MINUS_SRC_COLOR, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+			glBlendEquationSeparate(GL_FUNC_ADD, GL_FUNC_ADD);
+			break;
+		case BlendState::Add:
+			glEnable(GL_BLEND);
+			glBlendFuncSeparate(GL_ONE, GL_ONE, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+			glBlendEquationSeparate(GL_FUNC_ADD, GL_FUNC_ADD);
+			break;
+		case BlendState::Sub:
+			glEnable(GL_BLEND);
+			glBlendFuncSeparate(GL_ONE, GL_ONE, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+			glBlendEquationSeparate(GL_FUNC_SUBTRACT, GL_FUNC_ADD);
+			break;
+		case BlendState::RevSub:
+			glEnable(GL_BLEND);
+			glBlendFuncSeparate(GL_ONE, GL_ONE, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+			glBlendEquationSeparate(GL_FUNC_REVERSE_SUBTRACT, GL_FUNC_ADD);
+			break;
+		case BlendState::Inv:
+			glEnable(GL_BLEND);
+			glBlendFuncSeparate(GL_ONE_MINUS_DST_COLOR, GL_ONE_MINUS_SRC_COLOR, GL_ZERO, GL_ONE);
+			glBlendEquationSeparate(GL_FUNC_REVERSE_SUBTRACT, GL_FUNC_ADD);
+			break;
+		}
 
 		// DRAW
 
-		ctx->DrawIndexed(6, 0, 0);
-
-		// CLEAR
-
-		ctx->ClearState();
-		ctx->OMSetRenderTargets(1, p_d3d11_rtvs, p_d3d11_dsv.Get());
+		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, NULL);
 
 		return beginBatch();
 	}
 
-	bool Renderer_D3D11::createModel(StringView path, IModel** pp_model)
+	bool Renderer_OpenGL::createModel(StringView path, IModel** pp_model)
 	{
 		if (!m_model_shared)
 		{
-			spdlog::info("[core] 创建模型渲染器共享组件");
+			spdlog::info("[core] Creating ModelSharedComponent");
 			try
 			{
-				*(~m_model_shared) = new ModelSharedComponent_D3D11(m_device.get());
-				spdlog::info("[luastg] 已创建模型渲染器共享组件");
+				*(~m_model_shared) = new ModelSharedComponent_OpenGL(m_device.get());
+				spdlog::info("[core] ModelSharedComponent created successfully");
 			}
 			catch (...)
 			{
-				spdlog::error("[core] 无法创建模型渲染器共享组件");
+				spdlog::error("[core] Create ModelSharedComponent failed");
 				return false;
 			}
 		}
 
 		try
 		{
-			*pp_model = new Model_D3D11(m_device.get(), m_model_shared.get(), path);
+			*pp_model = new Model_OpenGL(m_device.get(), m_model_shared.get(), path);
 			return true;
 		}
 		catch (const std::exception&)
 		{
 			*pp_model = nullptr;
-			spdlog::error("[luastg] LuaSTG::Core::Renderer::createModel 失败");
+			spdlog::error("[core] LuaSTG::Core::Renderer::createModel failed");
 			return false;
 		}
 	}
-	bool Renderer_D3D11::drawModel(IModel* p_model)
+	bool Renderer_OpenGL::drawModel(IModel* p_model)
 	{
 		if (!p_model)
 		{
@@ -1672,7 +1321,7 @@ namespace Core::Graphics
 			return false;
 		}
 
-		static_cast<Model_D3D11*>(p_model)->draw(_state_set.fog_state);
+		static_cast<Model_OpenGL*>(p_model)->draw(_state_set.fog_state);
 
 		if (!beginBatch())
 		{
@@ -1682,28 +1331,28 @@ namespace Core::Graphics
 		return true;
 	}
 
-	ISamplerState* Renderer_D3D11::getKnownSamplerState(SamplerState state)
+	Graphics::SamplerState Renderer_OpenGL::getKnownSamplerState(SamplerState state)
 	{
-		return _sampler_state[IDX(state)].get();
+		return _sampler_state[IDX(state)];
 	}
 
-	Renderer_D3D11::Renderer_D3D11(Device_D3D11* p_device)
+	Renderer_OpenGL::Renderer_OpenGL(Device_OpenGL* p_device)
 		: m_device(p_device)
 	{
 		if (!createResources())
-			throw std::runtime_error("Renderer_D3D11::Renderer_D3D11");
+			throw std::runtime_error("Renderer_OpenGL::Renderer_OpenGL");
 		m_device->addEventListener(this);
 	}
-	Renderer_D3D11::~Renderer_D3D11()
+	Renderer_OpenGL::~Renderer_OpenGL()
 	{
 		m_device->removeEventListener(this);
 	}
 
-	bool Renderer_D3D11::create(Device_D3D11* p_device, Renderer_D3D11** pp_renderer)
+	bool Renderer_OpenGL::create(Device_OpenGL* p_device, Renderer_OpenGL** pp_renderer)
 	{
 		try
 		{
-			*pp_renderer = new Renderer_D3D11(p_device);
+			*pp_renderer = new Renderer_OpenGL(p_device);
 			return true;
 		}
 		catch (...)
@@ -1717,7 +1366,7 @@ namespace Core::Graphics
 	{
 		try
 		{
-			*pp_renderer = new Renderer_D3D11(static_cast<Device_D3D11*>(p_device));
+			*pp_renderer = new Renderer_OpenGL(static_cast<Device_OpenGL*>(p_device));
 			return true;
 		}
 		catch (...)

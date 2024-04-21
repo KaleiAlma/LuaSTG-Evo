@@ -168,20 +168,6 @@ namespace Core::Graphics
 		}
 	}
 
-	bool Device_OpenGL::createSamplerState(SamplerState const& def, ISamplerState** pp_sampler)
-	{
-		try
-		{
-			*pp_sampler = new SamplerState_OpenGL(this, def);
-			return true;
-		}
-		catch (...)
-		{
-			*pp_sampler = nullptr;
-			return false;
-		}
-	}
-
 	bool Device_OpenGL::create(Device_OpenGL** p_device)
 	{
 		try
@@ -215,145 +201,137 @@ namespace Core::Graphics
 {
 	// SamplerState
 
-	void SamplerState_OpenGL::onDeviceCreate()
-	{
-		createResource();
-	}
-	void SamplerState_OpenGL::onDeviceDestroy()
-	{
-		glDeleteSamplers(1, &opengl_sampler);
-	}
+	// void SamplerState_OpenGL::onDeviceCreate()
+	// {
+	// 	createResource();
+	// }
+	// void SamplerState_OpenGL::onDeviceDestroy()
+	// {
+	// 	glDeleteSamplers(1, &opengl_sampler);
+	// }
 
-	bool SamplerState_OpenGL::createResource()
-	{
-		glGenSamplers(1, &opengl_sampler);
-		if (opengl_sampler == 0) {
-			i18n_core_system_call_report_error("glGenSamplers");
-			return false;
-		}
+	// bool SamplerState_OpenGL::createResource()
+	// {
+	// 	glGenSamplers(1, &opengl_sampler);
+	// 	if (opengl_sampler == 0) {
+	// 		i18n_core_system_call_report_error("glGenSamplers");
+	// 		return false;
+	// 	}
 
-		switch (m_info.filter)
-		{
-		default: assert(false); return false;
-		case Filter::Point:
-			glSamplerParameteri(opengl_sampler, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-			glSamplerParameteri(opengl_sampler, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-			break;
-		case Filter::PointMinLinear:
-			glSamplerParameteri(opengl_sampler, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-			glSamplerParameteri(opengl_sampler, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-			break;
-		case Filter::PointMagLinear:
-			glSamplerParameteri(opengl_sampler, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-			glSamplerParameteri(opengl_sampler, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-			break;
-		case Filter::PointMipLinear: // unsupported
-			glSamplerParameteri(opengl_sampler, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-			glSamplerParameteri(opengl_sampler, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-			break;
-		case Filter::LinearMinPoint:
-			glSamplerParameteri(opengl_sampler, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-			glSamplerParameteri(opengl_sampler, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-			break;
-		case Filter::LinearMagPoint:
-			glSamplerParameteri(opengl_sampler, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-			glSamplerParameteri(opengl_sampler, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-			break;
-		case Filter::LinearMipPoint: // unsupported
-			glSamplerParameteri(opengl_sampler, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-			glSamplerParameteri(opengl_sampler, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-			break;
-		case Filter::Linear:
-			glSamplerParameteri(opengl_sampler, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-			glSamplerParameteri(opengl_sampler, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-			break;
-		case Filter::Anisotropic:
-			glSamplerParameteri(opengl_sampler, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-			glSamplerParameteri(opengl_sampler, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-			glSamplerParameterf(opengl_sampler, GL_TEXTURE_MAX_ANISOTROPY_EXT, m_info.max_anisotropy);
-			break;
-		}
+	// 	// switch (m_info.filter)
+	// 	// {
+	// 	// default: assert(false); return false;
+	// 	// case Filter::Nearest:
+	// 	// 	glSamplerParameteri(opengl_sampler, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	// 	// 	glSamplerParameteri(opengl_sampler, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	// 	// 	break;
+	// 	// case Filter::PointMinLinear:
+	// 	// 	glSamplerParameteri(opengl_sampler, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	// 	// 	glSamplerParameteri(opengl_sampler, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	// 	// 	break;
+	// 	// case Filter::PointMagLinear:
+	// 	// 	glSamplerParameteri(opengl_sampler, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	// 	// 	glSamplerParameteri(opengl_sampler, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	// 	// 	break;
+	// 	// case Filter::PointMipLinear: // unsupported
+	// 	// 	glSamplerParameteri(opengl_sampler, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	// 	// 	glSamplerParameteri(opengl_sampler, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	// 	// 	break;
+	// 	// case Filter::LinearMinPoint:
+	// 	// 	glSamplerParameteri(opengl_sampler, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	// 	// 	glSamplerParameteri(opengl_sampler, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	// 	// 	break;
+	// 	// case Filter::LinearMagPoint:
+	// 	// 	glSamplerParameteri(opengl_sampler, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	// 	// 	glSamplerParameteri(opengl_sampler, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	// 	// 	break;
+	// 	// case Filter::LinearMipPoint: // unsupported
+	// 	// 	glSamplerParameteri(opengl_sampler, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	// 	// 	glSamplerParameteri(opengl_sampler, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	// 	// 	break;
+	// 	// case Filter::Linear:
+	// 	// 	glSamplerParameteri(opengl_sampler, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	// 	// 	glSamplerParameteri(opengl_sampler, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	// 	// 	break;
+	// 	// case Filter::Anisotropic:
+	// 	// 	glSamplerParameteri(opengl_sampler, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	// 	// 	glSamplerParameteri(opengl_sampler, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	// 	// 	glSamplerParameterf(opengl_sampler, GL_TEXTURE_MAX_ANISOTROPY_EXT, m_info.max_anisotropy);
+	// 	// 	break;
+	// 	// }
 		
-		auto mapAddressMode_ = [](TextureAddressMode mode) -> GLint
-		{
-			switch (mode)
-			{
-			default: assert(false); return (GLint)0;
-			case TextureAddressMode::Wrap: return GL_REPEAT;
-			case TextureAddressMode::Mirror: return GL_MIRRORED_REPEAT;
-			case TextureAddressMode::Clamp: return GL_CLAMP_TO_EDGE;
-			case TextureAddressMode::Border: return GL_CLAMP_TO_BORDER;
-			case TextureAddressMode::MirrorOnce: return GL_MIRRORED_REPEAT;
-			}
-		};
+	// 	auto mapAddressMode_ = [](TextureAddressMode mode) -> GLint
+	// 	{
+	// 		switch (mode)
+	// 		{
+	// 		default: assert(false); return (GLint)0;
+	// 		case TextureAddressMode::Wrap: return GL_REPEAT;
+	// 		case TextureAddressMode::Mirror: return GL_MIRRORED_REPEAT;
+	// 		case TextureAddressMode::Clamp: return GL_CLAMP_TO_EDGE;
+	// 		case TextureAddressMode::Border: return GL_CLAMP_TO_BORDER;
+	// 		case TextureAddressMode::MirrorOnce: return GL_MIRRORED_REPEAT;
+	// 		}
+	// 	};
 
-	#define mapAddressMode(_X, _Y) \
-		GLint wrap##_Y = mapAddressMode_(m_info._X);\
-		if (wrap##_Y == (GLint)0) { assert(false); return false; }\
-		glSamplerParameteri(opengl_sampler, GL_TEXTURE_WRAP_##_Y, wrap##_Y);
+	// #define mapAddressMode(_X, _Y) \
+	// 	GLint wrap##_Y = mapAddressMode_(m_info._X);\
+	// 	if (wrap##_Y == (GLint)0) { assert(false); return false; }\
+	// 	glSamplerParameteri(opengl_sampler, GL_TEXTURE_WRAP_##_Y, wrap##_Y);
 
-		mapAddressMode(address_u, S);
-		mapAddressMode(address_v, T);
-		mapAddressMode(address_w, R);
+	// 	mapAddressMode(address_u, S);
+	// 	mapAddressMode(address_v, T);
+	// 	mapAddressMode(address_w, R);
 
-	#undef mapAddressMode
+	// #undef mapAddressMode
 
-		// desc.MipLODBias = m_info.mip_lod_bias;
-		glSamplerParameterf(opengl_sampler, GL_TEXTURE_LOD_BIAS, m_info.mip_lod_bias);
-
-
-		// desc.MaxAnisotropy = m_info.max_anisotropy;
-
-		// desc.ComparisonFunc = D3D11_COMPARISON_NEVER;
-		glSamplerParameteri(opengl_sampler, GL_TEXTURE_COMPARE_FUNC, GL_NEVER);
-
-		// desc.MinLOD = m_info.min_lod;
-		// desc.MaxLOD = m_info.max_lod;
-		glSamplerParameterf(opengl_sampler, GL_TEXTURE_MIN_LOD, m_info.min_lod);
-		glSamplerParameterf(opengl_sampler, GL_TEXTURE_MAX_LOD, m_info.max_lod);
+	// 	glSamplerParameterf(opengl_sampler, GL_TEXTURE_LOD_BIAS, m_info.mip_lod_bias);
+	// 	glSamplerParameteri(opengl_sampler, GL_TEXTURE_COMPARE_FUNC, GL_NEVER);
+	// 	glSamplerParameterf(opengl_sampler, GL_TEXTURE_MIN_LOD, m_info.min_lod);
+	// 	glSamplerParameterf(opengl_sampler, GL_TEXTURE_MAX_LOD, m_info.max_lod);
 		
-		float borderColor[4];
-	#define makeColor(r, g, b, a) \
-		borderColor[0] = r;\
-		borderColor[1] = g;\
-		borderColor[2] = b;\
-		borderColor[3] = a;
+	// 	float borderColor[4];
+	// #define makeColor(r, g, b, a) \
+	// 	borderColor[0] = r;\
+	// 	borderColor[1] = g;\
+	// 	borderColor[2] = b;\
+	// 	borderColor[3] = a;
 
-		switch (m_info.border_color)
-		{
-		default: assert(false); return false;
-		case BorderColor::Black:
-			makeColor(0.0f, 0.0f, 0.0f, 0.0f);
-			break;
-		case BorderColor::OpaqueBlack:
-			makeColor(0.0f, 0.0f, 0.0f, 1.0f);
-			break;
-		case BorderColor::TransparentWhite:
-			makeColor(1.0f, 1.0f, 1.0f, 0.0f);
-			break;
-		case BorderColor::White:
-			makeColor(1.0f, 1.0f, 1.0f, 1.0f);
-			break;
-		}
+	// 	switch (m_info.border_color)
+	// 	{
+	// 	default: assert(false); return false;
+	// 	case BorderColor::Black:
+	// 		makeColor(0.0f, 0.0f, 0.0f, 0.0f);
+	// 		break;
+	// 	case BorderColor::OpaqueBlack:
+	// 		makeColor(0.0f, 0.0f, 0.0f, 1.0f);
+	// 		break;
+	// 	case BorderColor::TransparentWhite:
+	// 		makeColor(1.0f, 1.0f, 1.0f, 0.0f);
+	// 		break;
+	// 	case BorderColor::White:
+	// 		makeColor(1.0f, 1.0f, 1.0f, 1.0f);
+	// 		break;
+	// 	}
 
-	#undef makeColor
-		glSamplerParameterfv(opengl_sampler, GL_TEXTURE_BORDER_COLOR, &borderColor[0]);
+	// #undef makeColor
+	// 	glSamplerParameterfv(opengl_sampler, GL_TEXTURE_BORDER_COLOR, &borderColor[0]);
 
-		return true;
-	}
+	// 	return true;
+	// }
 
-	SamplerState_OpenGL::SamplerState_OpenGL(Device_OpenGL* p_device, SamplerState const& def)
-		: m_device(p_device)
-		, m_info(def)
-	{
-		if (!createResource())
-			throw std::runtime_error("SamplerState_OpenGL::SamplerState_OpenGL");
-		m_device->addEventListener(this);
-	}
-	SamplerState_OpenGL::~SamplerState_OpenGL()
-	{
-		m_device->removeEventListener(this);
-	}
+	// SamplerState_OpenGL::SamplerState_OpenGL(Device_OpenGL* p_device, SamplerState const& def)
+	// 	: m_device(p_device)
+	// 	, m_info(def)
+	// {
+	// 	if (!createResource())
+	// 		throw std::runtime_error("SamplerState_OpenGL::SamplerState_OpenGL");
+	// 	m_device->addEventListener(this);
+	// }
+	// SamplerState_OpenGL::~SamplerState_OpenGL()
+	// {
+	// 	m_device->removeEventListener(this);
+	// 	glDeleteSamplers(1, &opengl_sampler);
+	// }
 
 	// Texture2D
 
@@ -481,7 +459,7 @@ namespace Core::Graphics
 		: m_device(device)
 		, m_size(size)
 		, m_dynamic(true)
-		, m_premul(rendertarget) // 默认是预乘 alpha 的
+		, m_premul(rendertarget)
 		, m_mipmap(false)
 		, m_isrt(rendertarget)
 	{
@@ -501,8 +479,6 @@ namespace Core::Graphics
 
 	bool RenderTarget_OpenGL::setSize(Vector2U size)
 	{
-		// d3d11_rtv.Reset();
-		// d2d1_bitmap_target.Reset();
 		if (!m_texture->setSize(size)) return false;
 		return createResource();
 	}
@@ -514,66 +490,11 @@ namespace Core::Graphics
 	}
 	void RenderTarget_OpenGL::onDeviceDestroy()
 	{
-		// d3d11_rtv.Reset();
-		// d2d1_bitmap_target.Reset();
 		m_texture->onDeviceDestroy();
 	}
 
 	bool RenderTarget_OpenGL::createResource()
 	{
-		// HRESULT hr = S_OK;
-
-		// auto* d3d11_device = m_device->GetD3D11Device();
-		// auto* d3d11_devctx = m_device->GetD3D11DeviceContext();
-		// auto* d2d1_device_context = m_device->GetD2D1DeviceContext();
-		// if (!d3d11_device || !d3d11_devctx || !d2d1_device_context)
-		// 	return false;
-
-		// get texture resource info
-
-		// D3D11_TEXTURE2D_DESC tex2ddef = {};
-		// m_texture->GetResource()->GetDesc(&tex2ddef);
-
-		// create render target view
-
-		// D3D11_RENDER_TARGET_VIEW_DESC rtvdef = {
-		// 	.Format = tex2ddef.Format,
-		// 	// TODO: sRGB
-		// 	//.Format = DXGI_FORMAT_B8G8R8A8_UNORM_SRGB,
-		// 	.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D,
-		// 	.Texture2D = D3D11_TEX2D_RTV{.MipSlice = 0,},
-		// };
-		// hr = gHR = d3d11_device->CreateRenderTargetView(m_texture->GetResource(), &rtvdef, &d3d11_rtv);
-		// if (FAILED(hr))
-		// {
-		// 	i18n_core_system_call_report_error("ID3D11Device::CreateRenderTargetView");
-		// 	return false;
-		// }
-		// M_D3D_SET_DEBUG_NAME(d3d11_rtv.Get(), "RenderTarget_OpenGL::d3d11_rtv");
-
-		// create d2d1 drawing
-
-		// Microsoft::WRL::ComPtr<IDXGISurface> dxgi_surface;
-		// hr = gHR = m_texture->GetResource()->QueryInterface(IID_PPV_ARGS(&dxgi_surface));
-		// if (FAILED(hr))
-		// {
-		// 	i18n_core_system_call_report_error("ID3D11Texture2D::QueryInterface -> IDXGISurface");
-		// 	return false;
-		// }
-		
-		// D2D1_BITMAP_PROPERTIES1 bitmap_info = {
-		// 	.pixelFormat = {
-		// 		.format = DXGI_FORMAT_B8G8R8A8_UNORM,
-		// 		.alphaMode = D2D1_ALPHA_MODE_PREMULTIPLIED,
-		// 	},
-		// 	.dpiX = 0.0f,
-		// 	.dpiY = 0.0f,
-		// 	.bitmapOptions = D2D1_BITMAP_OPTIONS_TARGET,
-		// 	.colorContext = NULL,
-		// };
-		// HRGet = d2d1_device_context->CreateBitmapFromDxgiSurface(dxgi_surface.Get(), &bitmap_info, &d2d1_bitmap_target);
-		// HRCheckCallReturnBool("ID3D11DeviceContext::CreateBitmapFromDxgiSurface");
-
 		glGenFramebuffers(1, &opengl_framebuffer);
 		if (opengl_framebuffer == 0) {
 			i18n_core_system_call_report_error("glGenFramebuffers");

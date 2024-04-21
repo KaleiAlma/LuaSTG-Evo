@@ -27,11 +27,11 @@ include(cmake/packages.xiph.cmake)
 include(cmake/packages.z.cmake)
 add_subdirectory(external)
 include(cmake/packages.lua.cmake)
-add_library(GeneratedShaderHeaders INTERFACE)
-target_include_directories(GeneratedShaderHeaders
-INTERFACE
-    ${CMAKE_CURRENT_LIST_DIR}/LuaSTG/Shader/generated
-)
+# add_library(GeneratedShaderHeaders INTERFACE)
+# target_include_directories(GeneratedShaderHeaders
+# INTERFACE
+#     ${CMAKE_CURRENT_LIST_DIR}/LuaSTG/Shader/generated
+# )
 add_subdirectory(imgui)
 
 # add_subdirectory(utility)

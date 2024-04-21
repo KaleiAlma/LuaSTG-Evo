@@ -1,6 +1,7 @@
 ﻿#pragma once
 #include "Core/Type.hpp"
 #include <limits>
+#include <optional>
 
 namespace Core::Graphics
 {
@@ -10,30 +11,38 @@ namespace Core::Graphics
 		virtual void onDeviceDestroy() = 0;
 	};
 
-	struct DeviceMemoryUsageStatistics
+	// struct DeviceMemoryUsageStatistics
+	// {
+	// 	struct DeviceMemoryUsage
+	// 	{
+	// 		uint64_t budget;
+	// 		uint64_t current_usage;
+	// 		uint64_t available_for_reservation;
+	// 		uint64_t current_reservation;
+	// 	};
+	// 	DeviceMemoryUsage local{};
+	// 	DeviceMemoryUsage non_local{};
+	// };
+
+	enum class FilterMode
 	{
-		struct DeviceMemoryUsage
-		{
-			uint64_t budget;
-			uint64_t current_usage;
-			uint64_t available_for_reservation;
-			uint64_t current_reservation;
-		};
-		DeviceMemoryUsage local{};
-		DeviceMemoryUsage non_local{};
+		Nearest,
+		NearestMipNearest,
+		NearestMipLinear,
+		Linear,
+		LinearMipNearest,
+		LinearMipLinear,
 	};
 
-	enum class Filter
+	struct Filter
 	{
-		Point,
-		PointMinLinear,
-		PointMagLinear,
-		PointMipLinear,
-		LinearMinPoint,
-		LinearMagPoint,
-		LinearMipPoint,
-		Linear,
-		Anisotropic,
+		FilterMode min;
+		FilterMode mag;
+
+		Filter(FilterMode min, FilterMode mag)
+		: min(min)
+		, mag(mag)
+		{}
 	};
 
 	enum class TextureAddressMode
@@ -42,7 +51,6 @@ namespace Core::Graphics
 		Mirror,
 		Clamp,
 		Border,
-		MirrorOnce,
 	};
 
 	enum class BorderColor
@@ -58,17 +66,15 @@ namespace Core::Graphics
 		Filter filter;
 		TextureAddressMode address_u;
 		TextureAddressMode address_v;
-		TextureAddressMode address_w;
 		float mip_lod_bias;
 		uint32_t max_anisotropy;
 		float min_lod;
 		float max_lod;
 		BorderColor border_color;
 		SamplerState()
-			: filter(Filter::Linear)
+			: filter(Filter(FilterMode::Linear, FilterMode::Linear))
 			, address_u(TextureAddressMode::Clamp)
 			, address_v(TextureAddressMode::Clamp)
-			, address_w(TextureAddressMode::Clamp)
 			, mip_lod_bias(0.0f)
 			, max_anisotropy(1u)
 			, min_lod(-std::numeric_limits<float>::max())
@@ -79,7 +85,6 @@ namespace Core::Graphics
 			: filter(filter_)
 			, address_u(address_)
 			, address_v(address_)
-			, address_w(address_)
 			, mip_lod_bias(0.0f)
 			, max_anisotropy(1u)
 			, min_lod(-std::numeric_limits<float>::max())
@@ -88,17 +93,17 @@ namespace Core::Graphics
 		{}
 	};
 
-	struct ISamplerState : public IObject
-	{
-	};
+	// struct ISamplerState : public IObject
+	// {
+	// };
 
 	struct ITexture2D : public IObject
 	{
 		virtual void* getNativeHandle() = 0;
 
 		virtual bool isDynamic() = 0;
-		// virtual bool isPremultipliedAlpha() = 0;
-		// virtual void setPremultipliedAlpha(bool v) = 0;
+		virtual bool isPremultipliedAlpha() = 0;
+		virtual void setPremultipliedAlpha(bool v) = 0;
 		virtual Vector2U getSize() = 0;
 		virtual bool setSize(Vector2U size) = 0;
 
@@ -107,9 +112,8 @@ namespace Core::Graphics
 
 		virtual bool saveToFile(StringView path) = 0;
 
-		virtual void setSamplerState(ISamplerState* p_sampler) = 0;
-		// Might be nullptr
-		virtual ISamplerState* getSamplerState() = 0;
+		virtual void setSamplerState(SamplerState sampler) = 0;
+		virtual std::optional<SamplerState> getSamplerState() = 0;
 	};
 
 	struct IRenderTarget : public IObject
@@ -137,7 +141,7 @@ namespace Core::Graphics
 		virtual void addEventListener(IDeviceEventListener* e) = 0;
 		virtual void removeEventListener(IDeviceEventListener* e) = 0;
 
-		virtual DeviceMemoryUsageStatistics getMemoryUsageStatistics() = 0;
+		// virtual DeviceMemoryUsageStatistics getMemoryUsageStatistics() = 0;
 
 		virtual bool recreate() = 0;
 		// virtual void setPreferenceGpu(StringView prefered_gpu) = 0;
@@ -155,7 +159,7 @@ namespace Core::Graphics
 		virtual bool createRenderTarget(Vector2U size, IRenderTarget** pp_rt) = 0;
 		virtual bool createDepthStencilBuffer(Vector2U size, IDepthStencilBuffer** pp_ds) = 0;
 
-		virtual bool createSamplerState(SamplerState const& def, ISamplerState** pp_sampler) = 0;
+		// virtual bool createSamplerState(SamplerState const& def, ISamplerState** pp_sampler) = 0;
 
 		static bool create(IDevice** p_device);
 	};

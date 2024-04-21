@@ -35,7 +35,7 @@ namespace Core::Graphics
 		void addEventListener(IDeviceEventListener* e);
 		void removeEventListener(IDeviceEventListener* e);
 
-		DeviceMemoryUsageStatistics getMemoryUsageStatistics();
+		// DeviceMemoryUsageStatistics getMemoryUsageStatistics();
 
 		bool recreate();
 		// void setPreferenceGpu(StringView prefered_gpu) { preferred_adapter_name = prefered_gpu; }
@@ -53,7 +53,7 @@ namespace Core::Graphics
 		bool createRenderTarget(Vector2U size, IRenderTarget** pp_rt);
 		bool createDepthStencilBuffer(Vector2U size, IDepthStencilBuffer** pp_ds);
 
-		bool createSamplerState(SamplerState const& def, ISamplerState** pp_sampler);
+		// bool createSamplerState(SamplerState const& def, ISamplerState** pp_sampler);
 
 	public:
 		// Device_OpenGL(std::string_view const& prefered_gpu = "");
@@ -64,28 +64,28 @@ namespace Core::Graphics
 		static bool create(Device_OpenGL** p_device);
 	};
 
-	class SamplerState_OpenGL
-		: public Object<ISamplerState>
-		, public IDeviceEventListener
-	{
-	private:
-		ScopeObject<Device_OpenGL> m_device;
-		SamplerState m_info;
-		GLuint opengl_sampler = 0;
+	// class SamplerState_OpenGL
+	// 	: public Object<ISamplerState>
+	// 	, public IDeviceEventListener
+	// {
+	// private:
+	// 	ScopeObject<Device_OpenGL> m_device;
+	// 	SamplerState m_info;
+	// 	GLuint opengl_sampler = 0;
 
-	public:
-		void onDeviceCreate();
-		void onDeviceDestroy();
+	// public:
+	// 	void onDeviceCreate();
+	// 	void onDeviceDestroy();
 
-		bool createResource();
+	// 	bool createResource();
 
-	public:
-		GLuint GetState() { return opengl_sampler; }
+	// public:
+	// 	GLuint GetState() { return opengl_sampler; }
 
-	public:
-		SamplerState_OpenGL(Device_OpenGL* p_device, SamplerState const& def);
-		~SamplerState_OpenGL();
-	};
+	// public:
+	// 	SamplerState_OpenGL(Device_OpenGL* p_device, SamplerState const& def);
+	// 	~SamplerState_OpenGL();
+	// };
 
 	class Texture2D_OpenGL
 		: public Object<ITexture2D>
@@ -93,7 +93,7 @@ namespace Core::Graphics
 	{
 	private:
 		ScopeObject<Device_OpenGL> m_device;
-		ScopeObject<ISamplerState> m_sampler;
+		std::optional<SamplerState> m_sampler;
 		ScopeObject<IData> m_data;
 		std::string source_path;
 		GLuint opengl_texture2d = 0;
@@ -119,8 +119,8 @@ namespace Core::Graphics
 		void* getNativeHandle() { return (void*)(intptr_t)opengl_texture2d; }
 
 		bool isDynamic() { return m_dynamic; }
-		// bool isPremultipliedAlpha() { return m_premul; }
-		// void setPremultipliedAlpha(bool v) { m_premul = v; }
+		bool isPremultipliedAlpha() { return m_premul; }
+		void setPremultipliedAlpha(bool v) { m_premul = v; }
 		Vector2U getSize() { return m_size; }
 		bool setSize(Vector2U size);
 
@@ -129,8 +129,8 @@ namespace Core::Graphics
 
 		bool saveToFile(StringView path);
 
-		void setSamplerState(ISamplerState* p_sampler) { m_sampler = p_sampler; }
-		ISamplerState* getSamplerState() { return m_sampler.get(); }
+		void setSamplerState(SamplerState sampler) { m_sampler = sampler; }
+		std::optional<SamplerState> getSamplerState() { return m_sampler; }
 
 	public:
 		Texture2D_OpenGL(Device_OpenGL* device, StringView path, bool mipmap);
