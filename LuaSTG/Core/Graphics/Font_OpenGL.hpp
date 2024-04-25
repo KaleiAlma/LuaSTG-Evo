@@ -38,14 +38,14 @@ namespace Core::Graphics
 
 	struct GlyphCacheInfo
 	{
-		// 继承自 GlyphInfo
-		uint32_t texture_index = 0; // 字形在哪个纹理上
-		RectF    texture_rect;      // 字形在纹理上的uv坐标
-		Vector2F size;              // 字形大小
-		Vector2F position;          // 笔触距离字形左上角坐标
-		Vector2F advance;           // 前进量
-		// 私有
-		uint32_t codepoint = 0;     // 当前的字符
+		// inherited from GlyphInfo
+		uint32_t texture_index = 0; // which texture the glyph is on
+		RectF    texture_rect;      // uv coordinates of the glyph
+		Vector2F size;              // font size
+		Vector2F position;          // stroke distance from the upper-left corner of the glyph coordinates
+		Vector2F advance;           // advance
+		// privately-owned
+		uint32_t codepoint = 0;     // current character
 	};
 
 	struct FreeTypeFontData
@@ -65,7 +65,7 @@ namespace Core::Graphics
 		float ft_descender{ 0.0f };
 	};
 
-	class TrueTypeGlyphManager_D3D11
+	class TrueTypeGlyphManager_OpenGL
 		: public Object<IGlyphManager>
 		, public IDeviceEventListener
 	{
@@ -104,11 +104,11 @@ namespace Core::Graphics
 		bool getGlyph(uint32_t codepoint, GlyphInfo* p_ref_info, bool no_render);
 
 	public:
-		TrueTypeGlyphManager_D3D11(IDevice* p_device, TrueTypeFontInfo* p_arr_info, size_t info_count);
-		~TrueTypeGlyphManager_D3D11();
+		TrueTypeGlyphManager_OpenGL(IDevice* p_device, TrueTypeFontInfo* p_arr_info, size_t info_count);
+		~TrueTypeGlyphManager_OpenGL();
 	};
 
-	class TextRenderer_D3D11
+	class TextRenderer_OpenGL
 		: public Object<ITextRenderer>
 	{
 	private:
@@ -140,7 +140,7 @@ namespace Core::Graphics
 			Vector3F* endout);
 
 	public:
-		TextRenderer_D3D11(IRenderer* p_renderer);
-		~TextRenderer_D3D11();
+		TextRenderer_OpenGL(IRenderer* p_renderer);
+		~TextRenderer_OpenGL();
 	};
 }

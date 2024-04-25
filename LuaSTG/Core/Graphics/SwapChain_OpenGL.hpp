@@ -3,28 +3,10 @@
 #include "Core/Graphics/SwapChain.hpp"
 #include "Core/Graphics/Window_SDL.hpp"
 #include "Core/Graphics/Device_OpenGL.hpp"
-// #include "Core/Graphics/Direct3D11/LetterBoxingRenderer.hpp"
-// #include "Platform/RuntimeLoader/DirectComposition.hpp"
+#include "glad/gl.h"
 
 namespace Core::Graphics
 {
-	class DisplayModeUpdater
-	{
-	private:
-		DISPLAY_DEVICEW last_device{};
-		DEVMODEW last_mode{};
-		bool is_scope{ false };
-	public:
-		bool Enter(HWND window, UINT width, UINT height);
-		void Leave();
-	public:
-		inline DisplayModeUpdater() = default;
-		inline ~DisplayModeUpdater()
-		{
-			Leave();
-		}
-	};
-
 	class SwapChain_OpenGL
 		: public Object<ISwapChain>
 		, public IWindowEventListener
@@ -33,24 +15,14 @@ namespace Core::Graphics
 	private:
 		ScopeObject<Window_SDL> m_window;
 		ScopeObject<Device_OpenGL> m_device;
-		Direct3D11::LetterBoxingRenderer m_scaling_renderer;
-		DisplayModeUpdater m_display_mode_updater;
 
-		Microsoft::WRL::Wrappers::Event dxgi_swapchain_event;
-		Microsoft::WRL::ComPtr<IDXGISwapChain1> dxgi_swapchain;
-		DXGI_SWAP_CHAIN_DESC1 m_swap_chain_info{};
-		DXGI_SWAP_CHAIN_FULLSCREEN_DESC m_swap_chain_fullscreen_info{};
-		BOOL m_swap_chain_fullscreen_mode{ FALSE };
-		BOOL m_swap_chain_vsync{ FALSE };
+		GLuint opengl_framebuffer = 0;
+		GLuint opengl_depthstencilbuffer = 0;
+		GLuint opengl_texture = 0;
 
-		BOOL m_swapchain_want_present_reset{ FALSE };
+		bool m_swap_chain_vsync{ false };
 
-		BOOL m_init{ FALSE };
-
-		bool m_modern_swap_chain_available{ false };
-		bool m_disable_exclusive_fullscreen{ false };
-		bool m_disable_composition{ false };
-		bool m_enable_composition{ false };
+		bool m_init{ false };
 
 	private:
 		void onDeviceCreate();
@@ -59,57 +31,19 @@ namespace Core::Graphics
 		void onWindowDestroy();
 		void onWindowActive();
 		void onWindowInactive();
-		void onWindowSize(Core::Vector2U size);
-		void onWindowFullscreenStateChange(bool state);
+		void onWindowSize(Core::Vector2I size);
+		// void onWindowFullscreenStateChange(bool state);
 
 	private:
-		void destroySwapChain();
-		bool createSwapChain(bool fullscreen, DXGI_MODE_DESC1 const& mode, bool no_attachment);
-		void waitFrameLatency(uint32_t timeout, bool reset);
-		bool enterExclusiveFullscreenTemporarily();
-		bool leaveExclusiveFullscreenTemporarily();
-		bool enterExclusiveFullscreen();
-		bool leaveExclusiveFullscreen();
-
-	private:
-		bool m_is_composition_mode{ false };
-		Platform::RuntimeLoader::DirectComposition dcomp_loader;
-		Microsoft::WRL::ComPtr<IDCompositionDesktopDevice> dcomp_desktop_device;
-		Microsoft::WRL::ComPtr<IDCompositionTarget> dcomp_target;
-		Microsoft::WRL::ComPtr<IDCompositionVisual2> dcomp_visual_root;
-		Microsoft::WRL::ComPtr<IDCompositionVisual2> dcomp_visual_background;
-		Microsoft::WRL::ComPtr<IDCompositionVisual2> dcomp_visual_swap_chain;
-		Microsoft::WRL::ComPtr<IDCompositionSurface> dcomp_surface_background;
-	private:
-		bool createDirectCompositionResources();
-		void destroyDirectCompositionResources();
-		bool updateDirectCompositionTransform();
-		bool commitDirectComposition();
-		bool createCompositionSwapChain(Vector2U size, bool latency_event);
-
-	private:
-		Microsoft::WRL::ComPtr<ID3D11RenderTargetView> m_swap_chain_d3d11_rtv;
 		Vector2U m_canvas_size{ 640,480 };
-		Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_canvas_d3d11_srv;
-		Microsoft::WRL::ComPtr<ID3D11RenderTargetView> m_canvas_d3d11_rtv;
-		Microsoft::WRL::ComPtr<ID3D11DepthStencilView> m_canvas_d3d11_dsv;
 	private:
 		bool createSwapChainRenderTarget();
 		void destroySwapChainRenderTarget();
-		bool createCanvasColorBuffer();
-		void destroyCanvasColorBuffer();
-		bool createCanvasDepthStencilBuffer();
-		void destroyCanvasDepthStencilBuffer();
 		bool createRenderAttachment();
 		void destroyRenderAttachment();
 
 	private:
-		bool updateLetterBoxingRendererTransform();
-		bool presentLetterBoxingRenderer();
-
-	private:
-		bool handleDirectCompositionWindowSize(Vector2U size);
-		bool handleSwapChainWindowSize(Vector2U size);
+		bool handleSwapChainWindowSize(Vector2I size);
 
 	private:
 		enum class EventType
@@ -126,14 +60,13 @@ namespace Core::Graphics
 		void removeEventListener(ISwapChainEventListener* e);
 
 		bool setWindowMode(Vector2U size);
-		bool setCompositionWindowMode(Vector2U size);
 
 		bool setCanvasSize(Vector2U size);
 		Vector2U getCanvasSize() { return m_canvas_size; }
 
 		void clearRenderAttachment();
 		void applyRenderAttachment();
-		void waitFrameLatency();
+		// void waitFrameLatency();
 		void setVSync(bool enable);
 		bool present();
 

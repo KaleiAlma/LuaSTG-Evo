@@ -1,5 +1,5 @@
 #include "Shared.hpp"
-#include "spdlog/spdlog.h"
+// #include "spdlog/spdlog.h"
 #include <SDL2/SDL_messagebox.h>
 #include <SDL2/SDL_video.h>
 #include <cstdint>
@@ -52,7 +52,7 @@ namespace Platform
         int32_t b_id;
         if (SDL_ShowMessageBox(&msg_box, &b_id))
         {
-            spdlog::error("[luastg] (GetError = {}) SDL_ShowMessageBox failed", SDL_GetError());
+            // spdlog::error("[luastg] (GetError = {}) SDL_ShowMessageBox failed", SDL_GetError());
             assert(false);
         }
         return 0 == b_id;

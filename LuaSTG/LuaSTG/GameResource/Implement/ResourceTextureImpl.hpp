@@ -18,16 +18,16 @@ namespace LuaSTGPlus
 	public:
 		Core::Graphics::ITexture2D* GetTexture() { return m_texture.get(); }
 		Core::Graphics::IRenderTarget* GetRenderTarget() { return m_rt.get(); }
-		Core::Graphics::IDepthStencilBuffer* GetDepthStencilBuffer() { return m_ds.get(); }
+		// Core::Graphics::IDepthStencilBuffer* GetDepthStencilBuffer() { return m_ds.get(); }
 		bool IsRenderTarget() { return m_is_rendertarget; }
 		bool HasDepthStencilBuffer() { return m_rt->DepthStencilBufferEnabled(); }
 	public:
 		// 纹理容器
 		ResourceTextureImpl(const char* name, Core::Graphics::ITexture2D* p_texture);
 		// 渲染附件容器
-		ResourceTextureImpl(const char* name, int w, int h, bool ds);
+		ResourceTextureImpl(const char* name, int w, int h);
 		// 自动调整大小的渲染附件容器
-		ResourceTextureImpl(const char* name, bool ds);
+		ResourceTextureImpl(const char* name);
 		~ResourceTextureImpl();
 	};
 }

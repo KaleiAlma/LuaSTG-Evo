@@ -11,6 +11,8 @@ project(LuaSTGSub LANGUAGES C CXX)
 #     add_compile_definitions(LUASTG_SUPPORTS_WINDOWS_7)
 # endif()
 
+# set(CMAKE_VERBOSE_MAKEFILE ON CACHE BOOL "ON" FORCE)
+
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 include(cmake/TargetCommonOptions.cmake)
 # include(cmake/msvc.crt.cmake)

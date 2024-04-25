@@ -1,6 +1,6 @@
 ﻿#include "Core/Audio/Decoder_FLAC.hpp"
 #include "Core/FileManager.hpp"
-#include "utf8.hpp"
+// #include "utf8.hpp"
 
 namespace Core::Audio
 {
@@ -65,7 +65,7 @@ namespace Core::Audio
 		return (self.m_ptr - self.m_data.data()) >= (ptrdiff_t)self.m_data.size();
 	}
 
-	// 公共回调
+	// 公共callback
 
 	FLAC__StreamDecoderWriteStatus Decoder_FLAC::onWrite(FLAC__StreamDecoder const*, FLAC__Frame const* frame, const FLAC__int32* const buffer[], void* client_data)
 	{
@@ -217,22 +217,22 @@ namespace Core::Audio
 
 		while (pcm_frame > 0)
 		{
-			// 先康康有没有没处理完的 frame
+			// Are there still unprocessed frames?
 			if (!m_flac_frame_data.empty())
 			{
 				if (m_current_pcm_frame >= m_flac_frame_data.sample_index && m_current_pcm_frame < (m_flac_frame_data.sample_index + m_flac_frame_data.sample_count))
 				{
-					// 计算参数
+					// Calculate parameters
 					uint32_t const pcm_frame_offset = m_current_pcm_frame - m_flac_frame_data.sample_index;
 					uint32_t const valid_pcm_frame = (m_flac_frame_data.sample_index + m_flac_frame_data.sample_count) - m_current_pcm_frame;
 					uint32_t const should_read_pcm_frame = std::min(pcm_frame, valid_pcm_frame);
-					// 写入
+					// write
 					uint8_t* ptr = (uint8_t*)buffer;
 					for (uint32_t idx = 0; idx < should_read_pcm_frame; idx += 1)
 					{
 						for (uint16_t chs = 0; chs < m_flac_frame_data.channels; chs += 1)
 						{
-							// 拆数据
+							// clean up data
 							int32_t const sample = m_flac_frame_data.data[chs][pcm_frame_offset + idx];
 							uint8_t const bytes[4] = {
 								(uint8_t)((sample & 0x000000FF)      ),
@@ -240,7 +240,8 @@ namespace Core::Audio
 								(uint8_t)((sample & 0x00FF0000) >> 16),
 								(uint8_t)((sample & 0xFF000000) >> 24),
 							};
-							// 看位深来写入数据，Windows 一般是小端，如果是大端平台需要把上面的 bytes 数组颠倒
+							// Write depends on bit depth. Windows is usually small-endian,
+							// for big endian platforms one would have to invert the array above
 							for (uint16_t bid = 0; bid < (m_flac_frame_data.bits_per_sample / 8); bid += 1)
 							{
 								*ptr = bytes[bid];
@@ -248,12 +249,12 @@ namespace Core::Audio
 							}
 						}
 					}
-					// 更新
+					// update
 					buffer = ptr;
 					pcm_frame -= should_read_pcm_frame;
 					read_pcm_frame_ += should_read_pcm_frame;
 					m_current_pcm_frame += should_read_pcm_frame;
-					// 如果已经完成了，直接返回
+					// if done, just return
 					if (pcm_frame == 0)
 					{
 						*read_pcm_frame = read_pcm_frame_;
@@ -262,20 +263,20 @@ namespace Core::Audio
 				}
 				else
 				{
-					m_flac_frame_data.clear(); // 不在范围内，可以清理了
+					m_flac_frame_data.clear(); // fallen out of scope, clean up
 				}
 			}
 
-			// 还需要继续读取
+			// Need to continue reading
 			if (!FLAC__stream_decoder_process_single(m_flac))
 			{
-				// 发生错误
+				// error!
 				*read_pcm_frame = read_pcm_frame_;
 				return false;
 			}
 		}
 
-		// 没有了
+		// nothing left, return
 		*read_pcm_frame = read_pcm_frame_;
 		return true;
 	}
@@ -284,14 +285,15 @@ namespace Core::Audio
 		: m_file(NULL)
 		, m_flac(NULL)
 	{
-		// 第一步：打开文件/加载文件
-		// WARNING: 记得多测试一下在内存中打开能不能正常读写，行为是不是 libFLAC 期望的
+		// Step 1: Open the file/load the file
+		// WARNING: Remember to test whether opening in memory reads/writes correctly,
+		// as expected by libFLAC
 
 		if (GFileManager().contain(path))
 		{
-			// 存在于文件系统，直接以文件的形式打开，flac 文件的大小也是有点离谱的
-			errno_t const result = _wfopen_s(&m_file, utf8::to_wstring(path).c_str(), L"rb");
-			if (0 != result)
+			// Exists in the file system and open it as a file, though the size is a bit outrageous
+			m_file = std::fopen(std::string(path).c_str(), "rb");
+			if (!m_file)
 			{
 				destroyResources();
 				throw std::runtime_error("Decoder_FLAC::Decoder_FLAC (1.1)");
@@ -299,13 +301,13 @@ namespace Core::Audio
 		}
 		else if (GFileManager().containEx(path))
 		{
-			// 在压缩包里的文件，只能读取到内存了
+			// When zipped, you can only read from memory
 			if (!GFileManager().loadEx(path, m_data))
 			{
 				destroyResources();
 				throw std::runtime_error("Decoder_FLAC::Decoder_FLAC (1.2)");
 			}
-			m_ptr = m_data.data(); // 先到文件头
+			m_ptr = m_data.data(); // Go to the file header
 		}
 		else
 		{
@@ -313,7 +315,7 @@ namespace Core::Audio
 			throw std::runtime_error("Decoder_FLAC::Decoder_FLAC (1.3)");
 		}
 
-		// 第二步：创建解码器
+		// Step 2: Create a decoder
 
 		m_flac = FLAC__stream_decoder_new();
 		if (NULL == m_flac)
@@ -327,15 +329,20 @@ namespace Core::Audio
 
 		if (m_file)
 		{
-			// 以文件的方式解码
+			// Decode as file
 			FLAC__StreamDecoderInitStatus flac_init = FLAC__STREAM_DECODER_INIT_STATUS_OK;
 			flac_init = FLAC__stream_decoder_init_FILE(m_flac, m_file, &onWrite, &onMetadata, &onError, this);
 			if (FLAC__STREAM_DECODER_INIT_STATUS_OK != flac_init)
 			{
-				// 容器或者格式不对？
-				if (0 != _fseeki64(m_file, 0, SEEK_SET)) // 先回到文件头
+				// Container or format incorrect?
+				// Go back to the file header
+#ifdef WIN32
+				if (0 != _fseeki64(m_file, 0, SEEK_SET))
+#else
+				if (0 != fseek(m_file, 0, SEEK_SET))
+#endif
 				{
-					// 你怎么也寄了
+					// Why did you send it too?
 					destroyResources();
 					throw std::runtime_error("Decoder_FLAC::Decoder_FLAC (2.2)");
 				}
@@ -343,32 +350,32 @@ namespace Core::Audio
 			}
 			if (FLAC__STREAM_DECODER_INIT_STATUS_OK != flac_init)
 			{
-				// 那大概就是不行了
+				// Then it probably won't work.
 				destroyResources();
 				throw std::runtime_error("Decoder_FLAC::Decoder_FLAC (2.3)");
 			}
 		}
 		else
 		{
-			// 以内存流的方式打开
+			// Open as a memory stream
 			FLAC__StreamDecoderInitStatus flac_init = FLAC__STREAM_DECODER_INIT_STATUS_OK;
 			flac_init = FLAC__stream_decoder_init_stream(m_flac, &onRead, &onSeek, &onTell, &onGetLength, onCheckEOF, &onWrite, &onMetadata, &onError, this);
 			if (FLAC__STREAM_DECODER_INIT_STATUS_OK != flac_init)
 			{
-				// 容器或者格式不对？
-				m_ptr = m_data.data(); // 先回到文件头
+				// Container or format incorrect?
+				m_ptr = m_data.data(); // Go back to the file header
 				flac_init = FLAC__stream_decoder_init_ogg_stream(m_flac, &onRead, &onSeek, &onTell, &onGetLength, onCheckEOF, &onWrite, &onMetadata, &onError, this);
 			}
 			if (FLAC__STREAM_DECODER_INIT_STATUS_OK != flac_init)
 			{
-				// 那大概就是不行了
+				// Then it probably won't work.
 				destroyResources();
 				throw std::runtime_error("Decoder_FLAC::Decoder_FLAC (2.4)");
 			}
 		}
-		m_init = true; // 标记为需要清理
+		m_init = true; // Mark as requiring cleanup
 
-		// 第三步：读取所有 metadata
+		// Step 3: Read all metadata
 
 		if (!FLAC__stream_decoder_process_until_end_of_metadata(m_flac))
 		{
@@ -377,18 +384,18 @@ namespace Core::Audio
 		}
 		if (!m_has_info)
 		{
-			// 暂时不支持没有 info 的格式
+			// Formats without info are not supported at this time
 			destroyResources();
 			throw std::runtime_error("Decoder_FLAC::Decoder_FLAC (3.2)");
 		}
 		if ((m_info.bits_per_sample % 8) != 0 || !(m_info.channels == 1 || m_info.channels == 2))
 		{
-			// 暂时不支持其他格式
+			// Other formats are not supported at this time
 			destroyResources();
 			throw std::runtime_error("Decoder_FLAC::Decoder_FLAC (3.3)");
 		}
 
-		// 第四步：先逝一逝
+		// Step 4: Flush and reset
 
 		if (!FLAC__stream_decoder_flush(m_flac))
 		{

@@ -1,33 +1,32 @@
 ﻿#include "LuaBinding/LuaWrapper.hpp"
 #include "LuaBinding/lua_luastg_hash.hpp"
-#include <DirectXMath.h>
+#define GLM_ENABLE_EXPERIMENTAL
+#include "glm/gtx/color_space.hpp"
 
 namespace LuaSTGPlus::LuaWrapper
 {
 	inline Core::Color4B HSV2RGB(float const hue, float const saturation, float const value, float const alpha)
 	{
-		DirectX::XMFLOAT4 const vec(hue * 0.01f, saturation * 0.01f, value * 0.01f, alpha * 0.01f);
-		DirectX::XMFLOAT4 vec2{};
-		DirectX::XMStoreFloat4(&vec2, DirectX::XMColorHSVToRGB(DirectX::XMLoadFloat4(&vec)));
+		glm::vec3 const vec(hue * 0.01f, saturation * 0.01f, value * 0.01f);
+		glm::vec3 vec2 = glm::rgbColor(vec);
 		return Core::Color4B(
 			(uint8_t)(vec2.x * 255.0f),
 			(uint8_t)(vec2.y * 255.0f),
 			(uint8_t)(vec2.z * 255.0f),
-			(uint8_t)(vec2.w * 255.0f)
+			(uint8_t)(alpha * 2.55f)
 		);
 	}
 
 	// In this case it returns a standard vector of floats, wxyz = ahsv respectively
 	inline Core::Vector4F RGB2HSV(uint8_t const red, uint8_t const green, uint8_t const blue, uint8_t const alpha)
 	{
-		DirectX::XMFLOAT4 const vec(red / 255.0f, green / 255.0f, blue / 255.0f, alpha / 255.0f);
-		DirectX::XMFLOAT4 vec2{};
-		DirectX::XMStoreFloat4(&vec2, DirectX::XMColorRGBToHSV(DirectX::XMLoadFloat4(&vec)));
+		glm::vec3 const vec(red / 255.0f, green / 255.0f, blue / 255.0f);
+		glm::vec3 vec2 = glm::hsvColor(vec);
 		return Core::Vector4(
 			vec2.x * 100.0f,
 			vec2.y * 100.0f,
 			vec2.z * 100.0f,
-			vec2.w * 100.0f
+			alpha / 2.55f
 		);
 	}
 

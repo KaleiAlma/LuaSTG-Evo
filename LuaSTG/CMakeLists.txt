@@ -1,7 +1,7 @@
 # LuaSTG configurer
 
 add_subdirectory(Shader)
-# include(Platform.cmake)
+include(Platform.cmake)
 include(Core.cmake)
 add_subdirectory(Configurer)
 
@@ -80,12 +80,12 @@ set(LUASTG_ENGINE_SOURCES
     LuaSTG/GameResource/Implement/ResourceModelImpl.hpp
     LuaSTG/GameResource/Implement/ResourceModelImpl.cpp
 
-    LuaSTG/LuaBinding/lua_dwrite.hpp
-    LuaSTG/LuaBinding/lua_dwrite.cpp
+    # LuaSTG/LuaBinding/lua_dwrite.hpp
+    # LuaSTG/LuaBinding/lua_dwrite.cpp
     LuaSTG/LuaBinding/lua_random.hpp
     LuaSTG/LuaBinding/lua_random.cpp
-    LuaSTG/LuaBinding/lua_xinput.hpp
-    LuaSTG/LuaBinding/lua_xinput.cpp
+    # LuaSTG/LuaBinding/lua_xinput.hpp
+    # LuaSTG/LuaBinding/lua_xinput.cpp
     LuaSTG/LuaBinding/lua_utility.hpp
     LuaSTG/LuaBinding/lua_luastg_hash.cpp
     LuaSTG/LuaBinding/lua_luastg_hash.hpp
@@ -103,7 +103,7 @@ set(LUASTG_ENGINE_SOURCES
     LuaSTG/LuaBinding/LW_Audio.cpp
     LuaSTG/LuaBinding/LW_BentLaser.cpp
     LuaSTG/LuaBinding/LW_Color.cpp
-    LuaSTG/LuaBinding/LW_DInput.cpp
+    # LuaSTG/LuaBinding/LW_DInput.cpp
     LuaSTG/LuaBinding/LW_FileManager.cpp
     LuaSTG/LuaBinding/LW_Input.cpp
     LuaSTG/LuaBinding/LW_LuaSTG.cpp
@@ -114,7 +114,7 @@ set(LUASTG_ENGINE_SOURCES
     LuaSTG/LuaBinding/LW_StopWatch.cpp
     LuaSTG/LuaBinding/LW_Window.cpp
     LuaSTG/LuaBinding/LW_ResourceMgr.cpp
-    LuaSTG/LuaBinding/LW_Platform.cpp
+    # LuaSTG/LuaBinding/LW_Platform.cpp
     LuaSTG/LuaBinding/LW_GameObjectManager.cpp
     LuaSTG/LuaBinding/LB_Mesh.cpp
     LuaSTG/LuaBinding/PostEffectShader.hpp
@@ -141,11 +141,11 @@ set(LUASTG_ENGINE_SOURCES
     LuaSTG/AppFrameRenderEx.cpp
     LuaSTG/LConfig.h
     LuaSTG/LMathConstant.hpp
-    LuaSTG/RuntimeCheck.hpp
-    LuaSTG/RuntimeCheck.cpp
+    # LuaSTG/RuntimeCheck.hpp
+    # LuaSTG/RuntimeCheck.cpp
     LuaSTG/Main.cpp
 
-    LuaSTG/LuaSTG.manifest
+    # LuaSTG/LuaSTG.manifest
 )
 source_group(TREE ${CMAKE_CURRENT_LIST_DIR} FILES ${LUASTG_ENGINE_SOURCES})
 target_sources(LuaSTG PRIVATE
@@ -165,16 +165,13 @@ endif()
 
 target_link_libraries(LuaSTG PRIVATE
     spdlog
-    utility
-    # PlatformAPI
-    # DirectXTexMini
-    # DirectX::ToolKitMini
+    # utility
+    PlatformAPI
     SDL2
-    SDL2_image
-    SDL2_mixer
-    SDL2_ttf
+    # SDL2_ttf
     Core
     xmath
+    # fmt
     # lua51static
     libluajit
     imgui
@@ -184,8 +181,8 @@ target_link_libraries(LuaSTG PRIVATE
     luasocket
     #lua_xlsx_csv
     lua_imgui
-    # imgui_impl_win32ex
-    # imgui_impl_dx11
+    imgui_impl_sdl2
+    imgui_impl_opengl3
     lua_steam_api
     tracy
     pcg_cpp

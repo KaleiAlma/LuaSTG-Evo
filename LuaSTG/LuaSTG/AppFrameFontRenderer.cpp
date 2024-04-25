@@ -1,5 +1,6 @@
 ﻿#include "AppFrame.h"
-#include "utf8.hpp"
+// #include "utf8.hpp"
+#include <string>
 
 namespace LuaSTGPlus
 {
@@ -15,7 +16,7 @@ namespace LuaSTGPlus
 
 	constexpr int const TEXT_FLAG_WORDBREAK = 0x10;
 
-	bool AppFrame::RenderText(IResourceFont* p, wchar_t* strBuf, Core::RectF rect, Core::Vector2F scale, FontAlignHorizontal halign, FontAlignVertical valign, bool bWordBreak)noexcept
+	bool AppFrame::RenderText(IResourceFont* p, char* strBuf, Core::RectF rect, Core::Vector2F scale, FontAlignHorizontal halign, FontAlignVertical valign, bool bWordBreak)noexcept
 	{
 		using namespace Core;
 		using namespace Core::Graphics;
@@ -31,7 +32,7 @@ namespace LuaSTGPlus
 		m_pTextRenderer->setColor(p->GetBlendColor());
 		
 		// 第一次遍历计算要渲染多少行
-		const wchar_t* pText = strBuf;
+		const char* pText = strBuf;
 		int iLineCount = 1;
 		float fLineWidth = 0.f;
 		while (*pText)
@@ -88,8 +89,8 @@ namespace LuaSTGPlus
 		vRenderPos.y -= pGlyphManager->getAscender() * scale.y;
 		
 		// 逐行渲染文字
-		wchar_t* pScanner = strBuf;
-		wchar_t c = 0;
+		char* pScanner = strBuf;
+		char c = 0;
 		bool bEOS = false;
 		fLineWidth = 0.f;
 		pText = pScanner;
@@ -123,7 +124,7 @@ namespace LuaSTGPlus
 				*pScanner = L'\0';
 			
 			// 渲染从pText~pScanner的文字
-			std::string u8_str(utf8::to_string(pText));
+			std::string u8_str(pText);
 			Vector2F ignore_;
 			switch (halign)
 			{
@@ -160,7 +161,7 @@ namespace LuaSTGPlus
 		return true;
 	}
 	
-	Core::Vector2F AppFrame::CalcuTextSize(IResourceFont* p, const wchar_t* strBuf, Core::Vector2F scale)noexcept
+	Core::Vector2F AppFrame::CalcuTextSize(IResourceFont* p, const char* strBuf, Core::Vector2F scale)noexcept
 	{
 		using namespace Core;
 		using namespace Core::Graphics;
@@ -201,10 +202,10 @@ namespace LuaSTGPlus
 		}
 		
 		// 编码转换
-		std::wstring s_TempStringBuf;
+		std::string s_TempStringBuf;
 		try
 		{
-			s_TempStringBuf = utf8::to_wstring(str);
+			s_TempStringBuf = std::string(str);
 		}
 		catch (const std::bad_alloc&)
 		{
@@ -241,7 +242,7 @@ namespace LuaSTGPlus
 		
 		return RenderText(
 			p.get(),
-			const_cast<wchar_t*>(s_TempStringBuf.data()),
+			const_cast<char*>(s_TempStringBuf.data()),
 			Core::RectF(x, y, x + tSize.x, y - tSize.y),
 			Core::Vector2F(scale, scale),
 			halign,
@@ -260,9 +261,9 @@ namespace LuaSTGPlus
 		}
 		
 		// 编码转换
-		std::wstring s_TempStringBuf;
+		std::string s_TempStringBuf;
 		try {
-			s_TempStringBuf = utf8::to_wstring(str);
+			s_TempStringBuf = std::string(str);
 		}
 		catch (const std::bad_alloc&) {
 			spdlog::error("[luastg] RenderTTF: 内存不足");
@@ -290,7 +291,7 @@ namespace LuaSTGPlus
 		p->SetBlendColor(c);
 		return RenderText(
 			p.get(),
-			const_cast<wchar_t*>(s_TempStringBuf.data()),
+			const_cast<char*>(s_TempStringBuf.data()),
 			Core::RectF(left, top, right, bottom),
 			Core::Vector2F(scale, scale) * 0.5f,  // TODO: 缩放系数=0.5 ????????????
 			halign,

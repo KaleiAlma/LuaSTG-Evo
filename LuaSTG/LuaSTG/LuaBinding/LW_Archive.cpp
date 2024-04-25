@@ -1,6 +1,6 @@
 ﻿#include "LuaBinding/LuaWrapper.hpp"
 #include "Core/FileManager.hpp"
-#include "utility/path.hpp"
+// #include "utility/path.hpp"
 #include "AppFrame.h"
 
 using namespace std;
@@ -32,7 +32,7 @@ void ArchiveWrapper::Register(lua_State* L)noexcept
 			auto& zip = getthis;
 			if (!zip.empty()) {
 				string frompathattr = luaL_checkstring(L, -1);
-				utility::path::to_slash(frompathattr);//转换为'/'分隔符
+				// utility::path::to_slash(frompathattr);//转换为'/'分隔符
 				if ((frompathattr.size() == 1) && (frompathattr.back() == '/')) {
 					frompathattr.pop_back();//根目录不需要分隔符
 				}
@@ -123,7 +123,7 @@ void ArchiveWrapper::Register(lua_State* L)noexcept
 			if (!zip.empty())
 			{
 				string frompath = luaL_checkstring(L, -1);
-				utility::path::to_slash(frompath);
+				// utility::path::to_slash(frompath);
 				lua_pushboolean(L, zip.contain(frompath));
 			}
 			else

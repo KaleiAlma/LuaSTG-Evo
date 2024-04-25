@@ -483,6 +483,7 @@ namespace Core::Graphics
                     assert(false);
                     return false;
                 }
+                glBindVertexArray(mblock.vao);
                 glm::mat4 mTRSw = mTRS;
                 for (auto it = mTRS_stack.crbegin(); it != mTRS_stack.crend(); it++)
                 {
@@ -503,7 +504,8 @@ namespace Core::Graphics
                         assert(false);
                         return false;
                     }
-
+                    glBindBuffer(GL_ARRAY_BUFFER, mblock.vertex_buffer);
+                    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
                     mblock.draw_count = accessor.count;
                 }
                 if (prim.attributes.contains("NORMAL"))
@@ -518,6 +520,8 @@ namespace Core::Graphics
                         assert(false);
                         return false;
                     }
+                    glBindBuffer(GL_ARRAY_BUFFER, mblock.normal_buffer);
+                    glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 0, 0);
                 }
                 if (prim.attributes.contains("COLOR_0"))
                 {
@@ -531,6 +535,8 @@ namespace Core::Graphics
                         assert(false);
                         return false;
                     }
+                    glBindBuffer(GL_ARRAY_BUFFER, mblock.color_buffer);
+                    glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, 0, 0);
                 }
                 if (prim.attributes.contains("TEXCOORD_0"))
                 {
@@ -544,6 +550,9 @@ namespace Core::Graphics
                         assert(false);
                         return false;
                     }
+                    glBindBuffer(GL_ARRAY_BUFFER, mblock.uv_buffer);
+                    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, 0);
+
                 }
                 if (prim.indices >= 0)
                 {
@@ -570,12 +579,14 @@ namespace Core::Graphics
                     assert(index_size == 2 || index_size == 4);
                     mblock.index_format = index_size == 2 ? GL_UNSIGNED_SHORT : GL_UNSIGNED_INT;
 
-                    glGenBuffers(1, &mblock.uv_buffer);
-                    if (mblock.uv_buffer == 0)
+                    glGenBuffers(1, &mblock.index_buffer);
+                    if (mblock.index_buffer == 0)
                     {
                         assert(false);
                         return false;
                     }
+                    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mblock.index_buffer);
+                    glBufferData(GL_ELEMENT_ARRAY_BUFFER, bytewidth, index_work.data(), GL_STATIC_DRAW);
 
                     mblock.draw_count = accessor.count;
                 }
@@ -771,13 +782,16 @@ namespace Core::Graphics
         };
         auto set_state_from_block = [&](ModelBlock& mblock)
         {
-            set_state_matrix_from_block(mblock);
+            glBindVertexArray(mblock.vao);
+            glEnableVertexAttribArray(3);
 
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mblock.index_buffer);
 
-            glBindBuffer(GL_UNIFORM_BUFFER, shared_->ubo_mlw);
+            set_state_matrix_from_block(mblock);
             glBindBufferBase(GL_UNIFORM_BUFFER, 1, shared_->ubo_mlw);
 
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_2D, mblock.image);
             map_sampler_to_opengl(mblock.sampler, mblock.image);
             if (!mblock.alpha_cull)
             {
@@ -855,6 +869,8 @@ namespace Core::Graphics
                 draw_block(mblock);
             }
         }
+
+        glDisableVertexAttribArray(3);
     }
 
     Model_OpenGL::Model_OpenGL(Device_OpenGL* p_device, ModelSharedComponent_OpenGL* p_model_shared, StringView path)

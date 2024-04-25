@@ -1,52 +1,54 @@
 ﻿#include "ImGuiExtension.h"
+#include "backends/imgui_impl_sdl2.h"
+#include <SDL2/SDL_video.h>
 
 #define WIN32_LEAN_AND_MEAN
 #define NOMINMAX
-#include <d3d11.h>
-#include <Xinput.h>
+// #include <d3d11.h>
+#include "glad/gl.h"
+// #include <Xinput.h>
 
 #include "imgui.h"
 #include "imgui_stdlib.h"
 #include "imgui_freetype.h"
-#include "imgui_impl_win32ex.h"
-#include "imgui_impl_dx11.h"
+#include "backends/imgui_impl_sdl2.h"
+#include "backends/imgui_impl_opengl3.h"
 #include "implot.h"
 
 #include "lua.hpp"
 #include "lua_imgui.hpp"
 #include "lua_imgui_type.hpp"
 
-#include "Platform/XInput.hpp"
+// #include "Platform/XInput.hpp"
 #include "Core/InitializeConfigure.hpp"
-#include "utf8.hpp"
 
 #include "AppFrame.h"
 #include "LuaBinding/LuaWrapper.hpp"
 
 // lua imgui backend binding
 
-static std::string bytes_count_to_string(DWORDLONG size)
-{
-    int count = 0;
-    char buffer[64] = {};
-    if (size < 1024) // B
-    {
-        count = std::snprintf(buffer, 64, "%u B", (unsigned int)size);
-    }
-    else if (size < (1024 * 1024)) // KB
-    {
-        count = std::snprintf(buffer, 64, "%.2f KiB", (double)size / 1024.0);
-    }
-    else if (size < (1024 * 1024 * 1024)) // MB
-    {
-        count = std::snprintf(buffer, 64, "%.2f MiB", (double)size / 1048576.0);
-    }
-    else // GB
-    {
-        count = std::snprintf(buffer, 64, "%.2f GiB", (double)size / 1073741824.0);
-    }
-    return std::string(buffer, count);
-}
+// static std::string bytes_count_to_string(DWORDLONG size)
+// {
+//     int count = 0;
+//     char buffer[64] = {};
+//     if (size < 1024) // B
+//     {
+//         count = std::snprintf(buffer, 64, "%u B", (unsigned int)size);
+//     }
+//     else if (size < (1024 * 1024)) // KB
+//     {
+//         count = std::snprintf(buffer, 64, "%.2f KiB", (double)size / 1024.0);
+//     }
+//     else if (size < (1024 * 1024 * 1024)) // MB
+//     {
+//         count = std::snprintf(buffer, 64, "%.2f MiB", (double)size / 1048576.0);
+//     }
+//     else // GB
+//     {
+//         count = std::snprintf(buffer, 64, "%.2f GiB", (double)size / 1073741824.0);
+//     }
+//     return std::string(buffer, count);
+// }
 
 static void showParticleSystemEditor(bool* p_open, LuaSTGPlus::IParticlePool* sys)
 {
@@ -267,21 +269,21 @@ static int lib_CacheGlyphFromString(lua_State* L)
     return 0;
 }
 
-static int lib_ShowTestInputWindow(lua_State* L)
-{
-    if(lua_gettop(L) >= 1)
-    {
-        bool v = lua_toboolean(L, 1);
-        imgui::showTestInputWindow(&v);
-        lua_pushboolean(L, v);
-        return 1;
-    }
-    else
-    {
-        imgui::showTestInputWindow();
-        return 0;
-    }
-}
+// static int lib_ShowTestInputWindow(lua_State* L)
+// {
+//     if(lua_gettop(L) >= 1)
+//     {
+//         bool v = lua_toboolean(L, 1);
+//         imgui::showTestInputWindow(&v);
+//         lua_pushboolean(L, v);
+//         return 1;
+//     }
+//     else
+//     {
+//         imgui::showTestInputWindow();
+//         return 0;
+//     }
+// }
 // static int lib_ShowMemoryUsageWindow(lua_State* L)
 // {
 //     bool v = (lua_gettop(L) >= 1) ? lua_toboolean(L, 1) : true;
@@ -367,7 +369,7 @@ static int lib_ShowFrameStatistics(lua_State* L)
     static std::vector<double> arr_obj_colli;
     static std::vector<double> arr_obj_colli_cb;
     static std::vector<double> arr_gpu_render_time;
-    static size_t arr_index = 0;
+    static ImU64 arr_index = 0;
     static size_t record_range = 240;
     constexpr size_t record_range_min = 60;
     constexpr size_t record_range_max = 3600;
@@ -538,54 +540,54 @@ static int lib_ShowFrameStatistics(lua_State* L)
 
             // memory
 
-            if (ImGui::CollapsingHeader("Memory Usage"))
-            {
-                MEMORYSTATUSEX mem_info = { sizeof(MEMORYSTATUSEX) };
-                GlobalMemoryStatusEx(&mem_info);
-                auto gpu_info = LAPP.GetAppModel()->getDevice()->getMemoryUsageStatistics();
-                lua_State* L_ = LAPP.GetLuaEngine();
-                int lua_infokb = lua_gc(L_, LUA_GCCOUNT, 0);
-                int lua_infob = lua_gc(L_, LUA_GCCOUNTB, 0);
-                DWORDLONG lua_info = (DWORDLONG)lua_infokb * (DWORDLONG)1024 + (DWORDLONG)lua_infob;
+            // if (ImGui::CollapsingHeader("Memory Usage"))
+            // {
+            //     MEMORYSTATUSEX mem_info = { sizeof(MEMORYSTATUSEX) };
+            //     GlobalMemoryStatusEx(&mem_info);
+            //     auto gpu_info = LAPP.GetAppModel()->getDevice()->getMemoryUsageStatistics();
+            //     lua_State* L_ = LAPP.GetLuaEngine();
+            //     int lua_infokb = lua_gc(L_, LUA_GCCOUNT, 0);
+            //     int lua_infob = lua_gc(L_, LUA_GCCOUNTB, 0);
+            //     DWORDLONG lua_info = (DWORDLONG)lua_infokb * (DWORDLONG)1024 + (DWORDLONG)lua_infob;
 
-                ImGui::Text("Avalid User Mode Memory Space: %s", bytes_count_to_string(mem_info.ullAvailVirtual).c_str());
-                ImGui::Text("User Mode Memory Space Usage: %s", bytes_count_to_string(mem_info.ullTotalVirtual - mem_info.ullAvailVirtual).c_str());
-                ImGui::Text("Lua Runtime Memory Usage: %s", bytes_count_to_string(lua_info).c_str());
-                ImGui::Text("Adapter Local Usage: %s", bytes_count_to_string(gpu_info.local.current_usage).c_str());
-                ImGui::Text("Adapter Non-Local Usage: %s", bytes_count_to_string(gpu_info.non_local.current_usage).c_str());
+            //     ImGui::Text("Avalid User Mode Memory Space: %s", bytes_count_to_string(mem_info.ullAvailVirtual).c_str());
+            //     ImGui::Text("User Mode Memory Space Usage: %s", bytes_count_to_string(mem_info.ullTotalVirtual - mem_info.ullAvailVirtual).c_str());
+            //     ImGui::Text("Lua Runtime Memory Usage: %s", bytes_count_to_string(lua_info).c_str());
+            //     ImGui::Text("Adapter Local Usage: %s", bytes_count_to_string(gpu_info.local.current_usage).c_str());
+            //     ImGui::Text("Adapter Non-Local Usage: %s", bytes_count_to_string(gpu_info.non_local.current_usage).c_str());
 
-                static float time_line_height = 384.0f;
-                static bool time_line_auto_fit = true;
-                ImGui::SliderFloat("Timeline Height##Memory Usage", &time_line_height, 256.0f, 512.0f);
-                ImGui::Checkbox("Auto-Fit Y Axis##Memory Usage", &time_line_auto_fit);
+            //     static float time_line_height = 384.0f;
+            //     static bool time_line_auto_fit = true;
+            //     ImGui::SliderFloat("Timeline Height##Memory Usage", &time_line_height, 256.0f, 512.0f);
+            //     ImGui::Checkbox("Auto-Fit Y Axis##Memory Usage", &time_line_auto_fit);
 
-                constexpr double const byte_to_MiB = 1.0 / (1024.0 * 1024.0);
-                arr_mem_mem[arr_index] = (double)(mem_info.ullTotalVirtual - mem_info.ullAvailVirtual) * byte_to_MiB;
-                arr_mem_gpu[arr_index] = (double)(gpu_info.local.current_usage + gpu_info.non_local.current_usage) * byte_to_MiB;
-                arr_mem_lua[arr_index] = (double)lua_info * byte_to_MiB;
+            //     constexpr double const byte_to_MiB = 1.0 / (1024.0 * 1024.0);
+            //     arr_mem_mem[arr_index] = (double)(mem_info.ullTotalVirtual - mem_info.ullAvailVirtual) * byte_to_MiB;
+            //     arr_mem_gpu[arr_index] = (double)(gpu_info.local.current_usage + gpu_info.non_local.current_usage) * byte_to_MiB;
+            //     arr_mem_lua[arr_index] = (double)lua_info * byte_to_MiB;
 
-                if (ImPlot::BeginPlot("##Memory Usage Statistics", ImVec2(-1, time_line_height), 0))
-                {
-                    //ImPlot::SetupAxes("Frame", "Time", flags, flags);
-                    ImPlot::SetupAxisLimits(ImAxis_X1, 0.0, (double)(record_range - 1), ImGuiCond_Always);
-                    //ImPlot::SetupAxisLimits(ImAxis_Y1, 0.0, 1000.0 / 18.0, ImGuiCond_Always);
-                    if (time_line_auto_fit)
-                        ImPlot::SetupAxes(NULL, NULL, ImPlotAxisFlags_None, ImPlotAxisFlags_AutoFit | ImPlotAxisFlags_RangeFit);
-                    else
-                        ImPlot::SetupAxes(NULL, NULL);
+            //     if (ImPlot::BeginPlot("##Memory Usage Statistics", ImVec2(-1, time_line_height), 0))
+            //     {
+            //         //ImPlot::SetupAxes("Frame", "Time", flags, flags);
+            //         ImPlot::SetupAxisLimits(ImAxis_X1, 0.0, (double)(record_range - 1), ImGuiCond_Always);
+            //         //ImPlot::SetupAxisLimits(ImAxis_Y1, 0.0, 1000.0 / 18.0, ImGuiCond_Always);
+            //         if (time_line_auto_fit)
+            //             ImPlot::SetupAxes(NULL, NULL, ImPlotAxisFlags_None, ImPlotAxisFlags_AutoFit | ImPlotAxisFlags_RangeFit);
+            //         else
+            //             ImPlot::SetupAxes(NULL, NULL);
 
-                    ImPlot::SetupLegend(ImPlotLocation_North, ImPlotLegendFlags_Horizontal | ImPlotLegendFlags_Outside);
+            //         ImPlot::SetupLegend(ImPlotLocation_North, ImPlotLegendFlags_Horizontal | ImPlotLegendFlags_Outside);
 
-                    ImPlot::PlotLine("Memory (MiB)", arr_mem_mem.data(), (int)record_range);
-                    ImPlot::PlotLine("GPU (MiB)", arr_mem_gpu.data(), (int)record_range);
-                    ImPlot::PlotLine("Lua (MiB)", arr_mem_lua.data(), (int)record_range);
+            //         ImPlot::PlotLine("Memory (MiB)", arr_mem_mem.data(), (int)record_range);
+            //         ImPlot::PlotLine("GPU (MiB)", arr_mem_gpu.data(), (int)record_range);
+            //         ImPlot::PlotLine("Lua (MiB)", arr_mem_lua.data(), (int)record_range);
 
-                    ImPlot::SetNextLineStyle(ImVec4(0.2f, 0.2f, 0.2f, 1.0f));
-                    ImPlot::PlotInfLines("##Current Time", &arr_index, 1, ImPlotInfLinesFlags_None);
+            //         ImPlot::SetNextLineStyle(ImVec4(0.2f, 0.2f, 0.2f, 1.0f));
+            //         ImPlot::PlotInfLines("##Current Time", &arr_index, 1, ImPlotInfLinesFlags_None);
 
-                    ImPlot::EndPlot();
-                }
-            }
+            //         ImPlot::EndPlot();
+            //     }
+            // }
 
             // object
 
@@ -694,8 +696,8 @@ void imgui_binding_lua_register_backend(lua_State* L)
         {"NewFrame", &lib_NewFrame},
         {"RenderDrawData", &lib_RenderDrawData},
         {"CacheGlyphFromString", &lib_CacheGlyphFromString},
-        {"ShowTestInputWindow", &lib_ShowTestInputWindow},
-        {"ShowMemoryUsageWindow", &lib_ShowMemoryUsageWindow},
+        // {"ShowTestInputWindow", &lib_ShowTestInputWindow},
+        // {"ShowMemoryUsageWindow", &lib_ShowMemoryUsageWindow},
         {"ShowFrameStatistics", &lib_ShowFrameStatistics},
         {"ShowResourceManagerDebugWindow", &lib_ShowResourceManagerDebugWindow},
         {"ShowParticleSystemEditor", &lib_ShowParticleSystemEditor},
@@ -712,8 +714,6 @@ void imgui_binding_lua_register_backend(lua_State* L)
 
 // imgui backend binding
 
-extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32Ex_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
-
 #define APP LuaSTGPlus::AppFrame::GetInstance()
 
 namespace imgui
@@ -729,37 +729,47 @@ namespace imgui
         std::atomic_int messageFlags;
         void onWindowCreate()
         {
-            ImGui_ImplWin32Ex_Init((void*)APP.GetAppModel()->getWindow()->getNativeHandle());
+            assert(ImGui_ImplSDL2_InitForOpenGL((SDL_Window*)APP.GetAppModel()->getWindow()->getNativeHandle(), SDL_GL_GetCurrentContext()));
         }
         void onWindowDestroy()
         {
-            ImGui_ImplWin32Ex_Shutdown();
+            // ImGui_ImplSDL2_Shutdown();
         }
         void onDeviceDestroy()
         {
             g_ImGuiTexIDValid = false;
-            ImGui_ImplDX11_Shutdown();
+            ImGui_ImplSDL2_Shutdown();
         }
         void onDeviceCreate()
         {
             g_ImGuiTexIDValid = false;
-            ID3D11Device* device = (ID3D11Device*)APP.GetAppModel()->getDevice()->getNativeHandle();
-            ID3D11DeviceContext* context = NULL;
-            device->GetImmediateContext(&context);
-            ImGui_ImplDX11_Init(device, context);
-            context->Release();
+            // ID3D11Device* device = (ID3D11Device*)APP.GetAppModel()->getDevice()->getNativeHandle();
+            // ID3D11DeviceContext* context = NULL;
+            // device->GetImmediateContext(&context);
+            ImGui_ImplOpenGL3_Init();
+            // context->Release();
         }
         void onWindowDpiChange()
         {
             messageFlags.fetch_or(0x1);
         }
-        NativeWindowMessageResult onNativeWindowMessage(void* hwnd, uint32_t msg, uintptr_t wparam, intptr_t lparam)
+        // NativeWindowMessageResult onNativeWindowMessage(void* hwnd, uint32_t msg, uintptr_t wparam, intptr_t lparam)
+        // {
+        //     LRESULT lresult = ImGui_ImplSDL2_WndProcHandler((HWND)hwnd, msg, wparam, lparam);
+        //     if (lresult)
+        //         return NativeWindowMessageResult(lresult, true);
+        //     else
+        //         return {};
+        // }
+        NativeWindowMessageResult onNativeWindowMessage(void* ev)
         {
-            LRESULT lresult = ImGui_ImplWin32Ex_WndProcHandler((HWND)hwnd, msg, wparam, lparam);
-            if (lresult)
-                return NativeWindowMessageResult(lresult, true);
-            else
-                return {};
+            // LRESULT lresult = ImGui_ImplSDL2_WndProcHandler((HWND)hwnd, msg, wparam, lparam);
+            // if (lresult)
+            //     return NativeWindowMessageResult(lresult, true);
+            // else
+            //     return {};
+            ImGui_ImplSDL2_ProcessEvent((SDL_Event*)ev);
+            return {};
         }
     };
     static ImGuiBackendEventListener g_ImGuiRenderDeviceEventListener;
@@ -818,8 +828,8 @@ namespace imgui
     static ImGuiGlyphManager g_ImGuiGlyphManager;
 
     static bool g_init_path_init = false;
-    static std::wstring g_ini_path;
-    static std::wstring const& getIniPath()
+    static std::string g_ini_path;
+    static std::string const& getIniPath()
     {
         if (!g_init_path_init)
         {
@@ -830,15 +840,15 @@ namespace imgui
             
             if (config.engine_cache_directory.empty())
             {
-                g_ini_path = L"imgui.ini";
+                g_ini_path = "imgui.ini";
             }
             else
             {
                 std::string parser_path;
                 Core::InitializeConfigure::parserDirectory(config.engine_cache_directory, parser_path, true);
-                std::filesystem::path directory(utf8::to_wstring(parser_path));
-                std::filesystem::path path = directory / utf8::to_wstring("imgui.ini");
-                g_ini_path = path.wstring();
+                std::filesystem::path directory(parser_path);
+                std::filesystem::path path = directory / "imgui.ini";
+                g_ini_path = path.string();
             }
         }
         return g_ini_path;
@@ -906,7 +916,7 @@ namespace imgui
         style.FrameBorderSize = 1.0f;
         style.TabBorderSize = 1.0f;
         
-        style.ScaleAllSizes(APP.GetAppModel()->getWindow()->getDPIScaling());
+        // style.ScaleAllSizes(APP.GetAppModel()->getWindow()->getDPIScaling());
 
         ImGui::GetStyle() = style;
 
@@ -924,7 +934,7 @@ namespace imgui
             {
                 io.Fonts->AddFontFromFileTTF(
                     fontpath.c_str(),
-                    16.0f * APP.GetAppModel()->getWindow()->getDPIScaling(),
+                    16.0f,
                     &cfg,
                     g_ImGuiGlyphManager.glyphRanges.Data
                 );
@@ -1006,32 +1016,32 @@ namespace imgui
             bool const ranges_flag = g_ImGuiGlyphManager.updateRanges();
             if ((msg_flags & 0x1) || ranges_flag)
             {
-                // 窗口 DPI 有变化或者有新的字形要添加进来
+                // Add new glyphs
                 auto& io = ImGui::GetIO();
                 io.Fonts->Clear();
                 setConfig();
-                ImGui_ImplDX11_InvalidateDeviceObjects();
+                // ImGui_ImplOpenGL3_InvalidateDeviceObjects();
             }
             constexpr int const mask = (~((int)ImGuiConfigFlags_NoMouseCursorChange));
             auto& io = ImGui::GetIO();
             if (allow_set_cursor)
                 io.ConfigFlags &= mask;
             {
-                ZoneScopedN("imgui.backend.NewFrame-D3D11");
-                ImGui_ImplDX11_NewFrame();
+                ZoneScopedN("imgui.backend.NewFrame-OpenGL3");
+                ImGui_ImplOpenGL3_NewFrame();
             }
             {
-                ZoneScopedN("imgui.backend.NewFrame-WIN32");
+                ZoneScopedN("imgui.backend.NewFrame-SDL2");
                 auto const ws = LAPP.GetAppModel()->getSwapChain()->getCanvasSize();
                 auto const mt = LAPP.GetMousePositionTransformF();
-                ImGui_ImplWin32Ex_FrameData dt;
-                dt.view_size.x = (float)ws.x;
-                dt.view_size.y = (float)ws.y;
-                dt.mouse_offset.x = mt.x;
-                dt.mouse_offset.y = mt.y;
-                dt.mouse_scale.x = mt.z;
-                dt.mouse_scale.y = mt.w;
-                ImGui_ImplWin32Ex_NewFrame(&dt);
+                // ImGui_ImplSDL2_FrameData dt;
+                // dt.view_size.x = (float)ws.x;
+                // dt.view_size.y = (float)ws.y;
+                // dt.mouse_offset.x = mt.x;
+                // dt.mouse_offset.y = mt.y;
+                // dt.mouse_scale.x = mt.z;
+                // dt.mouse_scale.y = mt.w;
+                ImGui_ImplSDL2_NewFrame();
             }
             g_ImGuiTexIDValid = true;
             if (io.WantCaptureKeyboard)
@@ -1050,373 +1060,373 @@ namespace imgui
             engine.GetAppModel()->getRenderer()->endBatch();
             
             // 绘制GUI数据
-            ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
+            ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
             
             // 重启渲染过程
             engine.GetAppModel()->getRenderer()->beginBatch();
         }
     }
 
-    void showTestInputWindow(bool* p_open)
-    {
-        auto* __p = APP.GetDInput();
-        if (__p == nullptr) return;
-        auto& dinput = *__p;
+    // void showTestInputWindow(bool* p_open)
+    // {
+    //     // auto* __p = APP.GetDInput();
+    //     // if (__p == nullptr) return;
+    //     // auto& dinput = *__p;
         
-        static bool _first_set_size = false;
-        if (!_first_set_size)
-        {
-            ImGui::SetNextWindowContentSize(ImVec2(640.0f, 480.0f));
-            _first_set_size = true;
-        }
-        bool show = ImGui::Begin("InputTest##80FF", p_open);
-        if (show)
-        {
-            static char buffer[1024] = { 0 };
-            static wchar_t wbuffer[1024] = { 0 };
-            static std::vector<std::string> combo_str;
-            static std::vector<char*> combo_data;
-            static int current_didx = 0;
-            static int current_xidx = 0;
-            static bool force_update = false;
+    //     static bool _first_set_size = false;
+    //     if (!_first_set_size)
+    //     {
+    //         ImGui::SetNextWindowContentSize(ImVec2(640.0f, 480.0f));
+    //         _first_set_size = true;
+    //     }
+    //     bool show = ImGui::Begin("InputTest##80FF", p_open);
+    //     if (show)
+    //     {
+    //         static char buffer[1024] = { 0 };
+    //         static wchar_t wbuffer[1024] = { 0 };
+    //         static std::vector<std::string> combo_str;
+    //         static std::vector<char*> combo_data;
+    //         static int current_didx = 0;
+    //         static int current_xidx = 0;
+    //         static bool force_update = false;
             
-            XINPUT_STATE xstate[4];
-            ZeroMemory(xstate, sizeof(xstate));
-            bool bxstate[4] = { false, false, false, false };
-            DWORD xdevice = 0;
-            for (size_t i = 0; i < 4; i += 1)
-            {
-                auto hr = Platform::XInput::getState((DWORD)i, xstate);
-                if (hr == ERROR_SUCCESS)
-                {
-                    bxstate[i] = true;
-                    xdevice += 1;
-                }
-            }
+    //         XINPUT_STATE xstate[4];
+    //         ZeroMemory(xstate, sizeof(xstate));
+    //         bool bxstate[4] = { false, false, false, false };
+    //         DWORD xdevice = 0;
+    //         for (size_t i = 0; i < 4; i += 1)
+    //         {
+    //             auto hr = Platform::XInput::getState((DWORD)i, xstate);
+    //             if (hr == ERROR_SUCCESS)
+    //             {
+    //                 bxstate[i] = true;
+    //                 xdevice += 1;
+    //             }
+    //         }
             
-            ImGui::Checkbox("Force Update", &force_update);
-            if (force_update)
-            {
-                dinput.update();
-            }
+    //         ImGui::Checkbox("Force Update", &force_update);
+    //         if (force_update)
+    //         {
+    //             dinput.update();
+    //         }
 
-            if (ImGui::BeginTabBar("##8010"))
-            {
-                if (ImGui::BeginTabItem("DirectInput##8011"))
-                {
-                    {
-                        const auto cnt = dinput.count();
-                        combo_str.resize(cnt);
-                        combo_data.resize(cnt);
-                        for (uint32_t i = 0; i < cnt; i += 1)
-                        {
-                            auto s1 = dinput.getDeviceName(i);
-                            auto s2 = dinput.getProductName(i);
-                            swprintf(wbuffer, 1023, L"%u. %s (%s)", i + 1, s1 ? s1 : L"<null>", s2 ? s2 : L"<null>");
-                            int need = WideCharToMultiByte(CP_UTF8, 0, wbuffer, -1, NULL, 0, NULL, NULL);
-                            combo_str[i].resize(need);
-                            WideCharToMultiByte(CP_UTF8, 0, wbuffer, -1, (LPSTR)combo_str[i].data(), need, NULL, NULL);
-                            combo_data[i] = (char*)combo_str[i].c_str();
-                        }
+    //         if (ImGui::BeginTabBar("##8010"))
+    //         {
+    //             if (ImGui::BeginTabItem("DirectInput##8011"))
+    //             {
+    //                 {
+    //                     const auto cnt = dinput.count();
+    //                     combo_str.resize(cnt);
+    //                     combo_data.resize(cnt);
+    //                     for (uint32_t i = 0; i < cnt; i += 1)
+    //                     {
+    //                         auto s1 = dinput.getDeviceName(i);
+    //                         auto s2 = dinput.getProductName(i);
+    //                         swprintf(wbuffer, 1023, L"%u. %s (%s)", i + 1, s1 ? s1 : L"<null>", s2 ? s2 : L"<null>");
+    //                         int need = WideCharToMultiByte(CP_UTF8, 0, wbuffer, -1, NULL, 0, NULL, NULL);
+    //                         combo_str[i].resize(need);
+    //                         WideCharToMultiByte(CP_UTF8, 0, wbuffer, -1, (LPSTR)combo_str[i].data(), need, NULL, NULL);
+    //                         combo_data[i] = (char*)combo_str[i].c_str();
+    //                     }
                         
-                        ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x * 0.8f);
-                        ImGui::Combo("Devices", &current_didx, combo_data.data(), (int)combo_data.size());
-                        ImGui::SameLine();
-                        ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x * 0.2f);
-                        if (ImGui::Button("Refresh"))
-                        {
-                            dinput.refresh();
-                        }
+    //                     ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x * 0.8f);
+    //                     ImGui::Combo("Devices", &current_didx, combo_data.data(), (int)combo_data.size());
+    //                     ImGui::SameLine();
+    //                     ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x * 0.2f);
+    //                     if (ImGui::Button("Refresh"))
+    //                     {
+    //                         dinput.refresh();
+    //                     }
                         
-                        Platform::DirectInput::RawState state;
-                        if (dinput.getRawState(current_didx, &state))
-                        {
-                            Platform::DirectInput::AxisRange range;
-                            dinput.getAxisRange(current_didx, &range);
+    //                     Platform::DirectInput::RawState state;
+    //                     if (dinput.getRawState(current_didx, &state))
+    //                     {
+    //                         Platform::DirectInput::AxisRange range;
+    //                         dinput.getAxisRange(current_didx, &range);
                             
-                            int cache = 0;
+    //                         int cache = 0;
                             
-                            ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x * 0.8f);
-                            cache = state.lX;
-                            ImGui::SliderInt("Axis X", &cache, range.XMin, range.XMax);
+    //                         ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x * 0.8f);
+    //                         cache = state.lX;
+    //                         ImGui::SliderInt("Axis X", &cache, range.XMin, range.XMax);
                             
-                            ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x * 0.8f);
-                            cache = state.lY;
-                            ImGui::SliderInt("Axis Y", &cache, range.YMin, range.YMax);
+    //                         ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x * 0.8f);
+    //                         cache = state.lY;
+    //                         ImGui::SliderInt("Axis Y", &cache, range.YMin, range.YMax);
                             
-                            ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x * 0.8f);
-                            cache = state.lZ;
-                            ImGui::SliderInt("Axis Z", &cache, range.ZMin, range.ZMax);
+    //                         ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x * 0.8f);
+    //                         cache = state.lZ;
+    //                         ImGui::SliderInt("Axis Z", &cache, range.ZMin, range.ZMax);
                             
-                            ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x * 0.8f);
-                            cache = state.lRx;
-                            ImGui::SliderInt("Axis RX", &cache, range.RxMin, range.RxMax);
+    //                         ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x * 0.8f);
+    //                         cache = state.lRx;
+    //                         ImGui::SliderInt("Axis RX", &cache, range.RxMin, range.RxMax);
                             
-                            ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x * 0.8f);
-                            cache = state.lRy;
-                            ImGui::SliderInt("Axis RY", &cache, range.RyMin, range.RyMax);
+    //                         ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x * 0.8f);
+    //                         cache = state.lRy;
+    //                         ImGui::SliderInt("Axis RY", &cache, range.RyMin, range.RyMax);
                             
-                            ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x * 0.8f);
-                            cache = state.lRz;
-                            ImGui::SliderInt("Axis RZ", &cache, range.RzMin, range.RzMax);
+    //                         ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x * 0.8f);
+    //                         cache = state.lRz;
+    //                         ImGui::SliderInt("Axis RZ", &cache, range.RzMin, range.RzMax);
                             
-                            ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x * 0.8f);
-                            cache = state.rglSlider[0];
-                            ImGui::SliderInt("Slider 1", &cache, range.Slider0Min, range.Slider0Max);
+    //                         ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x * 0.8f);
+    //                         cache = state.rglSlider[0];
+    //                         ImGui::SliderInt("Slider 1", &cache, range.Slider0Min, range.Slider0Max);
                             
-                            ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x * 0.8f);
-                            cache = state.rglSlider[1];
-                            ImGui::SliderInt("Slider 2", &cache, range.Slider1Min, range.Slider1Max);
+    //                         ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x * 0.8f);
+    //                         cache = state.rglSlider[1];
+    //                         ImGui::SliderInt("Slider 2", &cache, range.Slider1Min, range.Slider1Max);
                             
-                            ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x * 0.8f);
-                            cache = (state.rgdwPOV[0] <= 36000) ? state.rgdwPOV[0] : 0;
-                            ImGui::SliderInt("POV 1", &cache, 0, (state.rgdwPOV[0] <= 36000) ? 36000 : 0);
+    //                         ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x * 0.8f);
+    //                         cache = (state.rgdwPOV[0] <= 36000) ? state.rgdwPOV[0] : 0;
+    //                         ImGui::SliderInt("POV 1", &cache, 0, (state.rgdwPOV[0] <= 36000) ? 36000 : 0);
                             
-                            ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x * 0.8f);
-                            cache = (state.rgdwPOV[1] <= 36000) ? state.rgdwPOV[1] : 0;
-                            ImGui::SliderInt("POV 2", &cache, 0, (state.rgdwPOV[1] <= 36000) ? 36000 : 0);
+    //                         ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x * 0.8f);
+    //                         cache = (state.rgdwPOV[1] <= 36000) ? state.rgdwPOV[1] : 0;
+    //                         ImGui::SliderInt("POV 2", &cache, 0, (state.rgdwPOV[1] <= 36000) ? 36000 : 0);
                             
-                            ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x * 0.8f);
-                            cache = (state.rgdwPOV[2] <= 36000) ? state.rgdwPOV[2] : 0;
-                            ImGui::SliderInt("POV 3", &cache, 0, (state.rgdwPOV[2] <= 36000) ? 36000 : 0);
+    //                         ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x * 0.8f);
+    //                         cache = (state.rgdwPOV[2] <= 36000) ? state.rgdwPOV[2] : 0;
+    //                         ImGui::SliderInt("POV 3", &cache, 0, (state.rgdwPOV[2] <= 36000) ? 36000 : 0);
                             
-                            ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x * 0.8f);
-                            cache = (state.rgdwPOV[3] <= 36000) ? state.rgdwPOV[3] : 0;
-                            ImGui::SliderInt("POV 4", &cache, 0, (state.rgdwPOV[3] <= 36000) ? 36000 : 0);
+    //                         ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x * 0.8f);
+    //                         cache = (state.rgdwPOV[3] <= 36000) ? state.rgdwPOV[3] : 0;
+    //                         ImGui::SliderInt("POV 4", &cache, 0, (state.rgdwPOV[3] <= 36000) ? 36000 : 0);
                             
-                            bool bcache = false;
+    //                         bool bcache = false;
                             
-                            #define SHOWKEY(I, B) \
-                                ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x * 0.125f);\
-                                bcache = (state.rgbButtons[I - 1] != 0);\
-                                if constexpr ((I) < 10) ImGui::Checkbox("Button 0" #I, &bcache);\
-                                else ImGui::Checkbox("Button " #I, &bcache);\
-                                if constexpr (B) ImGui::SameLine();
+    //                         #define SHOWKEY(I, B) \
+    //                             ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x * 0.125f);\
+    //                             bcache = (state.rgbButtons[I - 1] != 0);\
+    //                             if constexpr ((I) < 10) ImGui::Checkbox("Button 0" #I, &bcache);\
+    //                             else ImGui::Checkbox("Button " #I, &bcache);\
+    //                             if constexpr (B) ImGui::SameLine();
                             
-                            SHOWKEY( 1, 1); SHOWKEY( 2, 1); SHOWKEY( 3, 1); SHOWKEY( 4, 1); SHOWKEY( 5, 1); SHOWKEY( 6, 1); SHOWKEY( 7, 1); SHOWKEY( 8, 0);
-                            SHOWKEY( 9, 1); SHOWKEY(10, 1); SHOWKEY(11, 1); SHOWKEY(12, 1); SHOWKEY(13, 1); SHOWKEY(14, 1); SHOWKEY(15, 1); SHOWKEY(16, 0);
-                            SHOWKEY(17, 1); SHOWKEY(18, 1); SHOWKEY(19, 1); SHOWKEY(20, 1); SHOWKEY(21, 1); SHOWKEY(22, 1); SHOWKEY(23, 1); SHOWKEY(24, 0);
-                            SHOWKEY(25, 1); SHOWKEY(26, 1); SHOWKEY(27, 1); SHOWKEY(28, 1); SHOWKEY(29, 1); SHOWKEY(30, 1); SHOWKEY(31, 1); SHOWKEY(32, 0);
+    //                         SHOWKEY( 1, 1); SHOWKEY( 2, 1); SHOWKEY( 3, 1); SHOWKEY( 4, 1); SHOWKEY( 5, 1); SHOWKEY( 6, 1); SHOWKEY( 7, 1); SHOWKEY( 8, 0);
+    //                         SHOWKEY( 9, 1); SHOWKEY(10, 1); SHOWKEY(11, 1); SHOWKEY(12, 1); SHOWKEY(13, 1); SHOWKEY(14, 1); SHOWKEY(15, 1); SHOWKEY(16, 0);
+    //                         SHOWKEY(17, 1); SHOWKEY(18, 1); SHOWKEY(19, 1); SHOWKEY(20, 1); SHOWKEY(21, 1); SHOWKEY(22, 1); SHOWKEY(23, 1); SHOWKEY(24, 0);
+    //                         SHOWKEY(25, 1); SHOWKEY(26, 1); SHOWKEY(27, 1); SHOWKEY(28, 1); SHOWKEY(29, 1); SHOWKEY(30, 1); SHOWKEY(31, 1); SHOWKEY(32, 0);
                             
-                            #undef SHOWKEY
-                        }
-                    }
-                    ImGui::EndTabItem();
-                }
-                if (ImGui::BeginTabItem("DirectInput to XInput##8012"))
-                {
-                    {
-                        const auto cnt = dinput.count();
-                        combo_str.resize(cnt);
-                        combo_data.resize(cnt);
-                        for (uint32_t i = 0; i < cnt; i += 1)
-                        {
-                            auto s1 = dinput.getDeviceName(i);
-                            auto s2 = dinput.getProductName(i);
-                            swprintf(wbuffer, 1023, L"%u. %s (%s)", i + 1, s1 ? s1 : L"<null>", s2 ? s2 : L"<null>");
-                            int need = WideCharToMultiByte(CP_UTF8, 0, wbuffer, -1, NULL, 0, NULL, NULL);
-                            combo_str[i].resize(need);
-                            WideCharToMultiByte(CP_UTF8, 0, wbuffer, -1, (LPSTR)combo_str[i].data(), need, NULL, NULL);
-                            combo_data[i] = (char*)combo_str[i].c_str();
-                        }
+    //                         #undef SHOWKEY
+    //                     }
+    //                 }
+    //                 ImGui::EndTabItem();
+    //             }
+    //             if (ImGui::BeginTabItem("DirectInput to XInput##8012"))
+    //             {
+    //                 {
+    //                     const auto cnt = dinput.count();
+    //                     combo_str.resize(cnt);
+    //                     combo_data.resize(cnt);
+    //                     for (uint32_t i = 0; i < cnt; i += 1)
+    //                     {
+    //                         auto s1 = dinput.getDeviceName(i);
+    //                         auto s2 = dinput.getProductName(i);
+    //                         swprintf(wbuffer, 1023, L"%u. %s (%s)", i + 1, s1 ? s1 : L"<null>", s2 ? s2 : L"<null>");
+    //                         int need = WideCharToMultiByte(CP_UTF8, 0, wbuffer, -1, NULL, 0, NULL, NULL);
+    //                         combo_str[i].resize(need);
+    //                         WideCharToMultiByte(CP_UTF8, 0, wbuffer, -1, (LPSTR)combo_str[i].data(), need, NULL, NULL);
+    //                         combo_data[i] = (char*)combo_str[i].c_str();
+    //                     }
                         
-                        ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x * 0.8f);
-                        ImGui::Combo("Devices", &current_didx, combo_data.data(), (int)combo_data.size());
-                        ImGui::SameLine();
-                        ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x * 0.2f);
-                        if (ImGui::Button("Refresh"))
-                        {
-                            dinput.refresh();
-                        }
+    //                     ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x * 0.8f);
+    //                     ImGui::Combo("Devices", &current_didx, combo_data.data(), (int)combo_data.size());
+    //                     ImGui::SameLine();
+    //                     ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x * 0.2f);
+    //                     if (ImGui::Button("Refresh"))
+    //                     {
+    //                         dinput.refresh();
+    //                     }
                         
-                        Platform::DirectInput::State state;
-                        if (dinput.getState(current_didx, &state))
-                        {
-                            SHORT cache[2];
-                            SHORT minv = -32768, maxv = 32767;
-                            BYTE bcache = 0;
-                            BYTE bminv = 0, bmaxv = 255;
+    //                     Platform::DirectInput::State state;
+    //                     if (dinput.getState(current_didx, &state))
+    //                     {
+    //                         SHORT cache[2];
+    //                         SHORT minv = -32768, maxv = 32767;
+    //                         BYTE bcache = 0;
+    //                         BYTE bminv = 0, bmaxv = 255;
                             
-                            ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x * 0.8f);
-                            cache[0] = state.sThumbLX; cache[1] = state.sThumbLY;
-                            ImGui::SliderScalarN("Left Joystick (LJ)", ImGuiDataType_S16, cache, 2, &minv, &maxv);
+    //                         ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x * 0.8f);
+    //                         cache[0] = state.sThumbLX; cache[1] = state.sThumbLY;
+    //                         ImGui::SliderScalarN("Left Joystick (LJ)", ImGuiDataType_S16, cache, 2, &minv, &maxv);
                             
-                            ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x * 0.8f);
-                            cache[0] = state.sThumbRX; cache[1] = state.sThumbRY;
-                            ImGui::SliderScalarN("Right Joystick (RJ)", ImGuiDataType_S16, cache, 2, &minv, &maxv);
+    //                         ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x * 0.8f);
+    //                         cache[0] = state.sThumbRX; cache[1] = state.sThumbRY;
+    //                         ImGui::SliderScalarN("Right Joystick (RJ)", ImGuiDataType_S16, cache, 2, &minv, &maxv);
                             
-                            ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x * 0.8f);
-                            bcache = state.bLeftTrigger;
-                            ImGui::SliderScalar("Left Trigger（LT）", ImGuiDataType_U8, &bcache, &bminv, &bmaxv);
+    //                         ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x * 0.8f);
+    //                         bcache = state.bLeftTrigger;
+    //                         ImGui::SliderScalar("Left Trigger（LT）", ImGuiDataType_U8, &bcache, &bminv, &bmaxv);
                             
-                            ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x * 0.8f);
-                            bcache = state.bRightTrigger;
-                            ImGui::SliderScalar("Right Trigger（RT）", ImGuiDataType_U8, &bcache, &bminv, &bmaxv);
+    //                         ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x * 0.8f);
+    //                         bcache = state.bRightTrigger;
+    //                         ImGui::SliderScalar("Right Trigger（RT）", ImGuiDataType_U8, &bcache, &bminv, &bmaxv);
                             
-                            bool _bstate = false;
+    //                         bool _bstate = false;
                             
-                            #define SHOWKEY(L, NAME, C) \
-                                _bstate = ((state.wButtons & C) != 0);\
-                                ImGui::Checkbox(#NAME, &_bstate);\
-                                if constexpr ((L) != 0) ImGui::SameLine();
+    //                         #define SHOWKEY(L, NAME, C) \
+    //                             _bstate = ((state.wButtons & C) != 0);\
+    //                             ImGui::Checkbox(#NAME, &_bstate);\
+    //                             if constexpr ((L) != 0) ImGui::SameLine();
                             
-                            SHOWKEY(1,    UP, XINPUT_GAMEPAD_DPAD_UP       );
-                            SHOWKEY(1,  DOWN, XINPUT_GAMEPAD_DPAD_DOWN     );
-                            SHOWKEY(1,  LEFT, XINPUT_GAMEPAD_DPAD_LEFT     );
-                            SHOWKEY(0, RIGHT, XINPUT_GAMEPAD_DPAD_RIGHT    );
+    //                         SHOWKEY(1,    UP, XINPUT_GAMEPAD_DPAD_UP       );
+    //                         SHOWKEY(1,  DOWN, XINPUT_GAMEPAD_DPAD_DOWN     );
+    //                         SHOWKEY(1,  LEFT, XINPUT_GAMEPAD_DPAD_LEFT     );
+    //                         SHOWKEY(0, RIGHT, XINPUT_GAMEPAD_DPAD_RIGHT    );
                             
-                            SHOWKEY(1, START, XINPUT_GAMEPAD_START         );
-                            SHOWKEY(0,  BACK, XINPUT_GAMEPAD_BACK          );
+    //                         SHOWKEY(1, START, XINPUT_GAMEPAD_START         );
+    //                         SHOWKEY(0,  BACK, XINPUT_GAMEPAD_BACK          );
                             
-                            SHOWKEY(1,  Left Thumb (LJB), XINPUT_GAMEPAD_LEFT_THUMB    );
-                            SHOWKEY(0, Right Thumb (RJB), XINPUT_GAMEPAD_RIGHT_THUMB   );
+    //                         SHOWKEY(1,  Left Thumb (LJB), XINPUT_GAMEPAD_LEFT_THUMB    );
+    //                         SHOWKEY(0, Right Thumb (RJB), XINPUT_GAMEPAD_RIGHT_THUMB   );
                             
-                            SHOWKEY(1,  Left Shoulder (LB), XINPUT_GAMEPAD_LEFT_SHOULDER );
-                            SHOWKEY(0, Right Shoulder (RB), XINPUT_GAMEPAD_RIGHT_SHOULDER);
+    //                         SHOWKEY(1,  Left Shoulder (LB), XINPUT_GAMEPAD_LEFT_SHOULDER );
+    //                         SHOWKEY(0, Right Shoulder (RB), XINPUT_GAMEPAD_RIGHT_SHOULDER);
                             
-                            SHOWKEY(1, A, XINPUT_GAMEPAD_A             );
-                            SHOWKEY(1, B, XINPUT_GAMEPAD_B             );
-                            SHOWKEY(1, X, XINPUT_GAMEPAD_X             );
-                            SHOWKEY(0, Y, XINPUT_GAMEPAD_Y             );
+    //                         SHOWKEY(1, A, XINPUT_GAMEPAD_A             );
+    //                         SHOWKEY(1, B, XINPUT_GAMEPAD_B             );
+    //                         SHOWKEY(1, X, XINPUT_GAMEPAD_X             );
+    //                         SHOWKEY(0, Y, XINPUT_GAMEPAD_Y             );
                             
-                            #undef SHOWKEY
-                        }
-                    }
-                    ImGui::EndTabItem();
-                }
-                if (ImGui::BeginTabItem("XInput##8013"))
-                {
-                    {
-                        combo_str.resize(xdevice);
-                        combo_data.resize(xdevice);
-                        for (uint32_t i = 0; i < xdevice; i += 1)
-                        {
-                            snprintf(buffer, 1023, "%u. %s", i + 1, "XBox Controller & XInput Compatible Controller");
-                            combo_str[i] = buffer;
-                            combo_data[i] = (char*)combo_str[i].c_str();
-                        }
+    //                         #undef SHOWKEY
+    //                     }
+    //                 }
+    //                 ImGui::EndTabItem();
+    //             }
+    //             if (ImGui::BeginTabItem("XInput##8013"))
+    //             {
+    //                 {
+    //                     combo_str.resize(xdevice);
+    //                     combo_data.resize(xdevice);
+    //                     for (uint32_t i = 0; i < xdevice; i += 1)
+    //                     {
+    //                         snprintf(buffer, 1023, "%u. %s", i + 1, "XBox Controller & XInput Compatible Controller");
+    //                         combo_str[i] = buffer;
+    //                         combo_data[i] = (char*)combo_str[i].c_str();
+    //                     }
                         
-                        ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x * 0.8f);
-                        ImGui::Combo("Devices", &current_xidx, combo_data.data(), (int)combo_data.size());
+    //                     ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x * 0.8f);
+    //                     ImGui::Combo("Devices", &current_xidx, combo_data.data(), (int)combo_data.size());
                         
-                        if (current_xidx < (int)xdevice)
-                        {
-                            auto& state = xstate[current_xidx].Gamepad;
+    //                     if (current_xidx < (int)xdevice)
+    //                     {
+    //                         auto& state = xstate[current_xidx].Gamepad;
                             
-                            SHORT cache[2];
-                            SHORT minv = -32768, maxv = 32767;
-                            BYTE bcache = 0;
-                            BYTE bminv = 0, bmaxv = 255;
+    //                         SHORT cache[2];
+    //                         SHORT minv = -32768, maxv = 32767;
+    //                         BYTE bcache = 0;
+    //                         BYTE bminv = 0, bmaxv = 255;
                             
-                            ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x * 0.8f);
-                            cache[0] = state.sThumbLX; cache[1] = state.sThumbLY;
-                            ImGui::SliderScalarN("Left Joystick (LJ)", ImGuiDataType_S16, cache, 2, &minv, &maxv);
+    //                         ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x * 0.8f);
+    //                         cache[0] = state.sThumbLX; cache[1] = state.sThumbLY;
+    //                         ImGui::SliderScalarN("Left Joystick (LJ)", ImGuiDataType_S16, cache, 2, &minv, &maxv);
                             
-                            ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x * 0.8f);
-                            cache[0] = state.sThumbRX; cache[1] = state.sThumbRY;
-                            ImGui::SliderScalarN("Right Joystick (RJ)", ImGuiDataType_S16, cache, 2, &minv, &maxv);
+    //                         ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x * 0.8f);
+    //                         cache[0] = state.sThumbRX; cache[1] = state.sThumbRY;
+    //                         ImGui::SliderScalarN("Right Joystick (RJ)", ImGuiDataType_S16, cache, 2, &minv, &maxv);
                             
-                            ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x * 0.8f);
-                            bcache = state.bLeftTrigger;
-                            ImGui::SliderScalar("Left Trigger（LT）", ImGuiDataType_U8, &bcache, &bminv, &bmaxv);
+    //                         ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x * 0.8f);
+    //                         bcache = state.bLeftTrigger;
+    //                         ImGui::SliderScalar("Left Trigger（LT）", ImGuiDataType_U8, &bcache, &bminv, &bmaxv);
                             
-                            ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x * 0.8f);
-                            bcache = state.bRightTrigger;
-                            ImGui::SliderScalar("Right Trigger（RT）", ImGuiDataType_U8, &bcache, &bminv, &bmaxv);
+    //                         ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x * 0.8f);
+    //                         bcache = state.bRightTrigger;
+    //                         ImGui::SliderScalar("Right Trigger（RT）", ImGuiDataType_U8, &bcache, &bminv, &bmaxv);
                             
-                            bool _bstate = false;
+    //                         bool _bstate = false;
                             
-                            #define SHOWKEY(L, NAME, C) \
-                                _bstate = ((state.wButtons & C) != 0);\
-                                ImGui::Checkbox(#NAME, &_bstate);\
-                                if constexpr ((L) != 0) ImGui::SameLine();
+    //                         #define SHOWKEY(L, NAME, C) \
+    //                             _bstate = ((state.wButtons & C) != 0);\
+    //                             ImGui::Checkbox(#NAME, &_bstate);\
+    //                             if constexpr ((L) != 0) ImGui::SameLine();
                             
-                            SHOWKEY(1,    UP, XINPUT_GAMEPAD_DPAD_UP       );
-                            SHOWKEY(1,  DOWN, XINPUT_GAMEPAD_DPAD_DOWN     );
-                            SHOWKEY(1,  LEFT, XINPUT_GAMEPAD_DPAD_LEFT     );
-                            SHOWKEY(0, RIGHT, XINPUT_GAMEPAD_DPAD_RIGHT    );
+    //                         SHOWKEY(1,    UP, XINPUT_GAMEPAD_DPAD_UP       );
+    //                         SHOWKEY(1,  DOWN, XINPUT_GAMEPAD_DPAD_DOWN     );
+    //                         SHOWKEY(1,  LEFT, XINPUT_GAMEPAD_DPAD_LEFT     );
+    //                         SHOWKEY(0, RIGHT, XINPUT_GAMEPAD_DPAD_RIGHT    );
                             
-                            SHOWKEY(1, START, XINPUT_GAMEPAD_START         );
-                            SHOWKEY(0,  BACK, XINPUT_GAMEPAD_BACK          );
+    //                         SHOWKEY(1, START, XINPUT_GAMEPAD_START         );
+    //                         SHOWKEY(0,  BACK, XINPUT_GAMEPAD_BACK          );
                             
-                            SHOWKEY(1,  Left Thumb (LJB), XINPUT_GAMEPAD_LEFT_THUMB    );
-                            SHOWKEY(0, Right Thumb (RJB), XINPUT_GAMEPAD_RIGHT_THUMB   );
+    //                         SHOWKEY(1,  Left Thumb (LJB), XINPUT_GAMEPAD_LEFT_THUMB    );
+    //                         SHOWKEY(0, Right Thumb (RJB), XINPUT_GAMEPAD_RIGHT_THUMB   );
                             
-                            SHOWKEY(1,  Left Shoulder (LB), XINPUT_GAMEPAD_LEFT_SHOULDER );
-                            SHOWKEY(0, Right Shoulder (RB), XINPUT_GAMEPAD_RIGHT_SHOULDER);
+    //                         SHOWKEY(1,  Left Shoulder (LB), XINPUT_GAMEPAD_LEFT_SHOULDER );
+    //                         SHOWKEY(0, Right Shoulder (RB), XINPUT_GAMEPAD_RIGHT_SHOULDER);
                             
-                            SHOWKEY(1, A, XINPUT_GAMEPAD_A             );
-                            SHOWKEY(1, B, XINPUT_GAMEPAD_B             );
-                            SHOWKEY(1, X, XINPUT_GAMEPAD_X             );
-                            SHOWKEY(0, Y, XINPUT_GAMEPAD_Y             );
+    //                         SHOWKEY(1, A, XINPUT_GAMEPAD_A             );
+    //                         SHOWKEY(1, B, XINPUT_GAMEPAD_B             );
+    //                         SHOWKEY(1, X, XINPUT_GAMEPAD_X             );
+    //                         SHOWKEY(0, Y, XINPUT_GAMEPAD_Y             );
                             
-                            #undef SHOWKEY
-                        }
-                    }
-                    ImGui::EndTabItem();
-                }
-                if (ImGui::BeginTabItem("Keyboard##8014"))
-                {
-                    for (int i = 0; i < 256; i += 1)
-                    {
-                        if (dinput.getKeyboardKeyState(i))
-                        {
-                            ImGui::Text("[%d]", i);
-                        }
-                    }
-                    ImGui::EndTabItem();
-                }
-                if (ImGui::BeginTabItem("Mouse##8014"))
-                {
-                    const auto x = dinput.getMouseMoveDeltaX();
-                    const auto y = dinput.getMouseMoveDeltaY();
-                    int xy[2] = { x, y };
-                    ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x * 0.8f);
-                    ImGui::DragInt2("Move Delta", xy);
+    //                         #undef SHOWKEY
+    //                     }
+    //                 }
+    //                 ImGui::EndTabItem();
+    //             }
+    //             if (ImGui::BeginTabItem("Keyboard##8014"))
+    //             {
+    //                 for (int i = 0; i < 256; i += 1)
+    //                 {
+    //                     if (dinput.getKeyboardKeyState(i))
+    //                     {
+    //                         ImGui::Text("[%d]", i);
+    //                     }
+    //                 }
+    //                 ImGui::EndTabItem();
+    //             }
+    //             if (ImGui::BeginTabItem("Mouse##8014"))
+    //             {
+    //                 const auto x = dinput.getMouseMoveDeltaX();
+    //                 const auto y = dinput.getMouseMoveDeltaY();
+    //                 int xy[2] = { x, y };
+    //                 ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x * 0.8f);
+    //                 ImGui::DragInt2("Move Delta", xy);
                     
-                    static int g_x = 0;
-                    static int g_y = 0;
-                    g_x += x;
-                    g_y += y;
-                    int g_xy[2] = { g_x, g_y };
-                    ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x * 0.8f);
-                    ImGui::DragInt2("Total Move", g_xy);
-                    ImGui::SameLine();
-                    ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x * 0.2f);
-                    if (ImGui::Button("Reset##1"))
-                    {
-                        g_x = 0;
-                        g_y = 0;
-                    }
+    //                 static int g_x = 0;
+    //                 static int g_y = 0;
+    //                 g_x += x;
+    //                 g_y += y;
+    //                 int g_xy[2] = { g_x, g_y };
+    //                 ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x * 0.8f);
+    //                 ImGui::DragInt2("Total Move", g_xy);
+    //                 ImGui::SameLine();
+    //                 ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x * 0.2f);
+    //                 if (ImGui::Button("Reset##1"))
+    //                 {
+    //                     g_x = 0;
+    //                     g_y = 0;
+    //                 }
                     
-                    int z = dinput.getMouseWheelDelta();
-                    ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x * 0.8f);
-                    ImGui::DragInt("Wheel Delta", &z);
+    //                 int z = dinput.getMouseWheelDelta();
+    //                 ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x * 0.8f);
+    //                 ImGui::DragInt("Wheel Delta", &z);
                     
-                    static int g_z = 0;
-                    g_z += z;
-                    ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x * 0.8f);
-                    int _g_z = g_z;
-                    ImGui::DragInt("Total Wheel", &_g_z);
-                    ImGui::SameLine();
-                    ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x * 0.2f);
-                    if (ImGui::Button("Reset##2"))
-                    {
-                        g_z = 0;
-                    }
+    //                 static int g_z = 0;
+    //                 g_z += z;
+    //                 ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x * 0.8f);
+    //                 int _g_z = g_z;
+    //                 ImGui::DragInt("Total Wheel", &_g_z);
+    //                 ImGui::SameLine();
+    //                 ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x * 0.2f);
+    //                 if (ImGui::Button("Reset##2"))
+    //                 {
+    //                     g_z = 0;
+    //                 }
                     
-                    for (int i = 0; i < 8; i += 1)
-                    {
-                        if (dinput.getMouseKeyState(i))
-                        {
-                            ImGui::Text("[%d]", i);
-                        }
-                    }
-                    ImGui::EndTabItem();
-                }
-                ImGui::EndTabBar();
-            }
-        }
-        ImGui::End();
-    }
+    //                 for (int i = 0; i < 8; i += 1)
+    //                 {
+    //                     if (dinput.getMouseKeyState(i))
+    //                     {
+    //                         ImGui::Text("[%d]", i);
+    //                     }
+    //                 }
+    //                 ImGui::EndTabItem();
+    //             }
+    //             ImGui::EndTabBar();
+    //         }
+    //     }
+    //     ImGui::End();
+    // }
 };

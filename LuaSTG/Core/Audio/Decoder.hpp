@@ -12,11 +12,11 @@ namespace Core::Audio
 		virtual uint32_t getByteRate() = 0;     // = getSampleRate() * getFrameSize()
 		virtual uint32_t getFrameCount() = 0;   // how many pcm frames?
 
-		virtual bool seek(uint32_t pcm_frame) = 0;
+		virtual bool seek(uint64_t pcm_frame) = 0;
 		virtual bool seekByTime(double sec) = 0;
-		virtual bool tell(uint32_t* pcm_frame) = 0;
+		virtual bool tell(uint64_t* pcm_frame) = 0;
 		virtual bool tellAsTime(double* sec) = 0;
-		virtual bool read(uint32_t pcm_frame, void* buffer, uint32_t* read_pcm_frame) = 0; // s16
+		virtual bool read(uint64_t pcm_frame, void* buffer, uint64_t* read_pcm_frame) = 0; // s16
 
 		static bool create(StringView path, IDecoder** pp_decoder);
 	};

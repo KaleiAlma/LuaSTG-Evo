@@ -1,4 +1,5 @@
-﻿#include "GameResource/ResourceManager.h"
+﻿#include "Core/Graphics/Sprite_OpenGL.hpp"
+#include "GameResource/ResourceManager.h"
 #include "GameResource/Implement/ResourceTextureImpl.hpp"
 #include "GameResource/Implement/ResourceSpriteImpl.hpp"
 #include "GameResource/Implement/ResourceAnimationImpl.hpp"
@@ -11,6 +12,7 @@
 #include "Core/FileManager.hpp"
 #include "AppFrame.h"
 #include "LuaBinding/lua_utility.hpp"
+#include <spdlog/spdlog.h>
 
 namespace LuaSTGPlus
 {
@@ -201,6 +203,7 @@ namespace LuaSTGPlus
         }
     
         Core::ScopeObject<Core::Graphics::ITexture2D> p_texture;
+        // spdlog::debug("tex_ptr: {}", (size_t)&p_texture); // 140737488345752 140737488345752
         if (!LAPP.GetAppModel()->getDevice()->createTextureFromFile(path, mipmaps, ~p_texture))
         {
             spdlog::error("[luastg] 从 '{}' 创建纹理 '{}' 失败", path, name);
@@ -239,6 +242,7 @@ namespace LuaSTGPlus
         }
 
         Core::ScopeObject<Core::Graphics::ITexture2D> p_texture;
+        // spdlog::debug("tex_ptr: {}", (size_t)&p_texture); // 
         if (!LAPP.GetAppModel()->getDevice()->createTexture(Core::Vector2U((uint32_t)width, (uint32_t)height), ~p_texture))
         {
             spdlog::error("[luastg] 创建纹理 '{}' ({}x{}) 失败", name, width, height);
@@ -284,11 +288,11 @@ namespace LuaSTGPlus
             Core::ScopeObject<IResourceTexture> tRes;
             if (width <= 0 || height <= 0)
             {
-                tRes.attach(new ResourceTextureImpl(name, depth_buffer));
+                tRes.attach(new ResourceTextureImpl(name));
             }
             else
             {
-                tRes.attach(new ResourceTextureImpl(name, width, height, depth_buffer));
+                tRes.attach(new ResourceTextureImpl(name, width, height));
             }
             m_TexturePool.emplace(name, tRes);
         }
@@ -336,6 +340,7 @@ namespace LuaSTGPlus
         }
     
         Core::ScopeObject<Core::Graphics::ISprite> p_sprite;
+        spdlog::debug("sizeof(Sprite_OpenGL): {}", sizeof(Core::Graphics::Sprite_OpenGL));
         if (!Core::Graphics::ISprite::create(
             LAPP.GetAppModel()->getRenderer(),
             pTex->GetTexture(),
@@ -492,15 +497,15 @@ namespace LuaSTGPlus
         }
     
         // 配置循环解码器（这里不用担心出现 exception，因为上面已经处理了）
-        ScopeObject<ResourceMusicImpl::LoopDecoder> p_loop_decoder;
-        p_loop_decoder.attach(new ResourceMusicImpl::LoopDecoder(p_decoder.get(), start, end));
+        // ScopeObject<Audio::LoopDecoder> p_loop_decoder;
+        // p_loop_decoder.attach(new ResourceMusicImpl::LoopDecoder(p_decoder.get(), start, end));
 
         // 创建播放器
         ScopeObject<IAudioPlayer> p_player;
         if (!once_decode)
         {
             // 流式播放器
-            if (!LAPP.GetAppModel()->getAudioDevice()->createStreamAudioPlayer(p_loop_decoder.get(), ~p_player))
+            if (!LAPP.GetAppModel()->getAudioDevice()->createStreamAudioPlayer(p_decoder.get(), ~p_player))
             {
                 spdlog::error("[luastg] LoadMusic: 无法创建音频播放器");
                 return false;
@@ -521,7 +526,7 @@ namespace LuaSTGPlus
         {
             //存入资源池
             Core::ScopeObject<IResourceMusic> tRes;
-            tRes.attach(new ResourceMusicImpl(name, p_loop_decoder.get(), p_player.get()));
+            tRes.attach(new ResourceMusicImpl(name, p_player.get()));
             m_MusicPool.emplace(name, tRes);
         }
         catch (std::exception const& e)

@@ -23,29 +23,29 @@ end
 local imgui = require("imgui")
 local test = require("test")
 
-local gpu_list = {}
-local select_gpu = ""
-local function changeGpu()
-    if string.len(select_gpu) > 0 then
-        lstg.ChangeGPU(select_gpu)
-        gpu_list = lstg.EnumGPUs() -- update
-        select_gpu = ""
-    end
-end
-local function showSelectGpuWindow()
-    local ImGui = imgui.ImGui
-    if #gpu_list < 1 then
-        gpu_list = lstg.EnumGPUs()
-    end
-    if ImGui.Begin("Select GPU") then
-        for _, v in ipairs(gpu_list) do
-            if ImGui.Button(v) then
-                select_gpu = v
-            end
-        end
-    end
-    ImGui.End()
-end
+-- local gpu_list = {}
+-- local select_gpu = ""
+-- local function changeGpu()
+--     if string.len(select_gpu) > 0 then
+--         lstg.ChangeGPU(select_gpu)
+--         gpu_list = lstg.EnumGPUs() -- update
+--         select_gpu = ""
+--     end
+-- end
+-- local function showSelectGpuWindow()
+--     local ImGui = imgui.ImGui
+--     if #gpu_list < 1 then
+--         gpu_list = lstg.EnumGPUs()
+--     end
+--     if ImGui.Begin("Select GPU") then
+--         for _, v in ipairs(gpu_list) do
+--             if ImGui.Button(v) then
+--                 select_gpu = v
+--             end
+--         end
+--     end
+--     ImGui.End()
+-- end
 local function showSelectResolutionWindow()
     local ImGui = imgui.ImGui
     local list = {
@@ -118,7 +118,7 @@ function GameExit()
     test.onDestroy()
 end
 function FrameFunc()
-    changeGpu()
+    -- changeGpu()
     imgui.backend.NewFrame(true)
     imgui.ImGui.NewFrame()
     --imgui.ImGui.ShowDemoWindow()
@@ -126,7 +126,7 @@ function FrameFunc()
     --imgui.backend.ShowMemoryUsageWindow()
     imgui.backend.ShowFrameStatistics()
     imgui.backend.ShowResourceManagerDebugWindow()
-    showSelectGpuWindow()
+    -- showSelectGpuWindow()
     showSelectResolutionWindow()
     test.onUpdate()
     imgui.ImGui.EndFrame()

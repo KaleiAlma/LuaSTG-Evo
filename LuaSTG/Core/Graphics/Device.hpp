@@ -122,7 +122,7 @@ namespace Core::Graphics
 		// virtual void* getNativeBitmapHandle() = 0;
 
 		virtual bool DepthStencilBufferEnabled() = 0;
-		virtual bool SetDepthStencilBufferEnable(bool enable) = 0;
+		// virtual bool SetDepthStencilBufferEnable(bool enable) = 0;
 
 		virtual bool setSize(Vector2U size) = 0;
 		virtual ITexture2D* getTexture() = 0;

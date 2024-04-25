@@ -1,9 +1,10 @@
 ﻿#include "Core/ApplicationModel_SDL.hpp"
 #include "Core/ApplicationModel.hpp"
-#include "Core/i18n.hpp"
+// #include "Core/i18n.hpp"
 // #include "Platform/WindowsVersion.hpp"
 // #include "Platform/DetectCPU.hpp"
 #include "TracyOpenGL.hpp"
+#include "SDL.h"
 #include <chrono>
 #include <limits>
 #include <thread>
@@ -22,7 +23,7 @@ namespace Core
 	double FrameRateController::udateData(TimePoint curr)
 	{
 		// Update Values
-		double const fps = 1.0 / (Duration)(curr - last_).count();
+		double const fps = 1.0 / (curr - last_).count();
 		double const s = 1.0 / fps;
 		total_frame_ += 1;
 		total_time_ += s;
@@ -233,7 +234,7 @@ namespace Core
 		FrameMark;
 		{
 			ZoneScopedN("OnInitWait");
-			m_swapchain->waitFrameLatency();
+			// m_swapchain->waitFrameLatency();
 			m_frame_rate_controller.update();
 		}
 
@@ -261,12 +262,11 @@ namespace Core
 		{
 			ZoneScopedN("OnUpdate");
 			ScopeTimer t(d.update_time);
+			m_window->handleEvents();
 			update_result = m_listener->onUpdate();
 		}
 
 		bool render_result = false;
-
-		
 
 		// Render
 		if (update_result)
@@ -295,8 +295,8 @@ namespace Core
 		{
 			ZoneScopedN("OnWait");
 			ScopeTimer t(d.wait_time);
-			m_swapchain->waitFrameLatency();
-			m_frame_rate_controller->update();
+			// m_swapchain->waitFrameLatency();
+			m_frame_rate_controller.update();
 		}
 
 		m_framestate_index = i;
@@ -342,17 +342,18 @@ namespace Core
 		// 	m_p_frame_rate_controller = &m_frame_rate_controller;
 		// }
 		// get_system_memory_status();
+		SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_JOYSTICK);
 		if (!Graphics::Window_SDL::create(~m_window))
 			throw std::runtime_error("Graphics::Window_SDL::create");
 		m_window->implSetApplicationModel(this);
-		if (!Graphics::Device_OpenGL::create(param.gpu, ~m_device))
+		if (!Graphics::Device_OpenGL::create(~m_device))
 			throw std::runtime_error("Graphics::Device_OpenGL::create");
 		if (!Graphics::SwapChain_OpenGL::create(*m_window, *m_device, ~m_swapchain))
 			throw std::runtime_error("Graphics::SwapChain_OpenGL::create");
 		if (!Graphics::Renderer_OpenGL::create(*m_device, ~m_renderer))
 			throw std::runtime_error("Graphics::Renderer_OpenGL::create");
-		if (!Audio::Device_XAUDIO2::create(~m_audiosys))
-			throw std::runtime_error("Audio::Device_XAUDIO2::create");
+		if (!Audio::Device_SDL::create(~m_audiosys))
+			throw std::runtime_error("Audio::Device_SDL::create");
 		// m_frame_query_list.reserve(2);
 		// for (int i = 0; i < 2; i += 1) {
 		// 	m_frame_query_list.emplace_back(m_device.get());

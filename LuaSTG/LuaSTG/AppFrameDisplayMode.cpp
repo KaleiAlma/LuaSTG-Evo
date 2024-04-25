@@ -122,10 +122,10 @@ namespace LuaSTGPlus
 		// 	window->setMonitorCentered(index);
 		// }
 		window->setMonitorCentered(monitor_idx);
-		if (!borderless)
-		{
-			window->setNativeIcon((void*)(ptrdiff_t)IDI_APPICON);
-		}
+		// if (!borderless)
+		// {
+		// 	// window->setNativeIcon((void*)(ptrdiff_t)IDI_APPICON);
+		// }
 		
 		logResult(result, m_Setting, MODE_NAME_WINDOW);
 
@@ -259,9 +259,9 @@ namespace LuaSTGPlus
 			auto* p_window = m_pAppModel->getWindow();
 			p_window->setTitleText(m_Setting.window_title);
 			p_window->setCursor(m_Setting.show_cursor ? WindowCursor::Arrow : WindowCursor::None);
-			p_window->setNativeIcon((void*)(ptrdiff_t)IDI_APPICON);
+			// p_window->setNativeIcon((void*)(ptrdiff_t)IDI_APPICON);
 			p_window->setSize(m_Setting.canvas_size);
-			p_window->setWindowCornerPreference(m_Setting.allow_windows_11_window_corner);
+			// p_window->setWindowCornerPreference(m_Setting.allow_windows_11_window_corner);
 		}
 		// 配置音量
 		{

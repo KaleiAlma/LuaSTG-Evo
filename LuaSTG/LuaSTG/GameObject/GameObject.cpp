@@ -7,6 +7,7 @@
 #include "LuaBinding/LuaWrapper.hpp"
 #include "XCollision.h"
 #include "AppFrame.h"
+#include <limits>
 
 namespace LuaSTGPlus
 {
@@ -59,7 +60,7 @@ namespace LuaSTGPlus
 				xtype = XColliderType::Circle;
 				break;
 			case GameObjectColliderType::OBB:
-				circum_r = std::sqrtf(std::powf(a, 2.0f) + std::powf(b, 2.0f));
+				circum_r = sqrtf(powf(a, 2.0f) + powf(b, 2.0f));
 				xtype = XColliderType::OBB;
 				break;
 			case GameObjectColliderType::Ellipse:
@@ -71,7 +72,7 @@ namespace LuaSTGPlus
 				xtype = XColliderType::Diamond;
 				break;
 			case GameObjectColliderType::Triangle:
-				circum_r = std::sqrtf(std::powf(a, 2.0f) + std::powf(b, 2.0f));
+				circum_r = sqrtf(powf(a, 2.0f) + powf(b, 2.0f));
 				xtype = XColliderType::Triangle;
 				break;
 			case GameObjectColliderType::Point:
@@ -82,8 +83,8 @@ namespace LuaSTGPlus
 		}
 		//根据偏移计算绝对坐标和旋转
 		void caloffset(float x, float y, float _rot) {
-			float tCos = std::cosf(-_rot);
-			float tSin = std::sinf(-_rot);
+			float tCos = cosf(-_rot);
+			float tSin = sinf(-_rot);
 			absx = x + dx * tCos + dy * tSin;
 			absy = y + dy * tCos - dx * tSin;
 			absrot = _rot + rot;
@@ -111,8 +112,8 @@ namespace LuaSTGPlus
 		layer = 0.;
 		hscale = vscale = 1.;
 #ifdef USER_SYSTEM_OPERATION
-		maxv = DBL_MAX * 0.5; // 平时应该不会有人弄那么大的速度吧，希望计算时不会溢出（
-		maxvx = maxvy = DBL_MAX;
+		maxv = std::numeric_limits<double>::max() * 0.5; // 平时应该不会有人弄那么大的速度吧，希望计算时不会溢出（
+		maxvx = maxvy = std::numeric_limits<double>::max();
 		ag = 0.;
 #endif
 
@@ -156,8 +157,8 @@ namespace LuaSTGPlus
 		layer = 0.;
 		hscale = vscale = 1.;
 #ifdef USER_SYSTEM_OPERATION
-		maxv = DBL_MAX * 0.5; // 平时应该不会有人弄那么大的速度吧，希望计算时不会溢出（
-		maxvx = maxvy = DBL_MAX;
+		maxv = std::numeric_limits<double>::max() * 0.5; // 平时应该不会有人弄那么大的速度吧，希望计算时不会溢出（
+		maxvx = maxvy = std::numeric_limits<double>::max();
 		ag = 0.;
 #endif
 
@@ -345,7 +346,7 @@ namespace LuaSTGPlus
 				// 单独应用重力加速度
 				vy -= ag;
 				// 速度限制，来自lua层
-				if (maxv <= DBL_MIN)
+				if (maxv <= std::numeric_limits<double>::min())
 				{
 					vx = 0.0;
 					vy = 0.0;
@@ -353,7 +354,7 @@ namespace LuaSTGPlus
 				else
 				{
 					lua_Number const speed_ = std::sqrt(vx * vx + vy * vy);
-					if (maxv < speed_ && speed_ > DBL_MIN)
+					if (maxv < speed_ && speed_ > std::numeric_limits<double>::min())
 					{
 						lua_Number const scale_ = maxv / speed_;
 						vx = scale_ * vx;
@@ -405,7 +406,7 @@ namespace LuaSTGPlus
 		lastx = x;
 		lasty = y;
 		touch_lastx_lasty = true;
-		if (navi && (std::abs(dx) > DBL_MIN || std::abs(dy) > DBL_MIN))
+		if (navi && (std::abs(dx) > std::numeric_limits<double>::min() || std::abs(dy) > std::numeric_limits<double>::min()))
 		{
 			rot = std::atan2(dy, dx);
 		}
@@ -586,7 +587,7 @@ namespace LuaSTGPlus
 			lua_pushnumber(L, std::sqrt(vx * vx + vy * vy));
 			return 1;
 		case LuaSTG::GameObjectMember::VANGLE:
-			if (std::abs(vx) > DBL_MIN || std::abs(vy) > DBL_MIN)
+			if (std::abs(vx) > std::numeric_limits<double>::min() || std::abs(vy) > std::numeric_limits<double>::min())
 				lua_pushnumber(L, std::atan2(vy, vx) * L_RAD_TO_DEG);
 			else
 				lua_pushnumber(L, rot * L_RAD_TO_DEG);
@@ -808,7 +809,7 @@ namespace LuaSTGPlus
 			do {
 				lua_Number const cur_speed_ = std::sqrt(vx * vx + vy * vy);
 				lua_Number const new_speed_ = luaL_checknumber(L, 3);
-				if (cur_speed_ <= DBL_MIN)
+				if (cur_speed_ <= std::numeric_limits<double>::min())
 				{
 					vx = std::cos(rot) * new_speed_;
 					vy = std::sin(rot) * new_speed_;
@@ -825,7 +826,7 @@ namespace LuaSTGPlus
 			do {
 				lua_Number const cur_speed_ = std::sqrt(vx * vx + vy * vy);
 				lua_Number const new_angle_ = luaL_checknumber(L, 3) * L_DEG_TO_RAD;
-				if (cur_speed_ <= DBL_MIN)
+				if (cur_speed_ <= std::numeric_limits<double>::min())
 				{
 					rot = new_angle_;
 				}

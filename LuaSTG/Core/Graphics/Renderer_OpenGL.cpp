@@ -328,7 +328,7 @@ namespace Core::Graphics
 		// glTexParameteri(GL_TEXTURE_2D, );
 		// 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		// 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		setSamplerState(state, index);
+		setSamplerState(_sampler_state[IDX(state)], index);
 	}
 	void Renderer_OpenGL::setSamplerState(Graphics::SamplerState state, GLuint index)
 	{
@@ -834,6 +834,7 @@ namespace Core::Graphics
 
 	void Renderer_OpenGL::setTexture(ITexture2D* texture)
 	{
+		if (!texture) return;
 		if (_draw_list.command.size > 0 && is_same(_draw_list.command.data[_draw_list.command.size - 1].texture, texture))
 		{
 			// Can merge
@@ -1017,11 +1018,11 @@ namespace Core::Graphics
 			glGetTextureLevelParameteriv(rt, 0, GL_TEXTURE_HEIGHT, &h);
 		}
 		
-		if (w < 1 || h < 1)
-		{
-			spdlog::warn("[core] LuaSTG::Core::Renderer::postEffect exiting early, as no render target is bound!");
-			return false;
-		}
+		// if (w < 1 || h < 1)
+		// {
+		// 	spdlog::warn("[core] LuaSTG::Core::Renderer::postEffect exiting early, as no render target is bound!");
+		// 	return false;
+		// }
 
 		glViewport(0, 0, w, h);
 		glScissor(0, 0, w, h);

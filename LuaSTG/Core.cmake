@@ -11,6 +11,8 @@ target_include_directories(Core PUBLIC
     .
     ${CMAKE_BINARY_DIR}/include/minizip
     ${CMAKE_SOURCE_DIR}/external/glad/include
+    ${CMAKE_SOURCE_DIR}/utility
+    ${CMAKE_SOURCE_DIR}/external/include
 )
 
 set(Core_SRC
@@ -32,7 +34,6 @@ set(Core_SRC
     Core/Graphics/Window_SDL.hpp
     Core/Graphics/Window_SDL.cpp
     Core/Graphics/Format.hpp
-    Core/Graphics/Format_OpenGL.hpp
     Core/Graphics/Device.hpp
     Core/Graphics/Device_OpenGL.hpp
     Core/Graphics/Device_OpenGL.cpp
@@ -52,8 +53,8 @@ set(Core_SRC
     Core/Graphics/Font.hpp
     Core/Graphics/Font_OpenGL.hpp
     Core/Graphics/Font_OpenGL.cpp
-    Core/Graphics/DearImGui_SDL_OpenGL.hpp
-    Core/Graphics/DearImGui_SDL_OpenGL.cpp
+    # Core/Graphics/DearImGui_SDL_OpenGL.hpp
+    # Core/Graphics/DearImGui_SDL_OpenGL.cpp
     Core/Application.hpp
     Core/ApplicationModel.hpp
     Core/ApplicationModel_SDL.hpp
@@ -61,24 +62,24 @@ set(Core_SRC
     Core/EventDispatcherImpl.hpp
 
     Core/Audio/Decoder.hpp
-    Core/Audio/Decoder_VorbisOGG.cpp
-    Core/Audio/Decoder_VorbisOGG.hpp
-    Core/Audio/Decoder_FLAC.hpp
-    Core/Audio/Decoder_FLAC.cpp
-    Core/Audio/Decoder_WAV.cpp
-    Core/Audio/Decoder_WAV.hpp
+    # Core/Audio/Decoder_VorbisOGG.cpp
+    # Core/Audio/Decoder_VorbisOGG.hpp
+    # Core/Audio/Decoder_FLAC.hpp
+    # Core/Audio/Decoder_FLAC.cpp
+    # Core/Audio/Decoder_WAV.cpp
+    # Core/Audio/Decoder_WAV.hpp
+    Core/Audio/Decoder_ma.cpp
+    Core/Audio/Decoder_ma.hpp
     Core/Audio/Decoder_ALL.cpp
     Core/Audio/Device.hpp
-    Core/Audio/Device_MM.cpp
-    Core/Audio/Device_XAUDIO2.cpp
-    Core/Audio/Device_XAUDIO2.hpp
+    Core/Audio/Device_SDL.cpp
+    Core/Audio/Device_SDL.hpp
 )
 source_group(TREE ${CMAKE_CURRENT_LIST_DIR} FILES ${Core_SRC})
 target_precompile_headers(Core PRIVATE
     Core/framework.hpp
 )
 target_sources(Core PRIVATE
-    # ${CMAKE_SOURCE_DIR}/external/glad/src/gl.c
     ${Core_SRC}
 )
 
@@ -87,16 +88,15 @@ target_link_libraries(Core PUBLIC
     spdlog
     tracy
     imgui
+    implot
     # util
-    utility
+    # utility
     PlatformAPI
     # gfx
     # libqoi
     SDL2-static
-    # SDL2_image
     nothings_stb
-    SDL2_mixer
-    SDL2_ttf
+    glad
     # math
     xmath
     glm
@@ -115,5 +115,9 @@ target_link_libraries(Core PUBLIC
     # database
     nlohmann_json
 )
+if(LINUX)
+    find_package(Fontconfig REQUIRED)
+    target_link_libraries(Core PUBLIC fontconfig)
+endif()
 
 # add_dependencies(Core fuck_zlib_ng_and_minizip_ng)

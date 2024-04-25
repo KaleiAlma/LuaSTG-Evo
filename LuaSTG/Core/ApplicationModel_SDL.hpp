@@ -5,7 +5,7 @@
 #include "Core/Graphics/Device_OpenGL.hpp"
 #include "Core/Graphics/SwapChain_OpenGL.hpp"
 #include "Core/Graphics/Renderer_OpenGL.hpp"
-#include "Core/Audio/Device_XAUDIO2.hpp"
+#include "Core/Audio/Device_SDL.hpp"
 #include <chrono>
 
 namespace Core
@@ -53,18 +53,18 @@ namespace Core
 	class ApplicationModel_SDL : public Object<IApplicationModel>
 	{
 	private:
-		// 多个线程共享
+		// Shared between threads
 
 		ScopeObject<Graphics::Window_SDL> m_window;
 		// Microsoft::WRL::Wrappers::Event win32_event_exit;
 		bool m_exit_flag{};
 
-		// 仅限工作线程
+		// Work thread exclusive
 
 		ScopeObject<Graphics::Device_OpenGL> m_device;
 		ScopeObject<Graphics::SwapChain_OpenGL> m_swapchain;
 		ScopeObject<Graphics::Renderer_OpenGL> m_renderer;
-		ScopeObject<Audio::Device_XAUDIO2> m_audiosys;
+		ScopeObject<Audio::Device_SDL> m_audiosys;
 		FrameRateController m_frame_rate_controller;
 		IApplicationEventListener* m_listener{ nullptr };
 		size_t m_framestate_index{ 0 };
@@ -73,17 +73,17 @@ namespace Core
 		bool runSingleThread();
 
 	public:
-		// 内部公开
+		// Internal Public
 
 		void runFrame();
 
 	public:
-		// 多个线程共享
+		// Shared between threads
 
 		Graphics::IWindow* getWindow() { return *m_window; }
 		void requestExit();
 
-		// 仅限工作线程
+		// Work thread exclusive
 
 		IFrameRateController* getFrameRateController() { return &m_frame_rate_controller; };
 		Graphics::IDevice* getDevice() { return *m_device; }
@@ -93,7 +93,7 @@ namespace Core
 		FrameStatistics getFrameStatistics();
 		FrameRenderStatistics getFrameRenderStatistics();
 
-		// 仅限主线程
+		// Main thread exclusive
 
 		bool run();
 

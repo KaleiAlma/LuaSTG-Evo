@@ -53,7 +53,7 @@ target_compile_definitions(implot PUBLIC
 target_include_directories(implot PUBLIC
     implot
 )
-target_sources(implot PRIVATE
+target_sources(implot PUBLIC
     implot/implot_demo.cpp
     implot/implot_internal.h
     implot/implot_items.cpp
@@ -80,7 +80,7 @@ target_sources(imgui_impl_opengl3 PRIVATE
 )
 target_link_libraries(imgui_impl_opengl3 PUBLIC
     imgui
-    GeneratedShaderHeaders
+    # GeneratedShaderHeaders
 )
 set_target_properties(imgui_impl_opengl3 PROPERTIES FOLDER external)
 

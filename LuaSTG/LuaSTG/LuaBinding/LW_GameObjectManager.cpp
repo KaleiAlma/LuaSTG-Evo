@@ -68,7 +68,7 @@ void LuaSTGPlus::LuaWrapper::GameObjectManagerWrapper::Register(lua_State* L) no
 			LPOOL.ResetPool();
 			return 0;
 		}
-		// EX+ 对象更新相关，影响 frame 回调函数以及对象更新
+		// EX+ 对象更新相关，影响 frame callback函数以及对象更新
 		static int GetSuperPause(lua_State* L) noexcept
 		{
 			lua_pushinteger(L, LPOOL.GetNextFrameSuperPauseTime());
@@ -162,7 +162,7 @@ void LuaSTGPlus::LuaWrapper::GameObjectManagerWrapper::Register(lua_State* L) no
 		// 对象属性访问
 		{ "GetAttr", &GameObjectPool::api_GetAttr },
 		{ "SetAttr", &GameObjectPool::api_SetAttr },
-		// 对象默认回调函数
+		// 对象默认callback函数
 		{ "DefaultRenderFunc", &GameObjectPool::api_DefaultRenderFunc },
 		// 对象资源控制
 		{ "SetImgState", &GameObjectPool::api_SetImgState },

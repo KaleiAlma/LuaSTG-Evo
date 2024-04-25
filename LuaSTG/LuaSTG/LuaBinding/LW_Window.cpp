@@ -100,25 +100,25 @@ static int lib_setTopMost(lua_State* L)
     getwindow(window);
     bool const topmost = lua_toboolean(L, 1);
     if (topmost)
-        window->setLayer(Core::Graphics::WindowLayer::TopMost);
+        window->setLayer(Core::Graphics::WindowLayer::Top);
     else
         window->setLayer(Core::Graphics::WindowLayer::Normal);
     return 0;
 }
-static int lib_setIMEEnable(lua_State* L)
-{
-    getwindow(window);
-    bool const enable = lua_toboolean(L, 1);
-    window->setIMEState(enable);
-    return 0;
-}
-static int lib_getDPIScaling(lua_State* L)
-{
-    getwindow(window);
-    float const dpi_scale = window->getDPIScaling();
-    lua_pushnumber(L, dpi_scale);
-    return 1;
-}
+// static int lib_setIMEEnable(lua_State* L)
+// {
+//     getwindow(window);
+//     bool const enable = lua_toboolean(L, 1);
+//     window->setIMEState(enable);
+//     return 0;
+// }
+// static int lib_getDPIScaling(lua_State* L)
+// {
+//     getwindow(window);
+//     float const dpi_scale = window->getDPIScaling();
+//     lua_pushnumber(L, dpi_scale);
+//     return 1;
+// }
 
 static int lib_setTextInputEnable(lua_State*)
 {
@@ -135,45 +135,45 @@ static int lib_clearTextInput(lua_State*)
     return 0;
 }
 
-static int lib_setCustomMoveSizeEnable(lua_State* L)
-{
-    getwindow(window);
-    window->setCustomSizeMoveEnable(lua_toboolean(L, 1));
-    return 0;
-}
-static int lib_setCustomMinimizeButtonRect(lua_State* L)
-{
-    getwindow(window);
-    window->setCustomMinimizeButtonRect(Core::RectI(
-        (int32_t)luaL_checkinteger(L, 1),
-        (int32_t)luaL_checkinteger(L, 2),
-        (int32_t)luaL_checkinteger(L, 3),
-        (int32_t)luaL_checkinteger(L, 4)
-    ));
-    return 0;
-}
-static int lib_setCustomCloseButtonRect(lua_State* L)
-{
-    getwindow(window);
-    window->setCustomCloseButtonRect(Core::RectI(
-        (int32_t)luaL_checkinteger(L, 1),
-        (int32_t)luaL_checkinteger(L, 2),
-        (int32_t)luaL_checkinteger(L, 3),
-        (int32_t)luaL_checkinteger(L, 4)
-    ));
-    return 0;
-}
-static int lib_setCustomMoveButtonRect(lua_State* L)
-{
-    getwindow(window);
-    window->setCustomMoveButtonRect(Core::RectI(
-        (int32_t)luaL_checkinteger(L, 1),
-        (int32_t)luaL_checkinteger(L, 2),
-        (int32_t)luaL_checkinteger(L, 3),
-        (int32_t)luaL_checkinteger(L, 4)
-    ));
-    return 0;
-}
+// static int lib_setCustomMoveSizeEnable(lua_State* L)
+// {
+//     getwindow(window);
+//     window->setCustomSizeMoveEnable(lua_toboolean(L, 1));
+//     return 0;
+// }
+// static int lib_setCustomMinimizeButtonRect(lua_State* L)
+// {
+//     getwindow(window);
+//     window->setCustomMinimizeButtonRect(Core::RectI(
+//         (int32_t)luaL_checkinteger(L, 1),
+//         (int32_t)luaL_checkinteger(L, 2),
+//         (int32_t)luaL_checkinteger(L, 3),
+//         (int32_t)luaL_checkinteger(L, 4)
+//     ));
+//     return 0;
+// }
+// static int lib_setCustomCloseButtonRect(lua_State* L)
+// {
+//     getwindow(window);
+//     window->setCustomCloseButtonRect(Core::RectI(
+//         (int32_t)luaL_checkinteger(L, 1),
+//         (int32_t)luaL_checkinteger(L, 2),
+//         (int32_t)luaL_checkinteger(L, 3),
+//         (int32_t)luaL_checkinteger(L, 4)
+//     ));
+//     return 0;
+// }
+// static int lib_setCustomMoveButtonRect(lua_State* L)
+// {
+//     getwindow(window);
+//     window->setCustomMoveButtonRect(Core::RectI(
+//         (int32_t)luaL_checkinteger(L, 1),
+//         (int32_t)luaL_checkinteger(L, 2),
+//         (int32_t)luaL_checkinteger(L, 3),
+//         (int32_t)luaL_checkinteger(L, 4)
+//     ));
+//     return 0;
+// }
 
 static int compat_SetSplash(lua_State* L)
 {
@@ -226,17 +226,17 @@ static const luaL_Reg lib[] = {
     makefname(setStyle),
     makefname(setSize),
     makefname(setTopMost),
-    makefname(setIMEEnable),
-    makefname(getDPIScaling),
+    // makefname(setIMEEnable),
+    // makefname(getDPIScaling),
     
     makefname(setTextInputEnable),
     makefname(getTextInput),
     makefname(clearTextInput),
     
-    makefname(setCustomMoveSizeEnable),
-    makefname(setCustomMinimizeButtonRect),
-    makefname(setCustomCloseButtonRect),
-    makefname(setCustomMoveButtonRect),
+    // makefname(setCustomMoveSizeEnable),
+    // makefname(setCustomMinimizeButtonRect),
+    // makefname(setCustomCloseButtonRect),
+    // makefname(setCustomMoveButtonRect),
     
     {NULL, NULL},
 };

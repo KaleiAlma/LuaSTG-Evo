@@ -1,6 +1,9 @@
 ﻿#include "Core/Graphics/Font_OpenGL.hpp"
 #include "Core/FileManager.hpp"
-// #include "utility/utf.hpp"
+#include "spdlog/spdlog.h"
+#include "utility/utf.hpp"
+#include <limits>
+#include <string_view>
 // #include "utf8.hpp"
 
 static bool findSystemFont(std::string_view name, std::string& u8_path);
@@ -70,13 +73,13 @@ namespace Core::Graphics
 
 #define G_FT_Library (SharedFreeTypeLibrary::get().lib)
 
-	// 宽度单位到像素
+	// width unit to pixels
 	inline float widthSizeToPixel(FT_Face Face, int Size)
 	{
 		float tXScale = Face->size->metrics.x_scale / 65536.f;
 		return (Size / 64.f) * tXScale;
 	}
-	// 高度单位到像素
+	// height unit to pixels
 	inline float heightSizeToPixel(FT_Face Face, int Size)
 	{
 		float tYScale = Face->size->metrics.y_scale / 65536.f;
@@ -88,25 +91,25 @@ namespace Core::Graphics
 		std::memset(data, 0, sizeof(data));
 	}
 
-	void TrueTypeGlyphManager_D3D11::onDeviceCreate()
+	void TrueTypeGlyphManager_OpenGL::onDeviceCreate()
 	{
-		// 等一个幸运儿调用 flush
+		// wait for someone to call flush
 	}
-	void TrueTypeGlyphManager_D3D11::onDeviceDestroy()
+	void TrueTypeGlyphManager_OpenGL::onDeviceDestroy()
 	{
-		// 全标记为脏
+		// mark all as dirty
 		for (auto& t : m_tex)
 		{
 			t.dirty_l = 0;
 			t.dirty_t = 0;
 			t.dirty_r = t.image.width;
-			t.dirty_b = t.pen_bottom + 1; // 多一个像素的边缘
+			t.dirty_b = t.pen_bottom + 1; // one more pixel on the edge
 		}
 	}
 
-	void TrueTypeGlyphManager_D3D11::closeFonts()
+	void TrueTypeGlyphManager_OpenGL::closeFonts()
 	{
-		// 先关闭字体
+		// close the font first
 		for (auto& f : m_font)
 		{
 			if (f.ft_face)
@@ -117,7 +120,7 @@ namespace Core::Graphics
 		}
 		m_font.clear();
 	}
-	bool TrueTypeGlyphManager_D3D11::openFonts(TrueTypeFontInfo* fonts, size_t count)
+	bool TrueTypeGlyphManager_OpenGL::openFonts(TrueTypeFontInfo* fonts, size_t count)
 	{
 		closeFonts();
 		if (!fonts || count == 0)
@@ -125,29 +128,29 @@ namespace Core::Graphics
 			assert(false); return false;
 		}
 
-		// 逐个打开字体
+		// open fonts one by one
 		m_font.resize(count);
 		for (size_t i = 0; i < count; i++)
 		{
-			// 准备数据
+			// prepare data
 			FreeTypeFontData& data = m_font[i];
 			auto setupFontFace = [&]()
 			{
-				// 设置一些参数
+				// set some parameters
 				if (FT_Err_Ok != FT_Set_Pixel_Sizes(data.ft_face, (FT_UInt)fonts[i].font_size.x, (FT_UInt)fonts[i].font_size.y))
 				{
 					FT_Done_Face(data.ft_face);
 					data.ft_face = NULL;
 					return;
 				}
-				// 计算一些度量值
+				// calculate some metrics
 				data.ft_line_height = heightSizeToPixel(data.ft_face, data.ft_face->height);
 				data.ft_ascender = heightSizeToPixel(data.ft_face, data.ft_face->ascender);
 				data.ft_descender = heightSizeToPixel(data.ft_face, data.ft_face->descender);
 			};
 			auto openFromFile = [&](std::string_view path)
 			{
-				// 打开
+				// open
 				if (FT_Err_Ok != FT_New_Face(G_FT_Library, path.data(), (FT_Long)fonts[i].font_face, &data.ft_face))
 				{
 					return;
@@ -156,7 +159,7 @@ namespace Core::Graphics
 			};
 			auto openFromBuffer = [&]()
 			{
-				// 打开
+				// open
 				if (FT_Err_Ok != FT_New_Memory_Face(G_FT_Library, (FT_Byte*)data.buffer.data(), (FT_Long)data.buffer.size(), (FT_Long)fonts[i].font_face, &data.ft_face))
 				{
 					return;
@@ -165,19 +168,19 @@ namespace Core::Graphics
 			};
 			if (!fonts[i].is_buffer)
 			{
-				// 先看看是不是要从系统加载
+				// let's see where it has to be loaded from first
 				std::string u8_path(fonts[i].source);
 				if (!GFileManager().containEx(u8_path))
 				{
 					if (!findSystemFont(fonts[i].source, u8_path))
 					{
-						continue; // 还是找不到
+						continue; // still can't find it.
 					}
 				}
-				// 如果是路径，尝试从文件打开
+				// if it's a valid path, try opening it from a file
 				if (!fonts[i].is_force_to_file)
 				{
-					// 读取进内存
+					// read into memory
 					if (GFileManager().loadEx(u8_path, data.buffer))
 					{
 						openFromBuffer();
@@ -185,24 +188,23 @@ namespace Core::Graphics
 				}
 				else
 				{
-					// 从文件打开
 					openFromFile(u8_path);
 				}
 			}
 			else if (fonts[i].source.data() && fonts[i].source.size() > 0)
 			{
-				// 如果是一块二进制数据，复制下来备用
+				// if it's binary data, make a backup.
 				data.buffer.resize(fonts[i].source.size());
 				std::memcpy(data.buffer.data(), fonts[i].source.data(), fonts[i].source.size());
 				openFromBuffer();
 			}
 			else
 			{
-				assert(false); continue; // 您数据呢？
+				assert(false); continue; // where's your data?
 			}
 		}
 
-		// 检查结果
+		// inspection results
 		bool is_all_open = true;
 		for (auto const& f : m_font) {
 			if (f.ft_face == nullptr) {
@@ -212,9 +214,9 @@ namespace Core::Graphics
 		}
 		if (is_all_open)
 		{
-			// 设置最后一个字体为回落字体
+			// setting the last font as a fallback font
 			m_font.back().is_fallback = true;
-			// 计算公共参数
+			// calculate common parameters
 			for (auto& f : m_font)
 			{
 				m_common_info.ft_line_height = std::max(m_common_info.ft_line_height, f.ft_line_height);
@@ -229,7 +231,7 @@ namespace Core::Graphics
 			return false;
 		}
 	}
-	bool TrueTypeGlyphManager_D3D11::addTexture()
+	bool TrueTypeGlyphManager_OpenGL::addTexture()
 	{
 		m_tex.emplace_back();
 		auto& t = m_tex.back();
@@ -237,10 +239,10 @@ namespace Core::Graphics
 		{
 			return false;
 		}
-		//t.texture->setPremultipliedAlpha(true); // 为了支持彩色文本，需要使用预乘 alpha 模式
+		//t.texture->setPremultipliedAlpha(true); // to support colored text, you must use premultiplied alpha
 		return true;
 	}
-	bool TrueTypeGlyphManager_D3D11::findGlyph(FT_ULong code, FT_Face& face, FT_UInt& index)
+	bool TrueTypeGlyphManager_OpenGL::findGlyph(FT_ULong code, FT_Face& face, FT_UInt& index)
 	{
 		for (auto& f : m_font)
 		{
@@ -257,35 +259,35 @@ namespace Core::Graphics
 		}
 		return false;
 	}
-	bool TrueTypeGlyphManager_D3D11::writeBitmapToCache(GlyphCacheInfo& info, FT_Bitmap& bitmap)
+	bool TrueTypeGlyphManager_OpenGL::writeBitmapToCache(GlyphCacheInfo& info, FT_Bitmap& bitmap)
 	{
-		// 太大的不要，滚
+		// too big. get out
 		if (bitmap.width > (TEXTURE_SIZE - 2) || bitmap.rows > (TEXTURE_SIZE - 2))
 		{
 			assert(false); return false;
 		}
-		// 搞到一个位置
+		// get a position
 		GlyphCache2D* pt = nullptr;
 		do
 		{
 			for (auto& t : m_tex)
 			{
-				// 初始化，留出 1 像素左上边缘
+				// initialize, leave 1 pixel top-left edge
 				if (t.pen_x == 0 || t.pen_y == 0)
 				{
 					t.pen_x = 1;
 					t.pen_y = 1;
 				}
-				// 这行能塞下吗，留出 1 像素右下边缘
+				// leave 1 pixel on bottom right edge
 				if ((t.pen_x + bitmap.width) < (t.image.width - 1) && (t.pen_y + bitmap.rows) < (t.image.height - 1))
 				{
 					pt = &t;
 					break;
 				}
-				// 换行，留出 1 像素行边缘
+				// line feed, leaving 1px edge
 				uint32_t const new_pen_x = 1;
 				uint32_t const new_pen_y = std::max(t.pen_y, t.pen_bottom + 1);
-				// 这行能塞下吗，留出 1 像素右下边缘
+				// leave 1 pixel on bottom right edge
 				if ((new_pen_x + bitmap.width) < (t.image.width - 1) && (new_pen_y + bitmap.rows) < (t.image.height - 1))
 				{
 					t.pen_x = new_pen_x;
@@ -300,7 +302,7 @@ namespace Core::Graphics
 			}
 			else
 			{
-				// 该添新丁了
+				// it's time for a new texture.
 				if (!addTexture())
 				{
 					return false;
@@ -308,32 +310,32 @@ namespace Core::Graphics
 			}
 		} while (!pt);
 		GlyphCache2D& t = *pt;
-		// 写入字形数据
+		// write to glyph data
 		info.texture_index = (uint32_t)(pt - m_tex.data());
 		info.texture_rect.a.x = (float)t.pen_x / (float)t.image.width;
 		info.texture_rect.a.y = (float)t.pen_y / (float)t.image.height;
 		info.texture_rect.b.x = (float)(t.pen_x + bitmap.width) / (float)t.image.width;
 		info.texture_rect.b.y = (float)(t.pen_y + bitmap.rows) / (float)t.image.height;
-		// 写入 bitmap 数据，同时写入 1 像素宽的透明边缘，写的有点乱，主要是为了最大化减少 CPU Cache Miss
+		// Write bitmap data with a 1px transparent edge, which is a bit messy, mainly to minimize CPU Cache Miss.
 		FT_Bitmap_Accessor accessor(bitmap);
-		for (int x = 0; x < (int)(accessor.width() + 2); x += 1) // 上 1 像素宽的边，宽度是 bitmap 的宽度再加 2 像素
+		for (int x = 0; x < (int)(accessor.width() + 2); x += 1) // upper 1px edge is the width of the bitmap plus 2px.
 		{
 			t.image.pixel(t.pen_x - 1 + x, t.pen_y - 1) = Color4B(0x00FFFFFF);
 		}
 		for (int y = 0; y < (int)accessor.height(); y += 1)
 		{
-			t.image.pixel(t.pen_x - 1, t.pen_y + y) = Color4B(0x00FFFFFF); // 左 1 像素宽的边
+			t.image.pixel(t.pen_x - 1, t.pen_y + y) = Color4B(0x00FFFFFF); // left 1px wide side
 			for (int x = 0; x < (int)accessor.width(); x += 1)
 			{
 				t.image.pixel(t.pen_x + x, t.pen_y + y) = accessor.pixel(x, y);
 			}
-			t.image.pixel(t.pen_x + accessor.width(), t.pen_y + y) = Color4B(0x00FFFFFF); // 右 1 像素宽的边
+			t.image.pixel(t.pen_x + accessor.width(), t.pen_y + y) = Color4B(0x00FFFFFF); // right 1px wide side
 		}
-		for (int x = 0; x < (int)(accessor.width() + 2); x += 1) // 下 1 像素宽的边，宽度是 bitmap 的宽度再加 2 像素
+		for (int x = 0; x < (int)(accessor.width() + 2); x += 1) // next 1px edge is the width of the bitmap plus 2px.
 		{
 			t.image.pixel(t.pen_x - 1 + x, t.pen_y + accessor.height()) = Color4B(0x00FFFFFF);
 		}
-		// 更新脏区域
+		// update dirty areas
 		if (t.dirty_l == INVALID_RECT)
 		{
 			t.dirty_l = t.pen_x - 1;
@@ -348,12 +350,12 @@ namespace Core::Graphics
 			t.dirty_r = std::max(t.dirty_r, t.pen_x + bitmap.width + 1);
 			t.dirty_b = std::max(t.dirty_b, t.pen_y + bitmap.rows + 1);
 		}
-		// 更新缓存
+		// update cache
 		t.pen_x += bitmap.width + 1;
 		t.pen_bottom = std::max(t.pen_bottom, t.pen_y + bitmap.rows);
 		return true;
 	}
-	GlyphCacheInfo* TrueTypeGlyphManager_D3D11::getGlyphCacheInfo(uint32_t codepoint)
+	GlyphCacheInfo* TrueTypeGlyphManager_OpenGL::getGlyphCacheInfo(uint32_t codepoint)
 	{
 		auto it = m_map.find(codepoint);
 		if (it != m_map.end())
@@ -369,7 +371,7 @@ namespace Core::Graphics
 			return nullptr;
 		}
 	}
-	bool TrueTypeGlyphManager_D3D11::renderCache(uint32_t codepoint)
+	bool TrueTypeGlyphManager_OpenGL::renderCache(uint32_t codepoint)
 	{
 		FT_Face face = nullptr;
 		FT_UInt index = 0;
@@ -395,24 +397,24 @@ namespace Core::Graphics
 		return false;
 	}
 
-	float TrueTypeGlyphManager_D3D11::getLineHeight()
+	float TrueTypeGlyphManager_OpenGL::getLineHeight()
 	{
 		return m_common_info.ft_line_height;
 	}
-	float TrueTypeGlyphManager_D3D11::getAscender()
+	float TrueTypeGlyphManager_OpenGL::getAscender()
 	{
 		return m_common_info.ft_ascender;
 	}
-	float TrueTypeGlyphManager_D3D11::getDescender()
+	float TrueTypeGlyphManager_OpenGL::getDescender()
 	{
 		return m_common_info.ft_descender;
 	}
 
-	uint32_t TrueTypeGlyphManager_D3D11::getTextureCount()
+	uint32_t TrueTypeGlyphManager_OpenGL::getTextureCount()
 	{
 		return (uint32_t)m_tex.size();
 	}
-	ITexture2D* TrueTypeGlyphManager_D3D11::getTexture(uint32_t index)
+	ITexture2D* TrueTypeGlyphManager_OpenGL::getTexture(uint32_t index)
 	{
 		if (index < m_tex.size())
 		{
@@ -421,13 +423,13 @@ namespace Core::Graphics
 		return nullptr;
 	}
 
-	bool TrueTypeGlyphManager_D3D11::cacheGlyph(uint32_t codepoint)
+	bool TrueTypeGlyphManager_OpenGL::cacheGlyph(uint32_t codepoint)
 	{
 		if (!getGlyphCacheInfo(codepoint))
 			return false;
 		return true;
 	}
-	bool TrueTypeGlyphManager_D3D11::cacheString(StringView str)
+	bool TrueTypeGlyphManager_OpenGL::cacheString(StringView str)
 	{
 		// utf-8 迭代器
 		char32_t code_ = 0;
@@ -441,7 +443,7 @@ namespace Core::Graphics
 		}
 		return result_;
 	}
-	bool TrueTypeGlyphManager_D3D11::flush()
+	bool TrueTypeGlyphManager_OpenGL::flush()
 	{
 		for (auto& t : m_tex)
 		{
@@ -463,7 +465,7 @@ namespace Core::Graphics
 		return true;
 	}
 
-	bool TrueTypeGlyphManager_D3D11::getGlyph(uint32_t codepoint, GlyphInfo* p_ref_info, bool no_render)
+	bool TrueTypeGlyphManager_OpenGL::getGlyph(uint32_t codepoint, GlyphInfo* p_ref_info, bool no_render)
 	{
 		if (!p_ref_info)
 		{
@@ -481,21 +483,21 @@ namespace Core::Graphics
 		return false;
 	}
 
-	TrueTypeGlyphManager_D3D11::TrueTypeGlyphManager_D3D11(IDevice* p_device, TrueTypeFontInfo* p_arr_info, size_t info_count)
+	TrueTypeGlyphManager_OpenGL::TrueTypeGlyphManager_OpenGL(IDevice* p_device, TrueTypeFontInfo* p_arr_info, size_t info_count)
 		: m_device(p_device)
 	{
 		if (!openFonts(p_arr_info, info_count))
 		{
-			throw std::runtime_error("TrueTypeGlyphManager_D3D11::TrueTypeGlyphManager_D3D11 (openFonts)");
+			throw std::runtime_error("TrueTypeGlyphManager_OpenGL::TrueTypeGlyphManager_OpenGL (openFonts)");
 		}
 		if (!addTexture())
 		{
-			throw std::runtime_error("TrueTypeGlyphManager_D3D11::TrueTypeGlyphManager_D3D11 (addTexture)");
+			throw std::runtime_error("TrueTypeGlyphManager_OpenGL::TrueTypeGlyphManager_OpenGL (addTexture)");
 		}
 		cacheGlyph(uint32_t(U' ')); // 先缓存一个空格
 		m_device->addEventListener(this);
 	}
-	TrueTypeGlyphManager_D3D11::~TrueTypeGlyphManager_D3D11()
+	TrueTypeGlyphManager_OpenGL::~TrueTypeGlyphManager_OpenGL()
 	{
 		m_device->removeEventListener(this);
 		closeFonts();
@@ -505,7 +507,7 @@ namespace Core::Graphics
 	{
 		try
 		{
-			*pp_glyphmgr = new TrueTypeGlyphManager_D3D11(p_device, p_arr_info, info_count);
+			*pp_glyphmgr = new TrueTypeGlyphManager_OpenGL(p_device, p_arr_info, info_count);
 			return true;
 		}
 		catch (...)
@@ -518,7 +520,7 @@ namespace Core::Graphics
 
 namespace Core::Graphics
 {
-	bool TextRenderer_D3D11::drawGlyph(GlyphInfo const& glyph_info, Vector2F const& start_pos)
+	bool TextRenderer_OpenGL::drawGlyph(GlyphInfo const& glyph_info, Vector2F const& start_pos)
 	{
 		// 准备顶点
 		IRenderer::DrawVertex vert[4] = {
@@ -576,7 +578,7 @@ namespace Core::Graphics
 
 		return true;
 	}
-	bool TextRenderer_D3D11::drawGlyphInSpace(GlyphInfo const& glyph_info, Vector3F const& start_pos, Vector3F const& right_vec, Vector3F const& down_vec)
+	bool TextRenderer_OpenGL::drawGlyphInSpace(GlyphInfo const& glyph_info, Vector3F const& start_pos, Vector3F const& right_vec, Vector3F const& down_vec)
 	{
 		// 准备顶点
 		IRenderer::DrawVertex vert[4] = {
@@ -628,7 +630,7 @@ namespace Core::Graphics
 		return true;
 	}
 
-	RectF TextRenderer_D3D11::getTextBoundary(StringView str)
+	RectF TextRenderer_OpenGL::getTextBoundary(StringView str)
 	{
 		if (!m_glyphmgr)
 		{
@@ -640,8 +642,8 @@ namespace Core::Graphics
 		GlyphInfo glyph_info = {};
 		Vector2F start_pos;
 		RectF rect(
-			Vector2F(FLT_MAX, -FLT_MAX),
-			Vector2F(-FLT_MAX, FLT_MAX));
+			Vector2F(std::numeric_limits<float>::max(), -std::numeric_limits<float>::max()),
+			Vector2F(-std::numeric_limits<float>::max(), std::numeric_limits<float>::max()));
 		bool is_updated = false;
 		float const line_height = m_glyphmgr->getLineHeight();
 
@@ -684,7 +686,7 @@ namespace Core::Graphics
 			return RectF();
 		}
 	}
-	Vector2F TextRenderer_D3D11::getTextAdvance(StringView str)
+	Vector2F TextRenderer_OpenGL::getTextAdvance(StringView str)
 	{
 		if (!m_glyphmgr)
 		{
@@ -725,7 +727,7 @@ namespace Core::Graphics
 			return Vector2F();
 		}
 	}
-	bool TextRenderer_D3D11::drawText(StringView str, Vector2F const& start, Vector2F* endout)
+	bool TextRenderer_OpenGL::drawText(StringView str, Vector2F const& start, Vector2F* endout)
 	{
 		if (!m_glyphmgr)
 		{
@@ -850,7 +852,7 @@ namespace Core::Graphics
 
 		return true;
 	}
-	bool TextRenderer_D3D11::drawTextInSpace(StringView str,
+	bool TextRenderer_OpenGL::drawTextInSpace(StringView str,
 		Vector3F const& start, Vector3F const& right_vec, Vector3F const& down_vec,
 		Vector3F* endout)
 	{
@@ -980,14 +982,14 @@ namespace Core::Graphics
 		return true;
 	}
 
-	TextRenderer_D3D11::TextRenderer_D3D11(IRenderer* p_renderer)
+	TextRenderer_OpenGL::TextRenderer_OpenGL(IRenderer* p_renderer)
 		: m_renderer(p_renderer)
 		, m_scale(Vector2F(1.0f, 1.0f))
 		, m_z(0.5f)
 		, m_color(Color4B(0xFFFFFFFFu))
 	{
 	}
-	TextRenderer_D3D11::~TextRenderer_D3D11()
+	TextRenderer_OpenGL::~TextRenderer_OpenGL()
 	{
 	}
 
@@ -995,7 +997,7 @@ namespace Core::Graphics
 	{
 		try
 		{
-			*pp_textrenderer = new TextRenderer_D3D11(p_renderer);
+			*pp_textrenderer = new TextRenderer_OpenGL(p_renderer);
 			return true;
 		}
 		catch (...)
@@ -1006,6 +1008,7 @@ namespace Core::Graphics
 	}
 }
 
+#ifdef WIN32
 #include <ShlObj.h>
 
 bool findSystemFont(std::string_view name, std::string& u8_path)
@@ -1078,3 +1081,12 @@ bool findSystemFont(std::string_view name, std::string& u8_path)
 
 	return false; // 没找到
 }
+#else
+
+bool findSystemFont(std::string_view name, std::string& u8_path)
+{
+	spdlog::error("[core] System font queries are not supported on this platform");
+	return false;
+}
+#endif
+

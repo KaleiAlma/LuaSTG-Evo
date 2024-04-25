@@ -1,6 +1,8 @@
 #pragma warning(disable:4310) // cast truncates constant value
 #pragma warning(disable:4127) // conditional expression is constant
 #pragma warning(disable:4244) // 'argument': conversion from 'unsigned int' to 'const pcg_extras::bitcount_t', possible loss of data
+#include <string>
+#include <sstream>
 
 #include "lua_random.hpp"
 #include "LuaBinding/lua_utility.hpp"
@@ -8,6 +10,38 @@
 #include "pcg_random.hpp"
 #include "Utility/sfc.hpp"
 #include "Utility/jsf.hpp"
+
+#ifndef WIN32
+std::istream& operator>>(std::istream& src, __uint128_t& value)
+{
+	std::string input;
+	src >> input;
+
+	value = 0;
+	
+	for(char c : input)
+	{
+		value *= 10;
+		value += c - '0';
+	}
+	return src;
+}
+static std::string u128_tostring(__uint128_t u128)
+{
+	std::string ret;
+	if (u128 > UINT64_MAX)
+	{
+		__uint128_t leading  = u128 / 10000000000000000000ULL;
+		uint64_t  trailing = u128 % 10000000000000000000ULL;
+		return u128_tostring(leading) + std::to_string(trailing);
+	}
+	else
+	{
+		uint64_t u64 = u128;
+		return std::to_string(u64);
+	}
+}
+#endif
 
 static std::string_view const LibraryID("random");
 
@@ -216,11 +250,14 @@ public:
 	}
 };
 
+//  class RandomBase<UtilRandom::T>;
+
 #define MAKE_TYPE(T) \
-	template class RandomBase<random::T>;\
-	std::string_view const RandomBase<random::T>::ClassID("random." #T);\
-	std::string_view const RandomBase<random::T>::CreateID(#T);\
-	using lua_##T##_t = RandomBase<random::T>;
+	template<>\
+	std::string_view const RandomBase<UtilRandom::T>::ClassID("random." #T);\
+	template<>\
+	std::string_view const RandomBase<UtilRandom::T>::CreateID(#T);\
+	using lua_##T##_t = RandomBase<UtilRandom::T>;
 
 MAKE_TYPE(splitmix64);
 
@@ -272,7 +309,7 @@ public:
 		inline void setSeed(lua_Integer seedv)
 		{
 			seed = seedv;
-			pcg_extras::seed_seq_from<random::splitmix64> seed_rng(static_cast<typename random::splitmix64::result_type>(seed));
+			pcg_extras::seed_seq_from<UtilRandom::splitmix64> seed_rng(static_cast<typename UtilRandom::splitmix64::result_type>(seed));
 			rng.seed(seed_rng);
 		}
 
@@ -471,7 +508,7 @@ public:
 	}
 };
 
-namespace random
+namespace UtilRandom
 {
 	class pcg32_oneseq_ex : public pcg32_oneseq
 	{
@@ -597,9 +634,9 @@ namespace random
 		{
 			std::ostringstream ss;
 			ss << name()
-				<< "-" << multiplier()
-				<< "-" << increment()
-				<< "-" << state_;
+				<< "-" << u128_tostring(multiplier())
+				<< "-" << u128_tostring(increment())
+				<< "-" << u128_tostring(state_);
 			return ss.str();
 		}
 		bool deserialize(std::string const& data)
@@ -653,9 +690,9 @@ namespace random
 		{
 			std::ostringstream ss;
 			ss << name()
-				<< "-" << multiplier()
-				<< "-" << increment()
-				<< "-" << state_;
+				<< "-" << u128_tostring(multiplier())
+				<< "-" << u128_tostring(increment())
+				<< "-" << u128_tostring(state_);
 			return ss.str();
 		}
 		bool deserialize(std::string const& data)
@@ -699,10 +736,11 @@ namespace random
 }
 
 #define MAKE_TYPE(T) \
-	template class RandomBasePCG<random::T##_ex>;\
-	std::string_view const RandomBasePCG<random::T##_ex>::ClassID("random." #T);\
-	std::string_view const RandomBasePCG<random::T##_ex>::CreateID(#T);\
-	using lua_##T##_t = RandomBasePCG<random::T##_ex>;
+	template<>\
+	std::string_view const RandomBasePCG<UtilRandom::T##_ex>::ClassID("random." #T);\
+	template<>\
+	std::string_view const RandomBasePCG<UtilRandom::T##_ex>::CreateID(#T);\
+	using lua_##T##_t = RandomBasePCG<UtilRandom::T##_ex>;
 
 // pcg family
 
@@ -731,7 +769,7 @@ public:
 		inline void setSeed(lua_Integer seedv)
 		{
 			seed = seedv;
-			random::splitmix64 seed_rng(static_cast<typename random::splitmix64::result_type>(seed));
+			UtilRandom::splitmix64 seed_rng(static_cast<typename UtilRandom::splitmix64::result_type>(seed));
 			auto const a = static_cast<typename RNG::result_type>(seed_rng());
 			if constexpr (std::is_same<RNG, jsf32>() || std::is_same<RNG, jsf64>())
 			{
@@ -927,8 +965,9 @@ public:
 };
 
 #define MAKE_TYPE(T) \
-	template class RandomBaseOther<T>;\
+	template<>\
 	std::string_view const RandomBaseOther<T>::ClassID("random." #T);\
+	template<>\
 	std::string_view const RandomBaseOther<T>::CreateID(#T);\
 	using lua_##T##_t = RandomBaseOther<T>;
 

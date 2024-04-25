@@ -301,7 +301,7 @@ void GameObjectBentLaser::SetEnvelope(float height, float base, float rate, floa
 	m_fEnvelopeHeight = height;
 	m_fEnvelopeBase = std::clamp(base, 0.0f, 1.0f);
 	m_fEnvelopeRate = rate;
-	m_fEnvelopePower = 0.4f * std::floorf(power / 0.4f); // 不要问，问就是魔法数字
+	m_fEnvelopePower = 0.4f * floorf(power / 0.4f); // 不要问，问就是魔法数字
 }
 
 bool GameObjectBentLaser::Update(size_t id, int length, float width, bool active) noexcept

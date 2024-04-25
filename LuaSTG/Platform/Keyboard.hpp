@@ -391,7 +391,7 @@ namespace Platform
 					uint8_t OemClear : 1;          // VK_OEM_CLEAR, 0xFE
 					uint8_t Reserved26 : 1;
 				} Key;
-				uint32_t Data[8];
+				uint32_t Data[10];
 			};
 
 			KeyStateData KeyState;
@@ -407,15 +407,15 @@ namespace Platform
 		};
 	private:
 	#if PLATFORM_KEYBOARD_USING_ATOMIC
-		std::atomic_uint32_t KeyState[8]{};
-		std::atomic_uint32_t KeyDown[8]{};
-		std::atomic_uint32_t KeyUp[8]{};
+		std::atomic_uint32_t KeyState[10]{};
+		std::atomic_uint32_t KeyDown[10]{};
+		std::atomic_uint32_t KeyUp[10]{};
 		std::atomic_uint8_t LastKeyDown{};
 		std::atomic_uint8_t LastKeyUp{};
 	#else
-		uint32_t KeyState[8]{};
-		uint32_t KeyDown[8]{};
-		uint32_t KeyUp[8]{};
+		uint32_t KeyState[10]{};
+		uint32_t KeyDown[10]{};
+		uint32_t KeyUp[10]{};
 		uint8_t LastKeyDown{};
 		uint8_t LastKeyUp{};
 	#endif
@@ -425,10 +425,6 @@ namespace Platform
 		void ResetFrame();
 		State GetState(bool new_frame = false);
 		void GetState(State& Ref, bool new_frame = false);
-	#ifdef WM_USER
-		void ProcessMessage(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
-	#else
-		void ProcessMessage(void*, unsigned int, void*, void*);
-	#endif
+		void ProcessMessage(void*);
 	};
 }

@@ -3,6 +3,8 @@
 #include "GameResource/ResourceFont.hpp"
 #include "GameResource/ResourceParticle.hpp"
 #include "LuaBinding/lua_luastg_hash.hpp"
+#include "lauxlib.h"
+#include "lua.h"
 
 namespace LuaSTGPlus
 {
@@ -144,7 +146,7 @@ namespace LuaSTGPlus
 			#define GET_ATTR(luakey, cppkey, valuetype, valueproc) {\
 				lua_pushstring(L, luakey);\
 				lua_gettable(L, argnum);\
-				info.##cppkey## = (valuetype)luaL_check##valueproc##(L, -1);\
+				info.cppkey = (valuetype)luaL_check##valueproc(L, -1);\
 				lua_pop(L, 1);\
 			}
 

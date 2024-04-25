@@ -64,7 +64,7 @@ namespace LuaSTGPlus
 	{
 		if (b > a) std::swap(a, b);
 		float const c = std::nextafterf(b, std::numeric_limits<float>::max()) - a;
-		return a + c * random::to_float(m_Random());
+		return a + c * UtilRandom::to_float(m_Random());
 	}
 
 	ParticlePoolImpl::ParticlePoolImpl(Core::ScopeObject<IResourceParticle> ref)

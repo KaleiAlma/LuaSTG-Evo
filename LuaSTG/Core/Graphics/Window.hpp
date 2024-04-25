@@ -11,8 +11,8 @@ namespace Core::Graphics
 		virtual void onWindowActive() {};
 		virtual void onWindowInactive() {};
 
-		virtual void onWindowSize(Vector2U size) { (void)size; };
-		virtual void onWindowFullscreenStateChange(bool state) { (void)state; }
+		virtual void onWindowSize(Vector2I size) { (void)size; };
+		// virtual void onWindowFullscreenStateChange(bool state) { (void)state; }
 		// virtual void onWindowDpiChange() {};
 
 		virtual void onWindowClose() {};
@@ -28,7 +28,7 @@ namespace Core::Graphics
 			NativeWindowMessageResult(intptr_t v, bool b) : result(v), should_return(b) {}
 		};
 
-		virtual NativeWindowMessageResult onNativeWindowMessage(void*, uint32_t, uintptr_t, intptr_t) { return {}; };
+		virtual NativeWindowMessageResult onNativeWindowMessage(void*) { return {}; };
 	};
 
 	enum class WindowFrameStyle

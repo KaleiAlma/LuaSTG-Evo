@@ -36,7 +36,7 @@ namespace LuaSTGPlus
 		inline float _GetEnvelope(float t) {
 			float ret = m_fEnvelopeHeight + (m_fEnvelopeBase * 
 				(1.0f - m_fEnvelopeRate * 2.0f * 
-					std::powf((t - 0.5f), m_fEnvelopePower)
+					powf((t - 0.5f), m_fEnvelopePower)
 					)
 				);
 			return (std::max)(0.0f, ret);

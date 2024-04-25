@@ -11,10 +11,10 @@
 
 #include "glad/gl.h"
 #include "spdlog/spdlog.h"
+// #define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "stb_image_write.h"
-#define STB_IMAGE_IMPLEMENTATION
-#include "stb_image.h"
 
 // #include "utf8.hpp"
 
@@ -44,7 +44,7 @@ namespace Core::Graphics
 
 	void Device_OpenGL::dispatchEvent(EventType t)
 	{
-		// 回调
+		// callback
 		m_is_dispatch_event = true;
 		switch (t)
 		{
@@ -62,7 +62,7 @@ namespace Core::Graphics
 			break;
 		}
 		m_is_dispatch_event = false;
-		// 处理那些延迟的对象
+		// Dealing with delayed objects
 		removeEventListener(nullptr);
 		for (auto& v : m_eventobj_late)
 		{
@@ -91,7 +91,7 @@ namespace Core::Graphics
 			{
 				if (v == e)
 				{
-					v = nullptr; // 不破坏遍历过程
+					v = nullptr; // doesn't break traversal
 				}
 			}
 		}
@@ -497,7 +497,7 @@ namespace Core::Graphics
 	{
 		glGenFramebuffers(1, &opengl_framebuffer);
 		if (opengl_framebuffer == 0) {
-			i18n_core_system_call_report_error("glGenFramebuffers");
+			spdlog::error("[core] glGenFramebuffers failed");
 			return false;
 		}
 		glBindFramebuffer(GL_FRAMEBUFFER, opengl_framebuffer);
@@ -512,6 +512,8 @@ namespace Core::Graphics
 			return false;
 		}
 
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
 		return true;
 	}
 
@@ -519,6 +521,7 @@ namespace Core::Graphics
 		: m_device(device)
 	{
 		m_texture.attach(new Texture2D_OpenGL(device, size, true));
+		m_depthstencilbuffer.attach(new DepthStencilBuffer_OpenGL(device, size));
 		if (!createResource())
 			throw std::runtime_error("RenderTarget::RenderTarget");
 		m_device->addEventListener(this);
@@ -554,7 +557,7 @@ namespace Core::Graphics
 	{
 		glGenRenderbuffers(1, &opengl_depthstencilbuffer);
 		if (opengl_depthstencilbuffer == 0) {
-			i18n_core_system_call_report_error("glGenRenderbuffers");
+			spdlog::error("[core] glGenRenderbuffers failed");
 			return false;
 		}
 		glBindRenderbuffer(GL_RENDERBUFFER, opengl_depthstencilbuffer);

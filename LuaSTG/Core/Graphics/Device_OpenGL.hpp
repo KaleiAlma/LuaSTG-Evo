@@ -190,7 +190,7 @@ namespace Core::Graphics
 
 	public:
 		bool DepthStencilBufferEnabled() { return m_depthstencilbuffer_enable; }
-		bool SetDepthStencilBufferEnable(bool enable);
+		// bool SetDepthStencilBufferEnable(bool enable);
 
 	public:
 		void* getNativeHandle() { return (void*)(intptr_t)opengl_framebuffer; }

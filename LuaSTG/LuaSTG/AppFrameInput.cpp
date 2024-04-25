@@ -1,52 +1,51 @@
 #include "AppFrame.h"
+#include "Core/Type.hpp"
+#include "SDL_keyboard.h"
+#include "SDL_events.h"
+#include "SDL_keycode.h"
+#include "SDL_mouse.h"
+#include "SDL_video.h"
+#include <cstddef>
 
-#define WIN32_LEAN_AND_MEAN
-#define NOMINMAX
-#include <Windows.h>
-#include "Mouse.h"
-#include "Platform/Keyboard.hpp"
+// #include "Platform/Keyboard.hpp"
 
 namespace LuaSTGPlus
 {
-    static Platform::Keyboard g_Keyboard;
-    static Platform::Keyboard::State g_KeyboardState;
+    // static Platform::Keyboard g_Keyboard;
+    // static Platform::Keyboard::State g_KeyboardState;
+    static SDL_Keycode lastKeyDown;
+    static SDL_Keycode lastKeyUp;
+    static Core::Vector2I mouseWheelDelta;
 }
 
 static struct InputEventListener : public Core::Graphics::IWindowEventListener
 {
-    NativeWindowMessageResult onNativeWindowMessage(void* window, uint32_t message, uintptr_t arg1, intptr_t arg2)
+    NativeWindowMessageResult onNativeWindowMessage(void* ev)
     {
-        switch (message)
+        SDL_Event* e = reinterpret_cast<SDL_Event*>(ev);
+        switch (e->type)
         {
-        case WM_ACTIVATE:
-        case WM_ACTIVATEAPP:
-        case WM_KEYDOWN:
-        case WM_SYSKEYDOWN:
-        case WM_KEYUP:
-        case WM_SYSKEYUP:
-            LuaSTGPlus::g_Keyboard.ProcessMessage((HWND)window, message, arg1, arg2);
+        case SDL_KEYDOWN:
+            LuaSTGPlus::lastKeyDown = e->key.keysym.sym;
+            break;
+        case SDL_KEYUP:
+            LuaSTGPlus::lastKeyUp = e->key.keysym.sym;
+            break;
+        case SDL_MOUSEWHEEL:
+            LuaSTGPlus::mouseWheelDelta = Core::Vector2I(e->wheel.x, e->wheel.y);
             break;
         }
 
-        switch (message)
-        {
-        case WM_ACTIVATE:
-        case WM_ACTIVATEAPP:
-        case WM_INPUT:
-        case WM_MOUSEMOVE:
-        case WM_LBUTTONDOWN:
-        case WM_LBUTTONUP:
-        case WM_RBUTTONDOWN:
-        case WM_RBUTTONUP:
-        case WM_MBUTTONDOWN:
-        case WM_MBUTTONUP:
-        case WM_MOUSEWHEEL:
-        case WM_XBUTTONDOWN:
-        case WM_XBUTTONUP:
-        case WM_MOUSEHOVER:
-            DirectX::Mouse::ProcessMessage(message, arg1, arg2);
-            break;
-        }
+        // switch (e->type)
+        // {
+        // case SDL_MOUSEMOTION:
+        // case SDL_MOUSEBUTTONDOWN:
+        // case SDL_MOUSEBUTTONUP:
+        // case SDL_MOUSEWHEEL:
+        // case SDL_WINDOWEVENT:
+        //     LuaSTGPlus::g_Mouse.ProcessMessage(ev);
+        //     break;
+        // }
 
         return {};
     }
@@ -54,55 +53,55 @@ static struct InputEventListener : public Core::Graphics::IWindowEventListener
 
 namespace LuaSTGPlus
 {
-    static std::unique_ptr<DirectX::Mouse> Mouse;
-    static DirectX::Mouse::State MouseState;
+    // static std::unique_ptr<DirectX::Mouse> Mouse;
+    // static DirectX::Mouse::State MouseState;
 
     void AppFrame::OpenInput()
     {
-        g_Keyboard.Reset();
-        Mouse = std::make_unique<DirectX::Mouse>();
-        ZeroMemory(&MouseState, sizeof(MouseState));
+        // g_Keyboard.Reset();
+        // Mouse = std::make_unique<DirectX::Mouse>();
+        // ZeroMemory(&MouseState, sizeof(MouseState));
         m_pAppModel->getWindow()->addEventListener(&g_InputEventListener);
-        Mouse->SetWindow((HWND)m_pAppModel->getWindow()->getNativeHandle());
+        // Mouse->SetWindow((HWND)m_pAppModel->getWindow()->getNativeHandle());
     }
     void AppFrame::CloseInput()
     {
         m_pAppModel->getWindow()->removeEventListener(&g_InputEventListener);
-        Mouse = nullptr;
+        // Mouse = nullptr;
     }
     void AppFrame::UpdateInput()
     {
-        g_Keyboard.GetState(g_KeyboardState, true);
-        if (Mouse)
-        {
-            MouseState = Mouse->GetState();
-            Mouse->ResetScrollWheelValue();
-        }
-        else
-        {
-            ZeroMemory(&MouseState, sizeof(MouseState));
-        }
+        // g_Keyboard.GetState(g_KeyboardState, true);
+        // if (Mouse)
+        // {
+        //     MouseState = Mouse->GetState();
+        //     Mouse->ResetScrollWheelValue();
+        // }
+        // else
+        // {
+        //     ZeroMemory(&MouseState, sizeof(MouseState));
+        // }
     }
     void AppFrame::ResetKeyboardInput()
     {
-        g_KeyboardState.Reset();
+        // g_KeyboardState.Reset();
     }
     void AppFrame::ResetMouseInput()
     {
-        ZeroMemory(&MouseState, sizeof(MouseState));
+        // ZeroMemory(&MouseState, sizeof(MouseState));
     }
 
     bool AppFrame::GetKeyState(int VKCode)noexcept
     {
-        return g_KeyboardState.IsKeyDown((Platform::Keyboard::Key)VKCode);
+        return SDL_GetKeyboardState(NULL)[SDL_GetScancodeFromKey(VKCode)];
     }
-    
+
     int AppFrame::GetLastKey()noexcept
     {
-        return (int)g_KeyboardState.LastKeyDown;
+        return (int)lastKeyDown;
     }
     
-    inline Core::Vector2F MapLetterBoxingPosition(Core::Vector2U isize, Core::Vector2U osize, Core::Vector2I pos)
+    inline Core::Vector2F MapLetterBoxingPosition(Core::Vector2U isize, Core::Vector2I osize, Core::Vector2I pos)
     {
         float const hscale = (float)osize.x / (float)isize.x;
         float const vscale = (float)osize.y / (float)isize.y;
@@ -118,53 +117,54 @@ namespace LuaSTGPlus
         return Core::Vector2F(x2, y2);
     }
 
-    bool AppFrame::GetMouseState_legacy(int button)noexcept
-    {
-        switch (button)
-        {
-        case 0:
-            return MouseState.leftButton;
-        case 1:
-            return MouseState.middleButton;
-        case 2:
-            return MouseState.rightButton;
-        case 3:
-            return MouseState.xButton1;
-        case 4:
-            return MouseState.xButton2;
-        default:
-            return false;
-        }
-    }
+    // bool AppFrame::GetMouseState_legacy(int button)noexcept
+    // {
+    //     switch (button)
+    //     {
+    //     case 0:
+    //         return MouseState.leftButton;
+    //     case 1:
+    //         return MouseState.middleButton;
+    //     case 2:
+    //         return MouseState.rightButton;
+    //     case 3:
+    //         return MouseState.xButton1;
+    //     case 4:
+    //         return MouseState.xButton2;
+    //     default:
+    //         return false;
+    //     }
+    // }
     bool AppFrame::GetMouseState(int button)noexcept
     {
-        switch (button)
-        {
-        case VK_LBUTTON:
-            return MouseState.leftButton;
-        case VK_MBUTTON:
-            return MouseState.middleButton;
-        case VK_RBUTTON:
-            return MouseState.rightButton;
-        case VK_XBUTTON1:
-            return MouseState.xButton1;
-        case VK_XBUTTON2:
-            return MouseState.xButton2;
-        default:
-            return false;
-        }
+        // switch (button)
+        // {
+        // case VK_LBUTTON:
+        //     return MouseState.leftButton;
+        // case VK_MBUTTON:
+        //     return MouseState.middleButton;
+        // case VK_RBUTTON:
+        //     return MouseState.rightButton;
+        // case VK_XBUTTON1:
+        //     return MouseState.xButton1;
+        // case VK_XBUTTON2:
+        //     return MouseState.xButton2;
+        // default:
+        //     return false;
+        // }
+        return SDL_BUTTON(button + 1) & SDL_GetMouseState(NULL, NULL);
     }
     Core::Vector2F AppFrame::GetMousePosition(bool no_flip)noexcept
     {
-        if (m_win32_window_size.x == 0 || m_win32_window_size.y == 0)
+        if (m_sdl_window_size.x == 0 || m_sdl_window_size.y == 0)
         {
-            RECT rc = {};
-            GetClientRect((HWND)GetAppModel()->getWindow()->getNativeHandle(), &rc);
-            m_win32_window_size = Core::Vector2U((uint32_t)(rc.right - rc.left), (uint32_t)(rc.bottom - rc.top));
+            SDL_GetWindowSizeInPixels(reinterpret_cast<SDL_Window*>(GetAppModel()->getWindow()->getNativeHandle()), &m_sdl_window_size.x, &m_sdl_window_size.y);
         }
-        auto const w_size = m_win32_window_size;
+        auto const w_size = m_sdl_window_size;
         auto const c_size = GetAppModel()->getSwapChain()->getCanvasSize();
-        auto const m_p = MapLetterBoxingPosition(c_size, w_size, Core::Vector2I(MouseState.x, MouseState.y));
+        Core::Vector2I mouse_pos;
+        SDL_GetMouseState(&mouse_pos.x, &mouse_pos.y);
+        auto const m_p = MapLetterBoxingPosition(c_size, w_size, mouse_pos);
         if (no_flip)
         {
             return m_p;
@@ -176,24 +176,20 @@ namespace LuaSTGPlus
     }
     Core::Vector2F AppFrame::GetCurrentWindowSizeF()
     {
-        if (m_win32_window_size.x == 0 || m_win32_window_size.y == 0)
+        if (m_sdl_window_size.x == 0 || m_sdl_window_size.y == 0)
         {
-            RECT rc = {};
-            GetClientRect((HWND)GetAppModel()->getWindow()->getNativeHandle(), &rc);
-            m_win32_window_size = Core::Vector2U((uint32_t)(rc.right - rc.left), (uint32_t)(rc.bottom - rc.top));
+            SDL_GetWindowSizeInPixels(reinterpret_cast<SDL_Window*>(GetAppModel()->getWindow()->getNativeHandle()), &m_sdl_window_size.x, &m_sdl_window_size.y);
         }
-        auto const w_size = m_win32_window_size;
+        auto const w_size = m_sdl_window_size;
         return Core::Vector2F((float)w_size.x, (float)w_size.y);
     }
     Core::Vector4F AppFrame::GetMousePositionTransformF()
     {
-        if (m_win32_window_size.x == 0 || m_win32_window_size.y == 0)
+        if (m_sdl_window_size.x == 0 || m_sdl_window_size.y == 0)
         {
-            RECT rc = {};
-            GetClientRect((HWND)GetAppModel()->getWindow()->getNativeHandle(), &rc);
-            m_win32_window_size = Core::Vector2U((uint32_t)(rc.right - rc.left), (uint32_t)(rc.bottom - rc.top));
+            SDL_GetWindowSizeInPixels(reinterpret_cast<SDL_Window*>(GetAppModel()->getWindow()->getNativeHandle()), &m_sdl_window_size.x, &m_sdl_window_size.y);
         }
-        auto const w_size = m_win32_window_size;
+        auto const w_size = m_sdl_window_size;
         auto const c_size = GetAppModel()->getSwapChain()->getCanvasSize();
 
         float const hscale = (float)w_size.x / (float)c_size.x;
@@ -208,6 +204,6 @@ namespace LuaSTGPlus
     }
     int32_t AppFrame::GetMouseWheelDelta()noexcept
     {
-        return MouseState.scrollWheelValue;
+        return mouseWheelDelta.y;
     }
 };

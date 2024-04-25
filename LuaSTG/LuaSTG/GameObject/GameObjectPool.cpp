@@ -412,7 +412,7 @@ namespace LuaSTGPlus
 					m_pCurrentObject = p;
 					// 越界设置为 del 状态
 					p->status = GameObjectStatus::Dead;
-					// 调用 del 回调
+					// 调用 del callback
 				#ifdef USING_ADVANCE_GAMEOBJECT_CLASS
 					if (!p->luaclass.IsDefaultDestroy)
 					{
@@ -624,7 +624,7 @@ namespace LuaSTGPlus
 		{
 			// 标记为即将回收的状态
 			p->status = (!kill_mode) ? GameObjectStatus::Dead : GameObjectStatus::Killed;
-			// 回调
+			// callback
 		#ifdef USING_ADVANCE_GAMEOBJECT_CLASS
 			if (!(!kill_mode && p->luaclass.IsDefaultDestroy) && !(kill_mode && p->luaclass.IsDefaultLegacyKill))
 			{

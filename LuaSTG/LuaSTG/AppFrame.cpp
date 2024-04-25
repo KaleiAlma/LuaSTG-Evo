@@ -1,11 +1,11 @@
 ﻿#include "AppFrame.h"
 #include "Core/FileManager.hpp"
-#include "Platform/XInput.hpp"
+// #include "Platform/XInput.hpp"
 #include "Utility/Utility.h"
 #include "Debugger/ImGuiExtension.h"
 #include "LuaBinding/LuaAppFrame.hpp"
-#include "utf8.hpp"
-#include "resource.h"
+// #include "utf8.hpp"
+// #include "resource.h"
 
 using namespace LuaSTGPlus;
 
@@ -303,17 +303,17 @@ void AppFrame::onWindowDestroy()
 }
 void AppFrame::onWindowActive()
 {
-	Platform::XInput::setEnable(true);
+	// Platform::XInput::setEnable(true);
 	m_window_active_changed.fetch_or(0x1);
 }
 void AppFrame::onWindowInactive()
 {
-	Platform::XInput::setEnable(false);
+	// Platform::XInput::setEnable(false);
 	m_window_active_changed.fetch_or(0x2);
 }
-void AppFrame::onWindowSize(Core::Vector2U size)
+void AppFrame::onWindowSize(Core::Vector2I size)
 {
-	m_win32_window_size = size;
+	m_sdl_window_size = size;
 }
 void AppFrame::onDeviceChange()
 {

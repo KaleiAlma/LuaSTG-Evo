@@ -4,8 +4,8 @@ luastg_target_common_options(utility)
 luastg_target_more_warning(utility)
 target_include_directories(utility PUBLIC .)
 set(utility_sources
-    utility/path.hpp
-    utility/path.cpp
+    # utility/path.hpp
+    # utility/path.cpp
     utility/utf.hpp
     # utf8.hpp
     # utf8.cpp

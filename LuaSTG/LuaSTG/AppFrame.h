@@ -214,9 +214,9 @@ namespace LuaSTGPlus
 		bool Render(IParticlePool* p, float hscale = 1, float vscale = 1)noexcept;
 		
 		/// @brief 渲染文字
-		bool RenderText(IResourceFont* p, wchar_t* strBuf, Core::RectF rect, Core::Vector2F scale, FontAlignHorizontal halign, FontAlignVertical valign, bool bWordBreak)noexcept;
+		bool RenderText(IResourceFont* p, char* strBuf, Core::RectF rect, Core::Vector2F scale, FontAlignHorizontal halign, FontAlignVertical valign, bool bWordBreak)noexcept;
 		
-		Core::Vector2F CalcuTextSize(IResourceFont* p, const wchar_t* strBuf, Core::Vector2F scale)noexcept;
+		Core::Vector2F CalcuTextSize(IResourceFont* p, const char* strBuf, Core::Vector2F scale)noexcept;
 		
 		bool RenderText(const char* name, const char* str, float x, float y, float scale, FontAlignHorizontal halign, FontAlignVertical valign)noexcept;
 		
@@ -307,13 +307,13 @@ namespace LuaSTGPlus
 		
 	protected:
 		std::atomic_int m_window_active_changed{ 0 };
-		Core::Vector2U m_win32_window_size;
+		Core::Vector2I m_sdl_window_size;
 
 		void onWindowCreate() override;
 		void onWindowDestroy() override;
 		void onWindowActive() override;
 		void onWindowInactive() override;
-		void onWindowSize(Core::Vector2U size) override;
+		void onWindowSize(Core::Vector2I size) override;
 		void onDeviceChange() override;
 
 		bool onUpdate() override;

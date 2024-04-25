@@ -195,7 +195,11 @@ add_subdirectory(steam_api)
 # ==================== glad ====================
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/glad/include)
-file(GLOB BUTTERFLIES_SOURCES_C ${CMAKE_CURRENT_SOURCE_DIR} *.c glad/src/gl.c)
+add_library(glad STATIC)
+luastg_target_common_options(glad)
+target_sources(glad PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/glad/src/gl.c
+)
 
 # ==================== sdl2 ====================
 
@@ -203,5 +207,5 @@ set(SDL2MIXER_MOD OFF)
 
 add_subdirectory(sdl2)
 # add_subdirectory(sdl_image)
-add_subdirectory(sdl_mixer)
-add_subdirectory(sdl_ttf)
+# add_subdirectory(sdl_mixer)
+# add_subdirectory(sdl_ttf)

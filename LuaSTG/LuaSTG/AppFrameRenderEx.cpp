@@ -166,7 +166,7 @@ namespace LuaSTGPlus
             {
                 constexpr float const da = std::numbers::pi_v<float> *2.0f / 32.0f;
                 float const angle = (float)(i - 1) * da;
-                vert[i] = IRenderer::DrawVertex(x + r * std::cosf(angle), y + r * std::sinf(angle), 0.5f, 0.0f, 0.0f, color.color());
+                vert[i] = IRenderer::DrawVertex(x + r * cosf(angle), y + r * sinf(angle), 0.5f, 0.0f, 0.0f, color.color());
             }
             // 计算索引
             IRenderer::DrawIndex* p_vidx = vidx;
@@ -198,8 +198,8 @@ namespace LuaSTGPlus
                 IRenderer::DrawVertex(-a,  b, 0.5f, 1.0f, 0.0f, color.color()),
             };
             // 变换
-            float const cos_v = std::cosf(rot);
-            float const sin_v = std::sinf(rot);
+            float const cos_v = cosf(rot);
+            float const sin_v = sinf(rot);
             for (size_t i = 0; i < 4; i += 1)
             {
                 float const tx = vert[i].x * cos_v - vert[i].y * sin_v;
@@ -230,13 +230,13 @@ namespace LuaSTGPlus
                 constexpr float const da = std::numbers::pi_v<float> * 2.0f / 36.0f;
                 float const angle = (float)(i - 1) * da;
                 vert[i] = IRenderer::DrawVertex(
-                    a * std::cosf(angle),
-                    b * std::sinf(angle),
+                    a * cosf(angle),
+                    b * sinf(angle),
                     0.5f, 0.0f, 0.0f, color.color());
             }
             // 变换
-            float const cos_v = std::cosf(rot);
-            float const sin_v = std::sinf(rot);
+            float const cos_v = cosf(rot);
+            float const sin_v = sinf(rot);
             for (size_t i = 1; i <= 36; i += 1)
             {
                 float const tx = vert[i].x * cos_v - vert[i].y * sin_v;

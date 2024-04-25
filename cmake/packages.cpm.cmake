@@ -211,30 +211,30 @@ endif()
 # freetype
 # Font utilities
 
-# Freetype is included in SDL2_ttf.
+CPMAddPackage(
+    NAME freetype
+    VERSION 2.13.1
+    #GITHUB_REPOSITORY freetype/freetype
+    #GIT_TAG VER-2-13-1
+    URL https://gitlab.freedesktop.org/freetype/freetype/-/archive/VER-2-13-1/freetype-VER-2-13-1.zip
+    OPTIONS
+    "FT_DISABLE_ZLIB ON"
+    "FT_DISABLE_BZIP2 ON"
+    "FT_DISABLE_PNG ON"
+    "FT_DISABLE_HARFBUZZ ON"
+    "FT_DISABLE_BROTLI ON"
+)
 
-# CPMAddPackage(
-#     NAME freetype
-#     VERSION 2.13.1
-#     #GITHUB_REPOSITORY freetype/freetype
-#     #GIT_TAG VER-2-13-1
-#     URL https://gitlab.freedesktop.org/freetype/freetype/-/archive/VER-2-13-1/freetype-VER-2-13-1.zip
-#     OPTIONS
-#     "FT_DISABLE_ZLIB ON"
-#     "FT_DISABLE_BZIP2 ON"
-#     "FT_DISABLE_PNG ON"
-#     "FT_DISABLE_HARFBUZZ ON"
-#     "FT_DISABLE_BROTLI ON"
-# )
-
-# if(freetype_ADDED)
-#     if(TARGET freetype)
-#         target_compile_options(freetype PRIVATE
-#             "/utf-8" # Unicode warning
-#         )
-#         set_target_properties(freetype PROPERTIES FOLDER external)
-#     endif()
-# endif()
+if(freetype_ADDED)
+    if(TARGET freetype)
+        if(MSVC)
+            target_compile_options(freetype PRIVATE
+                "/utf-8" # Unicode warning
+            )
+        endif()
+        set_target_properties(freetype PROPERTIES FOLDER external)
+    endif()
+endif()
 
 # pcg random
 # High-quality RNG

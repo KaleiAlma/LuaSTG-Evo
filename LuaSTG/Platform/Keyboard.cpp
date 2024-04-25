@@ -1,3 +1,5 @@
+#include "SDL_events.h"
+#include "SDL_video.h"
 #include "Shared.hpp"
 #include "Keyboard.hpp"
 
@@ -36,11 +38,11 @@ namespace Platform
     static_assert(sizeof(Keyboard::State::KeyStateData) == 32);
     static_assert(sizeof(Keyboard::State) == (32 * 3 + 4));
 
-    inline bool IsExtendedKey(LPARAM lParam)
-    {
-        constexpr LPARAM const bit_mask = KF_EXTENDED << 16;
-        return (lParam & bit_mask) == bit_mask;
-    }
+    // inline bool IsExtendedKey(LPARAM lParam)
+    // {
+    //     constexpr LPARAM const bit_mask = KF_EXTENDED << 16;
+    //     return (lParam & bit_mask) == bit_mask;
+    // }
 
     inline bool GetKey(uint32_t state_[8], uint8_t vk)
     {
@@ -69,8 +71,6 @@ namespace Platform
             state_[index] &= (~bitmk);
     }
 #endif
-    
-    constexpr uint8_t const VK_NUMPADENTER = 0xE8u; // Unassigned Virtual-Key Code
 
     void Keyboard::State::Reset()
     {
@@ -246,75 +246,51 @@ namespace Platform
     #endif
     }
 
-    void Keyboard::ProcessMessage(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+    void Keyboard::ProcessMessage(void* ev)
     {
-        std::ignore = hWnd;
+        SDL_Event* e = reinterpret_cast<SDL_Event*>(ev);
         bool down = false;
-        switch (uMsg)
+        switch (e->type)
         {
         default:
-            return; // ignore other message
-        case WM_ACTIVATE:
-        case WM_ACTIVATEAPP:
-            Reset();
-            return; // skip
-        case WM_KEYDOWN:
-        case WM_SYSKEYDOWN:
+            return; // ignore other messages
+        case SDL_WINDOWEVENT:
+            switch (e->window.type)
+            {
+                default:
+                    return; // ignore other messages
+                case SDL_WINDOWEVENT_FOCUS_GAINED:
+                case SDL_WINDOWEVENT_FOCUS_LOST:
+                    Reset();
+                    return; // skip
+            }
+        case SDL_KEYDOWN:
             down = true;
             break;
-        case WM_KEYUP:
-        case WM_SYSKEYUP:
+        case SDL_KEYUP:
             down = false;
             break;
         }
-        if (wParam > 0xFFu)
-        {
-            return; // ignore unknown key code
-        }
-        uint8_t const vk = wParam & 0xFFu;
-        uint8_t vk_translated = vk;
-        switch (vk)
-        {
-        case VK_RETURN:
-            vk_translated = IsExtendedKey(lParam) ? VK_NUMPADENTER : VK_RETURN;
-            break;
-        case VK_SHIFT:
-            vk_translated = IsExtendedKey(lParam) ? VK_RSHIFT : VK_LSHIFT;
-            if (!down)
-            {
-                // Windows system feature :(
-                AtomicSetKey(KeyState, VK_RSHIFT, false);
-                AtomicSetKey(KeyState, VK_LSHIFT, false);
-            }
-            break;
-        case VK_CONTROL:
-            vk_translated = IsExtendedKey(lParam) ? VK_RCONTROL : VK_LCONTROL;
-            break;
-        case VK_MENU:
-            vk_translated = IsExtendedKey(lParam) ? VK_RMENU : VK_LMENU;
-            break;
-        }
+
+        uint8_t const vk = e->key.keysym.scancode;
+        // uint8_t vk_translated = vk;
         AtomicSetKey(KeyState, vk, down);
-        if (vk != vk_translated)
-        {
-            AtomicSetKey(KeyState, vk_translated, down);
-        }
         if (down)
         {
-            AtomicSetKey(KeyDown, vk_translated, true);
+            AtomicSetKey(KeyDown, vk, true);
         #if PLATFORM_KEYBOARD_USING_ATOMIC
-            LastKeyDown.store(vk_translated);
+            LastKeyDown.store(vk);
         #else
-            LastKeyDown = (vk_translated);
+            LastKeyDown = (vk);
         #endif
         }
         else
         {
-            AtomicSetKey(KeyUp, vk_translated, true);
+            AtomicSetKey(KeyUp, vk, true);
         #if PLATFORM_KEYBOARD_USING_ATOMIC
-            LastKeyUp.store(vk_translated);
+            LastKeyUp.store(vk);
         #else
-            LastKeyUp = (vk_translated);
+            LastKeyUp = (vk);
         #endif
         }
     }

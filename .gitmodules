@@ -25,12 +25,6 @@
 [submodule "external/sdl2"]
 	path = external/sdl2
 	url = https://github.com/libsdl-org/SDL
-[submodule "external/sdl_mixer"]
-	path = external/sdl_mixer
-	url = https://github.com/libsdl-org/SDL_mixer
-[submodule "external/sdl_ttf"]
-	path = external/sdl_ttf
-	url = https://github.com/libsdl-org/SDL_ttf
 [submodule "external/luafilesystem"]
 	path = external/luafilesystem
 	url = https://github.com/lunarmodules/luafilesystem

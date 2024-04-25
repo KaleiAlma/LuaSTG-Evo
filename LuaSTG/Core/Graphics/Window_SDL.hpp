@@ -3,6 +3,7 @@
 #include "Core/ApplicationModel.hpp"
 #include "Core/Graphics/Window.hpp"
 #include "Core/Type.hpp"
+#include "SDL_events.h"
 // #include "Platform/Monitor.hpp"
 // #include "Platform/WindowSizeMoveController.hpp"
 // #include "Platform/RuntimeLoader/DesktopWindowManager.hpp"
@@ -33,7 +34,7 @@ namespace Core::Graphics
 		WindowFrameStyle m_framestyle{ WindowFrameStyle::Fixed };
 		// DWORD win32_window_style{ WS_OVERLAPPEDWINDOW ^ (WS_THICKFRAME | WS_MAXIMIZEBOX) };
 		// DWORD win32_window_style_ex{ 0 };
-		uint32_t sdl_window_flags{ SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE };
+		uint32_t sdl_window_flags{ SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI };
 		bool m_hidewindow{ true };
 		bool m_redirect_bitmap{ true };
 		SDL_Rect m_last_window_rect{};
@@ -82,6 +83,8 @@ namespace Core::Graphics
 
 		void implSetApplicationModel(IApplicationModel* p_framework) { m_framework = p_framework; }
 
+		void handleEvents();
+
 	private:
 		enum class EventType
 		{
@@ -95,7 +98,7 @@ namespace Core::Graphics
 
 			WindowSize,
 			WindowFullscreenStateChange,
-			WindowDpiChanged,
+			// WindowDpiChanged,
 
 			NativeWindowMessage,
 
@@ -103,8 +106,9 @@ namespace Core::Graphics
 		};
 		union EventData
 		{
-			Vector2U window_size;
+			Vector2I window_size;
 			bool window_fullscreen_state;
+			SDL_Event event;
 		};
 		bool m_is_dispatch_event{ false };
 		std::vector<IWindowEventListener*> m_eventobj;

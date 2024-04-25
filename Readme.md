@@ -11,7 +11,7 @@ You can download LuaSTG Evo from the [Releases Page](https://github.com/KaleiAlm
 ## Major Migration Content
 
 * Graphic API: Direct3D 11 to OpenGL 4.5
-* Audio API: XAudio2 to (to be decided - likely SDL_mixer)
+* Audio API: XAudio2 to SDL2 + miniaudio
 * Window API: Win32 to SDL2
 
 ## Requirements

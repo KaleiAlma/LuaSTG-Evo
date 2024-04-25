@@ -1,18 +1,23 @@
 ﻿#include "Core/Graphics/DearImGui_SDL_OpenGL.hpp"
+#include "SDL_keycode.h"
+#include "SDL_mouse.h"
 #include "imgui.h"
-#include <windowsx.h>
+// #include <windowsx.h>
+#include "SDL.h"
+#include "SDL_mouse.h"
+#include <SDL2/SDL_keyboard.h>
 
 namespace Core::Graphics
 {
-	constexpr UINT const MSG_MOUSE_CAPTURE = WM_USER + 0x20;
-	constexpr UINT const MSG_SET_IME_POS = WM_USER + 0x21;
+	// constexpr UINT const MSG_MOUSE_CAPTURE = WM_USER + 0x20;
+	// constexpr UINT const MSG_SET_IME_POS = WM_USER + 0x21;
 
-	constexpr WPARAM const MSG_MOUSE_CAPTURE_SET = 1;
-	constexpr WPARAM const MSG_MOUSE_CAPTURE_REL = 2;
+	// constexpr WPARAM const MSG_MOUSE_CAPTURE_SET = 1;
+	// constexpr WPARAM const MSG_MOUSE_CAPTURE_REL = 2;
 
-	constexpr int const IM_VK_KEYPAD_ENTER = VK_RETURN + 256;
+	// constexpr int const IM_VK_KEYPAD_ENTER = VK_RETURN + 256;
 
-	static bool mapMouseCursor(LPWSTR* outValue)
+	static bool mapMouseCursor(SDL_SystemCursor* outValue)
 	{
 		ImGuiIO& io = ImGui::GetIO();
 		if (io.ConfigFlags & ImGuiConfigFlags_NoMouseCursorChange)
@@ -26,26 +31,30 @@ namespace Core::Graphics
 		}
 		else
 		{
-			LPWSTR win32_cursor = IDC_ARROW;
+			SDL_SystemCursor sdl_cursor = SDL_SYSTEM_CURSOR_ARROW;
 			switch (imgui_cursor)
 			{
-			case ImGuiMouseCursor_Arrow: win32_cursor = IDC_ARROW; break;
-			case ImGuiMouseCursor_TextInput: win32_cursor = IDC_IBEAM; break;
-			case ImGuiMouseCursor_ResizeAll: win32_cursor = IDC_SIZEALL; break;
-			case ImGuiMouseCursor_ResizeEW: win32_cursor = IDC_SIZEWE; break;
-			case ImGuiMouseCursor_ResizeNS: win32_cursor = IDC_SIZENS; break;
-			case ImGuiMouseCursor_ResizeNESW: win32_cursor = IDC_SIZENESW; break;
-			case ImGuiMouseCursor_ResizeNWSE: win32_cursor = IDC_SIZENWSE; break;
-			case ImGuiMouseCursor_Hand: win32_cursor = IDC_HAND; break;
-			case ImGuiMouseCursor_NotAllowed: win32_cursor = IDC_NO; break;
+			case ImGuiMouseCursor_Arrow: sdl_cursor = SDL_SYSTEM_CURSOR_ARROW; break;
+			case ImGuiMouseCursor_TextInput: sdl_cursor = SDL_SYSTEM_CURSOR_IBEAM; break;
+			case ImGuiMouseCursor_ResizeAll: sdl_cursor = SDL_SYSTEM_CURSOR_SIZEALL; break;
+			case ImGuiMouseCursor_ResizeEW: sdl_cursor = SDL_SYSTEM_CURSOR_SIZEWE; break;
+			case ImGuiMouseCursor_ResizeNS: sdl_cursor = SDL_SYSTEM_CURSOR_SIZENS; break;
+			case ImGuiMouseCursor_ResizeNESW: sdl_cursor = SDL_SYSTEM_CURSOR_SIZENESW; break;
+			case ImGuiMouseCursor_ResizeNWSE: sdl_cursor = SDL_SYSTEM_CURSOR_SIZENWSE; break;
+			case ImGuiMouseCursor_Hand: sdl_cursor = SDL_SYSTEM_CURSOR_HAND; break;
+			case ImGuiMouseCursor_NotAllowed: sdl_cursor = SDL_SYSTEM_CURSOR_NO; break;
 			}
-			*outValue = win32_cursor;
+			*outValue = sdl_cursor;
 		}
 		return true;
 	}
-	static bool isVkDown(int vk)
+	// static bool isVkDown(int vk)
+	// {
+	// 	return (::GetKeyState(vk) & 0x8000) != 0;
+	// }
+	static bool isKeyDown(SDL_Keycode key)
 	{
-		return (::GetKeyState(vk) & 0x8000) != 0;
+		return SDL_GetKeyboardState(NULL)[SDL_GetScancodeFromKey(key)] != 0;
 	}
 	static void addKeyEvent(ImGuiKey key, bool down, int native_keycode, int native_scancode = -1)
 	{
@@ -54,66 +63,66 @@ namespace Core::Graphics
 		io.SetKeyEventNativeData(key, native_keycode, native_scancode); // To support legacy indexing (<1.87 user code)
 		IM_UNUSED(native_scancode);
 	}
-	static ImGuiKey mapVirtualKeyToImGuiKey(WPARAM wParam)
+	static ImGuiKey mapKeycodeToImGuiKey(SDL_Keycode key)
 	{
-		switch (wParam)
+		switch (key)
 		{
-		case VK_TAB: return ImGuiKey_Tab;
-		case VK_LEFT: return ImGuiKey_LeftArrow;
-		case VK_RIGHT: return ImGuiKey_RightArrow;
-		case VK_UP: return ImGuiKey_UpArrow;
-		case VK_DOWN: return ImGuiKey_DownArrow;
-		case VK_PRIOR: return ImGuiKey_PageUp;
-		case VK_NEXT: return ImGuiKey_PageDown;
-		case VK_HOME: return ImGuiKey_Home;
-		case VK_END: return ImGuiKey_End;
-		case VK_INSERT: return ImGuiKey_Insert;
-		case VK_DELETE: return ImGuiKey_Delete;
-		case VK_BACK: return ImGuiKey_Backspace;
-		case VK_SPACE: return ImGuiKey_Space;
-		case VK_RETURN: return ImGuiKey_Enter;
-		case VK_ESCAPE: return ImGuiKey_Escape;
-		case VK_OEM_7: return ImGuiKey_Apostrophe;
-		case VK_OEM_COMMA: return ImGuiKey_Comma;
-		case VK_OEM_MINUS: return ImGuiKey_Minus;
-		case VK_OEM_PERIOD: return ImGuiKey_Period;
-		case VK_OEM_2: return ImGuiKey_Slash;
-		case VK_OEM_1: return ImGuiKey_Semicolon;
-		case VK_OEM_PLUS: return ImGuiKey_Equal;
-		case VK_OEM_4: return ImGuiKey_LeftBracket;
-		case VK_OEM_5: return ImGuiKey_Backslash;
-		case VK_OEM_6: return ImGuiKey_RightBracket;
-		case VK_OEM_3: return ImGuiKey_GraveAccent;
-		case VK_CAPITAL: return ImGuiKey_CapsLock;
-		case VK_SCROLL: return ImGuiKey_ScrollLock;
-		case VK_NUMLOCK: return ImGuiKey_NumLock;
-		case VK_SNAPSHOT: return ImGuiKey_PrintScreen;
-		case VK_PAUSE: return ImGuiKey_Pause;
-		case VK_NUMPAD0: return ImGuiKey_Keypad0;
-		case VK_NUMPAD1: return ImGuiKey_Keypad1;
-		case VK_NUMPAD2: return ImGuiKey_Keypad2;
-		case VK_NUMPAD3: return ImGuiKey_Keypad3;
-		case VK_NUMPAD4: return ImGuiKey_Keypad4;
-		case VK_NUMPAD5: return ImGuiKey_Keypad5;
-		case VK_NUMPAD6: return ImGuiKey_Keypad6;
-		case VK_NUMPAD7: return ImGuiKey_Keypad7;
-		case VK_NUMPAD8: return ImGuiKey_Keypad8;
-		case VK_NUMPAD9: return ImGuiKey_Keypad9;
-		case VK_DECIMAL: return ImGuiKey_KeypadDecimal;
-		case VK_DIVIDE: return ImGuiKey_KeypadDivide;
-		case VK_MULTIPLY: return ImGuiKey_KeypadMultiply;
-		case VK_SUBTRACT: return ImGuiKey_KeypadSubtract;
-		case VK_ADD: return ImGuiKey_KeypadAdd;
-		case IM_VK_KEYPAD_ENTER: return ImGuiKey_KeypadEnter;
-		case VK_LSHIFT: return ImGuiKey_LeftShift;
-		case VK_LCONTROL: return ImGuiKey_LeftCtrl;
-		case VK_LMENU: return ImGuiKey_LeftAlt;
-		case VK_LWIN: return ImGuiKey_LeftSuper;
-		case VK_RSHIFT: return ImGuiKey_RightShift;
-		case VK_RCONTROL: return ImGuiKey_RightCtrl;
-		case VK_RMENU: return ImGuiKey_RightAlt;
-		case VK_RWIN: return ImGuiKey_RightSuper;
-		case VK_APPS: return ImGuiKey_Menu;
+		case SDLK_TAB: return ImGuiKey_Tab;
+		case SDLK_LEFT: return ImGuiKey_LeftArrow;
+		case SDLK_RIGHT: return ImGuiKey_RightArrow;
+		case SDLK_UP: return ImGuiKey_UpArrow;
+		case SDLK_DOWN: return ImGuiKey_DownArrow;
+		case SDLK_PAGEUP: return ImGuiKey_PageUp;
+		case SDLK_PAGEDOWN: return ImGuiKey_PageDown;
+		case SDLK_HOME: return ImGuiKey_Home;
+		case SDLK_END: return ImGuiKey_End;
+		case SDLK_INSERT: return ImGuiKey_Insert;
+		case SDLK_DELETE: return ImGuiKey_Delete;
+		case SDLK_BACKSPACE: return ImGuiKey_Backspace;
+		case SDLK_SPACE: return ImGuiKey_Space;
+		case SDLK_RETURN: return ImGuiKey_Enter;
+		case SDLK_ESCAPE: return ImGuiKey_Escape;
+		case SDLK_QUOTE: return ImGuiKey_Apostrophe;
+		case SDLK_COMMA: return ImGuiKey_Comma;
+		case SDLK_MINUS: return ImGuiKey_Minus;
+		case SDLK_PERIOD: return ImGuiKey_Period;
+		case SDLK_SLASH: return ImGuiKey_Slash;
+		case SDLK_SEMICOLON: return ImGuiKey_Semicolon;
+		case SDLK_PLUS: return ImGuiKey_Equal;
+		case SDLK_LEFTBRACKET: return ImGuiKey_LeftBracket;
+		case SDLK_BACKSLASH: return ImGuiKey_Backslash;
+		case SDLK_RIGHTBRACKET: return ImGuiKey_RightBracket;
+		case SDLK_BACKQUOTE: return ImGuiKey_GraveAccent;
+		case SDLK_CAPSLOCK: return ImGuiKey_CapsLock;
+		case SDLK_SCROLLLOCK: return ImGuiKey_ScrollLock;
+		case SDLK_NUMLOCKCLEAR: return ImGuiKey_NumLock;
+		case SDLK_PRINTSCREEN: return ImGuiKey_PrintScreen;
+		case SDLK_PAUSE: return ImGuiKey_Pause;
+		case SDLK_KP_0: return ImGuiKey_Keypad0;
+		case SDLK_KP_1: return ImGuiKey_Keypad1;
+		case SDLK_KP_2: return ImGuiKey_Keypad2;
+		case SDLK_KP_3: return ImGuiKey_Keypad3;
+		case SDLK_KP_4: return ImGuiKey_Keypad4;
+		case SDLK_KP_5: return ImGuiKey_Keypad5;
+		case SDLK_KP_6: return ImGuiKey_Keypad6;
+		case SDLK_KP_7: return ImGuiKey_Keypad7;
+		case SDLK_KP_8: return ImGuiKey_Keypad8;
+		case SDLK_KP_9: return ImGuiKey_Keypad9;
+		case SDLK_KP_PERIOD: return ImGuiKey_KeypadDecimal;
+		case SDLK_KP_DIVIDE: return ImGuiKey_KeypadDivide;
+		case SDLK_KP_MULTIPLY: return ImGuiKey_KeypadMultiply;
+		case SDLK_KP_MINUS: return ImGuiKey_KeypadSubtract;
+		case SDLK_KP_PLUS: return ImGuiKey_KeypadAdd;
+		case SDLK_KP_ENTER: return ImGuiKey_KeypadEnter;
+		case SDLK_LSHIFT: return ImGuiKey_LeftShift;
+		case SDLK_LCTRL: return ImGuiKey_LeftCtrl;
+		case SDLK_LALT: return ImGuiKey_LeftAlt;
+		case SDLK_LGUI: return ImGuiKey_LeftSuper;
+		case SDLK_RSHIFT: return ImGuiKey_RightShift;
+		case SDLK_RCTRL: return ImGuiKey_RightCtrl;
+		case SDLK_RALT: return ImGuiKey_RightAlt;
+		case SDLK_RGUI: return ImGuiKey_RightSuper;
+		case SDLK_MENU: return ImGuiKey_Menu;
 		case '0': return ImGuiKey_0;
 		case '1': return ImGuiKey_1;
 		case '2': return ImGuiKey_2;
@@ -124,85 +133,85 @@ namespace Core::Graphics
 		case '7': return ImGuiKey_7;
 		case '8': return ImGuiKey_8;
 		case '9': return ImGuiKey_9;
-		case 'A': return ImGuiKey_A;
-		case 'B': return ImGuiKey_B;
-		case 'C': return ImGuiKey_C;
-		case 'D': return ImGuiKey_D;
-		case 'E': return ImGuiKey_E;
-		case 'F': return ImGuiKey_F;
-		case 'G': return ImGuiKey_G;
-		case 'H': return ImGuiKey_H;
-		case 'I': return ImGuiKey_I;
-		case 'J': return ImGuiKey_J;
-		case 'K': return ImGuiKey_K;
-		case 'L': return ImGuiKey_L;
-		case 'M': return ImGuiKey_M;
-		case 'N': return ImGuiKey_N;
-		case 'O': return ImGuiKey_O;
-		case 'P': return ImGuiKey_P;
-		case 'Q': return ImGuiKey_Q;
-		case 'R': return ImGuiKey_R;
-		case 'S': return ImGuiKey_S;
-		case 'T': return ImGuiKey_T;
-		case 'U': return ImGuiKey_U;
-		case 'V': return ImGuiKey_V;
-		case 'W': return ImGuiKey_W;
-		case 'X': return ImGuiKey_X;
-		case 'Y': return ImGuiKey_Y;
-		case 'Z': return ImGuiKey_Z;
-		case VK_F1: return ImGuiKey_F1;
-		case VK_F2: return ImGuiKey_F2;
-		case VK_F3: return ImGuiKey_F3;
-		case VK_F4: return ImGuiKey_F4;
-		case VK_F5: return ImGuiKey_F5;
-		case VK_F6: return ImGuiKey_F6;
-		case VK_F7: return ImGuiKey_F7;
-		case VK_F8: return ImGuiKey_F8;
-		case VK_F9: return ImGuiKey_F9;
-		case VK_F10: return ImGuiKey_F10;
-		case VK_F11: return ImGuiKey_F11;
-		case VK_F12: return ImGuiKey_F12;
+		case 'a': return ImGuiKey_A;
+		case 'b': return ImGuiKey_B;
+		case 'c': return ImGuiKey_C;
+		case 'd': return ImGuiKey_D;
+		case 'e': return ImGuiKey_E;
+		case 'f': return ImGuiKey_F;
+		case 'g': return ImGuiKey_G;
+		case 'h': return ImGuiKey_H;
+		case 'i': return ImGuiKey_I;
+		case 'j': return ImGuiKey_J;
+		case 'k': return ImGuiKey_K;
+		case 'l': return ImGuiKey_L;
+		case 'm': return ImGuiKey_M;
+		case 'n': return ImGuiKey_N;
+		case 'o': return ImGuiKey_O;
+		case 'p': return ImGuiKey_P;
+		case 'q': return ImGuiKey_Q;
+		case 'r': return ImGuiKey_R;
+		case 's': return ImGuiKey_S;
+		case 't': return ImGuiKey_T;
+		case 'u': return ImGuiKey_U;
+		case 'v': return ImGuiKey_V;
+		case 'w': return ImGuiKey_W;
+		case 'x': return ImGuiKey_X;
+		case 'y': return ImGuiKey_Y;
+		case 'z': return ImGuiKey_Z;
+		case SDLK_F1: return ImGuiKey_F1;
+		case SDLK_F2: return ImGuiKey_F2;
+		case SDLK_F3: return ImGuiKey_F3;
+		case SDLK_F4: return ImGuiKey_F4;
+		case SDLK_F5: return ImGuiKey_F5;
+		case SDLK_F6: return ImGuiKey_F6;
+		case SDLK_F7: return ImGuiKey_F7;
+		case SDLK_F8: return ImGuiKey_F8;
+		case SDLK_F9: return ImGuiKey_F9;
+		case SDLK_F10: return ImGuiKey_F10;
+		case SDLK_F11: return ImGuiKey_F11;
+		case SDLK_F12: return ImGuiKey_F12;
 		default: return ImGuiKey_None;
 		}
 	}
 	static void updateKeyModifiers()
 	{
 		ImGuiIO& io = ImGui::GetIO();
-		io.AddKeyEvent(ImGuiMod_Ctrl, isVkDown(VK_CONTROL));
-		io.AddKeyEvent(ImGuiMod_Shift, isVkDown(VK_SHIFT));
-		io.AddKeyEvent(ImGuiMod_Alt, isVkDown(VK_MENU));
-		io.AddKeyEvent(ImGuiMod_Super, isVkDown(VK_APPS));
+		io.AddKeyEvent(ImGuiMod_Ctrl, isKeyDown(SDLK_LCTRL) || isKeyDown(SDLK_RCTRL));
+		io.AddKeyEvent(ImGuiMod_Shift, isKeyDown(SDLK_LSHIFT) || isKeyDown(SDLK_RSHIFT));
+		io.AddKeyEvent(ImGuiMod_Alt, isKeyDown(SDLK_LALT) || isKeyDown(SDLK_RALT));
+		io.AddKeyEvent(ImGuiMod_Super, isKeyDown(SDLK_LGUI) || isKeyDown(SDLK_RGUI));
 	}
 	
-	inline WPARAM convertImVec2ToWPARAM(ImVec2 const& v)
-	{
-		return ((int16_t)v.x) & (((int32_t)(int16_t)v.y) << 16);
-	}
-	inline ImVec2 convertWPARAMToImVec2(WPARAM const v)
-	{
-		return ImVec2((float)(int16_t)(v & 0xFFFFu), (float)(int16_t)((v & 0xFFFF0000u) >> 16));
-	}
-	static void updateIME(ImGuiViewport* viewport, ImGuiPlatformImeData* data)
-	{
-		if (viewport->PlatformHandleRaw)
-		{
-			PostMessageW((HWND)viewport->PlatformHandleRaw, MSG_SET_IME_POS, convertImVec2ToWPARAM(data->InputPos), 0);
-		}
-	}
+	// inline WPARAM convertImVec2ToWPARAM(ImVec2 const& v)
+	// {
+	// 	return ((int16_t)v.x) & (((int32_t)(int16_t)v.y) << 16);
+	// }
+	// inline ImVec2 convertWPARAMToImVec2(WPARAM const v)
+	// {
+	// 	return ImVec2((float)(int16_t)(v & 0xFFFFu), (float)(int16_t)((v & 0xFFFF0000u) >> 16));
+	// }
+	// static void updateIME(ImGuiViewport* viewport, ImGuiPlatformImeData* data)
+	// {
+	// 	if (viewport->PlatformHandleRaw)
+	// 	{
+	// 		PostMessageW((HWND)viewport->PlatformHandleRaw, MSG_SET_IME_POS, convertImVec2ToWPARAM(data->InputPos), 0);
+	// 	}
+	// }
 
 	bool DearImGui_Backend::createWindowResources()
 	{
-		if (!QueryPerformanceFrequency(&m_freq))
-			return false;
-		if (!QueryPerformanceCounter(&m_time))
-			return false;
+		// if (!QueryPerformanceFrequency(&m_freq))
+		// 	return false;
+		// if (!QueryPerformanceCounter(&m_time))
+		// 	return false;
 
 		ImGuiIO& io = ImGui::GetIO();
 		assert(io.BackendPlatformUserData == nullptr);
 		io.BackendPlatformName = "LuaSTG Sub";
 		io.BackendFlags |= ImGuiBackendFlags_HasMouseCursors;
 		io.BackendPlatformUserData = (void*)this;
-		io.SetPlatformImeDataFn = &updateIME;
+		// io.SetPlatformImeDataFn = &updateIME;
 
 		ImGui::GetMainViewport()->PlatformHandleRaw = (void*)m_window->GetWindow();
 
@@ -217,7 +226,7 @@ namespace Core::Graphics
 	}
 	void DearImGui_Backend::onWindowDestroy()
 	{
-		m_mouse_window = NULL;
+		// m_mouse_window = NULL;
 		m_is_mouse_tracked = false;
 		m_mouse_button_down = 0;
 		m_last_cursor = (int)ImGuiMouseCursor_Arrow;

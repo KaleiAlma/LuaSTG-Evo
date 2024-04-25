@@ -20,27 +20,27 @@ int main(int argc, char *argv[])
 #endif
 	Platform::CommandLineArguments::Get().Update(argc, argv);
 
-	[[maybe_unused]] Platform::ApplicationSingleInstance single_instance(LUASTG_INFO);
-	Core::InitializeConfigure cfg;
-	if (cfg.loadFromFile("config.json")) {
-		if (cfg.single_application_instance && !cfg.application_instance_id.empty()) {
-			single_instance.Initialize(cfg.application_instance_id);
-		}
-	}
+	// [[maybe_unused]] Platform::ApplicationSingleInstance single_instance(LUASTG_INFO);
+	// Core::InitializeConfigure cfg;
+	// if (cfg.loadFromFile("config.json")) {
+	// 	if (cfg.single_application_instance && !cfg.application_instance_id.empty()) {
+	// 		single_instance.Initialize(cfg.application_instance_id);
+	// 	}
+	// }
 
-	if (!LuaSTG::CheckUserRuntime())
-	{
-		return EXIT_FAILURE;
-	}
+	// if (!LuaSTG::CheckUserRuntime())
+	// {
+	// 	return EXIT_FAILURE;
+	// }
 
-	LuaSTGPlus::CoInitializeScope com_runtime;
-	if (!com_runtime())
-	{
-		Platform::MessageBox::Error(LUASTG_INFO,
-			"Engine Initialization Failed!\n"
-			"Failed to initialize COM runtime, try relaunching.");
-		return EXIT_FAILURE;
-	}
+	// LuaSTGPlus::CoInitializeScope com_runtime;
+	// if (!com_runtime())
+	// {
+	// 	Platform::MessageBox::Error(LUASTG_INFO,
+	// 		"Engine Initialization Failed!\n"
+	// 		"Failed to initialize COM runtime, try relaunching.");
+	// 	return EXIT_FAILURE;
+	// }
 
 	LuaSTG::Debugger::Logger::create();
 

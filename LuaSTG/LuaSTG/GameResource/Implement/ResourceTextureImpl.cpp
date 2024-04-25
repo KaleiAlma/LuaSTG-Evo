@@ -21,13 +21,13 @@ namespace LuaSTGPlus
 			}
 		}
 
-		if (m_enable_depthbuffer != !m_rt->DepthStencilBufferEnabled())
-		{
-			if (!m_rt->SetDepthStencilBufferEnable(m_enable_depthbuffer))
-			{
-				return false;
-			}
-		}
+		// if (m_enable_depthbuffer != !m_rt->DepthStencilBufferEnabled())
+		// {
+		// 	if (!m_rt->SetDepthStencilBufferEnable(m_enable_depthbuffer))
+		// 	{
+		// 		return false;
+		// 	}
+		// }
 
 		return true;
 	}
@@ -41,7 +41,7 @@ namespace LuaSTGPlus
 	{
 	}
 	// 渲染附件容器
-	ResourceTextureImpl::ResourceTextureImpl(const char* name, int w, int h, bool ds)
+	ResourceTextureImpl::ResourceTextureImpl(const char* name, int w, int h)
 		: ResourceBaseImpl(ResourceType::Texture, name)
 		, m_is_rendertarget(true)
 		, m_is_auto_resize(false)
@@ -54,7 +54,7 @@ namespace LuaSTGPlus
 		}
 	}
 	// 自动调整大小的渲染附件容器
-	ResourceTextureImpl::ResourceTextureImpl(const char* name, bool ds)
+	ResourceTextureImpl::ResourceTextureImpl(const char* name)
 		: ResourceBaseImpl(ResourceType::Texture, name)
 		, m_is_rendertarget(true)
 		, m_is_auto_resize(true)

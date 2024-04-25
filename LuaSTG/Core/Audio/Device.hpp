@@ -6,10 +6,10 @@ namespace Core::Audio
 {
 	enum class MixChannel
 	{
-		Direct,      // 直接输出到设备，不能用于 IDevice::setMixChannelVolume
-		SoundEffect, // 属于音效通道
-		Music,       // 属于背景音乐通道
-		Video,       // TODO: 用于视频
+		Direct,      // Output directly to the device, cannot be used for IDevice::setMixChannelVolume
+		SoundEffect, // Belongs to the SFX channel
+		Music,       // Belongs to the BGM channel
+		Video,       // TODO: for video
 
 		_COUNT,
 	};
@@ -37,6 +37,8 @@ namespace Core::Audio
 		virtual void updateFFT() = 0;
 		virtual uint32_t getFFTSize() = 0;
 		virtual float* getFFT() = 0;
+
+		// virtual IDecoder* getDecoder() = 0;
 	};
 
 	struct IAudioDevice : public IObject
@@ -51,8 +53,8 @@ namespace Core::Audio
 		virtual void setMixChannelVolume(MixChannel ch, float v) = 0;
 		virtual float getMixChannelVolume(MixChannel ch) = 0;
 
-		virtual bool createAudioPlayer(IDecoder* p_decoder, IAudioPlayer** pp_player) = 0; // 全部解码到内存中
-		virtual bool createLoopAudioPlayer(IDecoder* p_decoder, IAudioPlayer** pp_player) = 0; // 全部解码到内存中
-		virtual bool createStreamAudioPlayer(IDecoder* p_decoder, IAudioPlayer** pp_player) = 0; // 播放时才逐步解码
+		virtual bool createAudioPlayer(IDecoder* p_decoder, IAudioPlayer** pp_player) = 0; // Decode all into memory
+		virtual bool createLoopAudioPlayer(IDecoder* p_decoder, IAudioPlayer** pp_player) = 0; // Decode all into memory
+		virtual bool createStreamAudioPlayer(IDecoder* p_decoder, IAudioPlayer** pp_player) = 0; // Decode during playback
 	};
 }

@@ -17,6 +17,7 @@ function(luastg_target_common_options __TARGET__)
             )
         endif()
     endif()
+
     set_target_properties(${__TARGET__} PROPERTIES
         C_STANDARD 17
         C_STANDARD_REQUIRED ON
@@ -27,6 +28,14 @@ function(luastg_target_common_options __TARGET__)
         _UNICODE
         UNICODE
     )
+    if(NOT WIN32)
+        target_compile_definitions(${__TARGET__} PUBLIC
+            _FILE_OFFSET_BITS=64
+        )
+        target_compile_options(${__TARGET__} PRIVATE
+            "$<$<CONFIG:Debug>:-fno-stack-protector>"
+        )
+    endif()
 endfunction()
 
 function(luastg_target_common_options2 __TARGET__)

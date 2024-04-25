@@ -295,7 +295,7 @@ layout(index = 1) subroutine(Fog) vec4 fog_linear(vec4 color)
     float alpha = k1 * color.a + k * color.a * fog_color.a;
     float ka = k1 * (k1 + k * fog_color.a);
     float kb = k * alpha;
-    color = float4(ka * color.rgb + kb * fog_color.rgb, alpha);
+    color = vec4(ka * color.rgb + kb * fog_color.rgb, alpha);
     return color;
 }
 
@@ -307,7 +307,7 @@ layout(index = 2) subroutine(Fog) vec4 fog_exp(vec4 color)
     float alpha = k1 * color.a + k * color.a * fog_color.a;
     float ka = k1 * (k1 + k * fog_color.a);
     float kb = k * alpha;
-    color = float4(ka * color.rgb + kb * fog_color.rgb, alpha);
+    color = vec4(ka * color.rgb + kb * fog_color.rgb, alpha);
     return color;
 }
 
@@ -319,7 +319,7 @@ layout(index = 3) subroutine(Fog) vec4 fog_exp2(vec4 color)
     float alpha = k1 * color.a + k * color.a * fog_color.a;
     float ka = k1 * (k1 + k * fog_color.a);
     float kb = k * alpha;
-    color = float4(ka * color.rgb + kb * fog_color.rgb, alpha);
+    color = vec4(ka * color.rgb + kb * fog_color.rgb, alpha);
     return color;
 }
 
@@ -389,9 +389,9 @@ layout(binding = 1) uniform world_buffer
 };
 
 layout(location = 0) in vec3 pos;
-layout(location = 1) in vec3 norm;
+layout(location = 1) in vec2 uv;
 layout(location = 2) in vec4 col;
-layout(location = 3) in vec2 uv;
+layout(location = 3) in vec3 norm;
 
 layout(location = 0) out vec4 pos_out;
 layout(location = 1) out vec4 wpos_out;
@@ -404,7 +404,7 @@ void main()
     vec4 wpos = world * vec4(pos, 1.0));
     pos_out = view_proj * wpos;
     wpos_out = wpos;
-    norm_out = norm_world * float4(norm, 0.0); // no move
+    norm_out = norm_world * vec4(norm, 0.0); // no move
     col_out = col;
     uv_out = uv;
 };

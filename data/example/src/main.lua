@@ -195,9 +195,11 @@ function GameInit()
     lstg.SetImageState("player-rect", "", lstg.Color(255, 64, 64, 255))
     lstg.LoadImage("bullet-rect", "white", 0, 0, 16, 16)
     lstg.SetImageState("bullet-rect", "", lstg.Color(96, 0, 0, 0))
-    if not lstg.LoadTTF("Sans", "C:/Windows/Fonts/msyh.ttc", 48, 48) then
-        lstg.LoadTTF("Sans", "C:/Windows/Fonts/msyh.ttf", 48, 48) -- Windows 7
-    end
+    -- if not lstg.LoadTTF("Sans", "C:/Windows/Fonts/msyh.ttc", 48, 48) then
+    --     lstg.LoadTTF("Sans", "C:/Windows/Fonts/msyh.ttf", 48, 48) -- Windows 7
+    -- end
+    lstg.LoadTTF("Sans", "res/msyh.ttc", 48, 48)
+
     buildGameObjectScene()
 end
 function GameExit()

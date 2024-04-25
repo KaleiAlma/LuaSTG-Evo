@@ -57,7 +57,7 @@ namespace LuaSTGPlus
 		Core::ScopeObject<IResourceParticle> m_Res;
 		ParticleSystemResourceInfo m_Info;
 		std::array<hgeParticle, LPARTICLE_MAXCNT> m_ParticlePool;
-		random::xoshiro128p m_Random;
+		UtilRandom::xoshiro128p m_Random;
 		uint32_t m_RandomSeed = 0;
 		Status m_iStatus = Status::Alive;  // 状态
 		Core::Vector2F m_vCenter;  // 中心

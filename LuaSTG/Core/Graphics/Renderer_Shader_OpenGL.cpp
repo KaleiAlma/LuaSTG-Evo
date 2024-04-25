@@ -118,7 +118,7 @@ layout(index = 9) subroutine(Fog) vec4 fog_linear(vec4 color)
     float alpha = k1 * color.a + k * color.a * fog_color.a;
     float ka = k1 * (k1 + k * fog_color.a);
     float kb = k * alpha;
-    color = float4(ka * color.rgb + kb * fog_color.rgb, alpha);
+    color = vec4(ka * color.rgb + kb * fog_color.rgb, alpha);
     return color;
 }
 
@@ -130,7 +130,7 @@ layout(index = 10) subroutine(Fog) vec4 fog_exp(vec4 color)
     float alpha = k1 * color.a + k * color.a * fog_color.a;
     float ka = k1 * (k1 + k * fog_color.a);
     float kb = k * alpha;
-    color = float4(ka * color.rgb + kb * fog_color.rgb, alpha);
+    color = vec4(ka * color.rgb + kb * fog_color.rgb, alpha);
     return color;
 }
 
@@ -142,7 +142,7 @@ layout(index = 11) subroutine(Fog) vec4 fog_exp2(vec4 color)
     float alpha = k1 * color.a + k * color.a * fog_color.a;
     float ka = k1 * (k1 + k * fog_color.a);
     float kb = k * alpha;
-    color = float4(ka * color.rgb + kb * fog_color.rgb, alpha);
+    color = vec4(ka * color.rgb + kb * fog_color.rgb, alpha);
     return color;
 }
 
@@ -189,7 +189,6 @@ void main()
     col_out = col;
 }
 )"};
-
 
 #define IDX(x) (size_t)static_cast<uint8_t>(x)
 

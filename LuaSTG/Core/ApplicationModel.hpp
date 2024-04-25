@@ -23,9 +23,9 @@ namespace Core
 
     struct IApplicationEventListener
     {
-        // [工作线程]
+        // [Work Thread]
         virtual bool onUpdate() { return true; }
-        // [工作线程]
+        // [Work Thread]
         virtual bool onRender() { return true; }
     };
 
@@ -50,26 +50,26 @@ namespace Core
 
     struct IApplicationModel : public IObject
     {
-        // [工作线程]
+        // [Work Thread]
         virtual IFrameRateController* getFrameRateController() = 0;
-        // [主线程|工作线程]
+        // [Main thread | Work Thread]
         virtual Graphics::IWindow* getWindow() = 0;
-        // [工作线程]
+        // [Work Thread]
         virtual Graphics::IDevice* getDevice() = 0;
-        // [工作线程]
+        // [Work Thread]
         virtual Graphics::ISwapChain* getSwapChain() = 0;
-        // [工作线程]
+        // [Work Thread]
         virtual Graphics::IRenderer* getRenderer() = 0;
-        // [工作线程]
+        // [Work Thread]
         virtual Audio::IAudioDevice* getAudioDevice() = 0;
-        // [工作线程]
+        // [Work Thread]
         virtual FrameStatistics getFrameStatistics() = 0;
-        // [工作线程]
+        // [Work Thread]
         virtual FrameRenderStatistics getFrameRenderStatistics() = 0;
 
-        // [主线程|工作线程]
+        // [Main thread | Work Thread]
         virtual void requestExit() = 0;
-        // [主线程]
+        // [Main thread ]
         virtual bool run() = 0;
 
         static bool create(ApplicationModelCreationParameters param, IApplicationEventListener* p_app, IApplicationModel** pp_model);

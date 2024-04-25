@@ -150,7 +150,8 @@ if(luasocket_ADDED)
     PUBLIC
         # lua51static
         libluajit
-        ws2_32.lib
+        "$<$<BOOL:${WIN32}>:ws2_32.lib>"
     )
+
     set_target_properties(luasocket PROPERTIES FOLDER lualib)
 endif()

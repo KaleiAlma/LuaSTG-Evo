@@ -81,11 +81,11 @@ namespace LuaSTGPlus
 		public:
 			static void Register(lua_State* L) noexcept;
 		};
-		class PlatformWrapper
-		{
-		public:
-			static void Register(lua_State* L) noexcept;
-		};
+		// class PlatformWrapper
+		// {
+		// public:
+		// 	static void Register(lua_State* L) noexcept;
+		// };
 		
 		class ColorWrapper
 		{
@@ -119,11 +119,11 @@ namespace LuaSTGPlus
 			static void CreateAndPush(lua_State* L);
 		};
 		
-		class DInputWrapper
-		{
-		public:
-			static void Register(lua_State* L) noexcept;
-		};
+		// class DInputWrapper
+		// {
+		// public:
+		// 	static void Register(lua_State* L) noexcept;
+		// };
 		
 		class ParticleSystemWrapper
 		{
