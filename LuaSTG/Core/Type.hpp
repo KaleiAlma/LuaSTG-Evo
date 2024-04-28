@@ -196,8 +196,8 @@ namespace Core
 		Color4B(uint8_t const r_, uint8_t const g_, uint8_t const b_) : b(b_), g(g_), r(r_), a(static_cast<uint8_t>(255u)) {}
 		Color4B(uint8_t const r_, uint8_t const g_, uint8_t const b_, uint8_t const a_) : b(b_), g(g_), r(r_), a(a_) {}
 
-		inline void color(uint32_t ARGB) noexcept { *((uint32_t*)(&b)) = ARGB; }
-		inline uint32_t color() const noexcept { return *((uint32_t*)(&b)); }
+		inline void color(uint32_t ARGB) noexcept { *((uint32_t*)(&r)) = ARGB; }
+		inline uint32_t color() const noexcept { return *((uint32_t*)(&r)); }
 
 		bool operator==(Color4B const& right) const noexcept
 		{

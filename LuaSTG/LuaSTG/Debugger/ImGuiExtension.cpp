@@ -1,9 +1,13 @@
 ﻿#include "ImGuiExtension.h"
-#include "backends/imgui_impl_sdl2.h"
+#include "Core/Graphics/SwapChain_OpenGL.hpp"
+#include "Core/Type.hpp"
+#include "SDL_events.h"
+// #include "backends/imgui_impl_sdl2.h"
+// #include "imgui_impl_opengl3_loader.h"
 #include <SDL2/SDL_video.h>
 
-#define WIN32_LEAN_AND_MEAN
-#define NOMINMAX
+// #define WIN32_LEAN_AND_MEAN
+// #define NOMINMAX
 // #include <d3d11.h>
 #include "glad/gl.h"
 // #include <Xinput.h>
@@ -24,6 +28,7 @@
 
 #include "AppFrame.h"
 #include "LuaBinding/LuaWrapper.hpp"
+#include "spdlog/spdlog.h"
 
 // lua imgui backend binding
 
@@ -720,6 +725,8 @@ namespace imgui
 {
     static bool g_ImGuiBindEngine = false;
     static bool g_ImGuiTexIDValid = false;
+    static GLuint g_GLFramebuffer = 0;
+    static GLuint g_GLTex = 0;
     
     class ImGuiBackendEventListener
         : public Core::Graphics::IDeviceEventListener
@@ -733,12 +740,12 @@ namespace imgui
         }
         void onWindowDestroy()
         {
-            // ImGui_ImplSDL2_Shutdown();
+            ImGui_ImplSDL2_Shutdown();
         }
         void onDeviceDestroy()
         {
             g_ImGuiTexIDValid = false;
-            ImGui_ImplSDL2_Shutdown();
+            ImGui_ImplOpenGL3_Shutdown();
         }
         void onDeviceCreate()
         {
@@ -746,8 +753,10 @@ namespace imgui
             // ID3D11Device* device = (ID3D11Device*)APP.GetAppModel()->getDevice()->getNativeHandle();
             // ID3D11DeviceContext* context = NULL;
             // device->GetImmediateContext(&context);
-            ImGui_ImplOpenGL3_Init();
             // context->Release();
+            ImGui_ImplOpenGL3_Init();
+            if (!((Core::Graphics::SwapChain_OpenGL*)LAPP.GetAppModel()->getSwapChain())->addFramebuffer(g_GLFramebuffer, g_GLTex))
+                spdlog::error("ImGui Framebuffer Failed");
         }
         void onWindowDpiChange()
         {
@@ -763,11 +772,33 @@ namespace imgui
         // }
         NativeWindowMessageResult onNativeWindowMessage(void* ev)
         {
-            // LRESULT lresult = ImGui_ImplSDL2_WndProcHandler((HWND)hwnd, msg, wparam, lparam);
-            // if (lresult)
-            //     return NativeWindowMessageResult(lresult, true);
-            // else
-            //     return {};
+            SDL_Event* e = (SDL_Event*)ev;
+            // Core::Vector2U c_size = LAPP.GetAppModel()->getSwapChain()->getCanvasSize();
+            // if (e->type == SDL_MOUSEMOTION) // scale mouse movements
+            // {
+            //     Core::Vector2U w_size = LAPP.GetAppModel()->getWindow()->getSize();
+            //     Core::Vector2F scale_dim = Core::Vector2F((float) w_size.x / c_size.x, (float) w_size.y / c_size.y);
+            //     float scale = std::min(scale_dim.x, scale_dim.y);
+            //     e->motion.x *= scale;
+            //     e->motion.y *= scale;
+            //     e->motion.xrel *= scale;
+            //     e->motion.yrel *= scale;
+            //     if (scale_dim.x > scale_dim.y)
+            //     {
+            //         e->motion.x += (w_size.x - scale * c_size.x) / 2;
+            //     }
+            //     else
+            //     {
+            //         e->motion.y += (w_size.y - scale * c_size.y) / 2;
+            //     }
+            // }
+
+            // if (e->type == SDL_WINDOWEVENT && e->window.event == SDL_WINDOWEVENT_SIZE_CHANGED)
+            // {
+            //     glBindTexture(GL_TEXTURE_2D, g_GLTex);
+            //     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, LAPP.GetAppModel()->getWindow()->getSize().x, LAPP.GetAppModel()->getWindow()->getSize().y, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
+            // }
+
             ImGui_ImplSDL2_ProcessEvent((SDL_Event*)ev);
             return {};
         }
@@ -1041,6 +1072,12 @@ namespace imgui
                 // dt.mouse_offset.y = mt.y;
                 // dt.mouse_scale.x = mt.z;
                 // dt.mouse_scale.y = mt.w;
+                // Core::Vector2U wsize = LAPP.GetAppModel()->getWindow()->getSize();
+                // Core::Vector2U csize = LAPP.GetAppModel()->getSwapChain()->getCanvasSize();
+                // ImGui_ImplSDL2_NewFrame((int)wsize.x, (int)wsize.y, (int)csize.x, (int)csize.y);
+
+                glBindTexture(GL_TEXTURE_2D, g_GLTex);
+                glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, LAPP.GetAppModel()->getWindow()->getSize().x, LAPP.GetAppModel()->getWindow()->getSize().y, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
                 ImGui_ImplSDL2_NewFrame();
             }
             g_ImGuiTexIDValid = true;
@@ -1060,8 +1097,12 @@ namespace imgui
             engine.GetAppModel()->getRenderer()->endBatch();
             
             // 绘制GUI数据
+            glBindFramebuffer(GL_DRAW_FRAMEBUFFER, g_GLFramebuffer);
+            glClearColor(0.f, 0.f, 0.f, 0.f);
+            glClear(GL_COLOR_BUFFER_BIT);
             ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-            
+            glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+
             // 重启渲染过程
             engine.GetAppModel()->getRenderer()->beginBatch();
         }

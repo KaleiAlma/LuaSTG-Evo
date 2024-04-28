@@ -1,6 +1,14 @@
 cmake_minimum_required(VERSION 3.22)
 project(LuaSTGSub LANGUAGES C CXX)
 
+if(CMAKE_SYSTEM MATCHES Windows)
+   message(STATUS "Target system is Windows")
+endif()
+
+if(CMAKE_HOST_SYSTEM MATCHES Linux)
+   message(STATUS "Build host runs Linux")
+endif() 
+
 #option(LINK_STEAM_API "Enable Steam API" OFF)
 #option(LUASTG_RESDIR "Custom configurations" "res")
 
@@ -26,7 +34,10 @@ include(cmake/packages.cpm.cmake)
 # include(cmake/packages.nuget.cmake)
 # include(cmake/packages.directx.cmake)
 include(cmake/packages.xiph.cmake)
-include(cmake/packages.z.cmake)
+if(WIN32) # install minizip-ng and zlib-ng packages if you're on linux
+    message(STATUS "win32")
+    include(cmake/packages.z.cmake)
+endif()
 add_subdirectory(external)
 include(cmake/packages.lua.cmake)
 # add_library(GeneratedShaderHeaders INTERFACE)

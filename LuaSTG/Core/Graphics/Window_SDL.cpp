@@ -3,6 +3,7 @@
 #include "Core/InitializeConfigure.hpp"
 #include "Core/Type.hpp"
 #include "Core/i18n.hpp"
+#include "SDL_events.h"
 #include "SDL_video.h"
 #include "glad/gl.h"
 #include "SDL.h"
@@ -17,6 +18,7 @@ namespace Core::Graphics
 		SDL_Event ev;
 		while (SDL_PollEvent(&ev))
 		{
+
 			dispatchEvent(EventType::NativeWindowMessage, EventData{ .event = ev});
 			switch (ev.type)
 			{
@@ -32,6 +34,8 @@ namespace Core::Graphics
 					{
 						EventData d = {};
 						d.window_size = Vector2I(ev.window.data1, ev.window.data2);
+						sdl_window_width = ev.window.data1;
+						sdl_window_height = ev.window.data2;
 						dispatchEvent(EventType::WindowSize, d);
 					}
 					break;
@@ -118,11 +122,16 @@ namespace Core::Graphics
 	{
 		// Create a window
 
+		SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
+		SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
+		SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 8);
+		SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, 8);
 		SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
 		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 5);
 		SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
-#ifdef _DEBUG
+#ifndef NDEBUG
+		spdlog::debug("GL DEBUGGER ENABLED");
 		SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG);
 #endif
 
@@ -144,7 +153,7 @@ namespace Core::Graphics
 		int version = gladLoadGL((GLADloadfunc) SDL_GL_GetProcAddress);
 		spdlog::info("[core] OpenGL {}.{}", GLAD_VERSION_MAJOR(version), GLAD_VERSION_MINOR(version));
 
-#ifdef _DEBUG
+#ifndef NDEBUG
 		glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
 	
 		//Set up the debug info callback
@@ -153,7 +162,7 @@ namespace Core::Graphics
 		//Set up the type of debug information we want to receive
 		uint32_t uiUnusedIDs = 0;
 		glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, &uiUnusedIDs, GL_TRUE); //Enable all
-		glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_NOTIFICATION, 0, NULL, GL_FALSE); //Disable notifications
+		// glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_NOTIFICATION, 0, NULL, GL_FALSE); //Disable notifications
 #endif
 
 		dispatchEvent(EventType::WindowCreate);

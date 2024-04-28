@@ -355,7 +355,9 @@ namespace Core::Graphics
 		}
 
 		glBindTexture(GL_TEXTURE_2D, opengl_texture2d);
+		glPixelStorei(GL_UNPACK_ROW_LENGTH, pitch);
 		glTexSubImage2D(GL_TEXTURE_2D, 0, rc.a.x, rc.a.y, rc.width(), rc.height(), GL_RGBA, GL_UNSIGNED_BYTE, data);
+		glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
 		return true;
 	}
 
@@ -391,6 +393,7 @@ namespace Core::Graphics
 			}
 			glBindTexture(GL_TEXTURE_2D, opengl_texture2d);
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_size.x, m_size.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, m_data->data());
+			glGenerateMipmap(GL_TEXTURE_2D);
 		}
 		else if (!source_path.empty())
 		{
@@ -420,9 +423,11 @@ namespace Core::Graphics
 			}
 			glBindTexture(GL_TEXTURE_2D, opengl_texture2d);
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_size.x, m_size.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+			glGenerateMipmap(GL_TEXTURE_2D);
 			// glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 			// glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST_MIPMAP_LINEAR);
 			// glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, 4.0f);
+			stbi_image_free(data);
 		}
 		else
 		{
@@ -433,6 +438,7 @@ namespace Core::Graphics
 			}
 			glBindTexture(GL_TEXTURE_2D, opengl_texture2d);
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_size.x, m_size.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
+			glGenerateMipmap(GL_TEXTURE_2D);
 			// glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 			// glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 			// glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, 4.0f);
@@ -500,19 +506,19 @@ namespace Core::Graphics
 			spdlog::error("[core] glGenFramebuffers failed");
 			return false;
 		}
-		glBindFramebuffer(GL_FRAMEBUFFER, opengl_framebuffer);
-		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, m_depthstencilbuffer->GetResource());
-		glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, m_texture->GetResource(), 0);
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, opengl_framebuffer);
+		glFramebufferRenderbuffer(GL_DRAW_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, m_depthstencilbuffer->GetResource());
+		glFramebufferTexture(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, m_texture->GetResource(), 0);
 		GLenum DrawBuffers[1] = {GL_COLOR_ATTACHMENT0};
 		glDrawBuffers(1, DrawBuffers);
 
-		if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+		if(glCheckFramebufferStatus(GL_DRAW_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
 		{
 			spdlog::error("[core] Failed to create rendertarget framebuffer");
 			return false;
 		}
 
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 
 		return true;
 	}

@@ -121,7 +121,7 @@ namespace Core::Graphics
 			DrawVertex(float const x_, float const y_, float const z_, float const u_, float const v_)
 				: x(x_), y(y_), z(z_), u(u_), v(v_), color(0xFFFFFFFFu) {}
 			DrawVertex(float const x_, float const y_, float const u_, float const v_)
-				: x(x_), y(y_), z(0.5f), u(u_), v(v_), color(0xFFFFFFFFu) {} // TODO: z = 0.0f or z = 0.5f ?
+				: x(x_), y(y_), z(0.f), u(u_), v(v_), color(0xFFFFFFFFu) {} // TODO: z = 0.0f or z = 0.5f ?
 		};
 		using DrawIndex = uint16_t;
 

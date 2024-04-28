@@ -22,6 +22,16 @@ CPMAddPackage(
     "SPDLOG_DISABLE_DEFAULT_LOGGER ON"
 )
 
+if(TARGET spdlog)
+    if(MSVC)
+        target_compile_options(spdlog PUBLIC
+            "/DSPDLOG_SHORT_LEVEL_NAMES={\"V\",\"D\",\"I\",\"W\",\"E\",\"F\",\"O\"}"
+        )
+    endif()
+    set_target_properties(spdlog PROPERTIES FOLDER external)
+endif()
+
+
 # g-truc glm
 # OpenGL math library
 
@@ -32,15 +42,6 @@ CPMAddPackage(
     OPTIONS
     "GLM_ENABLE_CXX_17 ON"
 )
-
-if(TARGET spdlog)
-    if(MSVC)
-        target_compile_options(spdlog PUBLIC
-            "/DSPDLOG_SHORT_LEVEL_NAMES={\"V\",\"D\",\"I\",\"W\",\"E\",\"F\",\"O\"}"
-        )
-    endif()
-    set_target_properties(spdlog PROPERTIES FOLDER external)
-endif()
 
 # pugixml
 # XML file support

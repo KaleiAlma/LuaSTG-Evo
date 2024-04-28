@@ -92,8 +92,10 @@ add_library(imgui_impl_sdl2 STATIC)
 luastg_target_common_options(imgui_impl_sdl2)
 luastg_target_more_warning(imgui_impl_sdl2)
 target_include_directories(imgui_impl_sdl2 PUBLIC
+    backend
     imgui/backends
     ${SDL2_INCLUDE_DIR}
+    # ${CMAKE_SOURCE_DIR}/external/glad/include
 )
 target_sources(imgui_impl_sdl2 PRIVATE
     imgui/backends/imgui_impl_sdl2.cpp

@@ -5,6 +5,7 @@
 // #include "Platform/DetectCPU.hpp"
 #include "TracyOpenGL.hpp"
 #include "SDL.h"
+#include "spdlog/spdlog.h"
 #include <chrono>
 #include <limits>
 #include <thread>
@@ -23,7 +24,7 @@ namespace Core
 	double FrameRateController::udateData(TimePoint curr)
 	{
 		// Update Values
-		double const fps = 1.0 / (curr - last_).count();
+		double const fps = 1.0 / Duration(curr - last_).count();
 		double const s = 1.0 / fps;
 		total_frame_ += 1;
 		total_time_ += s;
@@ -91,7 +92,7 @@ namespace Core
 		// 	return indexFPS(0);
 		// }
 
-		Duration const sleep_dur = Duration(wait_) - (Duration)(curr_ - last_);
+		Duration const sleep_dur = Duration(wait_ - 0.0001) - (Duration)(curr_ - last_);
 		if (sleep_dur > Duration::zero())
 		{
 			std::this_thread::sleep_for(sleep_dur);

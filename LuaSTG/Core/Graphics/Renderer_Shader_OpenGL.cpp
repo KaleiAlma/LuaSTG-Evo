@@ -183,6 +183,7 @@ void main()
     pos_world = world * pos_world;
 #endif
 
+	gl_Position = view_proj * pos_world;
     sxy_out = view_proj * pos_world;
     pos_out = pos_world;
     uv_out = uv;
@@ -355,11 +356,13 @@ namespace Core::Graphics
 
 	bool Renderer_OpenGL::createShaders()
 	{
-		GLuint frag, vert;
-		compileFragmentShaderMacro(default_fragment, sizeof(default_fragment), frag);
+		GLuint frag = 0, vert = 0;
 		compileVertexShaderMacro(default_vertex, sizeof(default_vertex), vert);
-		glAttachShader(_program, frag);
+		compileFragmentShaderMacro(default_fragment, sizeof(default_fragment), frag);
+
+		_program = glCreateProgram();
 		glAttachShader(_program, vert);
+		glAttachShader(_program, frag);
 		glLinkProgram(_program);
 
 		glDeleteShader(frag);

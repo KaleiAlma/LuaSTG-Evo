@@ -1,7 +1,7 @@
 ---@class test.Window
 window = {}
-window.width = 1920
-window.height = 1080
+window.width = 1280
+window.height = 720
 function window:init()
     lstg.ChangeVideoMode(self.width, self.height, true, true)
 end

@@ -1,15 +1,76 @@
 ﻿#include "Core/Graphics/SwapChain_OpenGL.hpp"
 #include "Core/Graphics/Device_OpenGL.hpp"
+#include "Core/Graphics/Renderer.hpp"
 #include "Core/Graphics/Window_SDL.hpp"
 #include "Core/Type.hpp"
 #include "Core/i18n.hpp"
 #include "glad/gl.h"
 #include "SDL2/SDL_video.h"
+#include "spdlog/spdlog.h"
 #include "stb_image_write.h"
 
 //#define _log(x) OutputDebugStringA(x "\n")
 #define _log(x)
 #define ReportError(x) spdlog::error("[core] ", x)
+
+// Default Fragment Shader
+const GLchar sc_frag[]{R"(
+#version 450 core
+layout(binding = 0) uniform sampler2D sampler0;
+
+layout(location = 0) in vec2 TexCoord;
+out vec4 FragColor;
+
+void main()
+{
+    FragColor = texture(sampler0, TexCoord);
+}
+)"};
+
+// Default Vertex Shader
+const GLchar sc_vert[]{R"(
+#version 450 core
+layout(location = 0) in vec2 pos;
+layout(location = 0) out vec2 TexCoord;
+
+void main()
+{
+    TexCoord = pos;// + 0.5;
+    // TexCoord.y = -TexCoord.y;
+
+    gl_Position = vec4(pos.x * 2 - 1, pos.y * 2 - 1, 0.0, 1.0);
+}
+)"};
+
+
+static bool compileShaderMacro(const GLchar* data, GLint size, GLenum shadertype, GLuint& shader)
+{
+	shader = glCreateShader(shadertype);
+	glShaderSource(shader, 1, &data, &size);
+	glCompileShader(shader);
+
+	GLint result;
+	glGetShaderiv(shader, GL_COMPILE_STATUS, &result);
+	if (result == GL_FALSE)
+	{
+		GLchar log[1024];
+		int32_t log_len;
+		glGetShaderInfoLog(shader, 1024, &log_len, log);
+		spdlog::error("[core] Failed to compile shader: {}", log);
+		glDeleteShader(shader);
+		return false;
+	}
+
+	return true;
+}
+static bool compileVertexShaderMacro(const GLchar* data, GLint size, GLuint& shader)
+{
+	return compileShaderMacro(data, size, GL_VERTEX_SHADER, shader);
+}
+static bool compileFragmentShaderMacro(const GLchar* data, GLint size, GLuint& shader)
+{
+	return compileShaderMacro(data, size, GL_FRAGMENT_SHADER, shader);
+}
 
 namespace Core::Graphics
 {
@@ -115,37 +176,34 @@ namespace Core::Graphics
 	{
 		_log("createSwapChainRenderTarget");
 
-		glGenRenderbuffers(1, &opengl_depthstencilbuffer);
-		if (opengl_depthstencilbuffer == 0) {
+		glGenRenderbuffers(1, &rdr_depthstencilbuffer);
+		if (rdr_depthstencilbuffer == 0) {
 			spdlog::error("[core] (SwapChain) glGenRenderbuffers failed");
 			return false;
 		}
-		glBindRenderbuffer(GL_RENDERBUFFER, opengl_depthstencilbuffer);
+		glBindRenderbuffer(GL_RENDERBUFFER, rdr_depthstencilbuffer);
 		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_STENCIL, m_canvas_size.x, m_canvas_size.y);
 
-		glGenTextures(1, &opengl_texture);
-		if (opengl_texture == 0) {
+		glGenTextures(1, &rdr_tex);
+		if (rdr_tex == 0) {
 			spdlog::error("[core] (SwapChain) glGenTextures failed");
 			return false;
 		}
-		glBindTexture(GL_TEXTURE_2D, opengl_texture);
+		glBindTexture(GL_TEXTURE_2D, rdr_tex);
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_canvas_size.x, m_canvas_size.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
 
-		glGenFramebuffers(1, &opengl_framebuffer);
-		if (opengl_framebuffer == 0) {
+		glGenFramebuffers(1, &rdr_fbo);
+		if (rdr_fbo == 0) {
 			spdlog::error("[core] (SwapChain) glGenFramebuffers failed");
 			return false;
 		}
-		glBindFramebuffer(GL_FRAMEBUFFER, opengl_framebuffer);
-		// glNamedFramebufferRenderbuffer(opengl_framebuffer, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, opengl_depthstencilbuffer);
-		// glNamedFramebufferTexture(opengl_framebuffer, GL_COLOR_ATTACHMENT0, opengl_texture, 0);
-		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, opengl_depthstencilbuffer);
-		glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, opengl_texture, 0);
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, rdr_fbo);
+		glFramebufferRenderbuffer(GL_DRAW_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rdr_depthstencilbuffer);
+		glFramebufferTexture(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, rdr_tex, 0);
 		GLenum DrawBuffers[1] = {GL_COLOR_ATTACHMENT0};
 		glDrawBuffers(1, DrawBuffers);
 
-		// GLenum status = glCheckNamedFramebufferStatus(opengl_framebuffer, GL_FRAMEBUFFER);
-		GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+		GLenum status = glCheckFramebufferStatus(GL_DRAW_FRAMEBUFFER);
 
 		if(status != GL_FRAMEBUFFER_COMPLETE)
 		{
@@ -154,15 +212,51 @@ namespace Core::Graphics
 			return false;
 		}
 
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		glDrawBuffers(1, DrawBuffers);
+
+		status = glCheckFramebufferStatus(GL_DRAW_FRAMEBUFFER);
+
+		if(status != GL_FRAMEBUFFER_COMPLETE)
+		{
+			spdlog::error("[core] Failed to create swapchain framebuffer: {}, {}", glGetError(), status);
+			assert(false);
+			return false;
+		}
+
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+	
+		// glGenVertexArrays(1, &rdr_vao);
+		// glGenBuffers(1, &rdr_vbo);
+		// glGenBuffers(1, &rdr_ibo);
+		glGenVertexArrays(1, &ex_vao);
+		glGenBuffers(1, &ex_vbo);
+		glGenBuffers(1, &ex_ibo);
+
+		GLuint frag, vert;
+		compileVertexShaderMacro(sc_vert, sizeof(sc_vert), vert);
+		compileFragmentShaderMacro(sc_frag, sizeof(sc_frag), frag);
+		prgm = glCreateProgram();
+		glAttachShader(prgm, vert);
+		glAttachShader(prgm, frag);
+		glLinkProgram(prgm);
+		glDeleteShader(vert);
+		glDeleteShader(frag);
+
+		glBindVertexArray(ex_vao);
+
+		glBindBuffer(GL_ARRAY_BUFFER, ex_vbo);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_data), &vertex_data, GL_STATIC_DRAW);
+
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ex_ibo);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(idx_data), idx_data, GL_STATIC_DRAW);
 		return true;
 	}
 	void SwapChain_OpenGL::destroySwapChainRenderTarget()
 	{
 		_log("destroySwapChainRenderTarget");
 
-		glDeleteFramebuffers(1, &opengl_framebuffer);
-		glDeleteRenderbuffers(1, &opengl_depthstencilbuffer);
+		glDeleteFramebuffers(1, &rdr_fbo);
+		glDeleteRenderbuffers(1, &rdr_depthstencilbuffer);
 	}
 	bool SwapChain_OpenGL::createRenderAttachment()
 	{
@@ -182,13 +276,13 @@ namespace Core::Graphics
 	{
 		//_log("applyRenderAttachment");
 
-		glBindFramebuffer(GL_FRAMEBUFFER, opengl_framebuffer);
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, rdr_fbo);
 	}
 	void SwapChain_OpenGL::clearRenderAttachment()
 	{
 		//_log("clearRenderAttachment");
 
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 	}
 
 	bool SwapChain_OpenGL::handleSwapChainWindowSize(Vector2I size)
@@ -199,9 +293,6 @@ namespace Core::Graphics
 		{
 			assert(false); return false;
 		}
-
-		// Because of differences between DirectX and OpenGL, this function is
-		// now effectively empty.
 
 		return true;
 	}
@@ -277,25 +368,81 @@ namespace Core::Graphics
 	}
 	bool SwapChain_OpenGL::present()
 	{
-		glBindFramebuffer(GL_READ_FRAMEBUFFER, opengl_framebuffer);
+		Vector2U wsize = m_window->getSize();
+		Core::Vector2F scale_dim = Core::Vector2F((float) wsize.x / m_canvas_size.x, (float) wsize.y / m_canvas_size.y);
+		float scale = std::min(scale_dim.x, scale_dim.y);
+		Vector2F d;
+
+		if (scale_dim.x > scale_dim.y)
+		{
+			d.x = (wsize.x - scale * m_canvas_size.x) / 2;
+			d.y = 0;
+		}
+		else
+		{
+			d.x = 0;
+			d.y = (wsize.y - scale * m_canvas_size.y) / 2;
+		}
+		
+		glBindFramebuffer(GL_READ_FRAMEBUFFER, rdr_fbo);
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 		glClearColor(0.f, 0.f, 0.f, 0.f);
 		glClearDepth(1.f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-		Vector2U wsize = m_window->getSize();
+		glViewport(0, 0, wsize.x, wsize.y);
+		glScissor(0, 0, wsize.x, wsize.y);
 
 		glBlitFramebuffer(
 			0, 0, m_canvas_size.x, m_canvas_size.y,
-			(wsize.x - m_canvas_size.x) / 2, (wsize.y - m_canvas_size.y) / 2,
-			(wsize.x + m_canvas_size.x) / 2, (wsize.y + m_canvas_size.y) / 2,
+			(wsize.x - scale * (m_canvas_size.x + d.x)) / 2, (wsize.y - scale * (m_canvas_size.y + d.y)) / 2,
+			(wsize.x + scale * (m_canvas_size.x + d.x)) / 2, (wsize.y + scale * (m_canvas_size.y + d.y)) / 2,
 			GL_COLOR_BUFFER_BIT, GL_LINEAR
 		);
 
+		if (!ex_fbos.empty())
+		{
+			glUseProgram(prgm);
+			glBindVertexArray(ex_vao);
+			glBindBuffer(GL_ARRAY_BUFFER, ex_vbo);
+			glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_data), &vertex_data, GL_STATIC_DRAW);
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ex_ibo);
+			glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(idx_data), idx_data, GL_STATIC_DRAW);
+			glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), nullptr);
+			glEnableVertexAttribArray(0);
+			glDisableVertexAttribArray(1);
+			glDisableVertexAttribArray(2);
+			glDisableVertexAttribArray(3);
+
+			glEnable(GL_BLEND);
+			glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);  
+
+			for (auto& tex : ex_fbos)
+			{
+				// glBindFramebuffer(GL_READ_FRAMEBUFFER, fbo);
+				
+
+				glActiveTexture(GL_TEXTURE0);
+				glBindTexture(GL_TEXTURE_2D, tex);
+
+
+				glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+			}
+		}
+
+		// glBlitFramebuffer(
+		// 	0, 0, wsize.x, wsize.y,
+		// 	0, 0, wsize.x, wsize.y,
+		// 	GL_COLOR_BUFFER_BIT, GL_LINEAR
+		// );
+
 		glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
-		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, opengl_framebuffer);
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, rdr_fbo);
 
 		SDL_GL_SwapWindow(reinterpret_cast<SDL_Window*>(m_window->getNativeHandle()));
+
+#ifndef NDEBUG
+		// spdlog::debug("GL Error: {}", glGetError());
+#endif
 
 		return true;
 	}
@@ -306,10 +453,47 @@ namespace Core::Graphics
 
 		std::unique_ptr<uint8_t> data(new uint8_t[m_canvas_size.x * m_canvas_size.y * 4]);
 
-		glBindTexture(GL_TEXTURE_2D, opengl_texture);
+		glBindTexture(GL_TEXTURE_2D, rdr_tex);
 		glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, data.get());
 
 		return (bool)stbi_write_png(spath.c_str(), m_canvas_size.x, m_canvas_size.y, 4, data.get(), m_canvas_size.x * 4);
+	}
+
+	bool SwapChain_OpenGL::addFramebuffer(GLuint &fbo, GLuint &tex)
+	{
+		glGenTextures(1, &tex);
+		if (tex == 0) {
+			spdlog::error("[core] (SwapChain, Extra) glGenTextures failed");
+			return false;
+		}
+		glBindTexture(GL_TEXTURE_2D, tex);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_window->getSize().x, m_window->getSize().y, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
+		// glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		// glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST); 
+		// glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		// glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		
+		glGenFramebuffers(1, &fbo);
+		if (fbo == 0) {
+			spdlog::error("[core] (SwapChain, Extra) glGenFramebuffers failed");
+			return false;
+		}
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fbo);
+		glFramebufferTexture(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, tex, 0);
+		GLenum DrawBuffers[1] = {GL_COLOR_ATTACHMENT0};
+		glDrawBuffers(1, DrawBuffers);
+
+		if(glCheckFramebufferStatus(GL_DRAW_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+		{
+			spdlog::error("[core] Failed to create SwapChain Extra framebuffer");
+			return false;
+		}
+
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+
+		ex_fbos.emplace_back(tex);
+
+		return true;
 	}
 
 	SwapChain_OpenGL::SwapChain_OpenGL(Window_SDL* p_window, Device_OpenGL* p_device)

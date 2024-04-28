@@ -67,6 +67,7 @@ namespace Core::Graphics
 	{
 		ScopeObject<Texture2D_OpenGL> texture;
 		uint16_t vertex_count = 0;
+		uint16_t vertex_offset = 0;
 		uint16_t index_count = 0;
 	};
 

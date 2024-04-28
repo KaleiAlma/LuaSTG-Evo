@@ -82,6 +82,7 @@ namespace Core::Graphics
         }
         glBindTexture(GL_TEXTURE_2D, default_image);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 64, 64, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels.data());
+        glGenerateMipmap(GL_TEXTURE_2D);
 
         return true;
     }
@@ -425,6 +426,7 @@ namespace Core::Graphics
 
             glBindTexture(GL_TEXTURE_2D, image[idx]);
             glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, img.width, img.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, img.image.data());
+            glGenerateMipmap(GL_TEXTURE_2D);
         }
 
         return true;

@@ -4,6 +4,7 @@
 #include "Core/Graphics/Window_SDL.hpp"
 #include "Core/Graphics/Device_OpenGL.hpp"
 #include "glad/gl.h"
+#include <vector>
 
 namespace Core::Graphics
 {
@@ -13,12 +14,31 @@ namespace Core::Graphics
 		, public IDeviceEventListener
 	{
 	private:
+		GLfloat const vertex_data[8] = {
+			-1.f, 1.f,
+			1.f, 1.f,
+			1.f, -1.f,
+			-1.f, -1.f,
+		};
+		GLint const idx_data[6] = { 0, 1, 2, 0, 2, 3 };
+
+	private:
 		ScopeObject<Window_SDL> m_window;
 		ScopeObject<Device_OpenGL> m_device;
 
-		GLuint opengl_framebuffer = 0;
-		GLuint opengl_depthstencilbuffer = 0;
-		GLuint opengl_texture = 0;
+		// GLuint sw_fbo = 0;
+		// GLuint sw_tex = 0;
+		GLuint rdr_fbo = 0;
+		GLuint rdr_depthstencilbuffer = 0;
+		GLuint rdr_tex = 0;
+		GLuint rdr_vao = 0;
+		GLuint rdr_vbo = 0;
+		GLuint rdr_ibo = 0;
+		std::vector<GLuint> ex_fbos;
+		GLuint ex_vao = 0;
+		GLuint ex_vbo = 0;
+		GLuint ex_ibo = 0;
+		GLuint prgm;
 
 		bool m_swap_chain_vsync{ false };
 
@@ -71,6 +91,8 @@ namespace Core::Graphics
 		bool present();
 
 		bool saveSnapshotToFile(StringView path);
+
+		bool addFramebuffer(GLuint &fbo, GLuint &tex);
 
 	public:
 		SwapChain_OpenGL(Window_SDL* p_window, Device_OpenGL* p_device);

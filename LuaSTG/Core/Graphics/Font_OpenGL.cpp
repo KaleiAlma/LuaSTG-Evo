@@ -452,6 +452,7 @@ namespace Core::Graphics
 				if (!t.texture->uploadPixelData(
 					RectU(t.dirty_l, t.dirty_t, t.dirty_r, t.dirty_b),
 					&t.image.pixel(t.dirty_l, t.dirty_t),
+					// &t.image.data,
 					t.image.pitch))
 				{
 					return false;

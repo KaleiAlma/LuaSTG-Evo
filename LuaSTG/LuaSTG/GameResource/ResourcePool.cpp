@@ -340,7 +340,6 @@ namespace LuaSTGPlus
         }
     
         Core::ScopeObject<Core::Graphics::ISprite> p_sprite;
-        spdlog::debug("sizeof(Sprite_OpenGL): {}", sizeof(Core::Graphics::Sprite_OpenGL));
         if (!Core::Graphics::ISprite::create(
             LAPP.GetAppModel()->getRenderer(),
             pTex->GetTexture(),

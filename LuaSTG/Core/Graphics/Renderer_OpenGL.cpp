@@ -9,6 +9,8 @@
 #include "glm/glm.hpp"
 #include "glm/ext/matrix_clip_space.hpp"
 #include "glm/ext/matrix_transform.hpp"
+#include "spdlog/spdlog.h"
+#include <cstdint>
 #include <optional>
 
 #define IDX(x) (size_t)static_cast<uint8_t>(x)
@@ -164,28 +166,57 @@ namespace Core::Graphics
 	{
 		index = (index == 0xFFFFFFFFu) ? _vi_buffer_index : index;
 		auto& vi = _vi_buffer[index];
-		
+
 		glBindVertexArray(_vao);
 		glBindBuffer(GL_ARRAY_BUFFER, vi.vertex_buffer);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vi.index_buffer);
+
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(DrawVertex), (const GLvoid *)0);
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(DrawVertex), (const GLvoid *)offsetof(DrawVertex, u));
+		glEnableVertexAttribArray(1);
+		glVertexAttribPointer(2, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(DrawVertex), (const GLvoid *)offsetof(DrawVertex, color));
+		glEnableVertexAttribArray(2);
 	}
 	bool Renderer_OpenGL::uploadVertexIndexBuffer(bool discard)
 	{
 		ZoneScoped;
 		TracyGpuZone("UploadVertexIndexBuffer");
+		glBindVertexArray(_vao);
 		auto& vi_ = _vi_buffer[_vi_buffer_index];
+		// glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
 		// copy vertex data
 		if (_draw_list.vertex.size > 0)
 		{
 			glBindBuffer(GL_ARRAY_BUFFER, vi_.vertex_buffer);
-			glBufferData(GL_ARRAY_BUFFER, _draw_list.vertex.size * sizeof(DrawVertex), _draw_list.vertex.data, GL_STATIC_DRAW);
+			// if (discard)
+			// {
+			// 	GLubyte clear = 0;
+			// 	glClearBufferData(GL_ARRAY_BUFFER, GL_R8, GL_R8, GL_UNSIGNED_BYTE, &clear);
+			// }
+			// glBufferSubData(GL_ARRAY_BUFFER, vi_.vertex_offset, _draw_list.vertex.size * sizeof(DrawVertex), _draw_list.vertex.data);
+			void* map = glMapBufferRange(GL_ARRAY_BUFFER, vi_.vertex_offset, _draw_list.vertex.size * sizeof(DrawVertex), GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT);
+			// std::memcpy((DrawVertex*)map + vi_.vertex_offset, _draw_list.vertex.data, _draw_list.vertex.size * sizeof(DrawVertex));
+			std::memcpy((DrawVertex*)map, _draw_list.vertex.data, _draw_list.vertex.size * sizeof(DrawVertex));
+			glUnmapBuffer(GL_ARRAY_BUFFER);
 		}
 		// copy index data
 		if (_draw_list.index.size > 0)
 		{
 			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vi_.index_buffer);
-			glBufferData(GL_ELEMENT_ARRAY_BUFFER, _draw_list.index.size * sizeof(DrawIndex), _draw_list.index.data, GL_STATIC_DRAW);
+			// if (discard)
+			// {
+			// 	GLubyte clear = 0;
+			// 	glClearBufferData(GL_ELEMENT_ARRAY_BUFFER, GL_R8, GL_R8, GL_UNSIGNED_BYTE, &clear);
+			// }
+			// glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, vi_.index_offset, _draw_list.index.size * sizeof(DrawIndex), _draw_list.index.data);
+			
+			void* map = glMapBufferRange(GL_ELEMENT_ARRAY_BUFFER, vi_.index_offset, _draw_list.index.size * sizeof(DrawIndex), GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT);
+			// std::memcpy((DrawIndex*)map + vi_.index_offset, _draw_list.index.data, _draw_list.index.size * sizeof(DrawIndex));
+			std::memcpy((DrawIndex*)map, _draw_list.index.data, _draw_list.index.size * sizeof(DrawIndex));
+			glUnmapBuffer(GL_ELEMENT_ARRAY_BUFFER);
 		}
+		
 		return true;
 	}
 	void Renderer_OpenGL::clearDrawList()
@@ -217,9 +248,13 @@ namespace Core::Graphics
 		{
 			glGenBuffers(1, &vi_.vertex_buffer);
 			if (vi_.vertex_buffer == 0) return false;
-			
+			glBindBuffer(GL_ARRAY_BUFFER, vi_.vertex_buffer);
+			glBufferStorage(GL_ARRAY_BUFFER, _draw_list.vertex.capacity * sizeof(DrawVertex), 0, GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT);
+
 			glGenBuffers(1, &vi_.index_buffer);
 			if (vi_.index_buffer == 0) return false;
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vi_.index_buffer);
+			glBufferStorage(GL_ELEMENT_ARRAY_BUFFER, _draw_list.index.capacity * sizeof(DrawIndex), 0, GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT);
 		}
 
 		glGenBuffers(1, &_vp_matrix_buffer);
@@ -302,14 +337,6 @@ namespace Core::Graphics
 
 		setViewport(_state_set.viewport);
 		setScissorRect(_state_set.scissor_rect);
-
-		glUseProgram(_program);
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(DrawVertex), (const GLvoid *)0);
-		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(DrawVertex), (const GLvoid *)offsetof(DrawVertex, u));
-		glEnableVertexAttribArray(1);
-		glVertexAttribPointer(2, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(DrawVertex), (const GLvoid *)offsetof(DrawVertex, color));
-		glEnableVertexAttribArray(2);
 
 		setVertexColorBlendState(_state_set.vertex_color_blend_state);
 		setTexture(_state_texture.get());
@@ -482,9 +509,9 @@ namespace Core::Graphics
 		if (_state_dirty || _state_set.texture_alpha_type != state)
 		{
 			_state_set.texture_alpha_type = state;
-			GLuint subroutines[2] = { (GLuint)(IDX(_state_set.vertex_color_blend_state) * 2 + IDX(state)), (GLuint)(IDX(_state_set.fog_state) + 8) };
-			glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 2, subroutines);
 		}
+		GLuint subroutines[2] = { (GLuint)(IDX(_state_set.vertex_color_blend_state) * 2 + IDX(state)), (GLuint)(IDX(_state_set.fog_state) + 8) };
+		glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 2, subroutines);
 	}
 	bool Renderer_OpenGL::batchFlush(bool discard)
 	{
@@ -494,6 +521,7 @@ namespace Core::Graphics
 			TracyGpuZone("BatchFlush");
 			// upload data
 			if (!uploadVertexIndexBufferFromDrawList()) return false;
+			glUseProgram(_program);
 			// draw
 			if (_draw_list.command.size > 0)
 			{
@@ -505,7 +533,7 @@ namespace Core::Graphics
 					{
 						bindTextureAlphaType(cmd_.texture.get());
 						bindTextureSamplerState(cmd_.texture.get());
-						glDrawElementsBaseVertex(GL_TRIANGLES, cmd_.index_count, GL_UNSIGNED_INT, 0, vi_.index_offset);
+						glDrawElementsBaseVertex(GL_TRIANGLES, cmd_.index_count, GL_UNSIGNED_SHORT, 0, vi_.index_offset);
 					}
 					vi_.vertex_offset += cmd_.vertex_count;
 					vi_.index_offset += cmd_.index_count;
@@ -582,17 +610,13 @@ namespace Core::Graphics
 	{
 		setVertexIndexBuffer();
 
-		GLuint mats[2] = {
-			_vp_matrix_buffer,
-			_world_matrix_buffer,
-		};
-		glBindBuffersBase(GL_UNIFORM_BUFFER, 0, 2, mats);
-
-		GLuint psdata[2] = {
-			_camera_pos_buffer,
-			_fog_data_buffer,
-		};
-		glBindBuffersBase(GL_UNIFORM_BUFFER, 2, 2, psdata);
+		// GLuint bufs[4] = {
+		glBindBufferBase(GL_UNIFORM_BUFFER, 0, _vp_matrix_buffer);
+		glBindBufferBase(GL_UNIFORM_BUFFER, 1, _world_matrix_buffer);
+		glBindBufferBase(GL_UNIFORM_BUFFER, 2, _camera_pos_buffer);
+		glBindBufferBase(GL_UNIFORM_BUFFER, 3, _fog_data_buffer);
+		// };
+		// glBindBuffersBase(GL_UNIFORM_BUFFER, 0, 4, bufs);
 
 		initState();
 
@@ -626,12 +650,14 @@ namespace Core::Graphics
 	void Renderer_OpenGL::clearDepthBuffer(float zvalue)
 	{
 		batchFlush();
+		glClearDepth(zvalue);
+
 		glClear(GL_DEPTH_BUFFER_BIT);
 	}
 	void Renderer_OpenGL::setRenderAttachment(IRenderTarget* p_rt)
 	{
 		batchFlush();
-		glBindFramebuffer(GL_FRAMEBUFFER, static_cast<RenderTarget_OpenGL*>(p_rt)->GetFramebuffer());
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, static_cast<RenderTarget_OpenGL*>(p_rt)->GetFramebuffer());
 	}
 
 	void Renderer_OpenGL::setOrtho(BoxF const& box)
@@ -1007,7 +1033,7 @@ namespace Core::Graphics
 		GLint w, h;
 		/* get current rendertarget size */ {
 			GLint rt = 0;
-			glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_NAME, &rt);
+			glGetFramebufferAttachmentParameteriv(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_NAME, &rt);
 			if (rt == 0)
 			{
 				spdlog::error("[core] glGetFrameBufferAttachmentParameteriv failed");
@@ -1157,7 +1183,7 @@ namespace Core::Graphics
 		GLint w, h;
 		/* get current rendertarget size */ {
 			GLint rt = 0;
-			glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_NAME, &rt);
+			glGetFramebufferAttachmentParameteriv(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_NAME, &rt);
 			if (rt == 0)
 			{
 				spdlog::error("[core] glGetFrameBufferAttachmentParameteriv failed");
