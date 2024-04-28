@@ -27,11 +27,11 @@ jobs:
         os: [ubuntu-latest, windows-latest]
         build_type: [Release]
         # c_compiler: [gcc, clang, cl]
-        c_compiler: [clang, msvc]
+        c_compiler: [clang, MSVC]
         include:
           - os: windows-latest
-            c_compiler: msvc
-            cpp_compiler: msvc
+            c_compiler: MSVC
+            cpp_compiler: MSVC
           # - os: ubuntu-latest
           #   c_compiler: gcc
           #   cpp_compiler: g++
@@ -44,7 +44,7 @@ jobs:
           - os: windows-latest
             c_compiler: clang
           - os: ubuntu-latest
-            c_compiler: msvc
+            c_compiler: MSVC
 
     steps:
     - run: echo ${{ runner.os }}
@@ -53,6 +53,13 @@ jobs:
       run: sudo apt install ninja-build    
     - if: ${{ runner.os == 'Windows' }}
       run: choco install ninja
+
+    - if: ${{ runner.os == 'Linux' }}
+      run: |
+        sudo apt-get install clang-format clang-tidy clang-tools clang clangd libc++-dev libc++1 libc++abi-dev libc++abi1 libclang-dev libclang1 liblldb-dev libllvm-ocaml-dev libomp-dev libomp5 lld lldb llvm-dev llvm-runtime llvm python3-clang 
+        # deb http://apt.llvm.org/jammy/ llvm-toolchain-jammy-18 main &&
+        # deb-src http://apt.llvm.org/jammy/ llvm-toolchain-jammy-18 main &&
+        
     
     - uses: actions/checkout@v4
       with:
