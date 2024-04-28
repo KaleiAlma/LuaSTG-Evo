@@ -62,7 +62,7 @@ jobs:
       id: cache-cpp
       uses: actions/cache@v4
       with:
-        path: ~/cpm-cache
+        path: ${{ github.workspace }}/build/cpm-cache
         key: ${{ runner.os }}-cpm-${{ hashFiles('**/') }}
         restore-keys: |
           ${{ runner.os }}-cpm-
