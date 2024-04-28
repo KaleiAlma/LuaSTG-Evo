@@ -103,7 +103,7 @@ target_sources(imgui_impl_sdl2 PRIVATE
 )
 target_link_libraries(imgui_impl_sdl2 PUBLIC
     imgui
-    SDL2static
+    SDL2-static
 )
 set_target_properties(imgui_impl_sdl2 PROPERTIES FOLDER external)
 

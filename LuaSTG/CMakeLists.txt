@@ -167,7 +167,7 @@ target_link_libraries(LuaSTG PRIVATE
     spdlog
     # utility
     PlatformAPI
-    SDL2
+    SDL2-static
     SDL2main
     Core
     xmath
