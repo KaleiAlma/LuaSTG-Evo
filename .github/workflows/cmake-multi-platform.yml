@@ -47,6 +47,9 @@ jobs:
             c_compiler: cl
 
     steps:
+    - name: Install ninja-build tool
+      uses: seanmiddleditch/gha-setup-ninja@v4
+
     - uses: actions/checkout@v4
       with:
         submodules: 'recursive'
