@@ -101,7 +101,7 @@ target_link_libraries(Core PUBLIC
     xmath
     glm
     # file
-    minizip-ng
+    minizip
     # text
     freetype
     # model
