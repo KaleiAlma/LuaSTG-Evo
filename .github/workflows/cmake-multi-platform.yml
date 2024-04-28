@@ -47,9 +47,8 @@ jobs:
             c_compiler: cl
 
     steps:
-    # - name: Install ninja-build tool
-      # uses: seanmiddleditch/gha-setup-ninja@v4
-    - uses: lukka/get-cmake@latest
+    - name: Install CMake and Ninja
+      uses: symbitic/install-cmake@master
 
     - uses: actions/checkout@v4
       with:
