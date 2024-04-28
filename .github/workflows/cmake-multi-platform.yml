@@ -41,8 +41,8 @@ jobs:
         exclude:
           # - os: windows-latest
           #   c_compiler: gcc
-          # - os: windows-latest
-          #   c_compiler: clang
+          - os: windows-latest
+            c_compiler: clang
           - os: ubuntu-20.04
             c_compiler: msvc
 
