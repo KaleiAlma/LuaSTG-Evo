@@ -24,7 +24,7 @@ jobs:
       #
       # To add more build types (Release, Debug, RelWithDebInfo, etc.) customize the build_type list.
       matrix:
-        os: [ubuntu-latest, windows-latest]
+        os: [ubuntu-20.04, windows-latest]
         build_type: [Release]
         # c_compiler: [gcc, clang, cl]
         c_compiler: [clang, cl]
@@ -32,10 +32,10 @@ jobs:
           - os: windows-latest
             c_compiler: cl
             cpp_compiler: cl
-          # - os: ubuntu-latest
+          # - os: ubuntu-20.04
           #   c_compiler: gcc
           #   cpp_compiler: g++
-          - os: ubuntu-latest
+          - os: ubuntu-20.04
             c_compiler: clang
             cpp_compiler: clang++
         exclude:
@@ -43,7 +43,7 @@ jobs:
           #   c_compiler: gcc
           - os: windows-latest
             c_compiler: clang
-          - os: ubuntu-latest
+          - os: ubuntu-20.04
             c_compiler: cl
 
     steps:
@@ -55,12 +55,16 @@ jobs:
       id: cache-cpp
       uses: actions/cache@v4
       with:
-        path: |
-          ${{ github.workspace }}/build/_deps
-        key: cache-cpp-all
+        path: ~/cpm-cache
+        key: ${{ runner.os }}-cpm-${{ hashFiles('**/') }}
         restore-keys: |
-          cache-cpp-all
-  
+          ${{ runner.os }}-cpm-
+    #   path: |
+    #     ${{ github.workspace }}/build/_deps
+    #   key: cache-cpp-all
+    #   restore-keys: |
+    #     cache-cpp-all
+
     - name: Set reusable strings
       # Turn repeated input strings (such as the build output directory) into step outputs. These step outputs can be used throughout the workflow file.
       id: strings
@@ -77,6 +81,8 @@ jobs:
         -DCMAKE_C_COMPILER=${{ matrix.c_compiler }}
         -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
         -S ${{ github.workspace }}
+        -G Ninja
+        -DCPM_SOURCE_CACHE=~/cpm-cache
 
     - name: Build
       # Build your program with the given configuration. Note that --config is needed because the default Windows generator is a multi-config generator (Visual Studio generator).
