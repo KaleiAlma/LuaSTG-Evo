@@ -47,10 +47,11 @@ jobs:
             c_compiler: cl
 
     steps:
-    - if: ${{ runner.os == 'ubuntu-20.04' }}
-      run: sudo apt install ninja-build
-    
-    - if: ${{ runner.os == 'windows-latest' }}
+    - run: echo ${{ runner.os }}
+
+    - if: ${{ runner.os == 'ubuntu' }}
+      run: sudo apt install ninja-build    
+    - if: ${{ runner.os == 'windows' }}
       run: choco install ninja
     
     - uses: actions/checkout@v4
