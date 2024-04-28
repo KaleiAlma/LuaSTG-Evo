@@ -7,10 +7,10 @@
 // #include "Platform/Monitor.hpp"
 // #include "Platform/WindowSizeMoveController.hpp"
 // #include "Platform/RuntimeLoader/DesktopWindowManager.hpp"
-#include <SDL2/SDL_mouse.h>
-#include <SDL2/SDL_rect.h>
-#include <SDL2/SDL_surface.h>
-#include <SDL2/SDL_video.h>
+#include <SDL_mouse.h>
+#include <SDL_rect.h>
+#include <SDL_surface.h>
+#include <SDL_video.h>
 #include <cstdint>
 
 namespace Core::Graphics

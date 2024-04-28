@@ -5,7 +5,7 @@
 // #include <windowsx.h>
 #include "SDL.h"
 #include "SDL_mouse.h"
-#include <SDL2/SDL_keyboard.h>
+#include <SDL_keyboard.h>
 
 namespace Core::Graphics
 {

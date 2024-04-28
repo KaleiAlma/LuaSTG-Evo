@@ -634,9 +634,15 @@ namespace UtilRandom
 		{
 			std::ostringstream ss;
 			ss << name()
+#ifdef WIN32
+				<< "-" << multiplier()
+				<< "-" << increment()
+				<< "-" << state_;
+#else
 				<< "-" << u128_tostring(multiplier())
 				<< "-" << u128_tostring(increment())
 				<< "-" << u128_tostring(state_);
+#endif
 			return ss.str();
 		}
 		bool deserialize(std::string const& data)
@@ -690,9 +696,15 @@ namespace UtilRandom
 		{
 			std::ostringstream ss;
 			ss << name()
+#ifdef WIN32
+				<< "-" << multiplier()
+				<< "-" << increment()
+				<< "-" << state_;
+#else
 				<< "-" << u128_tostring(multiplier())
 				<< "-" << u128_tostring(increment())
 				<< "-" << u128_tostring(state_);
+#endif
 			return ss.str();
 		}
 		bool deserialize(std::string const& data)

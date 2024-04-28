@@ -1014,31 +1014,31 @@ namespace Core::Graphics
 
 bool findSystemFont(std::string_view name, std::string& u8_path)
 {
-	std::wstring wide_name(utf8::to_wstring(name));
+	std::string sname(name);
 
 	// 打开注册表 HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Fonts
 	// 枚举符合要求的字体
 	HKEY tKey = NULL;
-	if (RegOpenKeyExW(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Fonts", 0, KEY_READ, &tKey) == ERROR_SUCCESS)
+	if (RegOpenKeyExA(HKEY_LOCAL_MACHINE, "SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Fonts", 0, KEY_READ, &tKey) == ERROR_SUCCESS)
 	{
 		// 枚举子键
 		int tIndex = 0;
-		WCHAR tKeyName[MAX_PATH]{};
+		CHAR tKeyName[MAX_PATH]{};
 		DWORD tKeyNameLen = MAX_PATH;
 		DWORD tKeyType = 0;
 		BYTE tKeyData[MAX_PATH]{};
 		DWORD tKeyDataLen = MAX_PATH;
 
-		while (RegEnumValueW(tKey, tIndex, tKeyName, &tKeyNameLen, NULL, &tKeyType, tKeyData, &tKeyDataLen) == ERROR_SUCCESS)
+		while (RegEnumValueA(tKey, tIndex, tKeyName, &tKeyNameLen, NULL, &tKeyType, tKeyData, &tKeyDataLen) == ERROR_SUCCESS)
 		{
 			// 检查是否为相应字体
 			if (tKeyType == REG_SZ)
 			{
-				WCHAR tFontName[MAX_PATH]{};
-				WCHAR tFontType[MAX_PATH]{};
-				if (2 == swscanf_s(tKeyName, L"%[^()] (%[^()])", tFontName, MAX_PATH, tFontType, MAX_PATH))
+				CHAR tFontName[MAX_PATH]{};
+				CHAR tFontType[MAX_PATH]{};
+				if (2 == sscanf_s(tKeyName, "%[^()] (%[^()])", tFontName, MAX_PATH, tFontType, MAX_PATH))
 				{
-					size_t tLen = wcslen(tFontName);
+					size_t tLen = strlen(tFontName);
 
 					// 去除scanf匹配的空格
 					if (!tLen)
@@ -1049,18 +1049,18 @@ bool findSystemFont(std::string_view name, std::string& u8_path)
 							tFontName[tLen - 1] = L'\0';
 					}
 					// 是否为需要的字体
-					if (tFontName == wide_name)
+					if (tFontName == sname)
 					{
 						RegCloseKey(tKey);
 
-						WCHAR tTextDir[MAX_PATH]{};
-						SHGetSpecialFolderPathW(GetDesktopWindow(), tTextDir, CSIDL_FONTS, 0);
-						std::wstring tPath = tTextDir;
-						tPath += L'\\';
-						tPath += (WCHAR*)tKeyData;
+						CHAR tTextDir[MAX_PATH]{};
+						SHGetSpecialFolderPathA(GetDesktopWindow(), tTextDir, CSIDL_FONTS, 0);
+						std::string tPath = tTextDir;
+						tPath += '\\';
+						tPath += (CHAR*)tKeyData;
 
 						// 返回路径
-						u8_path = utf8::to_string(tPath);
+						u8_path = tPath;
 						return true;
 					}
 				}

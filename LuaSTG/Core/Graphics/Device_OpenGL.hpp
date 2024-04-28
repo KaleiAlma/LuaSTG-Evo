@@ -3,7 +3,7 @@
 #include "Core/Graphics/Device.hpp"
 #include "Core/Type.hpp"
 #include "glad/gl.h"
-#include <SDL2/SDL_video.h>
+#include <SDL_video.h>
 #include <cstdint>
 #include <optional>
 // #include "Platform/RuntimeLoader/DXGI.hpp"

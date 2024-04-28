@@ -4,7 +4,7 @@
 #include "SDL_events.h"
 // #include "backends/imgui_impl_sdl2.h"
 // #include "imgui_impl_opengl3_loader.h"
-#include <SDL2/SDL_video.h>
+#include <SDL_video.h>
 
 // #define WIN32_LEAN_AND_MEAN
 // #define NOMINMAX

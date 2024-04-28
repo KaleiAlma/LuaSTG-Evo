@@ -1,6 +1,6 @@
 # LuaSTG configurer
 
-add_subdirectory(Shader)
+# add_subdirectory(Shader)
 include(Platform.cmake)
 include(Core.cmake)
 add_subdirectory(Configurer)
@@ -168,7 +168,7 @@ target_link_libraries(LuaSTG PRIVATE
     # utility
     PlatformAPI
     SDL2
-    # SDL2_ttf
+    SDL2main
     Core
     xmath
     # fmt

@@ -1,6 +1,6 @@
 # imgui
 
-find_package(Freetype REQUIRED)
+# find_package(Freetype REQUIRED)
 
 add_library(imgui STATIC)
 luastg_target_common_options(imgui)
@@ -86,7 +86,7 @@ set_target_properties(imgui_impl_opengl3 PROPERTIES FOLDER external)
 
 # imgui backend sdl2
 
-find_package(SDL2 REQUIRED)
+# find_package(SDL2 REQUIRED)
 
 add_library(imgui_impl_sdl2 STATIC)
 luastg_target_common_options(imgui_impl_sdl2)
@@ -94,8 +94,8 @@ luastg_target_more_warning(imgui_impl_sdl2)
 target_include_directories(imgui_impl_sdl2 PUBLIC
     backend
     imgui/backends
-    ${SDL2_INCLUDE_DIR}
-    # ${CMAKE_SOURCE_DIR}/external/glad/include
+    # ${SDL2_INCLUDE_DIR}
+    ${CMAKE_SOURCE_DIR}/external/sdl2/include/
 )
 target_sources(imgui_impl_sdl2 PRIVATE
     imgui/backends/imgui_impl_sdl2.cpp
@@ -103,7 +103,7 @@ target_sources(imgui_impl_sdl2 PRIVATE
 )
 target_link_libraries(imgui_impl_sdl2 PUBLIC
     imgui
-    SDL2
+    SDL2static
 )
 set_target_properties(imgui_impl_sdl2 PROPERTIES FOLDER external)
 

@@ -1,21 +1,37 @@
-# zlib
+set(ZSTD_TAG v1.5.6 CACHE STRING "")
 
-CPMAddPackage(
-    NAME zlib_ng # 必须用这个名称，用来适配一些SB库
-    VERSION 2.1.6
-    GITHUB_REPOSITORY zlib-ng/zlib-ng
-    GIT_TAG 2.1.6
-    # DOWNLOAD_ONLY YES
-)
+# zlib
+set(ZLIB_ENABLE_TESTS OFF CACHE BOOL "" FORCE)
+set(ZLIBNG_ENABLE_TESTS OFF CACHE BOOL "" FORCE)
+
+# CPMAddPackage(
+#     NAME zlib_ng # 必须用这个名称，用来适配一些SB库
+#     VERSION 2.1.6
+#     GITHUB_REPOSITORY zlib-ng/zlib-ng
+#     GIT_TAG 2.1.6
+#     OPTIONS
+#     # DOWNLOAD_ONLY YES
+# )
 
 # minizip
 # 读取 zip 文件
+
+set(ZLIB_REPOSITORY https://github.com/zlib-ng/zlib-ng CACHE STRING "")
+set(ZLIB_TAG 2.1.6 CACHE STRING "")
+set(ZLIBNG_FOUND TRUE CACHE BOOL "" FORCE)
+# set(SKIP_INSTALL_ALL ON CACHE BOOL "")
 
 CPMAddPackage(
     NAME minizip_ng
     VERSION 4.0.5
     GITHUB_REPOSITORY zlib-ng/minizip-ng
     GIT_TAG 4.0.5
+    OPTIONS
+    ZLIB_ENABLE_TESTS OFF
+    ZLIBNG_ENABLE_TESTS OFF
+    # ZLIB_REPOSITORY https://github.com/zlib-ng/zlib-ng
+    # ZLIB_TAG 2.1.6
+    MZ_FETCH_LIBS OFF
     # DOWNLOAD_ONLY YES
 )
 

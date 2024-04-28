@@ -30,7 +30,7 @@
 // #include <wrl/client.h>
 // #include <wrl/wrappers/corewrappers.h>
 
-#include <SDL2/SDL.h>
+#include "SDL.h"
 
 // VERSIONHELPERAPI
 // IsWindows10BuildOrGreater(DWORD build)

@@ -1,7 +1,7 @@
 #include "Shared.hpp"
 // #include "spdlog/spdlog.h"
-#include <SDL2/SDL_messagebox.h>
-#include <SDL2/SDL_video.h>
+#include <SDL_messagebox.h>
+#include <SDL_video.h>
 #include <cstdint>
 #include <sys/types.h>
 #include "MessageBox.hpp"

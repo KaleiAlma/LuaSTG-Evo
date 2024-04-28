@@ -51,9 +51,9 @@ namespace Core::Graphics
 		}
 	}
 	
-	static char * gp_cSeverity[] = {"High", "Medium", "Low", "Notification"};
-	static char * gp_cType[] = {"Error", "Deprecated", "Undefined", "Portability", "Performance", "Other"};
-	static char * gp_cSource[] = {"OpenGL", "OS", "GLSL Compiler", "3rd Party", "Application", "Other"};
+	const char * gp_cSeverity[] = {"High", "Medium", "Low", "Notification"};
+	const char * gp_cType[] = {"Error", "Deprecated", "Undefined", "Portability", "Performance", "Other"};
+	const char * gp_cSource[] = {"OpenGL", "OS", "GLSL Compiler", "3rd Party", "Application", "Other"};
 
 	void DebugCallback(uint32_t uiSource, uint32_t uiType, uint32_t uiID, uint32_t uiSeverity, int32_t iLength, const char * p_cMessage, void* p_UserParam)
 	{

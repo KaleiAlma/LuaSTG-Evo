@@ -86,7 +86,11 @@ namespace Core
 		{
 			if (!check_size_and_align(size, align)) return;
 			assert(align > sizeof(std::max_align_t)); // 如果你遇到了这个断言，说明你在做没必要的对齐分配
+#ifdef WIN32
+			m_data = (uint8_t*)_aligned_malloc(size, align);
+#else
 			m_data = (uint8_t*)aligned_alloc(size, align);
+#endif
 			if (m_data) m_size = size;
 		}
 		virtual ~DataObject()

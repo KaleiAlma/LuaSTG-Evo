@@ -115,9 +115,5 @@ target_link_libraries(Core PUBLIC
     # database
     nlohmann_json
 )
-if(LINUX)
-    find_package(Fontconfig REQUIRED)
-    target_link_libraries(Core PUBLIC fontconfig)
-endif()
 
 # add_dependencies(Core fuck_zlib_ng_and_minizip_ng)

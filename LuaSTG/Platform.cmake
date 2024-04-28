@@ -1,6 +1,6 @@
 # Windows Platform
 
-find_package(SDL2 REQUIRED)
+# find_package(SDL2 REQUIRED)
 
 set(PLATFORM_SOURCES
     Platform/Shared.hpp
@@ -59,7 +59,8 @@ luastg_target_common_options(PlatformAPI)
 luastg_target_more_warning(PlatformAPI)
 target_include_directories(PlatformAPI PUBLIC
     .
-    ${SDL2_INCLUDE_DIR}
+    # ${SDL2_INCLUDE_DIR}
+    ${CMAKE_SOURCE_DIR}/external/sdl2/include/
 )
 target_sources(PlatformAPI PRIVATE
     ${PLATFORM_SOURCES}

@@ -106,7 +106,7 @@ namespace Core::Graphics
             bool alpha_blend = false;
             bool alpha_cull = false;
             float alpha = 0.5f;
-            uint draw_count = 0;
+            uint32_t draw_count = 0;
             GLenum index_format = GL_UNSIGNED_SHORT;
             GLenum primitive_topology = GL_TRIANGLES;
             ModelBlock()
