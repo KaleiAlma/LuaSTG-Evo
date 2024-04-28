@@ -47,10 +47,9 @@ jobs:
             c_compiler: cl
 
     steps:
-    - name: Install ninja-build tool
-      uses: ashutoshvarma/setup-ninja@master
-      with:
-        version: 1.12.0
+    # - name: Install ninja-build tool
+      # uses: seanmiddleditch/gha-setup-ninja@v4
+    - uses: lukka/get-cmake@latest
 
     - uses: actions/checkout@v4
       with:
