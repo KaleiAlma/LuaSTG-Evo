@@ -47,9 +47,12 @@ jobs:
             c_compiler: cl
 
     steps:
-    - name: Install CMake and Ninja
-      uses: lukka/get-cmake@latest
-
+    - if: runner.os == "ubuntu-20.04"
+      run: sudo apt install ninja-build
+    
+    - if: runner.os == "windows-latest"
+      run: choco install ninja
+    
     - uses: actions/checkout@v4
       with:
         submodules: 'recursive'
