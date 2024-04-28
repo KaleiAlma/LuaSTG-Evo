@@ -48,7 +48,7 @@ jobs:
 
     steps:
     - name: Install CMake and Ninja
-      uses: symbitic/install-cmake@master
+      uses: lukka/get-cmake@latest
 
     - uses: actions/checkout@v4
       with:
