@@ -49,9 +49,9 @@ jobs:
     steps:
     - run: echo ${{ runner.os }}
 
-    - if: ${{ runner.os == 'ubuntu' }}
+    - if: ${{ runner.os == 'Linux' }}
       run: sudo apt install ninja-build    
-    - if: ${{ runner.os == 'windows' }}
+    - if: ${{ runner.os == 'Windows' }}
       run: choco install ninja
     
     - uses: actions/checkout@v4
