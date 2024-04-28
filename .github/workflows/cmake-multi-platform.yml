@@ -32,10 +32,10 @@ jobs:
           - os: windows-latest
             c_compiler: msvc
             cpp_compiler: msvc
-          # - os: ubuntu-20.04
+          # - os: ubuntu-latest
           #   c_compiler: gcc
           #   cpp_compiler: g++
-          - os: ubuntu-20.04
+          - os: ubuntu-latest
             c_compiler: clang
             cpp_compiler: clang++
         exclude:
@@ -43,7 +43,7 @@ jobs:
           #   c_compiler: gcc
           - os: windows-latest
             c_compiler: clang
-          - os: ubuntu-20.04
+          - os: ubuntu-latest
             c_compiler: msvc
 
     steps:
