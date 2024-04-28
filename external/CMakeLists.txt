@@ -206,6 +206,6 @@ target_sources(glad PRIVATE
 set(SDL2MIXER_MOD OFF)
 
 add_subdirectory(sdl2)
-# add_subdirectory(sdl_image)
-# add_subdirectory(sdl_mixer)
-# add_subdirectory(sdl_ttf)
+if(WIN32)
+    set_target_properties(SDL2-static PROPERTIES OUTPUT_NAME "SDL2-static$<$<CONFIG:Debug>:d>")
+endif()
