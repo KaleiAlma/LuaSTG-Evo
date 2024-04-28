@@ -49,10 +49,10 @@ jobs:
     steps:
     - run: echo ${{ runner.os }}
 
-    # - if: ${{ runner.os == 'Linux' }}
-    #   run: sudo apt install ninja-build    
-    # - if: ${{ runner.os == 'Windows' }}
-    #   run: choco install ninja
+    - if: ${{ runner.os == 'Linux' }}
+      run: sudo apt install ninja-build    
+    - if: ${{ runner.os == 'Windows' }}
+      run: choco install ninja
     
     - uses: actions/checkout@v4
       with:
@@ -89,7 +89,7 @@ jobs:
         -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
         -S ${{ github.workspace }}
         -DCPM_SOURCE_CACHE=${{ github.workspace }}/build/cpm-cache
-        # -G Ninja
+        -G Ninja
 
     - name: Build
       # Build your program with the given configuration. Note that --config is needed because the default Windows generator is a multi-config generator (Visual Studio generator).
