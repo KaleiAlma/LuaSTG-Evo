@@ -100,6 +100,8 @@ jobs:
     - name: Configure CMake (Windows)
       run: >
         cmake -B ${{ steps.strings.outputs.build-output-dir }}
+        -DCMAKE_CXX_COMPILER=MSVC
+        -DCMAKE_C_COMPILER=MSVC
         -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
         -S ${{ github.workspace }}
         -DCPM_SOURCE_CACHE=${{ github.workspace }}/build/cpm-cache
