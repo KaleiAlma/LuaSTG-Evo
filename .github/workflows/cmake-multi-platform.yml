@@ -52,7 +52,7 @@ jobs:
     - if: ${{ runner.os == 'Linux' }}
       run: sudo apt install ninja-build && sudo apt remove clang-14 && sudo bash -c "$(wget -O - https://apt.llvm.org/llvm.sh)"
     - if: ${{ runner.os == 'Windows' }}
-      run: choco install ninja
+      run: choco install ninja && call C:\Program Files\Microsoft Visual Studio\2022\Professional\VC\Auxiliary\Build\vcvars64.bat
 
     # - if: ${{ runner.os == 'Linux' }}
     #   uses: KyleMayes/install-llvm-action@v2
@@ -100,8 +100,8 @@ jobs:
     - name: Configure CMake (Windows)
       run: >
         cmake -B ${{ steps.strings.outputs.build-output-dir }}
-        -DCMAKE_CXX_COMPILER=MSVC
-        -DCMAKE_C_COMPILER=MSVC
+        -DCMAKE_CXX_COMPILER=cl
+        -DCMAKE_C_COMPILER=cl
         -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
         -S ${{ github.workspace }}
         -DCPM_SOURCE_CACHE=${{ github.workspace }}/build/cpm-cache
