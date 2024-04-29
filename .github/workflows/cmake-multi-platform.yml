@@ -50,7 +50,7 @@ jobs:
     - run: echo ${{ runner.os }}
 
     - if: ${{ runner.os == 'Linux' }}
-      run: sudo apt install ninja-build && sudo apt remove clang && sudo bash -c "$(wget -O - https://apt.llvm.org/llvm.sh)"
+      run: sudo apt install ninja-build && sudo apt remove clang-14 && sudo bash -c "$(wget -O - https://apt.llvm.org/llvm.sh)"
     - if: ${{ runner.os == 'Windows' }}
       run: choco install ninja
 
