@@ -50,14 +50,14 @@ jobs:
     - run: echo ${{ runner.os }}
 
     - if: ${{ runner.os == 'Linux' }}
-      run: sudo apt install ninja-build && sudo apt remove clang-14 && sudo bash -c "$(wget -O - https://apt.llvm.org/llvm.sh)"
+      run: sudo apt install ninja-build && sudo bash -c "$(wget -O - https://apt.llvm.org/llvm.sh)"
     - if: ${{ runner.os == 'Windows' }}
-      run: choco install ninja && C:\Windows\System32\cmd.exe /k "C:\Program^ Files\Microsoft^ Visual^ Studio\2022\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
+      run: choco install ninja
 
-    # - if: ${{ runner.os == 'Linux' }}
-    #   uses: KyleMayes/install-llvm-action@v2
-    #   with:
-    #     version: "17"
+    - if: ${{ runner.os == 'Windows' }}
+      shell: cmd
+      run: |
+          call "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
     
     - uses: actions/checkout@v4
       with:
