@@ -50,14 +50,14 @@ jobs:
     - run: echo ${{ runner.os }}
 
     - if: ${{ runner.os == 'Linux' }}
-      run: sudo apt install ninja-build    
+      run: sudo apt install ninja-build clang-18
     - if: ${{ runner.os == 'Windows' }}
       run: choco install ninja
 
-    - if: ${{ runner.os == 'Linux' }}
-      uses: KyleMayes/install-llvm-action@v2
-      with:
-        version: "17"
+    # - if: ${{ runner.os == 'Linux' }}
+    #   uses: KyleMayes/install-llvm-action@v2
+    #   with:
+    #     version: "17"
     
     - uses: actions/checkout@v4
       with:
