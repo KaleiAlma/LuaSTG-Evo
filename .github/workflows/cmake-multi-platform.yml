@@ -27,24 +27,24 @@ jobs:
         os: [ubuntu-latest, windows-latest]
         build_type: [Release]
         # c_compiler: [gcc, clang, cl]
-        c_compiler: [clang, MSVC]
-        include:
-          - os: windows-latest
-            c_compiler: MSVC
-            cpp_compiler: MSVC
+        # c_compiler: [clang, MSVC]
+        # include:
+          # - os: windows-latest
+          #   c_compiler: MSVC
+          #   cpp_compiler: MSVC
           # - os: ubuntu-latest
           #   c_compiler: gcc
           #   cpp_compiler: g++
-          - os: ubuntu-latest
-            c_compiler: clang
-            cpp_compiler: clang++
-        exclude:
+          # - os: ubuntu-latest
+          #   c_compiler: clang
+          #   cpp_compiler: clang++
+        # exclude:
           # - os: windows-latest
           #   c_compiler: gcc
-          - os: windows-latest
-            c_compiler: clang
-          - os: ubuntu-latest
-            c_compiler: MSVC
+          # - os: windows-latest
+          #   c_compiler: clang
+          # - os: ubuntu-latest
+          #   c_compiler: MSVC
 
     steps:
     - run: echo ${{ runner.os }}
@@ -55,11 +55,9 @@ jobs:
       run: choco install ninja
 
     - if: ${{ runner.os == 'Linux' }}
-      run: |
-        sudo apt-get install clang-format clang-tidy clang-tools clang clangd libc++-dev libc++1 libc++abi-dev libc++abi1 libclang-dev libclang1 liblldb-dev libllvm-ocaml-dev libomp-dev libomp5 lld lldb llvm-dev llvm-runtime llvm python3-clang 
-        # deb http://apt.llvm.org/jammy/ llvm-toolchain-jammy-18 main &&
-        # deb-src http://apt.llvm.org/jammy/ llvm-toolchain-jammy-18 main &&
-        
+      uses: KyleMayes/install-llvm-action@v2
+      with:
+        version: "18"
     
     - uses: actions/checkout@v4
       with:
@@ -86,17 +84,28 @@ jobs:
       run: |
         echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
       
-    - name: Configure CMake
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
       # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
+    - name: Configure CMake (Linux)
       run: >
         cmake -B ${{ steps.strings.outputs.build-output-dir }}
-        -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }}
-        -DCMAKE_C_COMPILER=${{ matrix.c_compiler }}
+        -DCMAKE_CXX_COMPILER=clang++
+        -DCMAKE_C_COMPILER=clang
         -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
         -S ${{ github.workspace }}
         -DCPM_SOURCE_CACHE=${{ github.workspace }}/build/cpm-cache
         -G Ninja
+      if: ${{ runner.os == 'Linux' }}
+
+    - name: Configure CMake (Windows)
+      run: >
+        cmake -B ${{ steps.strings.outputs.build-output-dir }}
+        -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
+        -S ${{ github.workspace }}
+        -DCPM_SOURCE_CACHE=${{ github.workspace }}/build/cpm-cache
+        -G Ninja
+      if: ${{ runner.os == 'Windows' }}
+        
 
     - name: Build
       # Build your program with the given configuration. Note that --config is needed because the default Windows generator is a multi-config generator (Visual Studio generator).
