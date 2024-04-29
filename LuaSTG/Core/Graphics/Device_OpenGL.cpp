@@ -355,7 +355,7 @@ namespace Core::Graphics
 		}
 
 		glBindTexture(GL_TEXTURE_2D, opengl_texture2d);
-		glPixelStorei(GL_UNPACK_ROW_LENGTH, pitch);
+		glPixelStorei(GL_UNPACK_ROW_LENGTH, pitch / 4);
 		glTexSubImage2D(GL_TEXTURE_2D, 0, rc.a.x, rc.a.y, rc.width(), rc.height(), GL_RGBA, GL_UNSIGNED_BYTE, data);
 		glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
 		return true;
