@@ -97,7 +97,7 @@ jobs:
     - name: Configure CMake (Windows)
       shell: cmd
       run: >
-        call "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvars64.bat" &&
+        call "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvars64.bat";
         cmake -B ${{ steps.strings.outputs.build-output-dir }}
         -DCMAKE_CXX_COMPILER=cl
         -DCMAKE_C_COMPILER=cl
