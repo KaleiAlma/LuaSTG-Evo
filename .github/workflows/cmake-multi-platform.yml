@@ -57,7 +57,7 @@ jobs:
     - if: ${{ runner.os == 'Linux' }}
       uses: KyleMayes/install-llvm-action@v2
       with:
-        version: "18"
+        version: "17"
     
     - uses: actions/checkout@v4
       with:
