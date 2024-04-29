@@ -100,8 +100,8 @@ jobs:
     - name: Configure CMake (Windows)
       run: >
         cmake -B ${{ steps.strings.outputs.build-output-dir }}
-        -DCMAKE_CXX_COMPILER=cl.exe
-        -DCMAKE_C_COMPILER=cl.exe
+        -DCMAKE_CXX_COMPILER="C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\19.38.33135.0\bin\Hostx64\x64\cl.exe"
+        -DCMAKE_C_COMPILER="C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\19.38.33135.0\bin\Hostx64\x64\cl.exe"
         -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
         -S ${{ github.workspace }}
         -DCPM_SOURCE_CACHE=${{ github.workspace }}/build/cpm-cache
