@@ -89,8 +89,8 @@ jobs:
     - name: Configure CMake (Linux)
       run: >
         cmake -B ${{ steps.strings.outputs.build-output-dir }}
-        -DCMAKE_CXX_COMPILER=clang++
-        -DCMAKE_C_COMPILER=clang
+        -DCMAKE_CXX_COMPILER=clang++-18
+        -DCMAKE_C_COMPILER=clang-18
         -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
         -S ${{ github.workspace }}
         -DCPM_SOURCE_CACHE=${{ github.workspace }}/build/cpm-cache
