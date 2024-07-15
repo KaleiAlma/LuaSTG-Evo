@@ -1,6 +1,7 @@
 ﻿#include "LuaBinding/LuaWrapper.hpp"
 #include "AppFrame.h"
 #include "SDL_keycode.h"
+#include "SDL_mouse.h"
 // #include "Platform/Keyboard.hpp"
 // #include "Platform/Mouse.hpp"
 
@@ -270,16 +271,16 @@ static int register_mouse(lua_State* L)
 	struct { char const* id; lua_Integer value; } mcode[] = {
 		{ "None", 0 },
 
-		{ "Primary", /* VK_LBUTTON */ 0x01 },
-		{ "Left", /* VK_LBUTTON */ 0x01 },
-		{ "Middle", /* VK_MBUTTON */ 0x04 },
-		{ "Secondary", /* VK_RBUTTON */ 0x02 },
-		{ "Right", /* VK_RBUTTON */ 0x02 },
+		{ "Primary", /* VK_LBUTTON */ SDL_BUTTON_LEFT },
+		{ "Left", /* VK_LBUTTON */ SDL_BUTTON_LEFT },
+		{ "Middle", /* VK_MBUTTON */ SDL_BUTTON_MIDDLE },
+		{ "Secondary", /* VK_RBUTTON */ SDL_BUTTON_RIGHT },
+		{ "Right", /* VK_RBUTTON */ SDL_BUTTON_RIGHT },
 
-		{ "X1", /* VK_XBUTTON1 */ 0x05 },
-		{ "XButton1", /* VK_XBUTTON1 */ 0x05 },
-		{ "X2", /* VK_XBUTTON2 */ 0x06 },
-		{ "XButton2", /* VK_XBUTTON2 */ 0x06 },
+		{ "X1", /* VK_XBUTTON1 */ SDL_BUTTON_X1 },
+		{ "XButton1", /* VK_XBUTTON1 */ SDL_BUTTON_X1 },
+		{ "X2", /* VK_XBUTTON2 */ SDL_BUTTON_X2 },
+		{ "XButton2", /* VK_XBUTTON2 */ SDL_BUTTON_X2 },
 	};
 	for (auto const& v : mcode)
 	{
@@ -305,7 +306,7 @@ void LuaSTGPlus::LuaWrapper::InputWrapper::Register(lua_State* L) noexcept
 		}
 		static int GetMouseState(lua_State* L) noexcept
 		{
-			// lua_pushboolean(L, LAPP.GetMouseState_legacy(luaL_checkinteger(L, 1)));
+			lua_pushboolean(L, LAPP.GetMouseState(luaL_checkinteger(L, 1) + 1));
 			return 1;
 		}
 		static int GetMousePosition(lua_State* L) noexcept

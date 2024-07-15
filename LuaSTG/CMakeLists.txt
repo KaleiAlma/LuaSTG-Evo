@@ -80,6 +80,8 @@ set(LUASTG_ENGINE_SOURCES
     LuaSTG/GameResource/Implement/ResourceModelImpl.hpp
     LuaSTG/GameResource/Implement/ResourceModelImpl.cpp
 
+    LuaSTG/LuaBinding/lua_particle.hpp
+    LuaSTG/LuaBinding/lua_particle.cpp
     # LuaSTG/LuaBinding/lua_dwrite.hpp
     # LuaSTG/LuaBinding/lua_dwrite.cpp
     LuaSTG/LuaBinding/lua_random.hpp
@@ -130,7 +132,13 @@ set(LUASTG_ENGINE_SOURCES
     LuaSTG/Utility/Utility.h
     LuaSTG/Utility/ScopeObject.cpp
     LuaSTG/Utility/xorshift.hpp
-    
+
+    LuaSTG/Particle/ParticleList.h
+    LuaSTG/Particle/Particle2D.cpp
+    LuaSTG/Particle/Particle2D.h
+    LuaSTG/Particle/Particle3D.cpp
+    LuaSTG/Particle/Particle3D.h
+
     LuaSTG/AppFrame.h
     LuaSTG/AppFrame.cpp
     LuaSTG/AppFrameFontRenderer.cpp
@@ -147,6 +155,13 @@ set(LUASTG_ENGINE_SOURCES
 
     # LuaSTG/LuaSTG.manifest
 )
+
+if(MSVC)
+    list(APPEND LUASTG_ENGINE_SOURCES
+        LuaSTG/LuaSTG.manifest
+    )
+endif()
+
 source_group(TREE ${CMAKE_CURRENT_LIST_DIR} FILES ${LUASTG_ENGINE_SOURCES})
 target_sources(LuaSTG PRIVATE
     ${LUASTG_ENGINE_SOURCES}

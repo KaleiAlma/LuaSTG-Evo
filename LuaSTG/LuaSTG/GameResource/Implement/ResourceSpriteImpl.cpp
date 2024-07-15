@@ -62,4 +62,11 @@ namespace LuaSTGPlus
 			Core::Vector3F(x3, y3, z3),
 			Core::Vector3F(x4, y4, z4));
 	}
+	void ResourceSpriteImpl::Render3D(float x, float y, float z, float rot_x, float rot_y, float rot_z, float hscale, float vscale)
+	{
+		LAPP.updateGraph2DBlendMode(GetBlendMode());
+		GetSprite()->draw(Core::Vector3F(x, y, z),
+			Core::Vector3F(rot_x, rot_y, rot_z),
+			Core::Vector2F(hscale, vscale));
+	}
 }

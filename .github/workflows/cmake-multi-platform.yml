@@ -24,7 +24,7 @@ jobs:
       #
       # To add more build types (Release, Debug, RelWithDebInfo, etc.) customize the build_type list.
       matrix:
-        os: [ubuntu-latest, windows-latest]
+        os: [ubuntu-latest, windows-latest, macos-13]
         build_type: [Release, Debug]
         # c_compiler: [gcc, clang, cl]
         # c_compiler: [clang, MSVC]
@@ -53,6 +53,8 @@ jobs:
       run: sudo apt install ninja-build && sudo bash -c "$(wget -O - https://apt.llvm.org/llvm.sh)"
     - if: ${{ runner.os == 'Windows' }}
       run: choco install ninja
+    - if: ${{ runner.os == 'macOS' }}
+      run: brew install ninja llvm@18
 
     # - if: ${{ runner.os == 'Windows' }}
     
@@ -110,7 +112,19 @@ jobs:
         &&
         cmake --build ${{ steps.strings.outputs.build-output-dir }} --config ${{ matrix.build_type }} --target LuaSTG
       if: ${{ runner.os == 'Windows' }}
-        
+
+    - name: Configure and Build with CMake (macOS)
+      run: >
+        cmake -B ${{ steps.strings.outputs.build-output-dir }}
+        -DCMAKE_CXX_COMPILER=$(brew --prefix llvm@18)/bin/clang++
+        -DCMAKE_C_COMPILER=$(brew --prefix llvm@18)/bin/clang
+        -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
+        -S ${{ github.workspace }}
+        -DCPM_SOURCE_CACHE=${{ github.workspace }}/build/cpm-cache
+        -G Ninja
+        &&
+        cmake --build ${{ steps.strings.outputs.build-output-dir }} --config ${{ matrix.build_type }} --target LuaSTG
+      if: ${{ runner.os == 'macOS' }}
 
     # - name: Build
     #   # Build your program with the given configuration. Note that --config is needed because the default Windows generator is a multi-config generator (Visual Studio generator).

@@ -183,7 +183,7 @@ void main()
     pos_world = world * pos_world;
 #endif
 
-	gl_Position = view_proj * pos_world;
+    gl_Position = view_proj * pos_world;
     sxy_out = view_proj * pos_world;
     pos_out = pos_world;
     uv_out = uv;
@@ -233,7 +233,7 @@ namespace Core::Graphics
 			if (is_path)
 			{
 				std::vector<uint8_t> src;
-				if (!GFileManager().loadEx(source, (IData**)src.data()))
+				if (!GFileManager().loadEx(source, src))
 					return false;
 				if (!compileFragmentShaderMacro((const GLchar*)src.data(), src.size(), opengl_frag))
 					return false;
@@ -288,7 +288,7 @@ namespace Core::Graphics
 		{
 			glGetProgramResourceiv(opengl_prgm, GL_UNIFORM_BLOCK, block, block_properties_size, block_properties, block_properties_size, NULL, block_values);
 			name_buffer.resize(block_values[3]);
-			glGetProgramResourceName(opengl_prgm, GL_PROGRAM_INPUT, block, name_buffer.size(), NULL, &name_buffer[0]);
+			glGetProgramResourceName(opengl_prgm, GL_UNIFORM_BLOCK, block, name_buffer.size(), NULL, &name_buffer[0]);
 			std::string name((char*)&name_buffer, name_buffer.size() - 1);
 
 			LocalConstantBuffer local_buffer;
@@ -313,8 +313,9 @@ namespace Core::Graphics
 		{
 			glGetProgramResourceiv(opengl_prgm, GL_UNIFORM, uniform, uniform_properties_size, uniform_properties, uniform_properties_size, NULL, uniform_values);
 			name_buffer.resize(uniform_values[1]);
-			glGetProgramResourceName(opengl_prgm, GL_PROGRAM_INPUT, uniform, name_buffer.size(), NULL, &name_buffer[0]);
-			std::string name((char*)&name_buffer, name_buffer.size() - 1);
+			glGetProgramResourceName(opengl_prgm, GL_UNIFORM, uniform, name_buffer.size(), NULL, &name_buffer[0]);
+			std::string name(name_buffer.data(), name_buffer.size() - 1);
+			spdlog::info("[core] shader uniform name: {}", name);
 
 			if (uniform_values[0] == GL_SAMPLER_2D) // Handle Texture Uniforms
 			{

@@ -415,6 +415,7 @@ namespace Core::Graphics
 
 			glEnable(GL_BLEND);
 			glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);  
+			glBlendEquation(GL_FUNC_ADD);
 
 			for (auto& tex : ex_fbos)
 			{

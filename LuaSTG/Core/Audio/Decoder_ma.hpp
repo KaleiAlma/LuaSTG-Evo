@@ -2,6 +2,7 @@
 #include "Core/Object.hpp"
 #include "Core/Audio/Decoder.hpp"
 #include "miniaudio.h"
+#include "minivorbis.h"
 
 namespace Core::Audio
 {

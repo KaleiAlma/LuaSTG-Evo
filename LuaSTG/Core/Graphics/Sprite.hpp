@@ -26,6 +26,7 @@ namespace Core::Graphics
 
 		virtual void draw(RectF const& rc) = 0;
 		virtual void draw(Vector3F const& p1, Vector3F const& p2, Vector3F const& p3, Vector3F const& p4) = 0;
+		virtual void draw(Vector3F const& pos, Vector3F const& rot, Vector2F const& scale) = 0;
 		virtual void draw(Vector2F const& pos) = 0;
 		virtual void draw(Vector2F const& pos, float scale) = 0;
 		virtual void draw(Vector2F const& pos, float scale, float rotation) = 0;

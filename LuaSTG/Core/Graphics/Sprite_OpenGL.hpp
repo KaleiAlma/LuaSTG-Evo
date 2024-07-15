@@ -59,6 +59,7 @@ namespace Core::Graphics
 
 		void draw(RectF const& rc);
 		void draw(Vector3F const& p1, Vector3F const& p2, Vector3F const& p3, Vector3F const& p4);
+		void draw(Vector3F const& pos, Vector3F const& rot, Vector2F const& scale);
 		void draw(Vector2F const& pos);
 		void draw(Vector2F const& pos, float scale);
 		void draw(Vector2F const& pos, float scale, float rotation);

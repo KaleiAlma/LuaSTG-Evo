@@ -1,4 +1,6 @@
 ﻿#include "Core/Graphics/Sprite_OpenGL.hpp"
+#include "glm/ext/matrix_transform.hpp"
+#include "glm/fwd.hpp"
 
 namespace Core::Graphics
 {
@@ -63,6 +65,53 @@ namespace Core::Graphics
 			IRenderer::DrawVertex(p3.x, p3.y, p3.z, m_uv.b.x, m_uv.b.y, m_color[2].color()),
 			IRenderer::DrawVertex(p4.x, p4.y, p4.z, m_uv.a.x, m_uv.b.y, m_color[3].color()),
 		};
+
+		m_renderer->drawQuad(vert);
+	}
+	void Sprite_OpenGL::draw(Vector3F const& pos, Vector3F const& rot, Vector2F const& scale)
+	{
+		m_renderer->setTexture(m_texture.get());
+
+		RectF const rect = RectF(
+			m_pos_rc.a.x * scale.x,
+			m_pos_rc.a.y * scale.y,
+			m_pos_rc.b.x * scale.x,
+			m_pos_rc.b.y * scale.y
+		);
+
+		IRenderer::DrawVertex vert[4] = {
+			IRenderer::DrawVertex(rect.a.x, rect.a.y, 0.0f, m_uv.a.x, m_uv.a.y, m_color[0].color()),
+			IRenderer::DrawVertex(rect.b.x, rect.a.y, 0.0f, m_uv.b.x, m_uv.a.y, m_color[1].color()),
+			IRenderer::DrawVertex(rect.b.x, rect.b.y, 0.0f, m_uv.b.x, m_uv.b.y, m_color[2].color()),
+			IRenderer::DrawVertex(rect.a.x, rect.b.y, 0.0f, m_uv.a.x, m_uv.b.y, m_color[3].color()),
+		};
+
+		glm::mat4 transform = glm::identity<glm::mat4>();
+
+		transform = rotate(transform, rot.x, glm::vec3(1, 0, 0));
+		transform = rotate(transform, rot.y, glm::vec3(0, 1, 0));
+		transform = rotate(transform, rot.z, glm::vec3(0, 0, 1));
+
+#define transform_xyz(UNIT) \
+		{\
+			glm::vec4 tvec = glm::vec4(vert[UNIT].x, vert[UNIT].y, vert[UNIT].z, 1.0f);\
+			tvec = tvec * transform;\
+			vert[UNIT].x = tvec.x;\
+			vert[UNIT].y = tvec.y;\
+			vert[UNIT].z = tvec.z;\
+		}
+
+		transform_xyz(0);
+		transform_xyz(1);
+		transform_xyz(2);
+		transform_xyz(3);
+
+#undef transform_xyz
+
+		vert[0].x += pos.x; vert[0].y += pos.y; vert[0].z += pos.z;
+		vert[1].x += pos.x; vert[1].y += pos.y; vert[1].z += pos.z;
+		vert[2].x += pos.x; vert[2].y += pos.y; vert[2].z += pos.z;
+		vert[3].x += pos.x; vert[3].y += pos.y; vert[3].z += pos.z;
 
 		m_renderer->drawQuad(vert);
 	}

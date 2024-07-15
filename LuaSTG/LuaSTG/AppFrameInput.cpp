@@ -84,6 +84,8 @@ namespace LuaSTGPlus
     }
     void AppFrame::ResetKeyboardInput()
     {
+        lastKeyDown = -1;
+        lastKeyUp = -1;
         // g_KeyboardState.Reset();
     }
     void AppFrame::ResetMouseInput()
@@ -152,7 +154,7 @@ namespace LuaSTGPlus
         // default:
         //     return false;
         // }
-        return SDL_BUTTON(button + 1) & SDL_GetMouseState(NULL, NULL);
+        return SDL_BUTTON(button) & SDL_GetMouseState(NULL, NULL);
     }
     Core::Vector2F AppFrame::GetMousePosition(bool no_flip)noexcept
     {

@@ -185,6 +185,7 @@ namespace Core::Graphics
 		glBindVertexArray(_vao);
 		auto& vi_ = _vi_buffer[_vi_buffer_index];
 		// glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
+		GLuint inv = discard ? GL_MAP_INVALIDATE_BUFFER_BIT : 0;
 		// copy vertex data
 		if (_draw_list.vertex.size > 0)
 		{
@@ -195,8 +196,21 @@ namespace Core::Graphics
 			// 	glClearBufferData(GL_ARRAY_BUFFER, GL_R8, GL_R8, GL_UNSIGNED_BYTE, &clear);
 			// }
 			// glBufferSubData(GL_ARRAY_BUFFER, vi_.vertex_offset, _draw_list.vertex.size * sizeof(DrawVertex), _draw_list.vertex.data);
-			void* map = glMapBufferRange(GL_ARRAY_BUFFER, vi_.vertex_offset, _draw_list.vertex.size * sizeof(DrawVertex), GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT);
-			// std::memcpy((DrawVertex*)map + vi_.vertex_offset, _draw_list.vertex.data, _draw_list.vertex.size * sizeof(DrawVertex));
+			// void* map = glMapBufferRange(
+			// 	GL_ARRAY_BUFFER,
+			// 	// vi_.vertex_offset * sizeof(DrawVertex),
+			// 	0,
+			// 	_draw_list.vertex.size * sizeof(DrawVertex),
+			// 	GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT | inv
+			// );
+			void* map = glMapBufferRange(
+				GL_ARRAY_BUFFER,
+				vi_.vertex_offset * sizeof(DrawVertex),
+				// 0,
+				_draw_list.vertex.size * sizeof(DrawVertex),
+				GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT | inv
+			);
+			// std::memcpy((DrawVertex*)map + vi_.vertex_offset * sizeof(DrawVertex), _draw_list.vertex.data, _draw_list.vertex.size * sizeof(DrawVertex));
 			std::memcpy((DrawVertex*)map, _draw_list.vertex.data, _draw_list.vertex.size * sizeof(DrawVertex));
 			glUnmapBuffer(GL_ARRAY_BUFFER);
 		}
@@ -211,7 +225,14 @@ namespace Core::Graphics
 			// }
 			// glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, vi_.index_offset, _draw_list.index.size * sizeof(DrawIndex), _draw_list.index.data);
 			
-			void* map = glMapBufferRange(GL_ELEMENT_ARRAY_BUFFER, vi_.index_offset, _draw_list.index.size * sizeof(DrawIndex), GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT);
+			void* map = glMapBufferRange(
+				GL_ELEMENT_ARRAY_BUFFER,
+				vi_.index_offset * sizeof(DrawIndex),
+				// vi_.index_offset,
+				// 0,
+				_draw_list.index.size * sizeof(DrawIndex),
+				GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT | inv
+			);
 			// std::memcpy((DrawIndex*)map + vi_.index_offset, _draw_list.index.data, _draw_list.index.size * sizeof(DrawIndex));
 			std::memcpy((DrawIndex*)map, _draw_list.index.data, _draw_list.index.size * sizeof(DrawIndex));
 			glUnmapBuffer(GL_ELEMENT_ARRAY_BUFFER);
@@ -533,7 +554,8 @@ namespace Core::Graphics
 					{
 						bindTextureAlphaType(cmd_.texture.get());
 						bindTextureSamplerState(cmd_.texture.get());
-						glDrawElementsBaseVertex(GL_TRIANGLES, cmd_.index_count, GL_UNSIGNED_SHORT, 0, vi_.index_offset);
+						// glDrawElementsBaseVertex(GL_TRIANGLES, cmd_.index_count, GL_UNSIGNED_SHORT, 0, vi_.index_offset);
+						glDrawElementsBaseVertex(GL_TRIANGLES, cmd_.index_count, GL_UNSIGNED_SHORT, (void*)(vi_.index_offset * sizeof(DrawIndex)), vi_.vertex_offset);
 					}
 					vi_.vertex_offset += cmd_.vertex_count;
 					vi_.index_offset += cmd_.index_count;
@@ -668,6 +690,7 @@ namespace Core::Graphics
 			_camera_state_set.ortho = box;
 			_camera_state_set.is_3D = false;
 			glm::mat4 m4 = glm::orthoLH_ZO(box.a.x, box.b.x, box.b.y, box.a.y, box.a.z, box.b.z);
+			// spdlog::info("[core] setOrtho: {} {} {} {}", box.a.x, box.b.x, box.b.y, box.a.y);
 			/* upload vp matrix */ {
 				glBindBuffer(GL_UNIFORM_BUFFER, _vp_matrix_buffer);
 				glBufferData(GL_UNIFORM_BUFFER, sizeof(m4), &m4, GL_STATIC_DRAW);
@@ -690,7 +713,7 @@ namespace Core::Graphics
 			glm::vec3 const eyef3(eye.x, eye.y, eye.z);
 			glm::vec3 const lookatf3(lookat.x, lookat.y, lookat.z);
 			glm::vec3 const headupf3(headup.x, headup.y, headup.z);
-			glm::mat4 m4 = glm::lookAtLH(eyef3, lookatf3, headupf3) * glm::perspectiveLH_NO(fov, aspect, znear, zfar);
+			glm::mat4 m4 = glm::perspectiveLH_ZO(fov, aspect, znear, zfar) * glm::lookAtLH(eyef3, lookatf3, headupf3);
 			float const camera_pos[8] = {
 				eye.x, eye.y, eye.z, 0.0f,
 				lookatf3.x - eyef3.x, lookatf3.y - eyef3.y, lookatf3.z - eyef3.z, 0.0f,
@@ -713,7 +736,8 @@ namespace Core::Graphics
 		if (_state_dirty || _state_set.viewport != box)
 		{
 			batchFlush();
-			glViewport((GLint)box.a.x, (GLint)box.a.y, (GLint)box.b.x - (GLint)box.a.x, (GLint)box.b.y - (GLint)box.a.y);
+			_state_set.viewport = box;
+			glViewport((GLint)box.a.x, (GLint)box.b.y, (GLint)box.b.x - (GLint)box.a.x, (GLint)box.a.y - (GLint)box.b.y);
 		}
 	}
 	void Renderer_OpenGL::setScissorRect(RectF const& rect)
@@ -721,6 +745,7 @@ namespace Core::Graphics
 		if (_state_dirty || _state_set.scissor_rect != rect)
 		{
 			batchFlush();
+			_state_set.scissor_rect = rect;
 			glScissor((GLint)rect.a.x, (GLint)rect.a.y, (GLint)rect.width(), (GLint)rect.height());
 		}
 	}
@@ -986,8 +1011,10 @@ namespace Core::Graphics
 			if (!batchFlush()) return false;
 		}
 
-		assert(_draw_list.command.size > 0);
-		DrawCommand& cmd_ = _draw_list.command.data[_draw_list.command.size - 1];
+		// assert(_draw_list.command.size > 0);
+		// DrawCommand& cmd_ = _draw_list.command.data[_draw_list.command.size - 1];
+		DrawCommand& cmd_ = _draw_list.command.data[_draw_list.command.size];
+		// _draw_list.command.size++;
 
 		*ppvert = _draw_list.vertex.data + _draw_list.vertex.size;
 		_draw_list.vertex.size += nvert;
@@ -1194,11 +1221,11 @@ namespace Core::Graphics
 			glGetTextureLevelParameteriv(rt, 0, GL_TEXTURE_HEIGHT, &h);
 		}
 		
-		if (w < 1 || h < 1)
-		{
-			spdlog::warn("[core] LuaSTG::Core::Renderer::postEffect exiting early, as no render target is bound!");
-			return false;
-		}
+		// if (w < 1 || h < 1)
+		// {
+		// 	spdlog::warn("[core] LuaSTG::Core::Renderer::postEffect exiting early, as no render target is bound!");
+		// 	return false;
+		// }
 
 		glViewport(0, 0, w, h);
 		glScissor(0, 0, w, h);

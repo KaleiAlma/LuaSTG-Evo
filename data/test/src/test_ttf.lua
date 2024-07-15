@@ -6,7 +6,7 @@ local M = {}
 function M:onCreate()
     local old_pool = lstg.GetResourceStatus()
     lstg.SetResourceStatus("global")
-    lstg.LoadTTF("ttf:test1", "res/model/syst_heavy.otf", 0, 26)
+    lstg.LoadTTF("ttf:test1", "res/msyh.ttc", 0, 26)
     lstg.CacheTTFString("ttf:test1", "你好朋友")
     lstg.SetResourceStatus(old_pool)
     self.press_key = false

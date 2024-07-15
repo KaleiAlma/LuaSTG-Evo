@@ -108,11 +108,12 @@ end
 local function buildGameObjectScene()
     lstg.ResetPool()
     lstg.New(player_class)
+    local amt = 240
     global_tasks:add(function()
         while true do
             local x, y = window.width / 2, window.height / 2
-            for i = 0, 239 do
-                createBullet(x, y, (i / 240) * 360, 3)
+            for i = 0, amt - 1 do
+                createBullet(x, y, (i / amt) * 360, 3)
             end
             task.wait(4)
         end
@@ -153,11 +154,12 @@ local function renderText(font, text, x, y, scale, color, oscale, ocolor, align)
 end
 local function renderBackground()
     local cx, cy = window.width / 2, window.height / 2
-    renderText("Sans", "海内存知己\n天涯若比邻\n欢迎来到 LuaSTG Sub",
+    renderText("Sans", "Welcome to\nLuaSTG Evo",
         cx, cy,
-        1, lstg.Color(255, 2255, 255, 255),
-        4, lstg.Color(255, 0, 0, 0),
+        1, lstg.Color(255, 255, 255, 255),
+        3, lstg.Color(255, 0, 0, 0),
         1 + 4)
+    -- lstg.RenderTTF('Sans', 'Welcome to\nLuaSTG Evo', cx, cx, cy, cy, 1+4, lstg.Color(0xFF00FF00), 2)
     local circle_r = 300
     for i = 0, (360 - 1), (360 / 60) do
         local angle = i + timer * 0.17
@@ -168,7 +170,7 @@ local function renderBackground()
     end
 end
 local function drawDebugInfo()
-    renderText("Sans", "移动/Move: ←↑↓→  低速移动/Slower Move: LeftShift",
+    renderText("Sans", "Move: ←↑↓→  Slow: LeftShift",
         4, 4,
         0.5, lstg.Color(255, 2255, 255, 255),
         2, lstg.Color(255, 0, 0, 0),
@@ -204,11 +206,19 @@ function GameInit()
 end
 function GameExit()
 end
+
+local imgui = require("imgui")
+
 function FrameFunc()
     global_tasks:remove_dead()
     global_tasks:resume_all()
+    imgui.backend.NewFrame(true)
+    imgui.ImGui.NewFrame()
+    imgui.backend.ShowFrameStatistics()
+    imgui.backend.ShowResourceManagerDebugWindow()
     updateBackground()
     updateGameObject()
+    lstg.SetTitle("LuaSTG Evo @ " .. string.format("%.2f", lstg.GetFPS()) .. "FPS")
     if Keyboard.GetKeyState(Keyboard.Escape) then
         return true -- exit
     end
@@ -221,5 +231,7 @@ function RenderFunc()
     renderGameObject()
     renderBackground()
     drawDebugInfo()
+    imgui.ImGui.Render()
+    imgui.backend.RenderDrawData()
     lstg.EndScene()
 end

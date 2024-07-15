@@ -6,6 +6,7 @@
 #include "glm/ext/vector_float4.hpp"
 #include "glm/gtc/matrix_access.hpp"
 #include "glm/matrix.hpp"
+#include "spdlog/spdlog.h"
 #define GLM_ENABLE_EXPERIMENTAL
 #include "glm/gtx/quaternion.hpp"
 #include "glm/ext/quaternion_common.hpp"
@@ -370,7 +371,7 @@ namespace Core::Graphics
                 mT = glm::translate(mT, glm::vec3(node.translation[0], node.translation[1], node.translation[2]));
             #pragma warning(default:4244)
             }
-            return mS * mR * mT;
+            return mT * mR * mS;
         }
     }
 
@@ -500,6 +501,8 @@ namespace Core::Graphics
                     tinygltf::BufferView& bufferview = model.bufferViews[accessor.bufferView];
                     tinygltf::Buffer& buffer = model.buffers[bufferview.buffer];
 
+                    int32_t vertex_size = tinygltf::GetComponentSizeInBytes(accessor.componentType);
+                    uint32_t bytewidth = vertex_size * tinygltf::GetNumComponentsInType(accessor.type) * accessor.count;
                     glGenBuffers(1, &mblock.vertex_buffer);
                     if (mblock.vertex_buffer == 0)
                     {
@@ -507,7 +510,9 @@ namespace Core::Graphics
                         return false;
                     }
                     glBindBuffer(GL_ARRAY_BUFFER, mblock.vertex_buffer);
+                    glBufferData(GL_ARRAY_BUFFER, bytewidth, buffer.data.data() + bufferview.byteOffset + accessor.byteOffset, GL_STATIC_DRAW);
                     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+
                     mblock.draw_count = accessor.count;
                 }
                 if (prim.attributes.contains("NORMAL"))
@@ -516,6 +521,8 @@ namespace Core::Graphics
                     tinygltf::BufferView& bufferview = model.bufferViews[accessor.bufferView];
                     tinygltf::Buffer& buffer = model.buffers[bufferview.buffer];
 
+                    int32_t normal_size = tinygltf::GetComponentSizeInBytes(accessor.componentType);
+                    uint32_t bytewidth = normal_size * tinygltf::GetNumComponentsInType(accessor.type) * accessor.count;
                     glGenBuffers(1, &mblock.normal_buffer);
                     if (mblock.normal_buffer == 0)
                     {
@@ -523,6 +530,7 @@ namespace Core::Graphics
                         return false;
                     }
                     glBindBuffer(GL_ARRAY_BUFFER, mblock.normal_buffer);
+                    glBufferData(GL_ARRAY_BUFFER, bytewidth, buffer.data.data() + bufferview.byteOffset + accessor.byteOffset, GL_STATIC_DRAW);
                     glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 0, 0);
                 }
                 if (prim.attributes.contains("COLOR_0"))
@@ -531,6 +539,8 @@ namespace Core::Graphics
                     tinygltf::BufferView& bufferview = model.bufferViews[accessor.bufferView];
                     tinygltf::Buffer& buffer = model.buffers[bufferview.buffer];
 
+                    int32_t color_size = tinygltf::GetComponentSizeInBytes(accessor.componentType);
+                    uint32_t bytewidth = color_size * tinygltf::GetNumComponentsInType(accessor.type) * accessor.count;
                     glGenBuffers(1, &mblock.color_buffer);
                     if (mblock.color_buffer == 0)
                     {
@@ -538,6 +548,7 @@ namespace Core::Graphics
                         return false;
                     }
                     glBindBuffer(GL_ARRAY_BUFFER, mblock.color_buffer);
+                    glBufferData(GL_ARRAY_BUFFER, bytewidth, buffer.data.data() + bufferview.byteOffset + accessor.byteOffset, GL_STATIC_DRAW);
                     glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, 0, 0);
                 }
                 if (prim.attributes.contains("TEXCOORD_0"))
@@ -546,6 +557,8 @@ namespace Core::Graphics
                     tinygltf::BufferView& bufferview = model.bufferViews[accessor.bufferView];
                     tinygltf::Buffer& buffer = model.buffers[bufferview.buffer];
 
+                    int32_t uv_size = tinygltf::GetComponentSizeInBytes(accessor.componentType);
+                    uint32_t bytewidth = uv_size * tinygltf::GetNumComponentsInType(accessor.type) * accessor.count;
                     glGenBuffers(1, &mblock.uv_buffer);
                     if (mblock.uv_buffer == 0)
                     {
@@ -553,8 +566,8 @@ namespace Core::Graphics
                         return false;
                     }
                     glBindBuffer(GL_ARRAY_BUFFER, mblock.uv_buffer);
+                    glBufferData(GL_ARRAY_BUFFER, bytewidth, buffer.data.data() + bufferview.byteOffset + accessor.byteOffset, GL_STATIC_DRAW);
                     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, 0);
-
                 }
                 if (prim.indices >= 0)
                 {
@@ -566,6 +579,7 @@ namespace Core::Graphics
                     uint32_t bytewidth = index_size * tinygltf::GetNumComponentsInType(accessor.type) * accessor.count;
                     void* p_sysmem = buffer.data.data() + bufferview.byteOffset + accessor.byteOffset;
                     std::vector<uint16_t> index_work;
+
                     if (index_size == 1)
                     {
                         index_work.resize(bytewidth);
@@ -588,7 +602,7 @@ namespace Core::Graphics
                         return false;
                     }
                     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mblock.index_buffer);
-                    glBufferData(GL_ELEMENT_ARRAY_BUFFER, bytewidth, index_work.data(), GL_STATIC_DRAW);
+                    glBufferData(GL_ELEMENT_ARRAY_BUFFER, bytewidth, p_sysmem, GL_STATIC_DRAW);
 
                     mblock.draw_count = accessor.count;
                 }
@@ -754,17 +768,21 @@ namespace Core::Graphics
 
     void Model_OpenGL::draw(IRenderer::FogState fog)
     {
+        glUseProgram(shared_->shader_program);
+
         // common data
 
-        glm::mat4 const t_locwo_ = t_scale_ * t_mbrot_ * t_trans_;
+        glBindBuffer(GL_UNIFORM_BUFFER, shared_->ubo_light);
+        glBufferData(GL_UNIFORM_BUFFER, sizeof(sunshine), &sunshine, GL_STATIC_DRAW);
+        glm::mat4 const t_locwo_ = t_trans_ * t_mbrot_ * t_scale_;
 
         auto set_state_matrix_from_block = [&](ModelBlock& mblock)
         {
             GLuint subroutines[4]{
                 (GLuint)IDX(fog),
                 (GLuint)(mblock.image ? 1 : 0) + 4,
-                (GLuint)(mblock.alpha_cull ? 1 : 0) + 6,
-                (GLuint)(mblock.color_buffer ? 1 : 0) + 8
+                (GLuint)(mblock.color_buffer ? 1 : 0) + 6,
+                (GLuint)(mblock.alpha_cull ? 1 : 0) + 8,
             };
 
             glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 4, &subroutines[0]);
@@ -776,7 +794,7 @@ namespace Core::Graphics
                 glm::mat4 v1;
                 glm::mat4 v2;
             } v{};
-            glm::mat4 const t_total_ = mblock.local_matrix * t_locwo_;
+            glm::mat4 const t_total_ = t_locwo_ * mblock.local_matrix;
             v.v1 = t_total_;
             v.v2 = glm::inverseTranspose(t_total_);
             glBindBuffer(GL_UNIFORM_BUFFER, shared_->ubo_mlw);
@@ -785,12 +803,24 @@ namespace Core::Graphics
         auto set_state_from_block = [&](ModelBlock& mblock)
         {
             glBindVertexArray(mblock.vao);
-            glEnableVertexAttribArray(3);
-
+            if (mblock.vertex_buffer) {
+                glEnableVertexAttribArray(0);
+            }
+            if (mblock.uv_buffer) {
+                glEnableVertexAttribArray(1);
+            }
+            if (mblock.color_buffer) {
+                glEnableVertexAttribArray(2);
+            }
+            if (mblock.normal_buffer) {
+                glEnableVertexAttribArray(3);
+            }
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mblock.index_buffer);
 
             set_state_matrix_from_block(mblock);
             glBindBufferBase(GL_UNIFORM_BUFFER, 1, shared_->ubo_mlw);
+
+            upload_local_world_matrix(mblock);
 
             glActiveTexture(GL_TEXTURE0);
             glBindTexture(GL_TEXTURE_2D, mblock.image);
@@ -813,21 +843,24 @@ namespace Core::Graphics
                 glBindBuffer(GL_UNIFORM_BUFFER, shared_->ubo_alpha);
                 glBufferData(GL_UNIFORM_BUFFER, sizeof(alpha), &alpha, GL_STATIC_DRAW);
             }
-            GLuint buffers[2] = {
-                // camera position and look to vector are setup by Renderer at register(b0)
-                shared_->ubo_alpha,
-                shared_->ubo_light,
-            };
-            glBindBuffersBase(GL_UNIFORM_BUFFER, 4, 2, buffers);
+            // GLuint buffers[2] = {
+            //     // camera position and look to vector are setup by Renderer at register(b0)
+            //     shared_->ubo_alpha,
+            //     shared_->ubo_light,
+            // };
+            // glBindBuffersBase(GL_UNIFORM_BUFFER, 4, 2, buffers);
+
+            glBindBufferBase(GL_UNIFORM_BUFFER, 4, shared_->ubo_alpha);
+            glBindBufferBase(GL_UNIFORM_BUFFER, 5, shared_->ubo_light);
 
             // OM
 
-            glEnable(GL_DEPTH_BUFFER_BIT);
+            glEnable(GL_DEPTH_TEST);
             if (mblock.alpha_blend)
             {
                 glEnable(GL_BLEND);
-				glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
-				glBlendEquationSeparate(GL_FUNC_ADD, GL_FUNC_ADD);
+                glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+                glBlendEquationSeparate(GL_FUNC_ADD, GL_FUNC_ADD);
             }
             else
             {
@@ -872,7 +905,11 @@ namespace Core::Graphics
             }
         }
 
+        glDisableVertexAttribArray(0);
+        glDisableVertexAttribArray(1);
+        glDisableVertexAttribArray(2);
         glDisableVertexAttribArray(3);
+        // glDisable(GL_DEPTH_TEST);
     }
 
     Model_OpenGL::Model_OpenGL(Device_OpenGL* p_device, ModelSharedComponent_OpenGL* p_model_shared, StringView path)

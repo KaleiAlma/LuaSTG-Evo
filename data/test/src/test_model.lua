@@ -97,9 +97,10 @@ local M = {}
 function M:onCreate()
     local old_pool = lstg.GetResourceStatus()
     lstg.SetResourceStatus("global")
-    --lstg.LoadModel("model:test", "E:/Project/glTF-work/model/2.0/Sponza/glTF/Sponza.gltf")
-    --lstg.LoadModel("model:test", "res/Tree/Tree.gltf")
-    lstg.LoadModel("model:test", "C:/Users/Admin/Desktop/model/human.gltf")
+    -- lstg.LoadModel("model:test", "E:/Project/glTF-work/model/2.0/Sponza/glTF/Sponza.gltf")
+    -- lstg.LoadModel("model:test", "res/Tree/Tree.gltf")
+    -- lstg.LoadModel("model:test", "C:/Users/Admin/Desktop/model/human.gltf")
+    lstg.LoadModel("model:test", "res/cave.glb")
     lstg.SetResourceStatus(old_pool)
 end
 

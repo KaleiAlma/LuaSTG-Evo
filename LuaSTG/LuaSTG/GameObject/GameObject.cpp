@@ -474,6 +474,7 @@ namespace LuaSTGPlus
 						blendmode,
 						Core::Color4B(vertexcolor)
 						);
+					break;
 				case ResourceType::Animation:
 					static_cast<IResourceAnimation*>(res)->Render(
 						static_cast<int>(ani_timer),

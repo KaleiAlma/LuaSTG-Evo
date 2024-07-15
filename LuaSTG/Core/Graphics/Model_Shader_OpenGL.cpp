@@ -1,4 +1,5 @@
 ﻿#include "Core/Graphics/Model_OpenGL.hpp"
+#include "glad/gl.h"
 // #include "Platform/RuntimeLoader/Direct3DCompiler.hpp"
 
 // static std::string_view const built_in_shader(R"(
@@ -275,7 +276,7 @@ layout(location = 0) out vec4 col_out;
 subroutine vec4 Fog(vec4);
 subroutine vec4 BaseTexture();
 subroutine vec4 VertexColor();
-subroutine bool AlphaMask();
+subroutine bool AlphaMask(vec4);
 
 layout(location = 0) subroutine uniform Fog fog_uniform;
 layout(location = 1) subroutine uniform BaseTexture btex_uniform;
@@ -331,7 +332,7 @@ layout(index = 4) subroutine(BaseTexture) vec4 no_base_texture()
 layout(index = 5) subroutine(BaseTexture) vec4 base_texture()
 {
     vec4 color = texture(sampler0, uv);
-    return color * vec4(pow(tex_color.rgb, 2.2), tex_color.a);
+    return color; // * vec4(pow(col.rgb, vec3(2.2)), col.a);
 }
 
 layout(index = 6) subroutine(VertexColor) vec4 no_vertex_color()
@@ -344,12 +345,12 @@ layout(index = 7) subroutine(VertexColor) vec4 vertex_color()
     return col;
 }
 
-layout(index = 8) subroutine(AlphaMask) bool no_alpha_mask()
+layout(index = 8) subroutine(AlphaMask) bool no_alpha_mask(vec4 solid_color)
 {
     return false;
 }
 
-layout(index = 9) subroutine(AlphaMask) bool alpha_mask()
+layout(index = 9) subroutine(AlphaMask) bool alpha_mask(vec4 solid_color)
 {
     return solid_color.a < alpha.x;
 }
@@ -366,7 +367,7 @@ vec4 ApplySimpleLight(vec4 solid_color)
 void main()
 {
     vec4 color = base_color * btex_uniform() * vc_uniform();
-    if (amask_uniform)
+    if (amask_uniform(color))
     {
         discard;
     }
@@ -401,8 +402,9 @@ layout(location = 4) out vec2 uv_out;
 
 void main()
 {
-    vec4 wpos = world * vec4(pos, 1.0));
+    vec4 wpos = world * vec4(pos, 1.0);
     pos_out = view_proj * wpos;
+    gl_Position = pos_out;
     wpos_out = wpos;
     norm_out = norm_world * vec4(norm, 0.0); // no move
     col_out = col;
@@ -448,15 +450,17 @@ namespace Core::Graphics
     {
         // built-in: compile shader
 
-		GLuint frag, vert;
-		compileFragmentShaderMacro(default_fragment, sizeof(default_fragment), frag);
-		compileVertexShaderMacro(default_vertex, sizeof(default_vertex), vert);
-		glAttachShader(shader_program, frag);
-		glAttachShader(shader_program, vert);
-		glLinkProgram(shader_program);
+        GLuint frag = 0, vert = 0;
+        compileVertexShaderMacro(default_vertex, sizeof(default_vertex), vert);
+        compileFragmentShaderMacro(default_fragment, sizeof(default_fragment), frag);
 
-		glDeleteShader(frag);
-		glDeleteShader(vert);
+        shader_program = glCreateProgram();
+        glAttachShader(shader_program, vert);
+        glAttachShader(shader_program, frag);
+        glLinkProgram(shader_program);
+
+        glDeleteShader(frag);
+        glDeleteShader(vert);
 
         return true;
     }

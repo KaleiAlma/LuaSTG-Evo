@@ -85,7 +85,7 @@ local M = {}
 function M:onCreate()
     local old_pool = lstg.GetResourceStatus()
     lstg.SetResourceStatus("global")
-    lstg.LoadTTF("Sans", "C:/Windows/Fonts/msyh.ttc", 32, 32)
+    lstg.LoadTTF("Sans", "res/msyh.ttc", 32, 32)
     lstg.SetResourceStatus(old_pool)
 end
 

@@ -15,7 +15,7 @@ namespace Core::Audio
 		}
 		catch (std::exception const& e)
 		{
-			spdlog::error("[core] WAV: {}", e.what());
+			spdlog::error("[core] MA: {}", e.what());
 		}
 
 		*pp_decoder = nullptr;

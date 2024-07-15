@@ -395,6 +395,8 @@ bool AppFrame::onUpdate()
 		m_ResourceMgr.UpdateSound();
 	}
 
+	ResetKeyboardInput();
+
 	return result;
 }
 bool AppFrame::onRender()

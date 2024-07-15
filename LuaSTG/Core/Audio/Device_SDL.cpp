@@ -8,6 +8,7 @@
 #include <string>
 #define MINIAUDIO_IMPLEMENTATION
 #include "miniaudio.h"
+#include "minivorbis.h"
 
 
 static std::array<float, 1> s_empty_fft_data{};
@@ -170,6 +171,7 @@ namespace Core::Audio
 		
 		m_current_audio_device_name = device_name;
 		dispatchEventAudioDeviceCreate();
+		SDL_PauseAudioDevice(dev, 0);
 
 		return true;
 	}
@@ -607,7 +609,7 @@ namespace Core::Audio
 
 		if (createResources())
 		{
-			spdlog::info("[core] (AudioPlayer_SDL) Initialized audio player");
+			spdlog::info("[core] (LoopAudioPlayer_SDL) Initialized audio player");
 			// nothing wrong
 		}
 
@@ -754,7 +756,7 @@ namespace Core::Audio
 
 		m_pcm_data.resize(p_decoder->getFrameCount() * (uint32_t)p_decoder->getFrameSize());
 		uint64_t frames_read = 0;
-		if (!p_decoder->read(p_decoder->getFrameCount(), m_pcm_data.data(), &frames_read))
+		if (p_decoder->read(p_decoder->getFrameCount(), m_pcm_data.data(), &frames_read) != MA_SUCCESS)
 		{
 			spdlog::error("[core] (IDecoder::read) Failed to read audio");
 			throw std::runtime_error("StreamAudioPlayer_SDL::StreamAudioPlayer_SDL (4)");
