@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.22)
 project(LuaSTGSub LANGUAGES C CXX)
 
-if(LINUX)
+if(NOT WIN32)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -stdlib=libc++")
     set(CMAKE_EXE_LINKER_FLAGS "-lc++abi")
 endif()
