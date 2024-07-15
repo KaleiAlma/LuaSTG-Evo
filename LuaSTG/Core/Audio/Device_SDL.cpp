@@ -3,6 +3,7 @@
 #include "Core/Audio/Decoder_ma.hpp"
 #include "Core/Audio/Device.hpp"
 #include "SDL_audio.h"
+#include "SDL_error.h"
 // #include <cstddef>
 // #include <cstdint>
 #include <string>
@@ -65,9 +66,12 @@ namespace Core::Audio
 	{
 		m_audio_device_list.clear();
 
-		uint32_t device_count = SDL_GetNumAudioDevices(0);
+		int32_t device_count = SDL_GetNumAudioDevices(0);
 
-		for (uint32_t index = 0; index < device_count; index += 1)
+		if (device_count == -1)
+			return false;
+
+		for (int32_t index = 0; index < device_count; index += 1)
 		{
 			m_audio_device_list.emplace_back(SDL_GetAudioDeviceName(index, 0));
 		}
@@ -103,17 +107,19 @@ namespace Core::Audio
 
 		// output
 
-		refreshAudioDeviceList();
-
 		std::string_view device_name;
-		for (auto const& v : m_audio_device_list)
+		if (refreshAudioDeviceList())
 		{
-			if (v == m_target_audio_device_name)
+			for (auto const& v : m_audio_device_list)
 			{
-				device_name = v;
-				break;
+				if (v == m_target_audio_device_name)
+				{
+					device_name = v;
+					break;
+				}
 			}
 		}
+
 
 		SDL_AudioSpec want, have;
 		SDL_AudioDeviceID dev;
@@ -136,7 +142,7 @@ namespace Core::Audio
 
 		if (!dev)
 		{
-			spdlog::error("[core] Failed to initialize audio device.");
+			spdlog::error("[core] Failed to initialize audio device. {}", SDL_GetError());
 			return false;
 		}
 

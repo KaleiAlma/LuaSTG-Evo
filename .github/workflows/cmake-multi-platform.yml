@@ -50,7 +50,7 @@ jobs:
     - run: echo ${{ runner.os }}
 
     - if: ${{ runner.os == 'Linux' }}
-      run: sudo apt install ninja-build mesa-utils mesa-common-dev libxext-dev && sudo bash -c "$(wget -O - https://apt.llvm.org/llvm.sh)"
+      run: sudo apt install ninja-build mesa-utils mesa-common-dev libxext-dev libasound2-dev && sudo bash -c "$(wget -O - https://apt.llvm.org/llvm.sh)"
     - if: ${{ runner.os == 'Windows' }}
       run: choco install ninja
     - if: ${{ runner.os == 'macOS' }}
