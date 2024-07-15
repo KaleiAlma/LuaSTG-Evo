@@ -212,6 +212,10 @@ target_link_libraries(LuaSTG PRIVATE
 set(LUASTG_BUILD_OUTPUT_DIR ${CMAKE_BINARY_DIR}/bin)
 if(APPLE)
     add_custom_command(TARGET LuaSTG POST_BUILD
+        # apple fixes
+        COMMAND ${CMAKE_COMMAND} -E copy /usr/local/opt/zstd/lib/libzstd.1.dylib ${CMAKE_BINARY_DIR}/LuaSTG/LuaSTG.app/Contents/MacOS
+        COMMAND ${CMAKE_COMMAND} -E copy /usr/local/opt/openssl@3/lib/libssl.3.dylib ${CMAKE_BINARY_DIR}/LuaSTG/LuaSTG.app/Contents/MacOS
+
         COMMAND ${CMAKE_COMMAND} -E make_directory ${LUASTG_BUILD_OUTPUT_DIR}
 
         COMMAND ${CMAKE_COMMAND} -E rm -f ${LUASTG_BUILD_OUTPUT_DIR}/LuaSTG.zip
