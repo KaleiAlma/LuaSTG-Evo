@@ -260,7 +260,7 @@ void AppFrame::Shutdown()noexcept
 void AppFrame::Run()noexcept
 {
 	assert(m_iStatus == AppStatus::Initialized);
-	spdlog::info("[luastg] 开始更新&渲染循环");
+	spdlog::info("[luastg] Start Update/Render Loop");
 	
 	m_pAppModel->getWindow()->addEventListener(this);
 	m_pAppModel->getSwapChain()->addEventListener(this);
