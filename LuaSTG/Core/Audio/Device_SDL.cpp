@@ -103,6 +103,8 @@ namespace Core::Audio
 
 		// output
 
+		refreshAudioDeviceList();
+
 		std::string_view device_name;
 		for (auto const& v : m_audio_device_list)
 		{
