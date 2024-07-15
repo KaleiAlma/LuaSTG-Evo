@@ -54,7 +54,7 @@ jobs:
     - if: ${{ runner.os == 'Windows' }}
       run: choco install ninja
     - if: ${{ runner.os == 'macOS' }}
-      run: brew install ninja llvm@17 gcc@14
+      run: brew install ninja llvm@18
 
     # - if: ${{ runner.os == 'Windows' }}
     
@@ -116,8 +116,8 @@ jobs:
     - name: Configure and Build with CMake (macOS)
       run: >
         cmake -B ${{ steps.strings.outputs.build-output-dir }}
-        -DCMAKE_CXX_COMPILER=$(brew --prefix llvm@17)/bin/clang++
-        -DCMAKE_C_COMPILER=$(brew --prefix llvm@17)/bin/clang
+        -DCMAKE_CXX_COMPILER=$(brew --prefix llvm@18)/bin/clang++
+        -DCMAKE_C_COMPILER=$(brew --prefix llvm@18)/bin/clang
         -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
         -S ${{ github.workspace }}
         -DCPM_SOURCE_CACHE=${{ github.workspace }}/build/cpm-cache

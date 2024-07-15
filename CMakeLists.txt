@@ -1,10 +1,10 @@
 cmake_minimum_required(VERSION 3.22)
 project(LuaSTGSub LANGUAGES C CXX)
 
-# if(APPLE)
-#     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -stdlib=libstdc++")
-#     set(CMAKE_EXE_LINKER_FLAGS " -stdlib=libstdc++ -lc++abi")
-# endif()
+if(APPLE)
+    # set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -stdlib=libstdc++")
+    set(CMAKE_EXE_LINKER_FLAGS "-L/usr/local/opt/llvm@18/lib/c++ -Wl,-rpath,/usr/local/opt/llvm@18/lib/c++")
+endif()
 
 #option(LINK_STEAM_API "Enable Steam API" OFF)
 #option(LUASTG_RESDIR "Custom configurations" "res")
