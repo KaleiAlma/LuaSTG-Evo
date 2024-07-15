@@ -24,7 +24,7 @@ jobs:
       #
       # To add more build types (Release, Debug, RelWithDebInfo, etc.) customize the build_type list.
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-13]
+        os: [ubuntu-24.04, windows-latest, macos-13]
         build_type: [Release, Debug]
         # c_compiler: [gcc, clang, cl]
         # c_compiler: [clang, MSVC]
@@ -50,11 +50,11 @@ jobs:
     - run: echo ${{ runner.os }}
 
     - if: ${{ runner.os == 'Linux' }}
-      run: sudo apt install ninja-build libstdc++-13-dev && sudo bash -c "$(wget -O - https://apt.llvm.org/llvm.sh)"
+      run: sudo apt install ninja-build && sudo bash -c "$(wget -O - https://apt.llvm.org/llvm.sh)"
     - if: ${{ runner.os == 'Windows' }}
       run: choco install ninja
     - if: ${{ runner.os == 'macOS' }}
-      run: brew install ninja llvm@18 gcc@14
+      run: brew install ninja llvm@17 gcc@14
 
     # - if: ${{ runner.os == 'Windows' }}
     
@@ -116,8 +116,8 @@ jobs:
     - name: Configure and Build with CMake (macOS)
       run: >
         cmake -B ${{ steps.strings.outputs.build-output-dir }}
-        -DCMAKE_CXX_COMPILER=$(brew --prefix llvm@18)/bin/clang++
-        -DCMAKE_C_COMPILER=$(brew --prefix llvm@18)/bin/clang
+        -DCMAKE_CXX_COMPILER=$(brew --prefix llvm@17)/bin/clang++
+        -DCMAKE_C_COMPILER=$(brew --prefix llvm@17)/bin/clang
         -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
         -S ${{ github.workspace }}
         -DCPM_SOURCE_CACHE=${{ github.workspace }}/build/cpm-cache
