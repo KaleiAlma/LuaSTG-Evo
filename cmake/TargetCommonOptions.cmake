@@ -42,6 +42,11 @@ function(luastg_target_common_options __TARGET__)
         #     "$<$<CONFIG:Debug>:-fno-omit-frame-pointer>"
         # )
     endif()
+    if(APPLE)
+        target_link_options(${__TARGET__} PRIVATE
+            "$<$<CONFIG:Debug>:--warn-unresolved-symbols>"
+        )
+    endif()
 endfunction()
 
 function(luastg_target_common_options2 __TARGET__)
