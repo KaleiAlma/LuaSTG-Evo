@@ -215,6 +215,7 @@ if(APPLE)
         # apple fixes
         COMMAND ${CMAKE_COMMAND} -E copy /usr/local/opt/zstd/lib/libzstd.1.dylib ${CMAKE_BINARY_DIR}/LuaSTG/LuaSTG.app/Contents/MacOS
         COMMAND ${CMAKE_COMMAND} -E copy /usr/local/opt/openssl@3/lib/libssl.3.dylib ${CMAKE_BINARY_DIR}/LuaSTG/LuaSTG.app/Contents/MacOS
+        COMMAND ${CMAKE_COMMAND} -E copy /usr/local/opt/xz/lib/liblzma.5.dylib ${CMAKE_BINARY_DIR}/LuaSTG/LuaSTG.app/Contents/MacOS
 
         COMMAND ${CMAKE_COMMAND} -E make_directory ${LUASTG_BUILD_OUTPUT_DIR}
 
