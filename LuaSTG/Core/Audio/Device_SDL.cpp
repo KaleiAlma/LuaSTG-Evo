@@ -166,8 +166,8 @@ namespace Core::Audio
 			spdlog::error("[core] Failed to set master volume.");
 			return false;
 		}
-		ma_sound_set_volume(&m_shared->grp_sfx, std::clamp(m_volume_direct, 0.0f, 1.0f));
-		ma_sound_set_volume(&m_shared->grp_bgm, std::clamp(m_volume_direct, 0.0f, 1.0f));
+		ma_sound_set_volume(&m_shared->grp_sfx, std::clamp(m_volume_sound_effect, 0.0f, 1.0f));
+		ma_sound_set_volume(&m_shared->grp_bgm, std::clamp(m_volume_music, 0.0f, 1.0f));
 		
 		m_current_audio_device_name = device_name;
 		dispatchEventAudioDeviceCreate();
@@ -210,27 +210,24 @@ namespace Core::Audio
 
 		if (!m_shared) return;
 
-		ma_node* p_node;
 		switch (ch)
 		{
 		case MixChannel::Direct:
-			p_node = ma_node_graph_get_endpoint(&m_shared->engine.nodeGraph);
+			if (ma_engine_set_volume(&m_shared->engine, std::clamp(v, 0.0f, 1.0f)) != MA_SUCCESS)
+			{
+				spdlog::error("[core] Failed to set master volume.");
+			}
 			break;
 		case MixChannel::SoundEffect:
-			p_node = &m_shared->grp_sfx;
+			ma_sound_set_volume(&m_shared->grp_sfx, std::clamp(v, 0.0f, 1.0f));
 			break;
 		case MixChannel::Music:
-			p_node = &m_shared->grp_bgm;
+			ma_sound_set_volume(&m_shared->grp_bgm, std::clamp(v, 0.0f, 1.0f));
 			break;
 		default:
 			assert(false);
 			break;
 		}
-		if (!p_node)  return;
-
-		ma_result r = ma_node_set_output_bus_volume(p_node, 0, std::clamp(v, 0.0f, 1.0f));
-		if (r != MA_SUCCESS)
-			spdlog::error("[core] ma_node_set_output_bus_volume failed");
 	}
 	float Device_SDL::getMixChannelVolume(MixChannel ch)
 	{
