@@ -7,7 +7,11 @@ add_subdirectory(Configurer)
 
 # LuaSTG Engine
 
-add_executable(LuaSTG)
+if(APPLE)
+    add_executable(LuaSTG MACOSX_BUNDLE)
+else()
+    add_executable(LuaSTG)
+endif()
 
 luastg_target_common_options(LuaSTG)
 luastg_target_more_warning(LuaSTG)
