@@ -66,13 +66,13 @@ BEGIN
     BEGIN
         BLOCK "000004b0"
         BEGIN
-            VALUE "CompanyName", "璀境石"
-            VALUE "FileDescription", "LuaSTG Sub"
+            VALUE "CompanyName", "KaleiAlma"
+            VALUE "FileDescription", "LuaSTG Evo"
             VALUE "FileVersion", "0.1.0.0"
-            VALUE "InternalName", "LuaSTG Sub"
-            VALUE "LegalCopyright", "Copyright 2020-2023 璀境石"
-            VALUE "OriginalFilename", "LuaSTGSub.exe"
-            VALUE "ProductName", "LuaSTG Sub"
+            VALUE "InternalName", "LuaSTG Evo"
+            VALUE "LegalCopyright", "Copyright 2020-2023 KaleiAlma"
+            VALUE "OriginalFilename", "LuaSTGEvo.exe"
+            VALUE "ProductName", "LuaSTG Evo"
             VALUE "ProductVersion", "0.1.0.0"
         END
     END

@@ -79,13 +79,13 @@ BEGIN
     BEGIN
         BLOCK "000004b0"
         BEGIN
-            VALUE "CompanyName", "璀境石"
-            VALUE "FileDescription", "LuaSTG Sub"
+            VALUE "CompanyName", "KaleiAlma"
+            VALUE "FileDescription", "LuaSTG Evo"
             VALUE "FileVersion", "1.0.0.0"
             VALUE "InternalName", "LuaSTG Sub"
-            VALUE "LegalCopyright", "Copyright 2020-2023 璀境石"
-            VALUE "OriginalFilename", "LuaSTGSub.exe"
-            VALUE "ProductName", "LuaSTG Sub"
+            VALUE "LegalCopyright", "Copyright 2020-2023 KaleiAlma"
+            VALUE "OriginalFilename", "LuaSTGEvo.exe"
+            VALUE "ProductName", "LuaSTG Evo"
             VALUE "ProductVersion", "1.0.0.0"
         END
     END
@@ -189,13 +189,13 @@ BEGIN
     BEGIN
         BLOCK "000004b0"
         BEGIN
-            VALUE "CompanyName", "璀境石"
-            VALUE "FileDescription", "LuaSTG Sub"
+            VALUE "CompanyName", "KaleiAlma"
+            VALUE "FileDescription", "LuaSTG Evo"
             VALUE "FileVersion", "%s"
-            VALUE "InternalName", "LuaSTG Sub"
-            VALUE "LegalCopyright", "Copyright 2020-2023 璀境石"
-            VALUE "OriginalFilename", "LuaSTGSub.exe"
-            VALUE "ProductName", "LuaSTG Sub"
+            VALUE "InternalName", "LuaSTG Evo"
+            VALUE "LegalCopyright", "Copyright 2020-2023 KaleiAlma"
+            VALUE "OriginalFilename", "LuaSTGEvo.exe"
+            VALUE "ProductName", "LuaSTG Evo"
             VALUE "ProductVersion", "%s"
         END
     END
@@ -248,7 +248,7 @@ end
 --[[
 <?xml version="1.0" encoding="utf-8"?>
 <assembly xmlns="urn:schemas-microsoft-com:asm.v1" manifestVersion="1.0" xmlns:asmv3="urn:schemas-microsoft-com:asm.v3">
-    <assemblyIdentity type="win32" name="CeoiGingSek.LuaSTG.Sub" version="1.0.0.0"/>
+    <assemblyIdentity type="win32" name="KaleiAlma.LuaSTG.Evo" version="1.0.0.0"/>
     <trustInfo xmlns="urn:schemas-microsoft-com:asm.v3">
         <security>
             <requestedPrivileges>
@@ -293,7 +293,7 @@ end
 
 local manifest_fmt = [[<?xml version="1.0" encoding="utf-8"?>
 <assembly xmlns="urn:schemas-microsoft-com:asm.v1" manifestVersion="1.0" xmlns:asmv3="urn:schemas-microsoft-com:asm.v3">
-    <assemblyIdentity type="win32" name="CeoiGingSek.LuaSTG.Sub" version="%s"/>
+    <assemblyIdentity type="win32" name="KaleiAlma.LuaSTG.Evo" version="%s"/>
     <trustInfo xmlns="urn:schemas-microsoft-com:asm.v3">
         <security>
             <requestedPrivileges>
@@ -352,7 +352,7 @@ end
 #pragma once
 
 #define LUASTG_NAME          "LuaSTG"
-#define LUASTG_BRANCH        "Sub"
+#define LUASTG_BRANCH        "Evo"
 #define LUASTG_VERSION_NAME  "v0.0.1"
 #define LUASTG_VERSION_MAJOR 0
 #define LUASTG_VERSION_MINOR 0
@@ -370,7 +370,7 @@ end
 local h_fmt = [[#pragma once
 
 #define LUASTG_NAME          "LuaSTG"
-#define LUASTG_BRANCH        "Sub"
+#define LUASTG_BRANCH        "Evo"
 #define LUASTG_VERSION_NAME  "v%d.%d.%d"
 #define LUASTG_VERSION_MAJOR %d
 #define LUASTG_VERSION_MINOR %d
