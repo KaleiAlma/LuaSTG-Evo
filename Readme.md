@@ -10,14 +10,14 @@ You can download LuaSTG Evo from the [Releases Page](https://github.com/KaleiAlm
 
 ## Major Migration Content
 
-* Graphic API: Direct3D 11 to OpenGL 4.5
+* Graphic API: Direct3D 11 to OpenGL 4.1
 * Audio API: XAudio2 to SDL2 + miniaudio
 * Window API: Win32 to SDL2
 
 ## Requirements
 
-* Operating System: Windows or Linux
-* Graphics Card: compatible with OpenGL 4.5
+* Operating System: Windows/macOS (Experimental Support)/Linux
+* Graphics Card: compatible with OpenGL 4.1
 
 ## Build Requirements
 

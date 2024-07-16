@@ -237,31 +237,31 @@
 
 // Default Fragment Shader
 const GLchar default_fragment[]{R"(
-#version 450 core
+#version 410 core
 
-layout(binding = 2) uniform camera_data
+uniform camera_data
 {
     vec4 camera_pos;
     vec4 camera_at;
 };
-layout(binding = 3) uniform fog_data
+uniform fog_data
 {
     vec4 fog_color;
     vec4 fog_range;
 };
-layout(binding = 4) uniform alpha_cull
+uniform alpha_cull
 {
     vec4 base_color;
     vec4 alpha;
 };
-layout(binding = 5) uniform light_info
+uniform light_info
 {
     vec4 ambient;
     vec4 sunshine_pos;
     vec4 sunshine_dir;
     vec4 sunshine_color;
 };
-layout(binding = 0) uniform sampler2D sampler0;
+uniform sampler2D sampler0;
 
 float channel_minimum = 1.0 / 255.0;
 
@@ -278,17 +278,17 @@ subroutine vec4 BaseTexture();
 subroutine vec4 VertexColor();
 subroutine bool AlphaMask(vec4);
 
-layout(location = 0) subroutine uniform Fog fog_uniform;
-layout(location = 1) subroutine uniform BaseTexture btex_uniform;
-layout(location = 2) subroutine uniform VertexColor vc_uniform;
-layout(location = 3) subroutine uniform AlphaMask amask_uniform;
+subroutine uniform Fog fog_uniform;
+subroutine uniform BaseTexture btex_uniform;
+subroutine uniform VertexColor vc_uniform;
+subroutine uniform AlphaMask amask_uniform;
 
-layout(index = 0) subroutine(Fog) vec4 fog_none(vec4 color)
+subroutine(Fog) vec4 fog_none(vec4 color)
 {
     return color; // pass through
 }
 
-layout(index = 1) subroutine(Fog) vec4 fog_linear(vec4 color)
+subroutine(Fog) vec4 fog_linear(vec4 color)
 {
     float dist = distance(camera_pos.xyz, wpos.xyz);
     float k = clamp((dist - fog_range.x) / fog_range.w, 0.0, 1.0);
@@ -300,7 +300,7 @@ layout(index = 1) subroutine(Fog) vec4 fog_linear(vec4 color)
     return color;
 }
 
-layout(index = 2) subroutine(Fog) vec4 fog_exp(vec4 color)
+subroutine(Fog) vec4 fog_exp(vec4 color)
 {
     float dist = distance(camera_pos.xyz, wpos.xyz);
     float k = clamp(1.0 - exp(-(dist * fog_range.x)), 0.0, 1.0);
@@ -312,7 +312,7 @@ layout(index = 2) subroutine(Fog) vec4 fog_exp(vec4 color)
     return color;
 }
 
-layout(index = 3) subroutine(Fog) vec4 fog_exp2(vec4 color)
+subroutine(Fog) vec4 fog_exp2(vec4 color)
 {
     float dist = distance(camera_pos.xyz, wpos.xyz);
     float k = clamp(1.0 - exp(-pow(dist * fog_range.x, 2.0)), 0.0, 1.0);
@@ -324,33 +324,33 @@ layout(index = 3) subroutine(Fog) vec4 fog_exp2(vec4 color)
     return color;
 }
 
-layout(index = 4) subroutine(BaseTexture) vec4 no_base_texture()
+subroutine(BaseTexture) vec4 no_base_texture()
 {
     return vec4(1.0, 1.0, 1.0, 1.0);
 }
 
-layout(index = 5) subroutine(BaseTexture) vec4 base_texture()
+subroutine(BaseTexture) vec4 base_texture()
 {
     vec4 color = texture(sampler0, uv);
     return color; // * vec4(pow(col.rgb, vec3(2.2)), col.a);
 }
 
-layout(index = 6) subroutine(VertexColor) vec4 no_vertex_color()
+subroutine(VertexColor) vec4 no_vertex_color()
 {
     return vec4(1.0, 1.0, 1.0, 1.0);
 }
 
-layout(index = 7) subroutine(VertexColor) vec4 vertex_color()
+subroutine(VertexColor) vec4 vertex_color()
 {
     return col;
 }
 
-layout(index = 8) subroutine(AlphaMask) bool no_alpha_mask(vec4 solid_color)
+subroutine(AlphaMask) bool no_alpha_mask(vec4 solid_color)
 {
     return false;
 }
 
-layout(index = 9) subroutine(AlphaMask) bool alpha_mask(vec4 solid_color)
+subroutine(AlphaMask) bool alpha_mask(vec4 solid_color)
 {
     return solid_color.a < alpha.x;
 }
@@ -377,13 +377,13 @@ void main()
 
 // Default Vertex Shader
 const GLchar default_vertex[]{R"(
-#version 450 core
+#version 410 core
 
-layout(binding = 0) uniform view_proj_buffer
+uniform view_proj_buffer
 {
     mat4 view_proj;
 };
-layout(binding = 1) uniform world_buffer
+uniform world_buffer
 {
     mat4 world;
     mat4 norm_world;
@@ -461,6 +461,20 @@ namespace Core::Graphics
 
         glDeleteShader(frag);
         glDeleteShader(vert);
+
+        GLuint idx_view_proj_buffer = glGetUniformBlockIndex(shader_program, "view_proj_buffer");
+        GLuint idx_world_buffer = glGetUniformBlockIndex(shader_program, "world_buffer");
+        GLuint idx_camera_data = glGetUniformBlockIndex(shader_program, "camera_data");
+        GLuint idx_fog_data = glGetUniformBlockIndex(shader_program, "fog_data");
+        GLuint idx_alpha_cull = glGetUniformBlockIndex(shader_program, "alpha_cull");
+        GLuint idx_light_info = glGetUniformBlockIndex(shader_program, "light_info");
+
+        glUniformBlockBinding(shader_program, idx_view_proj_buffer, 0);
+        glUniformBlockBinding(shader_program, idx_world_buffer, 1);
+        glUniformBlockBinding(shader_program, idx_camera_data, 2);
+        glUniformBlockBinding(shader_program, idx_fog_data, 3);
+        glUniformBlockBinding(shader_program, idx_alpha_cull, 4);
+        glUniformBlockBinding(shader_program, idx_light_info, 5);
 
         return true;
     }

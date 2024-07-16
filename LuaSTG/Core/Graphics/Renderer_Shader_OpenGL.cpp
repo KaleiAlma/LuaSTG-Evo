@@ -9,18 +9,18 @@
 
 // Default Fragment Shader
 const GLchar default_fragment[]{R"(
-#version 450 core
+#version 410 core
 
-layout(binding = 2) uniform camera_data
+uniform camera_data
 {
     vec4 camera_pos;
 };
-layout(binding = 3) uniform fog_data
+uniform fog_data
 {
     vec4 fog_color;
     vec4 fog_range;
 };
-layout(binding = 0) uniform sampler2D sampler0;
+uniform sampler2D sampler0;
 
 float channel_minimum = 1.0 / 255.0;
 
@@ -34,29 +34,29 @@ layout(location = 0) out vec4 col_out;
 subroutine vec4 Blend();
 subroutine vec4 Fog(vec4);
 
-layout(location = 0) subroutine uniform Blend blend_uniform;
-layout(location = 1) subroutine uniform Fog fog_uniform;
+subroutine uniform Blend blend_uniform;
+subroutine uniform Fog fog_uniform;
 
-layout(index = 0) subroutine(Blend) vec4 vb_zero()
+subroutine(Blend) vec4 vb_zero()
 {
     vec4 color = texture(sampler0, uv);
     color.rgb *= color.a;
     return color;
 }
 
-layout(index = 1) subroutine(Blend) vec4 vb_zero_pmul()
+subroutine(Blend) vec4 vb_zero_pmul()
 {
     return texture(sampler0, uv); // pass through
 }
 
-layout(index = 2) subroutine(Blend) vec4 vb_one()
+subroutine(Blend) vec4 vb_one()
 {
     vec4 color = col;
     color.rgb *= color.a;
     return color;
 }
 
-layout(index = 3) subroutine(Blend) vec4 vb_one_pmul()
+subroutine(Blend) vec4 vb_one_pmul()
 {
     return col; // pass through
 }
@@ -71,13 +71,13 @@ vec4 add_common(vec4 color) {
     return color;
 }
 
-layout(index = 4) subroutine(Blend) vec4 vb_add()
+subroutine(Blend) vec4 vb_add()
 {
     vec4 color = texture(sampler0, uv);
     return add_common(color);
 }
 
-layout(index = 5) subroutine(Blend) vec4 vb_add_pmul()
+subroutine(Blend) vec4 vb_add_pmul()
 {
     vec4 color = texture(sampler0, uv);
 
@@ -91,14 +91,14 @@ layout(index = 5) subroutine(Blend) vec4 vb_add_pmul()
     return add_common(color);
 }
 
-layout(index = 6) subroutine(Blend) vec4 vb_mul()
+subroutine(Blend) vec4 vb_mul()
 {
     vec4 color = texture(sampler0, uv) * col;
     color.rgb *= color.a;
     return color;
 }
 
-layout(index = 7) subroutine(Blend) vec4 vb_mul_pmul()
+subroutine(Blend) vec4 vb_mul_pmul()
 {
     vec4 color = texture(sampler0, uv) * col;
     color.rgb *= col.a; // need to multiply with texture alpha
@@ -106,12 +106,12 @@ layout(index = 7) subroutine(Blend) vec4 vb_mul_pmul()
 }
 
 
-layout(index = 8) subroutine(Fog) vec4 fog_none(vec4 color)
+subroutine(Fog) vec4 fog_none(vec4 color)
 {
     return color; // pass through
 }
 
-layout(index = 9) subroutine(Fog) vec4 fog_linear(vec4 color)
+subroutine(Fog) vec4 fog_linear(vec4 color)
 {
     float dist = distance(camera_pos.xyz, pos.xyz);
     float k = clamp((dist - fog_range.x) / fog_range.w, 0.0, 1.0);
@@ -123,7 +123,7 @@ layout(index = 9) subroutine(Fog) vec4 fog_linear(vec4 color)
     return color;
 }
 
-layout(index = 10) subroutine(Fog) vec4 fog_exp(vec4 color)
+subroutine(Fog) vec4 fog_exp(vec4 color)
 {
     float dist = distance(camera_pos.xyz, pos.xyz);
     float k = clamp(1.0 - exp(-(dist * fog_range.x)), 0.0, 1.0);
@@ -135,7 +135,7 @@ layout(index = 10) subroutine(Fog) vec4 fog_exp(vec4 color)
     return color;
 }
 
-layout(index = 11) subroutine(Fog) vec4 fog_exp2(vec4 color)
+subroutine(Fog) vec4 fog_exp2(vec4 color)
 {
     float dist = distance(camera_pos.xyz, pos.xyz);
     float k = clamp(1.0 - exp(-pow(dist * fog_range.x, 2.0)), 0.0, 1.0);
@@ -155,14 +155,14 @@ void main()
 
 // Default Vertex Shader
 const GLchar default_vertex[]{R"(
-#version 450 core
+#version 410 core
 
-layout(binding = 0) uniform view_proj_buffer
+uniform view_proj_buffer
 {
     mat4 view_proj;
 };
 #if defined(WORLD_MATRIX)
-layout(binding = 1) uniform world_buffer
+uniform world_buffer
 {
     mat4 world;
 };
@@ -263,7 +263,7 @@ namespace Core::Graphics
 		{
 			GLchar log[1024];
 			int32_t log_len;
-			glGetShaderInfoLog(opengl_prgm, 1024, &log_len, log);
+			glGetProgramInfoLog(opengl_prgm, 1024, &log_len, log);
 			spdlog::error("[core] Failed to link shader: {}", log);
 			glDeleteShader(opengl_frag);
 			glDeleteShader(opengl_vert);
@@ -287,6 +287,7 @@ namespace Core::Graphics
 
 		for (int block = 0; block < amt_uniform_blocks; block++)
 		{
+			glUniformBlockBinding(opengl_prgm, block, block);
 			glGetProgramResourceiv(opengl_prgm, GL_UNIFORM_BLOCK, block, block_properties_size, block_properties, block_properties_size, NULL, block_values);
 			name_buffer.resize(block_values[3]);
 			glGetProgramResourceName(opengl_prgm, GL_UNIFORM_BLOCK, block, name_buffer.size(), NULL, &name_buffer[0]);
@@ -294,10 +295,12 @@ namespace Core::Graphics
 
 			LocalConstantBuffer local_buffer;
 			local_buffer.index = block_values[0];
+			spdlog::debug("[core] binding: {}", block_values[0]);
 			local_buffer.buffer.resize(block_values[1]);
 			local_buffer.variable.reserve(block_values[2]);
 
 			m_buffer_map.emplace(name, std::move(local_buffer));
+
 		}
 
 		GLint amt_uniforms = 0;
@@ -395,6 +398,14 @@ namespace Core::Graphics
 
 		glDeleteShader(frag);
 		glDeleteShader(vert);
+
+		GLuint idx_view_proj_buffer = glGetUniformBlockIndex(_program, "view_proj_buffer");
+		GLuint idx_camera_data = glGetUniformBlockIndex(_program, "camera_data");
+		GLuint idx_fog_data = glGetUniformBlockIndex(_program, "fog_data");
+
+		glUniformBlockBinding(_program, idx_view_proj_buffer, 0);
+		glUniformBlockBinding(_program, idx_camera_data, 2);
+		glUniformBlockBinding(_program, idx_fog_data, 3);
 
 		return true;
 	}
