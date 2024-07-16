@@ -394,8 +394,8 @@ namespace Core::Graphics
 
 		glBlitFramebuffer(
 			0, 0, m_canvas_size.x, m_canvas_size.y,
-			(wsize.x - scale * (m_canvas_size.x + d.x)) / 2, (wsize.y - scale * (m_canvas_size.y + d.y)) / 2,
-			(wsize.x + scale * (m_canvas_size.x + d.x)) / 2, (wsize.y + scale * (m_canvas_size.y + d.y)) / 2,
+			(wsize.x - scale * (m_canvas_size.x + d.x)) / 2, (wsize.y + scale * (m_canvas_size.y + d.y)) / 2,
+			(wsize.x + scale * (m_canvas_size.x + d.x)) / 2, (wsize.y - scale * (m_canvas_size.y + d.y)) / 2,
 			GL_COLOR_BUFFER_BIT, GL_LINEAR
 		);
 

@@ -4,6 +4,7 @@
 #include "Core/Type.hpp"
 #include "glad/gl.h"
 #include "spdlog/spdlog.h"
+#include <cassert>
 #include <vector>
 
 // Default Fragment Shader
@@ -315,7 +316,6 @@ namespace Core::Graphics
 			name_buffer.resize(uniform_values[1]);
 			glGetProgramResourceName(opengl_prgm, GL_UNIFORM, uniform, name_buffer.size(), NULL, &name_buffer[0]);
 			std::string name(name_buffer.data(), name_buffer.size() - 1);
-			spdlog::info("[core] shader uniform name: {}", name);
 
 			if (uniform_values[0] == GL_SAMPLER_2D) // Handle Texture Uniforms
 			{
@@ -329,7 +329,34 @@ namespace Core::Graphics
 			{
 				LocalVariable local_variable;
 				local_variable.offset = uniform_values[2];
-				local_variable.size = uniform_values[3];
+				switch (uniform_values[0])
+				{
+				case GL_FLOAT:
+					local_variable.size = uniform_values[3] * sizeof(float);
+					break;
+				case GL_FLOAT_VEC2:
+					local_variable.size = uniform_values[3] * sizeof(float) * 2;
+					break;
+				case GL_FLOAT_VEC3:
+					local_variable.size = uniform_values[3] * sizeof(float) * 3;
+					break;
+				case GL_FLOAT_VEC4:
+					local_variable.size = uniform_values[3] * sizeof(float) * 4;
+					break;
+
+				case GL_FLOAT_MAT2:
+					local_variable.size = uniform_values[3] * sizeof(float) * 4;
+					break;
+				case GL_FLOAT_MAT3:
+					local_variable.size = uniform_values[3] * sizeof(float) * 9;
+					break;
+				case GL_FLOAT_MAT4:
+					local_variable.size = uniform_values[3] * sizeof(float) * 16;
+					break;
+
+				default:
+					assert(false);
+				}
 
 				// data structures are different between DirectX and OpenGL, so take a performance hit
 				for (auto& v : m_buffer_map)

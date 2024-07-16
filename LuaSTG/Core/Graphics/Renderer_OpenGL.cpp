@@ -689,7 +689,7 @@ namespace Core::Graphics
 			batchFlush();
 			_camera_state_set.ortho = box;
 			_camera_state_set.is_3D = false;
-			glm::mat4 m4 = glm::orthoLH_ZO(box.a.x, box.b.x, box.b.y, box.a.y, box.a.z, box.b.z);
+			glm::mat4 m4 = glm::orthoLH_ZO(box.a.x, box.b.x, box.a.y, box.b.y, box.a.z, box.b.z);
 			// spdlog::info("[core] setOrtho: {} {} {} {}", box.a.x, box.b.x, box.b.y, box.a.y);
 			/* upload vp matrix */ {
 				glBindBuffer(GL_UNIFORM_BUFFER, _vp_matrix_buffer);
@@ -710,10 +710,10 @@ namespace Core::Graphics
 			_camera_state_set.znear = znear;
 			_camera_state_set.zfar = zfar;
 			_camera_state_set.is_3D = true;
-			glm::vec3 const eyef3(eye.x, eye.y, eye.z);
-			glm::vec3 const lookatf3(lookat.x, lookat.y, lookat.z);
+			glm::vec3 const eyef3(eye.x, -eye.y, eye.z);
+			glm::vec3 const lookatf3(lookat.x, -lookat.y, lookat.z);
 			glm::vec3 const headupf3(headup.x, headup.y, headup.z);
-			glm::mat4 m4 = glm::perspectiveLH_ZO(fov, aspect, znear, zfar) * glm::lookAtLH(eyef3, lookatf3, headupf3);
+			glm::mat4 m4 = glm::scale(glm::perspectiveLH_ZO(fov, aspect, znear, zfar) * glm::lookAtLH(eyef3, lookatf3, headupf3), glm::vec3(1, -1, 1));
 			float const camera_pos[8] = {
 				eye.x, eye.y, eye.z, 0.0f,
 				lookatf3.x - eyef3.x, lookatf3.y - eyef3.y, lookatf3.z - eyef3.z, 0.0f,
@@ -737,7 +737,7 @@ namespace Core::Graphics
 		{
 			batchFlush();
 			_state_set.viewport = box;
-			glViewport((GLint)box.a.x, (GLint)box.b.y, (GLint)box.b.x - (GLint)box.a.x, (GLint)box.a.y - (GLint)box.b.y);
+			glViewport((GLint)box.a.x, (GLint)box.a.y, (GLint)box.b.x - (GLint)box.a.x, (GLint)box.b.y - (GLint)box.a.y);
 		}
 	}
 	void Renderer_OpenGL::setScissorRect(RectF const& rect)
@@ -1084,10 +1084,10 @@ namespace Core::Graphics
 
 		/* upload vertex data */ {
 			DrawVertex const vertex_data[4] = {
-				DrawVertex(0.f,      (float)h, 0.0f, 0.0f),
-				DrawVertex((float)w, (float)h, 1.0f, 0.0f),
-				DrawVertex((float)w, 0.f,      1.0f, 1.0f),
-				DrawVertex(0.f,      0.f,      0.0f, 1.0f),
+				DrawVertex(0.f,      0.f,      0.0f, 0.0f),
+				DrawVertex((float)w, 0.f,      1.0f, 0.0f),
+				DrawVertex((float)w, (float)h, 1.0f, 1.0f),
+				DrawVertex(0.f,      (float)h, 0.0f, 1.0f),
 			};
 			glBindBuffer(GL_ARRAY_BUFFER, _fx_vbuffer);
 			glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_data), &vertex_data, GL_STATIC_DRAW);
@@ -1110,19 +1110,18 @@ namespace Core::Graphics
 		glBindBufferBase(GL_UNIFORM_BUFFER, 0, _vp_matrix_buffer);
 
 		/* upload built-in value */ if (cv_n > 0) {
-
 			glBindBuffer(GL_UNIFORM_BUFFER, _user_float_buffer);
-			glBufferData(GL_UNIFORM_BUFFER, std::min<GLuint>((GLuint)cv_n, 8) * sizeof(Vector4F), &cv, GL_STATIC_DRAW);
+			glBufferData(GL_UNIFORM_BUFFER, std::min<GLuint>((GLuint)cv_n, 8) * sizeof(Vector4F), cv, GL_STATIC_DRAW);
 		}
 		/* upload built-in value */ {
 			float ps_cbdata[8] = {
 				(float)w, (float)h, 0.0f, 0.0f,
 				_state_set.viewport.a.x, _state_set.viewport.a.y, _state_set.viewport.b.x, _state_set.viewport.b.y,
 			};
-			glBindBuffer(GL_UNIFORM_BUFFER, _user_float_buffer);
-			glBufferData(GL_UNIFORM_BUFFER, std::min<GLuint>((GLuint)cv_n, 8) * sizeof(Vector4F), &cv, GL_STATIC_DRAW);
+			glBindBuffer(GL_UNIFORM_BUFFER, _fog_data_buffer);
+			glBufferData(GL_UNIFORM_BUFFER, sizeof(ps_cbdata), &ps_cbdata, GL_STATIC_DRAW);
 		}
-		GLuint frag_bufs[2] = { _user_float_buffer, _fog_data_buffer };
+		GLuint frag_bufs[2] = { _fog_data_buffer, _user_float_buffer };
 		glBindBuffersBase(GL_UNIFORM_BUFFER, 2, 2, frag_bufs);
 
 		for (int stage = 0; stage < std::min<int>((int)tv_sv_n, 4); stage++)
@@ -1232,13 +1231,12 @@ namespace Core::Graphics
 
 		glUseProgram(static_cast<PostEffectShader_OpenGL*>(p_effect)->GetShader());
 
-		
 		/* upload vertex data */ {
 			DrawVertex const vertex_data[4] = {
-				DrawVertex(0.f,      (float)h, 0.0f, 0.0f),
-				DrawVertex((float)w, (float)h, 1.0f, 0.0f),
-				DrawVertex((float)w, 0.f,      1.0f, 1.0f),
-				DrawVertex(0.f,      0.f,      0.0f, 1.0f),
+				DrawVertex(0.f,      0.f,      0.0f, 0.0f),
+				DrawVertex((float)w, 0.f,      1.0f, 0.0f),
+				DrawVertex((float)w, (float)h, 1.0f, 1.0f),
+				DrawVertex(0.f,      (float)h, 0.0f, 1.0f),
 			};
 			glBindBuffer(GL_ARRAY_BUFFER, _fx_vbuffer);
 			glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_data), &vertex_data, GL_STATIC_DRAW);
@@ -1252,6 +1250,12 @@ namespace Core::Graphics
 		glVertexAttribPointer(2, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(DrawVertex), (const GLvoid *)offsetof(DrawVertex, color));
 		glEnableVertexAttribArray(2);
 
+		if (!p_effect->apply(this))
+		{
+			spdlog::error("[core] Cannot apply PostEffectShader variables");
+			return false;
+		}
+		
 		/* upload vp matrix */ {
 			glm::mat4 mat4 = glm::orthoLH_ZO(0.0f, (float)w, 0.0f, (float)h, 0.0f, 1.0f);
 			glBindBuffer(GL_UNIFORM_BUFFER, _vp_matrix_buffer);
@@ -1260,13 +1264,15 @@ namespace Core::Graphics
 
 		glBindBufferBase(GL_UNIFORM_BUFFER, 0, _vp_matrix_buffer);
 
-		// [Stage PS]
-
-		if (!p_effect->apply(this))
-		{
-			spdlog::error("[core] Cannot apply PostEffectShader variables");
-			return false;
+		/* upload built-in value */ {
+			float ps_cbdata[8] = {
+				(float)w, (float)h, 0.0f, 0.0f,
+				_state_set.viewport.a.x, _state_set.viewport.a.y, _state_set.viewport.b.x, _state_set.viewport.b.y,
+			};
+			glBindBuffer(GL_UNIFORM_BUFFER, _fog_data_buffer);
+			glBufferData(GL_UNIFORM_BUFFER, sizeof(ps_cbdata), &ps_cbdata, GL_STATIC_DRAW);
 		}
+		glBindBufferBase(GL_UNIFORM_BUFFER, 3, _fog_data_buffer);
 
 		glDisable(GL_DEPTH_TEST);
 		switch (blend) {
@@ -1328,7 +1334,7 @@ namespace Core::Graphics
 
 		// DRAW
 
-		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, NULL);
+		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, NULL);
 
 		return beginBatch();
 	}

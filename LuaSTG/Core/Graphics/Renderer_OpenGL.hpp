@@ -12,7 +12,7 @@ namespace Core::Graphics
 {
 	struct RendererStateSet
 	{
-		BoxF viewport = { 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f };
+		BoxF viewport = { 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f };
 		RectF scissor_rect = { 0.0f, 0.0f, 1.0f, 1.0f };
 		float fog_near_or_density = 0.0f;
 		float fog_far = 0.0f;

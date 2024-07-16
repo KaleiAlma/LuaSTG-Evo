@@ -2,6 +2,7 @@
 #include "LuaBinding/lua_utility.hpp"
 #include "LuaBinding/PostEffectShader.hpp"
 #include "AppFrame.h"
+#include "spdlog/spdlog.h"
 
 inline Core::Graphics::IRenderer* LR2D() { return LAPP.GetAppModel()->getRenderer(); }
 inline LuaSTGPlus::ResourceMgr& LRESMGR() { return LAPP.GetResourceMgr(); }
@@ -769,8 +770,8 @@ static int compat_SetViewport(lua_State* L)noexcept
         );
     }
     Core::Vector2U const backbuf_size = LAPP.GetRenderTargetManager()->GetTopRenderTargetSize();
-    // box.a.y = (float)backbuf_size.y - box.a.y;
-    // box.b.y = (float)backbuf_size.y - box.b.y;
+    box.a.y = (float)backbuf_size.y - box.a.y;
+    box.b.y = (float)backbuf_size.y - box.b.y;
     LR2D()->setViewport(box);
     return 0;
 }
@@ -946,7 +947,16 @@ static int compat_PostEffect(lua_State* L)
         return luaL_error(L, "texture '%s' not found.", rt_name);
     check_rendertarget_usage(prt);
     
-    Core::Vector4F cbdata[8] = {};
+    Core::Vector4F cbdata[8] = {
+        Core::Vector4F(0.f, 0.f, 0.f, 0.f),
+        Core::Vector4F(0.f, 0.f, 0.f, 0.f),
+        Core::Vector4F(0.f, 0.f, 0.f, 0.f),
+        Core::Vector4F(0.f, 0.f, 0.f, 0.f),
+        Core::Vector4F(0.f, 0.f, 0.f, 0.f),
+        Core::Vector4F(0.f, 0.f, 0.f, 0.f),
+        Core::Vector4F(0.f, 0.f, 0.f, 0.f),
+        Core::Vector4F(0.f, 0.f, 0.f, 0.f),
+    };
     Core::Graphics::ITexture2D* tdata[4] = {};
     Core::Graphics::IRenderer::SamplerState tsdata[4] = {};
     
