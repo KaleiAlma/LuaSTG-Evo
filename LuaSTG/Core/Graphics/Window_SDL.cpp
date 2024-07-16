@@ -4,6 +4,7 @@
 #include "Core/Type.hpp"
 #include "Core/i18n.hpp"
 #include "SDL_events.h"
+#include "SDL_mouse.h"
 #include "SDL_video.h"
 #include "glad/gl.h"
 #include "SDL.h"
@@ -536,43 +537,55 @@ namespace Core::Graphics
 			assert(false); return false;
 
 		case WindowCursor::None:
+			SDL_ShowCursor(SDL_DISABLE);
 			SDL_SetCursor(NULL);
 			break;
 
 		case WindowCursor::Arrow:
+			SDL_ShowCursor(SDL_ENABLE);
 			SDL_SetCursor(SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_ARROW));
 			break;
 		case WindowCursor::Hand:
+			SDL_ShowCursor(SDL_ENABLE);
 			SDL_SetCursor(SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_HAND));
 			break;
 
 		case WindowCursor::Cross:
+			SDL_ShowCursor(SDL_ENABLE);
 			SDL_SetCursor(SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_CROSSHAIR));
 			break;
 		case WindowCursor::TextInput:
+			SDL_ShowCursor(SDL_ENABLE);
 			SDL_SetCursor(SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_IBEAM));
 			break;
 		
 		case WindowCursor::Resize:
+			SDL_ShowCursor(SDL_ENABLE);
 			SDL_SetCursor(SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_SIZEALL));
 			break;
 		case WindowCursor::ResizeEW:
+			SDL_ShowCursor(SDL_ENABLE);
 			SDL_SetCursor(SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_SIZEWE));
 			break;
 		case WindowCursor::ResizeNS:
+			SDL_ShowCursor(SDL_ENABLE);
 			SDL_SetCursor(SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_SIZENS));
 			break;
 		case WindowCursor::ResizeNESW:
+			SDL_ShowCursor(SDL_ENABLE);
 			SDL_SetCursor(SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_SIZENESW));
 			break;
 		case WindowCursor::ResizeNWSE:
+			SDL_ShowCursor(SDL_ENABLE);
 			SDL_SetCursor(SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_SIZENWSE));
 			break;
 
 		case WindowCursor::NotAllowed:
+			SDL_ShowCursor(SDL_ENABLE);
 			SDL_SetCursor(SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_NO));
 			break;
 		case WindowCursor::Wait:
+			SDL_ShowCursor(SDL_ENABLE);
 			SDL_SetCursor(SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_WAIT));
 			break;
 		}
