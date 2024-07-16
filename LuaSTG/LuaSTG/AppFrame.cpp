@@ -1,6 +1,7 @@
 ﻿#include "AppFrame.h"
 #include "Core/FileManager.hpp"
 // #include "Platform/XInput.hpp"
+#include "SDL_filesystem.h"
 #include "Utility/Utility.h"
 #include "Debugger/ImGuiExtension.h"
 #include "LuaBinding/LuaAppFrame.hpp"
@@ -127,6 +128,9 @@ bool AppFrame::Init()noexcept
 	spdlog::info("[luastg] 初始化引擎");
 	m_iStatus = AppStatus::Initializing;
 
+#ifdef __APPLE__
+	std::filesystem::current_path(SDL_GetBasePath());
+#endif
 	//////////////////////////////////////// Lua初始化部分
 	
 	spdlog::info("[luastg] 初始化luajit引擎");
