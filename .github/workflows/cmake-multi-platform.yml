@@ -54,7 +54,7 @@ jobs:
     - if: ${{ runner.os == 'Windows' }}
       run: choco install ninja
     - if: ${{ runner.os == 'macOS' }}
-      run: brew install ninja llvm@18
+      run: brew install ninja llvm@18 dylibbundler
 
     # - if: ${{ runner.os == 'Windows' }}
     

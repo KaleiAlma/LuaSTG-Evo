@@ -212,20 +212,22 @@ target_link_libraries(LuaSTG PRIVATE
 set(LUASTG_BUILD_OUTPUT_DIR ${CMAKE_BINARY_DIR}/bin)
 if(APPLE)
     # apple fixes
-    set_property(TARGET LuaSTG PROPERTY XCODE_EMBED_FRAMEWORKS 
-        "/usr/local/opt/zstd/lib/libzstd.1.dylib"
-        "/usr/local/opt/openssl@3/lib/libssl.3.dylib"
-        "/usr/local/opt/xz/lib/liblzma.5.dylib"
-    )
-    set_target_properties(LuaSTG PROPERTIES XCODE_EMBED_FRAMEWORKS_PATH "Frameworks")
-    set_target_properties(LuaSTG PROPERTIES XCODE_EMBED_FRAMEWORKS_REMOVE_HEADERS_ON_COPY ON)
-    set_target_properties(LuaSTG PROPERTIES XCODE_EMBED_FRAMEWORKS_CODE_SIGN_ON_COPY ON)
+    # set_property(TARGET LuaSTG PROPERTY XCODE_EMBED_FRAMEWORKS 
+    #     "/usr/local/opt/zstd/lib/libzstd.1.dylib"
+    #     "/usr/local/opt/openssl@3/lib/libssl.3.dylib"
+    #     "/usr/local/opt/xz/lib/liblzma.5.dylib"
+    # )
+    # set_target_properties(LuaSTG PROPERTIES XCODE_EMBED_FRAMEWORKS_PATH "Frameworks")
+    # set_target_properties(LuaSTG PROPERTIES XCODE_EMBED_FRAMEWORKS_REMOVE_HEADERS_ON_COPY ON)
+    # set_target_properties(LuaSTG PROPERTIES XCODE_EMBED_FRAMEWORKS_CODE_SIGN_ON_COPY ON)
 
     add_custom_command(TARGET LuaSTG POST_BUILD
         # apple fixes
         # COMMAND ${CMAKE_COMMAND} -E copy /usr/local/opt/zstd/lib/libzstd.1.dylib ${CMAKE_BINARY_DIR}/LuaSTG/LuaSTG.app/Contents/MacOS
         # COMMAND ${CMAKE_COMMAND} -E copy /usr/local/opt/openssl@3/lib/libssl.3.dylib ${CMAKE_BINARY_DIR}/LuaSTG/LuaSTG.app/Contents/MacOS
         # COMMAND ${CMAKE_COMMAND} -E copy /usr/local/opt/xz/lib/liblzma.5.dylib ${CMAKE_BINARY_DIR}/LuaSTG/LuaSTG.app/Contents/MacOS
+
+        dylibbundler -of -cd -b -x ./LuaSTG.app/Contents/MacOS/LuaSTG -d ./LuaSTG.app/Contents/Frameworks -p @executable_path/../Frameworks/
 
         COMMAND ${CMAKE_COMMAND} -E make_directory ${LUASTG_BUILD_OUTPUT_DIR}
 
