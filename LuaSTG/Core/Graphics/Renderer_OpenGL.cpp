@@ -263,7 +263,7 @@ namespace Core::Graphics
 		glGenBuffers(1, &_fx_ibuffer);
 		if (_fx_ibuffer == 0) return false;
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _fx_ibuffer);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, 6 * sizeof(IRenderer::DrawIndex), &idx_, GL_STATIC_DRAW);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(idx_), &idx_, GL_STATIC_DRAW);
 
 		for (auto& vi_ : _vi_buffer)
 		{
@@ -1195,7 +1195,7 @@ namespace Core::Graphics
 
 		// DRAW
 
-		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, NULL);
+		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, NULL);
 
 		return beginBatch();
 	}
