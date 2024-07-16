@@ -753,9 +753,9 @@ namespace Core::Audio
 
 	StreamAudioPlayer_SDL::StreamAudioPlayer_SDL(Device_SDL* p_device, IDecoder* p_decoder)
 		: m_device(p_device)
-	#ifndef NDEBUG
+	// #ifndef NDEBUG
 		, m_decoder(p_decoder)
-	#endif
+	// #endif
 	{
 		// decoding
 
