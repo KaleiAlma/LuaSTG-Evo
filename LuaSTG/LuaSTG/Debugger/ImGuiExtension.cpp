@@ -9,6 +9,7 @@
 // #define WIN32_LEAN_AND_MEAN
 // #define NOMINMAX
 // #include <d3d11.h>
+#include "SDL_video.h"
 #include "glad/gl.h"
 // #include <Xinput.h>
 
@@ -736,7 +737,13 @@ namespace imgui
         std::atomic_int messageFlags;
         void onWindowCreate()
         {
-            assert(ImGui_ImplSDL2_InitForOpenGL((SDL_Window*)APP.GetAppModel()->getWindow()->getNativeHandle(), SDL_GL_GetCurrentContext()));
+            SDL_Window* w = (SDL_Window*)APP.GetAppModel()->getWindow()->getNativeHandle();
+            bool r = ImGui_ImplSDL2_InitForOpenGL(w, SDL_GL_GetCurrentContext());
+            assert(r);
+            if (!r)
+            {
+                spdlog::error("[imgui] Couldn't init ImGui!!");
+            }
         }
         void onWindowDestroy()
         {
@@ -772,32 +779,13 @@ namespace imgui
         // }
         NativeWindowMessageResult onNativeWindowMessage(void* ev)
         {
-            SDL_Event* e = (SDL_Event*)ev;
-            // Core::Vector2U c_size = LAPP.GetAppModel()->getSwapChain()->getCanvasSize();
-            // if (e->type == SDL_MOUSEMOTION) // scale mouse movements
-            // {
-            //     Core::Vector2U w_size = LAPP.GetAppModel()->getWindow()->getSize();
-            //     Core::Vector2F scale_dim = Core::Vector2F((float) w_size.x / c_size.x, (float) w_size.y / c_size.y);
-            //     float scale = std::min(scale_dim.x, scale_dim.y);
-            //     e->motion.x *= scale;
-            //     e->motion.y *= scale;
-            //     e->motion.xrel *= scale;
-            //     e->motion.yrel *= scale;
-            //     if (scale_dim.x > scale_dim.y)
-            //     {
-            //         e->motion.x += (w_size.x - scale * c_size.x) / 2;
-            //     }
-            //     else
-            //     {
-            //         e->motion.y += (w_size.y - scale * c_size.y) / 2;
-            //     }
-            // }
+            if (ImGui::GetIO().BackendPlatformUserData == nullptr)
+            {
+                spdlog::warn("[imgui] Not initialized yet!!");
+                return {};
+            }
 
-            // if (e->type == SDL_WINDOWEVENT && e->window.event == SDL_WINDOWEVENT_SIZE_CHANGED)
-            // {
-            //     glBindTexture(GL_TEXTURE_2D, g_GLTex);
-            //     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, LAPP.GetAppModel()->getWindow()->getSize().x, LAPP.GetAppModel()->getWindow()->getSize().y, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
-            // }
+            SDL_Event* e = (SDL_Event*)ev;
 
             ImGui_ImplSDL2_ProcessEvent((SDL_Event*)ev);
             return {};
