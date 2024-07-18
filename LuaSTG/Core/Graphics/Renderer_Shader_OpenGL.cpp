@@ -284,7 +284,7 @@ namespace Core::Graphics
 		GLint block_values[block_properties_size];
 
 		std::vector<GLchar> name_buffer(128);
-		int block_offs = 1;
+		int block_offs = 0;
 
 		for (int block = 0; block < amt_uniform_blocks; block++)
 		{
@@ -312,7 +312,7 @@ namespace Core::Graphics
 			{
 				glUniformBlockBinding(opengl_prgm, block, 0);
 				m_buffer_map["view_proj_buffer"].index = 0;
-				block_offs -= 1;
+				// block_offs -= 1;
 			}
 		}
 
