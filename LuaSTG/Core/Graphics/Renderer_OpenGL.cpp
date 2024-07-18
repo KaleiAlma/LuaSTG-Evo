@@ -1113,7 +1113,7 @@ namespace Core::Graphics
 			glBufferData(GL_UNIFORM_BUFFER, sizeof(ps_cbdata), &ps_cbdata, GL_STATIC_DRAW);
 		}
 		GLuint frag_bufs[2] = { _fog_data_buffer, _user_float_buffer };
-		glBindBuffersBase(GL_UNIFORM_BUFFER, 1, 2, frag_bufs);
+		glBindBuffersBase(GL_UNIFORM_BUFFER, 2, 2, frag_bufs);
 
 		for (int stage = 0; stage < std::min<int>((int)tv_sv_n, 4); stage++)
 		{
