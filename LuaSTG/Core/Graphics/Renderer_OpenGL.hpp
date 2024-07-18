@@ -130,6 +130,7 @@ namespace Core::Graphics
 
 	public:
 		GLuint GetShader() const noexcept { return opengl_prgm; }
+		void bind(GLuint engine_data, GLuint user_data);
 
 	public:
 		bool setFloat(StringView name, float value);

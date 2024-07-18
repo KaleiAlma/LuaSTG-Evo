@@ -145,6 +145,12 @@ namespace Core::Graphics
 		return true;
 	}
 
+	void PostEffectShader_OpenGL::bind(GLuint engine_data, GLuint user_data)
+	{
+		glBindBufferBase(GL_UNIFORM_BUFFER, m_buffer_map["engine_data"].index, engine_data);
+		glBindBufferBase(GL_UNIFORM_BUFFER, m_buffer_map["user_data"].index, user_data);
+	}
+
 	PostEffectShader_OpenGL::PostEffectShader_OpenGL(Device_OpenGL* p_device, StringView path, bool is_path_)
 		: m_device(p_device)
 		, source(path)
@@ -1112,8 +1118,9 @@ namespace Core::Graphics
 			glBindBuffer(GL_UNIFORM_BUFFER, _fog_data_buffer);
 			glBufferData(GL_UNIFORM_BUFFER, sizeof(ps_cbdata), &ps_cbdata, GL_STATIC_DRAW);
 		}
-		GLuint frag_bufs[2] = { _fog_data_buffer, _user_float_buffer };
-		glBindBuffersBase(GL_UNIFORM_BUFFER, 2, 2, frag_bufs);
+		// GLuint frag_bufs[2] = { _fog_data_buffer, _user_float_buffer };
+		// glBindBuffersBase(GL_UNIFORM_BUFFER, 1, 2, frag_bufs);
+		static_cast<PostEffectShader_OpenGL*>(p_effect)->bind(_fog_data_buffer, _user_float_buffer);
 
 		for (int stage = 0; stage < std::min<int>((int)tv_sv_n, 4); stage++)
 		{
