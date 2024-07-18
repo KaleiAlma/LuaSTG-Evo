@@ -284,17 +284,18 @@ namespace Core::Graphics
 		GLint block_values[block_properties_size];
 
 		std::vector<GLchar> name_buffer(128);
+		int block_offs = 1;
 
 		for (int block = 0; block < amt_uniform_blocks; block++)
 		{
-			glUniformBlockBinding(opengl_prgm, block, block + 1);
+			glUniformBlockBinding(opengl_prgm, block, block + block_offs);
 			glGetProgramResourceiv(opengl_prgm, GL_UNIFORM_BLOCK, block, block_properties_size, block_properties, block_properties_size, NULL, block_values);
 			name_buffer.resize(block_values[3]);
 			glGetProgramResourceName(opengl_prgm, GL_UNIFORM_BLOCK, block, name_buffer.size(), NULL, &name_buffer[0]);
 			std::string name(name_buffer.data(), name_buffer.size() - 1);
 
 			LocalConstantBuffer local_buffer;
-			local_buffer.index = block_values[0];
+			local_buffer.index = block + block_offs;
 			spdlog::debug("[core] name: {}", name);
 			spdlog::debug("[core] binding: {}", block_values[0]);
 			spdlog::debug("[core] datasize: {}", block_values[1]);
@@ -305,7 +306,15 @@ namespace Core::Graphics
 
 			m_buffer_map.emplace(name, std::move(local_buffer));
 
+			if (name == "view_proj_buffer")
+			{
+				block_offs -= 1;
+			}
 		}
+
+		GLuint idx_view_proj_buffer = glGetUniformBlockIndex(opengl_prgm, "view_proj_buffer");
+		glUniformBlockBinding(opengl_prgm, idx_view_proj_buffer, 0);
+		m_buffer_map["view_proj_buffer"].index = 0;
 
 		GLint amt_uniforms = 0;
 		glGetProgramInterfaceiv(opengl_prgm, GL_UNIFORM, GL_ACTIVE_RESOURCES, &amt_uniforms);
@@ -371,7 +380,7 @@ namespace Core::Graphics
 				// data structures are different between DirectX and OpenGL, so take a performance hit
 				for (auto& v : m_buffer_map)
 				{
-					if (v.second.index == uniform_values[4] + 1)
+					if (v.second.index == uniform_values[4])
 					{
 						v.second.variable.emplace(name, std::move(local_variable));
 						break;
@@ -388,10 +397,6 @@ namespace Core::Graphics
 		//	if (v.second.opengl_buffer == 0)
 		//		return false;
 		//}
-
-
-		GLuint idx_view_proj_buffer = glGetUniformBlockIndex(opengl_prgm, "view_proj_buffer");
-		glUniformBlockBinding(opengl_prgm, idx_view_proj_buffer, 0);
 
 		return true;
 	}
