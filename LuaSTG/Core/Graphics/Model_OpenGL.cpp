@@ -778,14 +778,19 @@ namespace Core::Graphics
 
         auto set_state_matrix_from_block = [&](ModelBlock& mblock)
         {
-            GLuint subroutines[4]{
-                (GLuint)IDX(fog),
-                (GLuint)(mblock.image ? 1 : 0) + 4,
-                (GLuint)(mblock.color_buffer ? 1 : 0) + 6,
-                (GLuint)(mblock.alpha_cull ? 1 : 0) + 8,
-            };
+            //GLuint subroutines[4]{
+            //    (GLuint)IDX(fog),
+            //    (GLuint)(mblock.image ? 1 : 0) + 4,
+            //    (GLuint)(mblock.color_buffer ? 1 : 0) + 6,
+            //    (GLuint)(mblock.alpha_cull ? 1 : 0) + 8,
+            //};
+            GLuint subroutines[4];
+            subroutines[shared_->idx_fog_uniform] = (GLuint)IDX(fog);
+            subroutines[shared_->idx_btex_uniform] = (GLuint)(mblock.image ? 1 : 0) + 4;
+            subroutines[shared_->idx_vc_uniform] = (GLuint)(mblock.color_buffer ? 1 : 0) + 6;
+            subroutines[shared_->idx_amask_uniform] = (GLuint)(mblock.alpha_cull ? 1 : 0) + 8;            
 
-            glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 4, &subroutines[0]);
+            glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 4, subroutines);
         };
         auto upload_local_world_matrix = [&](ModelBlock& mblock)
         {

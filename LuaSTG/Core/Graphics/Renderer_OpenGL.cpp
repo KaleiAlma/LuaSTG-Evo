@@ -506,7 +506,13 @@ namespace Core::Graphics
 		{
 			_state_set.texture_alpha_type = state;
 		}
-		GLuint subroutines[2] = { (GLuint)(IDX(_state_set.vertex_color_blend_state) * 2 + IDX(state)), (GLuint)(IDX(_state_set.fog_state) + 8) };
+		//GLuint subroutines[2] = { (GLuint)(IDX(_state_set.vertex_color_blend_state) * 2 + IDX(state)), (GLuint)(IDX(_state_set.fog_state) + 8) };
+		//GLuint subroutines[2] = { (GLuint)(IDX(_state_set.fog_state) + 8), (GLuint)(IDX(_state_set.vertex_color_blend_state) * 2 + IDX(state)) };
+
+		GLuint subroutines[2];
+		subroutines[idx_blend_uniform] = (GLuint)(IDX(_state_set.vertex_color_blend_state) * 2 + IDX(state));
+		subroutines[idx_fog_uniform] = (GLuint)(IDX(_state_set.fog_state) + 8);
+
 		glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 2, subroutines);
 	}
 	bool Renderer_OpenGL::batchFlush(bool discard)
@@ -738,7 +744,12 @@ namespace Core::Graphics
 		{
 			batchFlush();
 			_state_set.vertex_color_blend_state = state;
-			GLuint subroutines[2] = { (GLuint)(IDX(state) * 2 + IDX(_state_set.texture_alpha_type)), (GLuint)(IDX(_state_set.fog_state) + 8) };
+			//GLuint subroutines[2] = { (GLuint)(IDX(state) * 2 + IDX(_state_set.texture_alpha_type)), (GLuint)(IDX(_state_set.fog_state) + 8) };
+			//GLuint subroutines[2] = { (GLuint)(IDX(_state_set.fog_state) + 8), (GLuint)(IDX(state) * 2 + IDX(_state_set.texture_alpha_type)) };
+			GLuint subroutines[2];
+			subroutines[idx_blend_uniform] = (GLuint)(IDX(state) * 2 + IDX(_state_set.texture_alpha_type));
+			subroutines[idx_fog_uniform] = (GLuint)(IDX(_state_set.fog_state) + 8);
+
 			glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 2, subroutines);
 		}
 	}
@@ -763,7 +774,12 @@ namespace Core::Graphics
 				glBufferData(GL_UNIFORM_BUFFER, sizeof(fog_color_and_range), &fog_color_and_range, GL_STATIC_DRAW);
 			}
 
-			GLuint subroutines[2] = { (GLuint)(IDX(_state_set.vertex_color_blend_state) * 2 + IDX(_state_set.texture_alpha_type)), (GLuint)(IDX(state) + 8) };
+			//GLuint subroutines[2] = { (GLuint)(IDX(_state_set.vertex_color_blend_state) * 2 + IDX(_state_set.texture_alpha_type)), (GLuint)(IDX(state) + 8) };
+			//GLuint subroutines[2] = { (GLuint)(IDX(state) + 8), (GLuint)(IDX(_state_set.vertex_color_blend_state) * 2 + IDX(_state_set.texture_alpha_type)) };
+
+			GLuint subroutines[2];
+			subroutines[idx_blend_uniform] = (GLuint)(IDX(_state_set.vertex_color_blend_state) * 2 + IDX(_state_set.texture_alpha_type));
+			subroutines[idx_fog_uniform] = (GLuint)(IDX(state) + 8);
 			glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 2, subroutines);
 		}
 	}
@@ -1097,17 +1113,17 @@ namespace Core::Graphics
 			glBufferData(GL_UNIFORM_BUFFER, sizeof(ps_cbdata), &ps_cbdata, GL_STATIC_DRAW);
 		}
 		GLuint frag_bufs[2] = { _fog_data_buffer, _user_float_buffer };
-		glBindBuffersBase(GL_UNIFORM_BUFFER, 2, 2, frag_bufs);
+		glBindBuffersBase(GL_UNIFORM_BUFFER, 1, 2, frag_bufs);
 
 		for (int stage = 0; stage < std::min<int>((int)tv_sv_n, 4); stage++)
 		{
-			glActiveTexture(GL_TEXTURE0 + stage);
+			glActiveTexture(GL_TEXTURE1 + stage);
 			glBindTexture(GL_TEXTURE_2D, static_cast<Texture2D_OpenGL*>(p_tex_arr[stage])->GetResource());
 			setSamplerState(sv[stage], stage);
 		}
-		glActiveTexture(GL_TEXTURE5);
+		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, static_cast<Texture2D_OpenGL*>(p_tex)->GetResource());
-		setSamplerState(sv[5], 5);
+		setSamplerState(rtsv, 4);
 
 		glDisable(GL_DEPTH_TEST);
 		switch (blend) {

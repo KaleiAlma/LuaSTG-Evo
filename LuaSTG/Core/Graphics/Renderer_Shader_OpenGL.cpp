@@ -287,17 +287,21 @@ namespace Core::Graphics
 
 		for (int block = 0; block < amt_uniform_blocks; block++)
 		{
-			glUniformBlockBinding(opengl_prgm, block, block);
+			glUniformBlockBinding(opengl_prgm, block, block + 1);
 			glGetProgramResourceiv(opengl_prgm, GL_UNIFORM_BLOCK, block, block_properties_size, block_properties, block_properties_size, NULL, block_values);
 			name_buffer.resize(block_values[3]);
 			glGetProgramResourceName(opengl_prgm, GL_UNIFORM_BLOCK, block, name_buffer.size(), NULL, &name_buffer[0]);
-			std::string name((char*)&name_buffer, name_buffer.size() - 1);
+			std::string name(name_buffer.data(), name_buffer.size() - 1);
 
 			LocalConstantBuffer local_buffer;
 			local_buffer.index = block_values[0];
+			spdlog::debug("[core] name: {}", name);
 			spdlog::debug("[core] binding: {}", block_values[0]);
+			spdlog::debug("[core] datasize: {}", block_values[1]);
+			spdlog::debug("[core] vars: {}", block_values[2]);
 			local_buffer.buffer.resize(block_values[1]);
 			local_buffer.variable.reserve(block_values[2]);
+			glGenBuffers(1, &local_buffer.opengl_buffer);
 
 			m_buffer_map.emplace(name, std::move(local_buffer));
 
@@ -330,6 +334,9 @@ namespace Core::Graphics
 			}
 			else // Handle Uniform Buffers
 			{
+				spdlog::debug("[core] name: {}", name);
+				spdlog::debug("[core] offset: {}", uniform_values[2]);
+				spdlog::debug("[core] block index: {}", uniform_values[4]);
 				LocalVariable local_variable;
 				local_variable.offset = uniform_values[2];
 				switch (uniform_values[0])
@@ -364,7 +371,7 @@ namespace Core::Graphics
 				// data structures are different between DirectX and OpenGL, so take a performance hit
 				for (auto& v : m_buffer_map)
 				{
-					if (v.second.index == uniform_values[4])
+					if (v.second.index == uniform_values[4] + 1)
 					{
 						v.second.variable.emplace(name, std::move(local_variable));
 						break;
@@ -375,12 +382,16 @@ namespace Core::Graphics
 
 		// Create buffers
 
-		for (auto& v : m_buffer_map)
-		{
-			glGenBuffers(1, &v.second.opengl_buffer);
-			if (v.second.opengl_buffer == 0)
-				return false;
-		}
+		//for (auto& v : m_buffer_map)
+		//{
+		//	glGenBuffers(1, &v.second.opengl_buffer);
+		//	if (v.second.opengl_buffer == 0)
+		//		return false;
+		//}
+
+
+		GLuint idx_view_proj_buffer = glGetUniformBlockIndex(opengl_prgm, "view_proj_buffer");
+		glUniformBlockBinding(opengl_prgm, idx_view_proj_buffer, 0);
 
 		return true;
 	}
@@ -406,6 +417,9 @@ namespace Core::Graphics
 		glUniformBlockBinding(_program, idx_view_proj_buffer, 0);
 		glUniformBlockBinding(_program, idx_camera_data, 2);
 		glUniformBlockBinding(_program, idx_fog_data, 3);
+
+		idx_blend_uniform = glGetSubroutineUniformLocation(_program, GL_FRAGMENT_SHADER, "blend_uniform");
+		idx_fog_uniform = glGetSubroutineUniformLocation(_program, GL_FRAGMENT_SHADER, "fog_uniform");
 
 		return true;
 	}

@@ -117,7 +117,6 @@ namespace Core::Graphics
 		};
 	private:
 		ScopeObject<Device_OpenGL> m_device;
-		// GLuint opengl_frag;
 		GLuint opengl_prgm;
 		std::unordered_map<std::string, LocalConstantBuffer> m_buffer_map;
 		std::unordered_map<std::string, LocalTexture2D> m_texture2d_map;
@@ -175,6 +174,8 @@ namespace Core::Graphics
 		// GLuint _vertex_shader[IDX(FogState::MAX_COUNT)]; // FogState
 		// GLuint _pixel_shader[IDX(VertexColorBlendState::MAX_COUNT)][IDX(FogState::MAX_COUNT)][IDX(TextureAlphaType::MAX_COUNT)]; // VertexColorBlendState, FogState, TextureAlphaType
 		GLuint _program;
+		GLint idx_blend_uniform;
+		GLint idx_fog_uniform;
 		// Microsoft::WRL::ComPtr<ID3D11RasterizerState> _raster_state;
 		Graphics::SamplerState _sampler_state[IDX(SamplerState::MAX_COUNT)];
 		// Microsoft::WRL::ComPtr<ID3D11DepthStencilState> _depth_state[IDX(DepthState::MAX_COUNT)];

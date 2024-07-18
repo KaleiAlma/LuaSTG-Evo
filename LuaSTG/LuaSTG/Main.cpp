@@ -8,7 +8,11 @@
 #include "AppFrame.h"
 #include "RuntimeCheck.hpp"
 
-#include "SDL.h"
+#include "SDL_main.h"
+
+#ifdef _WIN32
+#pragma comment(linker, "/SUBSYSTEM:windows /ENTRY:mainCRTStartup")
+#endif // _WIN32
 
 int main(int argc, char *argv[])
 {

@@ -41,6 +41,10 @@ namespace Core::Graphics
         // Microsoft::WRL::ComPtr<ID3D11PixelShader> shader_pixel_nt_vc[IDX(IRenderer::FogState::MAX_COUNT)];
         // Microsoft::WRL::ComPtr<ID3D11PixelShader> shader_pixel_alpha_nt_vc[IDX(IRenderer::FogState::MAX_COUNT)];
         GLuint shader_program;
+        GLint idx_fog_uniform;
+        GLint idx_btex_uniform;
+        GLint idx_vc_uniform;
+        GLint idx_amask_uniform;
 
         // Microsoft::WRL::ComPtr<ID3D11RasterizerState> state_rs_cull_none;
         // Microsoft::WRL::ComPtr<ID3D11RasterizerState> state_rs_cull_back;
