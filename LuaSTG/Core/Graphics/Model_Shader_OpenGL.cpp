@@ -476,6 +476,12 @@ namespace Core::Graphics
         glUniformBlockBinding(shader_program, idx_alpha_cull, 4);
         glUniformBlockBinding(shader_program, idx_light_info, 5);
 
+
+        idx_fog_uniform = glGetSubroutineUniformLocation(shader_program, GL_FRAGMENT_SHADER, "fog_uniform");
+        idx_btex_uniform = glGetSubroutineUniformLocation(shader_program, GL_FRAGMENT_SHADER, "btex_uniform");
+        idx_vc_uniform = glGetSubroutineUniformLocation(shader_program, GL_FRAGMENT_SHADER, "vc_uniform");
+        idx_amask_uniform = glGetSubroutineUniformLocation(shader_program, GL_FRAGMENT_SHADER, "amask_uniform");
+
         return true;
     }
 }

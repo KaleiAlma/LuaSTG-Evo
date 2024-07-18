@@ -20,7 +20,9 @@ namespace Core::Audio
 	{
 		Shared_SDL* p_shared = reinterpret_cast<Shared_SDL*>(p_userdata);
 		ma_engine engine = p_shared->engine;
-		uint32_t bufferSizeInFrames = (uint32_t)bufferSizeInBytes / ma_get_bytes_per_frame(ma_format_f32, ma_engine_get_channels(&engine));
+		uint32_t bpf = ma_get_bytes_per_frame(ma_format_f32, ma_engine_get_channels(&engine));
+		bpf = bpf > 0 ? bpf : 1;
+		uint32_t bufferSizeInFrames = (uint32_t)bufferSizeInBytes / bpf;
 		ma_engine_read_pcm_frames(&engine, p_buffer, bufferSizeInFrames, NULL);
 	}
 
