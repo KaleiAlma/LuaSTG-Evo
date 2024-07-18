@@ -131,7 +131,7 @@ namespace Core::Graphics
 		{
 			glBindBuffer(GL_UNIFORM_BUFFER, v.second.opengl_buffer);
 			glBufferData(GL_UNIFORM_BUFFER, v.second.buffer.size(), v.second.buffer.data(), GL_STATIC_DRAW);
-			glBindBufferBase(GL_UNIFORM_BUFFER, v.second.index, v.second.opengl_buffer);
+			glBindBufferBase(GL_UNIFORM_BUFFER, v.second.binding, v.second.opengl_buffer);
 		}
 
 		for (auto& v : m_texture2d_map)
@@ -147,8 +147,8 @@ namespace Core::Graphics
 
 	void PostEffectShader_OpenGL::bind(GLuint engine_data, GLuint user_data)
 	{
-		glBindBufferBase(GL_UNIFORM_BUFFER, m_buffer_map["engine_data"].index, engine_data);
-		glBindBufferBase(GL_UNIFORM_BUFFER, m_buffer_map["user_data"].index, user_data);
+		glBindBufferBase(GL_UNIFORM_BUFFER, m_buffer_map["engine_data"].binding, engine_data);
+		glBindBufferBase(GL_UNIFORM_BUFFER, m_buffer_map["user_data"].binding, user_data);
 	}
 
 	PostEffectShader_OpenGL::PostEffectShader_OpenGL(Device_OpenGL* p_device, StringView path, bool is_path_)

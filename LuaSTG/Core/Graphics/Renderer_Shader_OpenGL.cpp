@@ -295,8 +295,10 @@ namespace Core::Graphics
 			std::string name(name_buffer.data(), name_buffer.size() - 1);
 
 			LocalConstantBuffer local_buffer;
-			local_buffer.index = block + block_offs;
+			local_buffer.index = block;
+			local_buffer.binding = block + block_offs;
 			spdlog::debug("[core] name: {}", name);
+			spdlog::debug("[core] index: {}", block);
 			spdlog::debug("[core] binding: {}", block_values[0]);
 			spdlog::debug("[core] datasize: {}", block_values[1]);
 			spdlog::debug("[core] vars: {}", block_values[2]);
@@ -308,13 +310,13 @@ namespace Core::Graphics
 
 			if (name == "view_proj_buffer")
 			{
+				glUniformBlockBinding(opengl_prgm, block, 0);
+				m_buffer_map["view_proj_buffer"].index = 0;
 				block_offs -= 1;
 			}
 		}
 
-		GLuint idx_view_proj_buffer = glGetUniformBlockIndex(opengl_prgm, "view_proj_buffer");
-		glUniformBlockBinding(opengl_prgm, idx_view_proj_buffer, 0);
-		m_buffer_map["view_proj_buffer"].index = 0;
+		//GLuint idx_view_proj_buffer = glGetUniformBlockIndex(opengl_prgm, "view_proj_buffer");
 
 		GLint amt_uniforms = 0;
 		glGetProgramInterfaceiv(opengl_prgm, GL_UNIFORM, GL_ACTIVE_RESOURCES, &amt_uniforms);

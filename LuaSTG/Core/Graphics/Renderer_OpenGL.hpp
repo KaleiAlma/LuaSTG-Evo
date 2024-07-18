@@ -106,6 +106,7 @@ namespace Core::Graphics
 		struct LocalConstantBuffer
 		{
 			GLuint index{};
+			GLuint binding{};
 			std::vector<uint8_t> buffer;
 			GLuint opengl_buffer = 0;
 			std::unordered_map<std::string, LocalVariable> variable;
