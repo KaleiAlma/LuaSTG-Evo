@@ -228,6 +228,8 @@ if(APPLE)
         # COMMAND ${CMAKE_COMMAND} -E copy /usr/local/opt/xz/lib/liblzma.5.dylib ${CMAKE_BINARY_DIR}/LuaSTG/LuaSTG.app/Contents/MacOS
 
         COMMAND dylibbundler -of -cd -b -x ${CMAKE_BINARY_DIR}/LuaSTG/LuaSTG.app/Contents/MacOS/LuaSTG -d ${CMAKE_BINARY_DIR}/LuaSTG/LuaSTG.app/Contents/Frameworks -p @executable_path/../Frameworks/
+        COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/LuaSTG/LuaSTG.app/Contents/Resources
+        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_LIST_DIR}/LuaSTG/Custom/LuaSTG.icns ${CMAKE_BINARY_DIR}/LuaSTG/LuaSTG.app/
 
         COMMAND ${CMAKE_COMMAND} -E make_directory ${LUASTG_BUILD_OUTPUT_DIR}
 

@@ -7,6 +7,8 @@ if(APPLE)
     set(CMAKE_EXE_LINKER_FLAGS "-L/usr/local/opt/llvm@18/lib/c++ -Wl,-rpath,/usr/local/opt/llvm@18/lib/c++")
 endif()
 
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+
 #option(LINK_STEAM_API "Enable Steam API" OFF)
 #option(LUASTG_RESDIR "Custom configurations" "res")
 

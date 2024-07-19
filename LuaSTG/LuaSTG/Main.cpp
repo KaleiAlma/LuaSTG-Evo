@@ -11,8 +11,6 @@
 #include "SDL_main.h"
 
 #ifdef __APPLE__
-#include <sys/stat.h>
-#include <sys/types.h>
 #include <unistd.h>
 #include "SDL_filesystem.h"
 #endif
@@ -54,7 +52,6 @@ int main(int argc, char *argv[])
 	// }
 
 #ifdef __APPLE__
-	mkdir(SDL_GetBasePath(), 0700);
 	chdir(SDL_GetBasePath());
 #endif
 
