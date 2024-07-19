@@ -195,28 +195,30 @@ namespace Core::Graphics
 		if (_draw_list.vertex.size > 0)
 		{
 			glBindBuffer(GL_ARRAY_BUFFER, vi_.vertex_buffer);
-			void* map = glMapBufferRange(
-				GL_ARRAY_BUFFER,
-				vi_.vertex_offset * sizeof(DrawVertex),
-				// 0,
-				_draw_list.vertex.size * sizeof(DrawVertex),
-				GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT | inv
-			);
-			std::memcpy((DrawVertex*)map, _draw_list.vertex.data, _draw_list.vertex.size * sizeof(DrawVertex));
-			glUnmapBuffer(GL_ARRAY_BUFFER);
+			// void* map = glMapBufferRange(
+			// 	GL_ARRAY_BUFFER,
+			// 	vi_.vertex_offset * sizeof(DrawVertex),
+			// 	// 0,
+			// 	_draw_list.vertex.size * sizeof(DrawVertex),
+			// 	GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT | inv
+			// );
+			// std::memcpy((DrawVertex*)map, _draw_list.vertex.data, _draw_list.vertex.size * sizeof(DrawVertex));
+			// glUnmapBuffer(GL_ARRAY_BUFFER);
+			glBufferSubData(GL_ARRAY_BUFFER, vi_.vertex_offset * sizeof(DrawVertex), _draw_list.vertex.size * sizeof(DrawVertex), _draw_list.vertex.data);
 		}
 		// copy index data
 		if (_draw_list.index.size > 0)
 		{
 			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vi_.index_buffer);
-			void* map = glMapBufferRange(
-				GL_ELEMENT_ARRAY_BUFFER,
-				vi_.index_offset * sizeof(DrawIndex),
-				_draw_list.index.size * sizeof(DrawIndex),
-				GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT | inv
-			);
-			std::memcpy((DrawIndex*)map, _draw_list.index.data, _draw_list.index.size * sizeof(DrawIndex));
-			glUnmapBuffer(GL_ELEMENT_ARRAY_BUFFER);
+			// void* map = glMapBufferRange(
+			// 	GL_ELEMENT_ARRAY_BUFFER,
+			// 	vi_.index_offset * sizeof(DrawIndex),
+			// 	_draw_list.index.size * sizeof(DrawIndex),
+			// 	GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT | inv
+			// );
+			// std::memcpy((DrawIndex*)map, _draw_list.index.data, _draw_list.index.size * sizeof(DrawIndex));
+			// glUnmapBuffer(GL_ELEMENT_ARRAY_BUFFER);
+			glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, vi_.index_offset * sizeof(DrawIndex), _draw_list.index.size * sizeof(DrawIndex), _draw_list.index.data);
 		}
 		
 		return true;
@@ -251,12 +253,14 @@ namespace Core::Graphics
 			glGenBuffers(1, &vi_.vertex_buffer);
 			if (vi_.vertex_buffer == 0) return false;
 			glBindBuffer(GL_ARRAY_BUFFER, vi_.vertex_buffer);
-			glBufferStorage(GL_ARRAY_BUFFER, _draw_list.vertex.capacity * sizeof(DrawVertex), 0, GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT);
+			// glBufferStorage(GL_ARRAY_BUFFER, _draw_list.vertex.capacity * sizeof(DrawVertex), 0, GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT);
+			glBufferData(GL_ARRAY_BUFFER, _draw_list.vertex.capacity * sizeof(DrawVertex), 0, GL_DYNAMIC_DRAW);
 
 			glGenBuffers(1, &vi_.index_buffer);
 			if (vi_.index_buffer == 0) return false;
 			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vi_.index_buffer);
-			glBufferStorage(GL_ELEMENT_ARRAY_BUFFER, _draw_list.index.capacity * sizeof(DrawIndex), 0, GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT);
+			// glBufferStorage(GL_ELEMENT_ARRAY_BUFFER, _draw_list.index.capacity * sizeof(DrawIndex), 0, GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT);
+			glBufferData(GL_ELEMENT_ARRAY_BUFFER, _draw_list.index.capacity * sizeof(DrawIndex), 0, GL_DYNAMIC_DRAW);
 		}
 
 		glGenBuffers(1, &_vp_matrix_buffer);

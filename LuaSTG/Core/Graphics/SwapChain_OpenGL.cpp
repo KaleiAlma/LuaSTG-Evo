@@ -15,8 +15,8 @@
 
 // Default Fragment Shader
 const GLchar sc_frag[]{R"(
-#version 450 core
-layout(binding = 0) uniform sampler2D sampler0;
+#version 410 core
+uniform sampler2D sampler0;
 
 layout(location = 0) in vec2 TexCoord;
 out vec4 FragColor;
@@ -29,14 +29,13 @@ void main()
 
 // Default Vertex Shader
 const GLchar sc_vert[]{R"(
-#version 450 core
+#version 410 core
 layout(location = 0) in vec2 pos;
 layout(location = 0) out vec2 TexCoord;
 
 void main()
 {
-    TexCoord = pos;// + 0.5;
-    // TexCoord.y = -TexCoord.y;
+    TexCoord = pos;
 
     gl_Position = vec4(pos.x * 2 - 1, pos.y * 2 - 1, 0.0, 1.0);
 }

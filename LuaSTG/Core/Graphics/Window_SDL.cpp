@@ -155,6 +155,7 @@ namespace Core::Graphics
 		spdlog::info("[core] OpenGL {}.{}", GLAD_VERSION_MAJOR(version), GLAD_VERSION_MINOR(version));
 		spdlog::info("[core] {}", (const char*)glGetString(GL_VERSION));
 
+#ifndef __APPLE__
 #ifndef NDEBUG
 		glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
 	
@@ -165,6 +166,7 @@ namespace Core::Graphics
 		uint32_t uiUnusedIDs = 0;
 		glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, &uiUnusedIDs, GL_TRUE); //Enable all
 		// glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_NOTIFICATION, 0, NULL, GL_FALSE); //Disable notifications
+#endif
 #endif
 
 		dispatchEvent(EventType::WindowCreate);
