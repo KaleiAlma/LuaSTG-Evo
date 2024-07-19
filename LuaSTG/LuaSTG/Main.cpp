@@ -10,6 +10,11 @@
 
 #include "SDL_main.h"
 
+#ifdef __APPLE__
+#include <filesystem>
+#include "SDL_filesystem.h"
+#endif
+
 #ifdef _WIN32
 #pragma comment(linker, "/SUBSYSTEM:windows /ENTRY:mainCRTStartup")
 #endif // _WIN32
@@ -45,6 +50,11 @@ int main(int argc, char *argv[])
 	// 		"Failed to initialize COM runtime, try relaunching.");
 	// 	return EXIT_FAILURE;
 	// }
+
+#ifdef __APPLE__
+	std::filesystem::create_directory(SDL_GetBasePath());
+	std::filesystem::current_path(SDL_GetBasePath());
+#endif
 
 	LuaSTG::Debugger::Logger::create();
 

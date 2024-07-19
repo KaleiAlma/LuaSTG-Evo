@@ -3,10 +3,6 @@
 #include "Utility/Utility.h"
 #include "Debugger/ImGuiExtension.h"
 #include "LuaBinding/LuaAppFrame.hpp"
-#ifdef __APPLE__
-#include <filesystem>
-#include "SDL_filesystem.h"
-#endif
 // #include "utf8.hpp"
 // #include "resource.h"
 
@@ -130,10 +126,6 @@ bool AppFrame::Init()noexcept
 	spdlog::info("[luastg] 初始化引擎");
 	m_iStatus = AppStatus::Initializing;
 
-#ifdef __APPLE__
-	std::filesystem::create_directory(SDL_GetBasePath());
-	std::filesystem::current_path(SDL_GetBasePath());
-#endif
 	//////////////////////////////////////// Lua初始化部分
 	
 	spdlog::info("[luastg] 初始化luajit引擎");
