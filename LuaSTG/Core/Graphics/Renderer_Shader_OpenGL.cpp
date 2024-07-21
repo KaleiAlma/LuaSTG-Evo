@@ -363,7 +363,7 @@ namespace Core::Graphics
             glGetActiveUniformBlockiv(opengl_prgm, block, GL_UNIFORM_BLOCK_ACTIVE_UNIFORMS, &vars);
             glGetActiveUniformBlockiv(opengl_prgm, block, GL_UNIFORM_BLOCK_NAME_LENGTH, &namelen);
             name_buffer.resize(namelen);
-            glGetProgramResourceName(opengl_prgm, GL_UNIFORM_BLOCK, block, name_buffer.size(), NULL, &name_buffer[0]);
+            glGetActiveUniformBlockName(opengl_prgm, block, name_buffer.size(), NULL, &name_buffer[0]);
             std::string name(name_buffer.data(), name_buffer.size() - 1);
 
             LocalConstantBuffer local_buffer;
@@ -404,7 +404,7 @@ namespace Core::Graphics
             glGetActiveUniformsiv(opengl_prgm, 1, &uniform, GL_UNIFORM_BLOCK_INDEX, &block_idx);
             glGetActiveUniformsiv(opengl_prgm, 1, &uniform, GL_UNIFORM_NAME_LENGTH, &namelen);
             name_buffer.resize(namelen);
-            glGetProgramResourceName(opengl_prgm, GL_UNIFORM, uniform, name_buffer.size(), NULL, &name_buffer[0]);
+            glGetActiveUniformName(opengl_prgm, uniform, name_buffer.size(), NULL, &name_buffer[0]);
             std::string name(name_buffer.data(), name_buffer.size() - 1);
 
             if (type == GL_SAMPLER_2D) // Handle Texture Uniforms
