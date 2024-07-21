@@ -203,100 +203,101 @@ namespace Core::Graphics
 {
     void map_sampler_to_opengl(tinygltf::Sampler& samp, GLuint tex)
     {
+        glBindTexture(GL_TEXTURE_2D, tex);
     #define MAKE_FILTER(MIN, MAG_MIP) ((MAG_MIP << 16) | (MIN))
         switch (MAKE_FILTER(samp.minFilter, samp.magFilter))
         {
         default:
-            glTexParameteri(tex, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-            glTexParameteri(tex, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
             break;
         case MAKE_FILTER(TINYGLTF_TEXTURE_FILTER_NEAREST, TINYGLTF_TEXTURE_FILTER_NEAREST):
-            glTexParameteri(tex, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-            glTexParameteri(tex, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-            glTexParameteri(tex, GL_TEXTURE_MIN_LOD, 0);
-            glTexParameteri(tex, GL_TEXTURE_MAX_LOD, 0);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_LOD, 0);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LOD, 0);
             break;
         case MAKE_FILTER(TINYGLTF_TEXTURE_FILTER_NEAREST, TINYGLTF_TEXTURE_FILTER_LINEAR):
-            glTexParameteri(tex, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-            glTexParameteri(tex, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-            glTexParameteri(tex, GL_TEXTURE_MIN_LOD, 0);
-            glTexParameteri(tex, GL_TEXTURE_MAX_LOD, 0);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_LOD, 0);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LOD, 0);
             break;
         case MAKE_FILTER(TINYGLTF_TEXTURE_FILTER_NEAREST, TINYGLTF_TEXTURE_FILTER_NEAREST_MIPMAP_NEAREST):
-            glTexParameteri(tex, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-            glTexParameteri(tex, GL_TEXTURE_MAG_FILTER, GL_NEAREST_MIPMAP_NEAREST);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST_MIPMAP_NEAREST);
             break;
         case MAKE_FILTER(TINYGLTF_TEXTURE_FILTER_NEAREST, TINYGLTF_TEXTURE_FILTER_LINEAR_MIPMAP_NEAREST):
-            glTexParameteri(tex, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-            glTexParameteri(tex, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_NEAREST);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_NEAREST);
             break;
         case MAKE_FILTER(TINYGLTF_TEXTURE_FILTER_NEAREST, TINYGLTF_TEXTURE_FILTER_NEAREST_MIPMAP_LINEAR):
-            glTexParameteri(tex, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-            glTexParameteri(tex, GL_TEXTURE_MAG_FILTER, GL_NEAREST_MIPMAP_LINEAR);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST_MIPMAP_LINEAR);
             break;
         case MAKE_FILTER(TINYGLTF_TEXTURE_FILTER_NEAREST, TINYGLTF_TEXTURE_FILTER_LINEAR_MIPMAP_LINEAR):
-            glTexParameteri(tex, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-            glTexParameteri(tex, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR);
             break;
         case MAKE_FILTER(TINYGLTF_TEXTURE_FILTER_LINEAR, TINYGLTF_TEXTURE_FILTER_NEAREST):
-            glTexParameteri(tex, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-            glTexParameteri(tex, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-            glTexParameteri(tex, GL_TEXTURE_MIN_LOD, 0);
-            glTexParameteri(tex, GL_TEXTURE_MAX_LOD, 0);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_LOD, 0);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LOD, 0);
             break;
         case MAKE_FILTER(TINYGLTF_TEXTURE_FILTER_LINEAR, TINYGLTF_TEXTURE_FILTER_LINEAR):
-            glTexParameteri(tex, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-            glTexParameteri(tex, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-            glTexParameteri(tex, GL_TEXTURE_MIN_LOD, 0);
-            glTexParameteri(tex, GL_TEXTURE_MAX_LOD, 0);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_LOD, 0);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LOD, 0);
             break;
         case MAKE_FILTER(TINYGLTF_TEXTURE_FILTER_LINEAR, TINYGLTF_TEXTURE_FILTER_NEAREST_MIPMAP_NEAREST):
-            glTexParameteri(tex, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-            glTexParameteri(tex, GL_TEXTURE_MAG_FILTER, GL_NEAREST_MIPMAP_NEAREST);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST_MIPMAP_NEAREST);
             break;
         case MAKE_FILTER(TINYGLTF_TEXTURE_FILTER_LINEAR, TINYGLTF_TEXTURE_FILTER_LINEAR_MIPMAP_NEAREST):
-            glTexParameteri(tex, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-            glTexParameteri(tex, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_NEAREST);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_NEAREST);
             break;
         case MAKE_FILTER(TINYGLTF_TEXTURE_FILTER_LINEAR, TINYGLTF_TEXTURE_FILTER_NEAREST_MIPMAP_LINEAR):
-            glTexParameteri(tex, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-            glTexParameteri(tex, GL_TEXTURE_MAG_FILTER, GL_NEAREST_MIPMAP_LINEAR);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST_MIPMAP_LINEAR);
             break;
         case MAKE_FILTER(TINYGLTF_TEXTURE_FILTER_LINEAR, TINYGLTF_TEXTURE_FILTER_LINEAR_MIPMAP_LINEAR):
-            glTexParameteri(tex, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-            glTexParameteri(tex, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR);
             break;
         }
     #undef MAKE_FILTER
         switch (samp.wrapS)
         {
         default:
-            glTexParameteri(tex, GL_TEXTURE_WRAP_S, GL_REPEAT);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
             break;
         case TINYGLTF_TEXTURE_WRAP_REPEAT:
-            glTexParameteri(tex, GL_TEXTURE_WRAP_S, GL_REPEAT);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
             break;
         case TINYGLTF_TEXTURE_WRAP_CLAMP_TO_EDGE:
-            glTexParameteri(tex, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
             break;
         case TINYGLTF_TEXTURE_WRAP_MIRRORED_REPEAT:
-            glTexParameteri(tex, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
             break;
         }
         switch (samp.wrapT)
         {
         default:
         case -1:
-            glTexParameteri(tex, GL_TEXTURE_WRAP_T, GL_REPEAT);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
             break;
         case TINYGLTF_TEXTURE_WRAP_REPEAT:
-            glTexParameteri(tex, GL_TEXTURE_WRAP_T, GL_REPEAT);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
             break;
         case TINYGLTF_TEXTURE_WRAP_CLAMP_TO_EDGE:
-            glTexParameteri(tex, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
             break;
         case TINYGLTF_TEXTURE_WRAP_MIRRORED_REPEAT:
-            glTexParameteri(tex, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
             break;
         }
     }

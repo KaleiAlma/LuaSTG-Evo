@@ -1069,8 +1069,10 @@ namespace Core::Graphics
                 return false;
             }
 
-            glGetTexLevelParameteriv(rt, 0, GL_TEXTURE_WIDTH, &w);
-            glGetTexLevelParameteriv(rt, 0, GL_TEXTURE_HEIGHT, &h);
+            glBindTexture(GL_TEXTURE_2D, rt);
+
+            glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &w);
+            glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT, &h);
         }
         
         // if (w < 1 || h < 1)
@@ -1219,8 +1221,10 @@ namespace Core::Graphics
                 return false;
             }
 
-            glGetTexLevelParameteriv(rt, 0, GL_TEXTURE_WIDTH, &w);
-            glGetTexLevelParameteriv(rt, 0, GL_TEXTURE_HEIGHT, &h);
+            glBindTexture(GL_TEXTURE_2D, rt);
+
+            glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &w);
+            glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT, &h);
         }
         
         // if (w < 1 || h < 1)
