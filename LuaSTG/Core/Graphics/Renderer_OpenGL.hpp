@@ -177,8 +177,8 @@ namespace Core::Graphics
 		// GLuint _pixel_shader[IDX(VertexColorBlendState::MAX_COUNT)][IDX(FogState::MAX_COUNT)][IDX(TextureAlphaType::MAX_COUNT)]; // VertexColorBlendState, FogState, TextureAlphaType
 		GLuint _programs[IDX(VertexColorBlendState::MAX_COUNT)][IDX(FogState::MAX_COUNT)][IDX(TextureAlphaType::MAX_COUNT)]; // VertexColorBlendState, FogState, TextureAlphaType
 		// GLuint _program;
-		GLint idx_blend_uniform;
-		GLint idx_fog_uniform;
+		// GLint idx_blend_uniform;
+		// GLint idx_fog_uniform;
 		// Microsoft::WRL::ComPtr<ID3D11RasterizerState> _raster_state;
 		Graphics::SamplerState _sampler_state[IDX(SamplerState::MAX_COUNT)];
 		// Microsoft::WRL::ComPtr<ID3D11DepthStencilState> _depth_state[IDX(DepthState::MAX_COUNT)];
