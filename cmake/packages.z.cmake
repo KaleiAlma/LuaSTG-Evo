@@ -33,6 +33,7 @@ CPMAddPackage(
     # ZLIB_REPOSITORY https://github.com/zlib-ng/zlib-ng
     # ZLIB_TAG 2.1.6
     MZ_FETCH_LIBS OFF
+    MZ_LZMA OFF # TODO: this is a temp fix, remove when repo is available again
     # DOWNLOAD_ONLY YES
 )
 
