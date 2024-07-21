@@ -1069,8 +1069,8 @@ namespace Core::Graphics
                 return false;
             }
 
-            glGetTextureLevelParameteriv(rt, 0, GL_TEXTURE_WIDTH, &w);
-            glGetTextureLevelParameteriv(rt, 0, GL_TEXTURE_HEIGHT, &h);
+            glGetTexLevelParameteriv(rt, 0, GL_TEXTURE_WIDTH, &w);
+            glGetTexLevelParameteriv(rt, 0, GL_TEXTURE_HEIGHT, &h);
         }
         
         // if (w < 1 || h < 1)
@@ -1219,8 +1219,8 @@ namespace Core::Graphics
                 return false;
             }
 
-            glGetTextureLevelParameteriv(rt, 0, GL_TEXTURE_WIDTH, &w);
-            glGetTextureLevelParameteriv(rt, 0, GL_TEXTURE_HEIGHT, &h);
+            glGetTexLevelParameteriv(rt, 0, GL_TEXTURE_WIDTH, &w);
+            glGetTexLevelParameteriv(rt, 0, GL_TEXTURE_HEIGHT, &h);
         }
         
         // if (w < 1 || h < 1)

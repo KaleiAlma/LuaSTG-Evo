@@ -436,9 +436,11 @@ namespace Core::Graphics
 		// );
 
 		glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
-		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, rdr_fbo);
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 
 		SDL_GL_SwapWindow(reinterpret_cast<SDL_Window*>(m_window->getNativeHandle()));
+
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, rdr_fbo);
 
 #ifndef NDEBUG
 		// spdlog::debug("GL Error: {}", glGetError());
