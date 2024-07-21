@@ -1,266 +1,38 @@
 ﻿#include "Core/Graphics/Model_OpenGL.hpp"
+#include "Core/Graphics/Renderer.hpp"
 #include "glad/gl.h"
-// #include "Platform/RuntimeLoader/Direct3DCompiler.hpp"
-
-// static std::string_view const built_in_shader(R"(
-// // pipeline data flow
-
-// struct VS_INPUT
-// {
-//     float3 pos  : POSITION;
-//     float3 norm : NORMAL;
-//     float2 uv   : TEXCOORD;
-// };
-// struct VS_P3F_N3F_C4F_T2F
-// {
-//     float3 pos  : POSITION;
-//     float3 norm : NORMAL;
-//     float4 col  : COLOR;
-//     float2 uv   : TEXCOORD;
-// };
-// struct PS_INPUT
-// {
-//     float4 pos  : SV_POSITION;
-//     float4 wpos : POSITION;
-//     float4 norm : NORMAL;
-//     float2 uv   : TEXCOORD;
-// };
-// struct PS_S4F_P4F_N4F_C4F_T2F
-// {
-//     float4 pos  : SV_POSITION;
-//     float4 wpos : POSITION;
-//     float4 norm : NORMAL;
-//     float4 col  : COLOR;
-//     float2 uv   : TEXCOORD;
-// };
-// struct OM_INPUT
-// {
-//     float4 col : SV_Target;
-// };
-
-// // vertex stage
-
-// cbuffer constantBuffer0 : register(b0)
-// {
-//     float4x4 ProjectionMatrix;
-// };
-// cbuffer constantBuffer1 : register(b1)
-// {
-//     float4x4 LocalWorldMatrix;
-//     float4x4 NormalLocalWorldMatrix;
-// };
-
-// PS_INPUT VS_Main(VS_INPUT input)
-// {
-//     float4 wpos = mul(LocalWorldMatrix, float4(input.pos, 1.0f));
-//     PS_INPUT output;
-//     output.pos = mul(ProjectionMatrix, wpos);
-//     output.wpos = wpos;
-//     output.norm = mul(NormalLocalWorldMatrix, float4(input.norm, 0.0f)); // no move
-//     output.uv = input.uv;
-//     return output;
-// };
-
-// PS_S4F_P4F_N4F_C4F_T2F VS_Main_VertexColor(VS_P3F_N3F_C4F_T2F input)
-// {
-//     float4 wpos = mul(LocalWorldMatrix, float4(input.pos, 1.0f));
-//     PS_S4F_P4F_N4F_C4F_T2F output;
-//     output.pos = mul(ProjectionMatrix, wpos);
-//     output.wpos = wpos;
-//     output.norm = mul(NormalLocalWorldMatrix, float4(input.norm, 0.0f)); // no move
-//     output.col = input.col;
-//     output.uv = input.uv;
-//     return output;
-// };
-
-// // pixel stage
-
-// cbuffer cameraInfo : register(b0)
-// {
-//     float4 CameraPos;
-//     float4 CameraLookTo;
-// };
-// cbuffer fogInfo : register(b1)
-// {
-//     float4 fog_color;
-//     float4 fog_range;
-// };
-// cbuffer alphaCull : register(b2)
-// {
-//     float4 base_color;
-//     float4 alpha;
-// };
-// cbuffer lightInfo : register(b3)
-// {
-//     float4 ambient;
-//     float4 sunshine_pos;
-//     float4 sunshine_dir;
-//     float4 sunshine_color;
-// };
-
-// SamplerState sampler0 : register(s0);
-// Texture2D texture0 : register(t0);
-
-// float4 ApplySimpleLight(float4 norm, float4 wpos, float4 solid_color)
-// {
-//     float3 v_normal = normalize(norm.xyz);
-//     float light_factor = max(0.0f, dot(v_normal, -sunshine_dir.xyz));
-//     //float3 pixel_to_eye = normalize(CameraPos.xyz - wpos.xyz);
-//     //float reflact_factor = pow(max(0.0f, dot(reflect(sunshine_dir, v_normal), pixel_to_eye)), 10.0f);
-//     return float4((ambient.rgb * ambient.a + sunshine_color.rgb * sunshine_color.a * light_factor) * solid_color.rgb, solid_color.a);
-// }
-
-// float4 ApplyFog(float4 wpos, float4 solid_color)
-// {
-//     #if defined(FOG_ENABLE)
-//         // camera_pos.xyz 和 input.pos.xyz 都是在世界坐标系下的坐标，求得的距离也是基于世界坐标系的
-//         float dist = distance(CameraPos.xyz, wpos.xyz);
-//         #if defined(FOG_EXP)
-//             // 指数雾，fog_range.x 是雾密度
-//             float k = clamp(1.0f - exp(-(dist * fog_range.x)), 0.0f, 1.0f);
-//         #elif defined(FOG_EXP2)
-//             // 二次指数雾，fog_range.x 是雾密度
-//             float k = clamp(1.0f - exp(-pow(dist * fog_range.x, 2.0f)), 0.0f, 1.0f);
-//         #else // FOG_LINEAR
-//             // 线性雾，fog_range.x 是雾起始距离，fog_range.y 是雾浓度最大处的距离，fog_range.w 是雾范围（fog_range.y - fog_range.x）
-//             float k = clamp((dist - fog_range.x) / fog_range.w, 0.0f, 1.0f);
-//         #endif
-//         return float4(lerp(solid_color.rgb, fog_color.rgb, k), solid_color.a);
-//     #else
-//         return solid_color;
-//     #endif
-// }
-
-// OM_INPUT PS_Main(PS_INPUT input)
-// {
-//     float4 tex_color = texture0.Sample(sampler0, input.uv);
-//     float4 solid_color = base_color * float4(pow(tex_color.rgb, 2.2f), tex_color.a);
-//     solid_color = ApplySimpleLight(input.norm, input.wpos, solid_color);
-//     solid_color = ApplyFog(input.wpos, solid_color);
-//     OM_INPUT output;
-//     output.col = pow(solid_color, 1.0f / 2.2f);
-//     return output; 
-// }
-
-// OM_INPUT PS_Main_AlphaMask(PS_INPUT input)
-// {
-//     float4 tex_color = texture0.Sample(sampler0, input.uv);
-//     float4 solid_color = base_color * float4(pow(tex_color.rgb, 2.2f), tex_color.a);
-//     if (solid_color.a < alpha.x)
-//     {
-//         discard;
-//     }
-//     solid_color = ApplySimpleLight(input.norm, input.wpos, solid_color);
-//     solid_color = ApplyFog(input.wpos, solid_color);
-//     OM_INPUT output;
-//     output.col = pow(solid_color, 1.0f / 2.2f);
-//     return output; 
-// }
-
-// OM_INPUT PS_Main_NoBaseTexture(PS_INPUT input)
-// {
-//     float4 solid_color = base_color;
-//     solid_color = ApplySimpleLight(input.norm, input.wpos, solid_color);
-//     solid_color = ApplyFog(input.wpos, solid_color);
-//     OM_INPUT output;
-//     output.col = pow(solid_color, 1.0f / 2.2f);
-//     return output; 
-// }
-
-// OM_INPUT PS_Main_NoBaseTexture_AlphaMask(PS_INPUT input)
-// {
-//     float4 solid_color = base_color;
-//     if (solid_color.a < alpha.x)
-//     {
-//         discard;
-//     }
-//     solid_color = ApplySimpleLight(input.norm, input.wpos, solid_color);
-//     solid_color = ApplyFog(input.wpos, solid_color);
-//     OM_INPUT output;
-//     output.col = pow(solid_color, 1.0f / 2.2f);
-//     return output; 
-// }
-
-// // 2
-
-// OM_INPUT PS_Main_VertexColor(PS_S4F_P4F_N4F_C4F_T2F input)
-// {
-//     float4 tex_color = texture0.Sample(sampler0, input.uv);
-//     float4 solid_color = base_color * input.col * float4(pow(tex_color.rgb, 2.2f), tex_color.a);
-//     solid_color = ApplySimpleLight(input.norm, input.wpos, solid_color);
-//     solid_color = ApplyFog(input.wpos, solid_color);
-//     OM_INPUT output;
-//     output.col = pow(solid_color, 1.0f / 2.2f);
-//     return output; 
-// }
-
-// OM_INPUT PS_Main_AlphaMask_VertexColor(PS_S4F_P4F_N4F_C4F_T2F input)
-// {
-//     float4 tex_color = texture0.Sample(sampler0, input.uv);
-//     float4 solid_color = base_color * input.col * float4(pow(tex_color.rgb, 2.2f), tex_color.a);
-//     if (solid_color.a < alpha.x)
-//     {
-//         discard;
-//     }
-//     solid_color = ApplySimpleLight(input.norm, input.wpos, solid_color);
-//     solid_color = ApplyFog(input.wpos, solid_color);
-//     OM_INPUT output;
-//     output.col = pow(solid_color, 1.0f / 2.2f);
-//     return output; 
-// }
-
-// OM_INPUT PS_Main_NoBaseTexture_VertexColor(PS_S4F_P4F_N4F_C4F_T2F input)
-// {
-//     float4 solid_color = base_color * input.col;
-//     solid_color = ApplySimpleLight(input.norm, input.wpos, solid_color);
-//     solid_color = ApplyFog(input.wpos, solid_color);
-//     OM_INPUT output;
-//     output.col = pow(solid_color, 1.0f / 2.2f);
-//     return output; 
-// }
-
-// OM_INPUT PS_Main_NoBaseTexture_AlphaMask_VertexColor(PS_S4F_P4F_N4F_C4F_T2F input)
-// {
-//     float4 solid_color = base_color * input.col;
-//     if (solid_color.a < alpha.x)
-//     {
-//         discard;
-//     }
-//     solid_color = ApplySimpleLight(input.norm, input.wpos, solid_color);
-//     solid_color = ApplyFog(input.wpos, solid_color);
-//     OM_INPUT output;
-//     output.col = pow(solid_color, 1.0f / 2.2f);
-//     return output; 
-// }
-
-// )");
 
 // Default Fragment Shader
-const GLchar default_fragment[]{R"(
+const constexpr GLchar default_fragment[]{R"(
 #version 410 core
 
+#define {}
+#define {}
+#define {}
+#define {}
+
 uniform camera_data
-{
+{{
     vec4 camera_pos;
     vec4 camera_at;
-};
+}};
 uniform fog_data
-{
+{{
     vec4 fog_color;
     vec4 fog_range;
-};
+}};
 uniform alpha_cull
-{
+{{
     vec4 base_color;
     vec4 alpha;
-};
+}};
 uniform light_info
-{
+{{
     vec4 ambient;
     vec4 sunshine_pos;
     vec4 sunshine_dir;
     vec4 sunshine_color;
-};
+}};
 uniform sampler2D sampler0;
 
 float channel_minimum = 1.0 / 255.0;
@@ -273,23 +45,25 @@ layout(location = 4) in vec2 uv;
 
 layout(location = 0) out vec4 col_out;
 
-subroutine vec4 Fog(vec4);
-subroutine vec4 BaseTexture();
-subroutine vec4 VertexColor();
-subroutine bool AlphaMask(vec4);
+// subroutine vec4 Fog(vec4);
+// subroutine vec4 BaseTexture();
+// subroutine vec4 VertexColor();
+// subroutine bool AlphaMask(vec4);
 
-subroutine uniform Fog fog_uniform;
-subroutine uniform BaseTexture btex_uniform;
-subroutine uniform VertexColor vc_uniform;
-subroutine uniform AlphaMask amask_uniform;
+// subroutine uniform Fog fog_uniform;
+// subroutine uniform BaseTexture btex_uniform;
+// subroutine uniform VertexColor vc_uniform;
+// subroutine uniform AlphaMask amask_uniform;
 
-subroutine(Fog) vec4 fog_none(vec4 color)
-{
+// subroutine(Fog)
+vec4 fog_none(vec4 color)
+{{
     return color; // pass through
-}
+}}
 
-subroutine(Fog) vec4 fog_linear(vec4 color)
-{
+// subroutine(Fog)
+vec4 fog_linear(vec4 color)
+{{
     float dist = distance(camera_pos.xyz, wpos.xyz);
     float k = clamp((dist - fog_range.x) / fog_range.w, 0.0, 1.0);
     float k1 = 1.0 - k;
@@ -298,10 +72,11 @@ subroutine(Fog) vec4 fog_linear(vec4 color)
     float kb = k * alpha;
     color = vec4(ka * color.rgb + kb * fog_color.rgb, alpha);
     return color;
-}
+}}
 
-subroutine(Fog) vec4 fog_exp(vec4 color)
-{
+// subroutine(Fog)
+vec4 fog_exp(vec4 color)
+{{
     float dist = distance(camera_pos.xyz, wpos.xyz);
     float k = clamp(1.0 - exp(-(dist * fog_range.x)), 0.0, 1.0);
     float k1 = 1.0 - k;
@@ -310,10 +85,11 @@ subroutine(Fog) vec4 fog_exp(vec4 color)
     float kb = k * alpha;
     color = vec4(ka * color.rgb + kb * fog_color.rgb, alpha);
     return color;
-}
+}}
 
-subroutine(Fog) vec4 fog_exp2(vec4 color)
-{
+// subroutine(Fog)
+vec4 fog_exp2(vec4 color)
+{{
     float dist = distance(camera_pos.xyz, wpos.xyz);
     float k = clamp(1.0 - exp(-pow(dist * fog_range.x, 2.0)), 0.0, 1.0);
     float k1 = 1.0 - k;
@@ -322,61 +98,47 @@ subroutine(Fog) vec4 fog_exp2(vec4 color)
     float kb = k * alpha;
     color = vec4(ka * color.rgb + kb * fog_color.rgb, alpha);
     return color;
-}
-
-subroutine(BaseTexture) vec4 no_base_texture()
-{
-    return vec4(1.0, 1.0, 1.0, 1.0);
-}
-
-subroutine(BaseTexture) vec4 base_texture()
-{
-    vec4 color = texture(sampler0, uv);
-    return color; // * vec4(pow(col.rgb, vec3(2.2)), col.a);
-}
-
-subroutine(VertexColor) vec4 no_vertex_color()
-{
-    return vec4(1.0, 1.0, 1.0, 1.0);
-}
-
-subroutine(VertexColor) vec4 vertex_color()
-{
-    return col;
-}
-
-subroutine(AlphaMask) bool no_alpha_mask(vec4 solid_color)
-{
-    return false;
-}
-
-subroutine(AlphaMask) bool alpha_mask(vec4 solid_color)
-{
-    return solid_color.a < alpha.x;
-}
+}}
 
 vec4 ApplySimpleLight(vec4 solid_color)
-{
+{{
     vec3 v_normal = normalize(norm.xyz);
     float light_factor = max(0.0, dot(v_normal, -sunshine_dir.xyz));
     //vec3 pixel_to_eye = normalize(CameraPos.xyz - wpos.xyz);
     //float reflact_factor = pow(max(0.0, dot(reflect(sunshine_dir, v_normal), pixel_to_eye)), 10.0);
     return vec4((ambient.rgb * ambient.a + sunshine_color.rgb * sunshine_color.a * light_factor) * solid_color.rgb, solid_color.a);
-}
+}}
 
 void main()
-{
-    vec4 color = base_color * btex_uniform() * vc_uniform();
-    if (amask_uniform(color))
-    {
+{{
+    vec4 color = base_color;
+#if defined(BASE_TEXTURE)
+    color *= texture(sampler0, uv);
+#endif
+#if defined(VERTEX_COLOR)
+    color *= col;
+#endif
+#if defined(ALPHA_MASK)
+    if (color.a < alpha.x)
+    {{
         discard;
-    }
-    col_out = fog_uniform(ApplySimpleLight(color));
-}
+    }}
+#endif
+    col_out = ApplySimpleLight(color);
+#if defined(FOG_LINEAR)
+    col_out = fog_linear(col_out);
+#elif defined(FOG_EXP)
+    col_out = fog_exp(col_out);
+#elif defined(FOG_EXP2)
+    col_out = fog_exp2(col_out);
+#endif
+}}
 )"};
 
+const constexpr std::string_view dfrag_sv{default_fragment};
+
 // Default Vertex Shader
-const GLchar default_vertex[]{R"(
+const constexpr GLchar default_vertex[]{R"(
 #version 410 core
 
 uniform view_proj_buffer
@@ -418,6 +180,28 @@ void main()
 
 namespace Core::Graphics
 {
+    const constexpr char* fog_state[IDX(IRenderer::FogState::MAX_COUNT)]{
+        "FOG_DISABLE",
+        "FOG_LINEAR",
+        "FOG_EXP",
+        "FOG_EXP2",
+    };
+
+    const constexpr char* amask[2]{
+        "NO_ALPHA_MASK",
+        "ALPHA_MASK",
+    };
+
+    const constexpr char* btex[2]{
+        "NO_BASE_TEXTURE",
+        "BASE_TEXTURE",
+    };
+
+    const constexpr char* vc[2]{
+        "NO_VERTEX_COLOR",
+        "VERTEX_COLOR",
+    };
+
     static bool compileShaderMacro(const GLchar* data, GLint size, GLenum shadertype, GLuint& shader)
     {
         shader = glCreateShader(shadertype);
@@ -450,37 +234,53 @@ namespace Core::Graphics
     {
         // built-in: compile shader
 
-        GLuint frag = 0, vert = 0;
+        GLuint vert = 0;
         compileVertexShaderMacro(default_vertex, sizeof(default_vertex), vert);
-        compileFragmentShaderMacro(default_fragment, sizeof(default_fragment), frag);
 
-        shader_program = glCreateProgram();
-        glAttachShader(shader_program, vert);
-        glAttachShader(shader_program, frag);
-        glLinkProgram(shader_program);
+        GLuint idx_view_proj_buffer;
+        GLuint idx_world_buffer;
+        GLuint idx_camera_data;
+        GLuint idx_fog_data;
+        GLuint idx_alpha_cull;
+        GLuint idx_light_info;
 
-        glDeleteShader(frag);
+        for (int i = 0; i < IDX(IRenderer::FogState::MAX_COUNT); i++)
+        for (int j = 0; j < 2; j++)
+        for (int k = 0; k < 2; k++)
+        for (int l = 0; l < 2; l++)
+        {
+            GLuint frag = 0;
+            std::string s_frag = std::format(dfrag_sv, fog_state[i], amask[j], btex[k], vc[l]);
+            compileFragmentShaderMacro(s_frag.c_str(), s_frag.length(), frag);
+
+            programs[i][j][k][l] = glCreateProgram();
+            glAttachShader(programs[i][j][k][l], vert);
+            glAttachShader(programs[i][j][k][l], frag);
+            glLinkProgram(programs[i][j][k][l]);
+
+            glDeleteShader(frag);
+
+            idx_view_proj_buffer = glGetUniformBlockIndex(programs[i][j][k][l], "view_proj_buffer");
+            idx_world_buffer = glGetUniformBlockIndex(programs[i][j][k][l], "world_buffer");
+            idx_camera_data = glGetUniformBlockIndex(programs[i][j][k][l], "camera_data");
+            idx_fog_data = glGetUniformBlockIndex(programs[i][j][k][l], "fog_data");
+            idx_alpha_cull = glGetUniformBlockIndex(programs[i][j][k][l], "alpha_cull");
+            idx_light_info = glGetUniformBlockIndex(programs[i][j][k][l], "light_info");
+
+            glUniformBlockBinding(programs[i][j][k][l], idx_view_proj_buffer, 0);
+            glUniformBlockBinding(programs[i][j][k][l], idx_world_buffer, 1);
+            glUniformBlockBinding(programs[i][j][k][l], idx_camera_data, 2);
+            glUniformBlockBinding(programs[i][j][k][l], idx_fog_data, 3);
+            glUniformBlockBinding(programs[i][j][k][l], idx_alpha_cull, 4);
+            glUniformBlockBinding(programs[i][j][k][l], idx_light_info, 5);
+        }
+
         glDeleteShader(vert);
 
-        GLuint idx_view_proj_buffer = glGetUniformBlockIndex(shader_program, "view_proj_buffer");
-        GLuint idx_world_buffer = glGetUniformBlockIndex(shader_program, "world_buffer");
-        GLuint idx_camera_data = glGetUniformBlockIndex(shader_program, "camera_data");
-        GLuint idx_fog_data = glGetUniformBlockIndex(shader_program, "fog_data");
-        GLuint idx_alpha_cull = glGetUniformBlockIndex(shader_program, "alpha_cull");
-        GLuint idx_light_info = glGetUniformBlockIndex(shader_program, "light_info");
-
-        glUniformBlockBinding(shader_program, idx_view_proj_buffer, 0);
-        glUniformBlockBinding(shader_program, idx_world_buffer, 1);
-        glUniformBlockBinding(shader_program, idx_camera_data, 2);
-        glUniformBlockBinding(shader_program, idx_fog_data, 3);
-        glUniformBlockBinding(shader_program, idx_alpha_cull, 4);
-        glUniformBlockBinding(shader_program, idx_light_info, 5);
-
-
-        idx_fog_uniform = glGetSubroutineUniformLocation(shader_program, GL_FRAGMENT_SHADER, "fog_uniform");
-        idx_btex_uniform = glGetSubroutineUniformLocation(shader_program, GL_FRAGMENT_SHADER, "btex_uniform");
-        idx_vc_uniform = glGetSubroutineUniformLocation(shader_program, GL_FRAGMENT_SHADER, "vc_uniform");
-        idx_amask_uniform = glGetSubroutineUniformLocation(shader_program, GL_FRAGMENT_SHADER, "amask_uniform");
+        // idx_fog_uniform = glGetSubroutineUniformLocation(shader_program, GL_FRAGMENT_SHADER, "fog_uniform");
+        // idx_btex_uniform = glGetSubroutineUniformLocation(shader_program, GL_FRAGMENT_SHADER, "btex_uniform");
+        // idx_vc_uniform = glGetSubroutineUniformLocation(shader_program, GL_FRAGMENT_SHADER, "vc_uniform");
+        // idx_amask_uniform = glGetSubroutineUniformLocation(shader_program, GL_FRAGMENT_SHADER, "amask_uniform");
 
         return true;
     }

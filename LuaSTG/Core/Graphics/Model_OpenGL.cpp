@@ -768,7 +768,7 @@ namespace Core::Graphics
 
     void Model_OpenGL::draw(IRenderer::FogState fog)
     {
-        glUseProgram(shared_->shader_program);
+        // glUseProgram(shared_->shader_program);
 
         // common data
 
@@ -784,13 +784,14 @@ namespace Core::Graphics
             //    (GLuint)(mblock.color_buffer ? 1 : 0) + 6,
             //    (GLuint)(mblock.alpha_cull ? 1 : 0) + 8,
             //};
-            GLuint subroutines[4];
-            subroutines[shared_->idx_fog_uniform] = (GLuint)IDX(fog);
-            subroutines[shared_->idx_btex_uniform] = (GLuint)(mblock.image ? 1 : 0) + 4;
-            subroutines[shared_->idx_vc_uniform] = (GLuint)(mblock.color_buffer ? 1 : 0) + 6;
-            subroutines[shared_->idx_amask_uniform] = (GLuint)(mblock.alpha_cull ? 1 : 0) + 8;            
+            // GLuint subroutines[4];
+            // subroutines[shared_->idx_fog_uniform] = (GLuint)IDX(fog);
+            // subroutines[shared_->idx_btex_uniform] = (GLuint)(mblock.image ? 1 : 0) + 4;
+            // subroutines[shared_->idx_vc_uniform] = (GLuint)(mblock.color_buffer ? 1 : 0) + 6;
+            // subroutines[shared_->idx_amask_uniform] = (GLuint)(mblock.alpha_cull ? 1 : 0) + 8;
 
-            glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 4, subroutines);
+            // glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 4, subroutines);
+            glUseProgram(shared_->programs[IDX(fog)][mblock.alpha_cull ? 1 : 0][mblock.image ? 1 : 0][mblock.color_buffer ? 1 : 0]);
         };
         auto upload_local_world_matrix = [&](ModelBlock& mblock)
         {

@@ -175,7 +175,8 @@ namespace Core::Graphics
 		// Microsoft::WRL::ComPtr<ID3D11InputLayout> _input_layout;
 		// GLuint _vertex_shader[IDX(FogState::MAX_COUNT)]; // FogState
 		// GLuint _pixel_shader[IDX(VertexColorBlendState::MAX_COUNT)][IDX(FogState::MAX_COUNT)][IDX(TextureAlphaType::MAX_COUNT)]; // VertexColorBlendState, FogState, TextureAlphaType
-		GLuint _program;
+		GLuint _programs[IDX(VertexColorBlendState::MAX_COUNT)][IDX(FogState::MAX_COUNT)][IDX(TextureAlphaType::MAX_COUNT)]; // VertexColorBlendState, FogState, TextureAlphaType
+		// GLuint _program;
 		GLint idx_blend_uniform;
 		GLint idx_fog_uniform;
 		// Microsoft::WRL::ComPtr<ID3D11RasterizerState> _raster_state;
