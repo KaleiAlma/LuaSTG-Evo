@@ -21,6 +21,7 @@ set(ZLIB_REPOSITORY https://github.com/zlib-ng/zlib-ng CACHE STRING "")
 set(ZLIB_TAG 2.1.6 CACHE STRING "")
 set(ZLIBNG_FOUND TRUE CACHE BOOL "" FORCE)
 set(SKIP_INSTALL_ALL ON CACHE BOOL "")
+set(MZ_LZMA OFF CACHE BOOL "")  # TODO: this is a temp fix, remove when repo is available again
 
 CPMAddPackage(
     NAME minizip_ng
@@ -33,7 +34,6 @@ CPMAddPackage(
     # ZLIB_REPOSITORY https://github.com/zlib-ng/zlib-ng
     # ZLIB_TAG 2.1.6
     MZ_FETCH_LIBS OFF
-    MZ_LZMA OFF # TODO: this is a temp fix, remove when repo is available again
     # DOWNLOAD_ONLY YES
 )
 
