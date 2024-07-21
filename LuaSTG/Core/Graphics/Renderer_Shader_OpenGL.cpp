@@ -345,28 +345,32 @@ namespace Core::Graphics
         // Uniform Blocks
 
         GLint amt_uniform_blocks = 0;
-        glGetProgramInterfaceiv(opengl_prgm, GL_UNIFORM_BLOCK, GL_ACTIVE_RESOURCES, &amt_uniform_blocks);
+        glGetProgramiv(opengl_prgm, GL_ACTIVE_UNIFORM_BLOCKS, &amt_uniform_blocks);
 
-        const size_t block_properties_size = 4;
-        GLenum block_properties[block_properties_size] = { GL_BUFFER_BINDING, GL_BUFFER_DATA_SIZE, GL_NUM_ACTIVE_VARIABLES, GL_NAME_LENGTH };
-        GLint block_values[block_properties_size];
+        // const size_t block_properties_size = 4;
+        // GLenum block_properties[block_properties_size] = { GL_BUFFER_BINDING, GL_BUFFER_DATA_SIZE, GL_NUM_ACTIVE_VARIABLES, GL_NAME_LENGTH };
+        // GLint block_values[block_properties_size];
 
         std::vector<GLchar> name_buffer(128);
         int block_offs = 1;
 
         for (int block = 0; block < amt_uniform_blocks; block++)
         {
+            GLint binding, datasize, vars, namelen;
             glUniformBlockBinding(opengl_prgm, block, block + block_offs);
-            glGetProgramResourceiv(opengl_prgm, GL_UNIFORM_BLOCK, block, block_properties_size, block_properties, block_properties_size, NULL, block_values);
-            name_buffer.resize(block_values[3]);
+            glGetActiveUniformBlockiv(opengl_prgm, block, GL_UNIFORM_BLOCK_BINDING, &binding);
+            glGetActiveUniformBlockiv(opengl_prgm, block, GL_UNIFORM_BLOCK_DATA_SIZE, &datasize);
+            glGetActiveUniformBlockiv(opengl_prgm, block, GL_UNIFORM_BLOCK_ACTIVE_UNIFORMS, &vars);
+            glGetActiveUniformBlockiv(opengl_prgm, block, GL_UNIFORM_BLOCK_NAME_LENGTH, &namelen);
+            name_buffer.resize(namelen);
             glGetProgramResourceName(opengl_prgm, GL_UNIFORM_BLOCK, block, name_buffer.size(), NULL, &name_buffer[0]);
             std::string name(name_buffer.data(), name_buffer.size() - 1);
 
             LocalConstantBuffer local_buffer;
             local_buffer.index = block;
             local_buffer.binding = block + block_offs;
-            local_buffer.buffer.resize(block_values[1]);
-            local_buffer.variable.reserve(block_values[2]);
+            local_buffer.buffer.resize(datasize);
+            local_buffer.variable.reserve(vars);
             glGenBuffers(1, &local_buffer.opengl_buffer);
 
             m_buffer_map.emplace(name, std::move(local_buffer));
@@ -382,23 +386,28 @@ namespace Core::Graphics
         //GLuint idx_view_proj_buffer = glGetUniformBlockIndex(opengl_prgm, "view_proj_buffer");
 
         GLint amt_uniforms = 0;
-        glGetProgramInterfaceiv(opengl_prgm, GL_UNIFORM, GL_ACTIVE_RESOURCES, &amt_uniforms);
+        glGetProgramiv(opengl_prgm, GL_ACTIVE_UNIFORMS, &amt_uniforms);
 
-        const size_t uniform_properties_size = 5;
-        GLenum uniform_properties[uniform_properties_size] = { GL_TYPE, GL_NAME_LENGTH, GL_OFFSET, GL_ARRAY_SIZE, GL_BLOCK_INDEX };
-        GLint uniform_values[uniform_properties_size];
+        // const size_t uniform_properties_size = 5;
+        // GLenum uniform_properties[uniform_properties_size] = { GL_TYPE, GL_NAME_LENGTH, GL_OFFSET, GL_ARRAY_SIZE, GL_BLOCK_INDEX };
+        // GLint uniform_values[uniform_properties_size];
 
         GLint amt_samplers = 0;
         GLuint tex_idx = 0;
 
-        for (int uniform = 0; uniform < amt_uniforms; uniform++)
+        for (GLuint uniform = 0; uniform < amt_uniforms; uniform++)
         {
-            glGetProgramResourceiv(opengl_prgm, GL_UNIFORM, uniform, uniform_properties_size, uniform_properties, uniform_properties_size, NULL, uniform_values);
-            name_buffer.resize(uniform_values[1]);
+            GLint type, offset, arrsize, block_idx, namelen;
+            glGetActiveUniformsiv(opengl_prgm, 1, &uniform, GL_UNIFORM_TYPE, &type);
+            glGetActiveUniformsiv(opengl_prgm, 1, &uniform, GL_UNIFORM_OFFSET, &offset);
+            glGetActiveUniformsiv(opengl_prgm, 1, &uniform, GL_UNIFORM_SIZE, &arrsize);
+            glGetActiveUniformsiv(opengl_prgm, 1, &uniform, GL_UNIFORM_BLOCK_INDEX, &block_idx);
+            glGetActiveUniformsiv(opengl_prgm, 1, &uniform, GL_UNIFORM_NAME_LENGTH, &namelen);
+            name_buffer.resize(namelen);
             glGetProgramResourceName(opengl_prgm, GL_UNIFORM, uniform, name_buffer.size(), NULL, &name_buffer[0]);
             std::string name(name_buffer.data(), name_buffer.size() - 1);
 
-            if (uniform_values[0] == GL_SAMPLER_2D) // Handle Texture Uniforms
+            if (type == GL_SAMPLER_2D) // Handle Texture Uniforms
             {
                 LocalTexture2D local_texture2d;
                 local_texture2d.index = tex_idx;
@@ -409,30 +418,30 @@ namespace Core::Graphics
             else // Handle Uniform Buffers
             {
                 LocalVariable local_variable;
-                local_variable.offset = uniform_values[2];
-                switch (uniform_values[0])
+                local_variable.offset = offset;
+                switch (type)
                 {
                 case GL_FLOAT:
-                    local_variable.size = uniform_values[3] * sizeof(float);
+                    local_variable.size = arrsize * sizeof(float);
                     break;
                 case GL_FLOAT_VEC2:
-                    local_variable.size = uniform_values[3] * sizeof(float) * 2;
+                    local_variable.size = arrsize * sizeof(float) * 2;
                     break;
                 case GL_FLOAT_VEC3:
-                    local_variable.size = uniform_values[3] * sizeof(float) * 3;
+                    local_variable.size = arrsize * sizeof(float) * 3;
                     break;
                 case GL_FLOAT_VEC4:
-                    local_variable.size = uniform_values[3] * sizeof(float) * 4;
+                    local_variable.size = arrsize * sizeof(float) * 4;
                     break;
 
                 case GL_FLOAT_MAT2:
-                    local_variable.size = uniform_values[3] * sizeof(float) * 4;
+                    local_variable.size = arrsize * sizeof(float) * 4;
                     break;
                 case GL_FLOAT_MAT3:
-                    local_variable.size = uniform_values[3] * sizeof(float) * 9;
+                    local_variable.size = arrsize * sizeof(float) * 9;
                     break;
                 case GL_FLOAT_MAT4:
-                    local_variable.size = uniform_values[3] * sizeof(float) * 16;
+                    local_variable.size = arrsize * sizeof(float) * 16;
                     break;
 
                 default:
@@ -442,7 +451,7 @@ namespace Core::Graphics
                 // data structures are different between DirectX and OpenGL, so take a performance hit
                 for (auto& v : m_buffer_map)
                 {
-                    if (v.second.index == uniform_values[4])
+                    if (v.second.index == block_idx)
                     {
                         v.second.variable.emplace(name, std::move(local_variable));
                         break;
