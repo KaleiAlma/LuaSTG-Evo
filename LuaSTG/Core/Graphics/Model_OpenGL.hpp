@@ -42,10 +42,10 @@ namespace Core::Graphics
         // GLuint program_alpha_nt_vc[IDX(IRenderer::FogState::MAX_COUNT)];
         // GLuint shader_program;
         GLuint programs[IDX(IRenderer::FogState::MAX_COUNT)][2][2][2];
-        GLint idx_fog_uniform;
-        GLint idx_btex_uniform;
-        GLint idx_vc_uniform;
-        GLint idx_amask_uniform;
+        // GLint idx_fog_uniform;
+        // GLint idx_btex_uniform;
+        // GLint idx_vc_uniform;
+        // GLint idx_amask_uniform;
 
         // Microsoft::WRL::ComPtr<ID3D11RasterizerState> state_rs_cull_none;
         // Microsoft::WRL::ComPtr<ID3D11RasterizerState> state_rs_cull_back;
