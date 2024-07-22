@@ -113,6 +113,9 @@ namespace Core::Graphics
             assert(false);
             return false;
         }
+        glBindBuffer(GL_UNIFORM_BUFFER, ubo_mlw);
+        glBufferData(GL_UNIFORM_BUFFER, 128, 0, GL_DYNAMIC_DRAW);
+
 
         // built-in: camera info
 
@@ -805,7 +808,7 @@ namespace Core::Graphics
             v.v1 = t_total_;
             v.v2 = glm::inverseTranspose(t_total_);
             glBindBuffer(GL_UNIFORM_BUFFER, shared_->ubo_mlw);
-            glBufferData(GL_UNIFORM_BUFFER, sizeof(v), &v, GL_STATIC_DRAW);
+            glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(v), &v);
         };
         auto set_state_from_block = [&](ModelBlock& mblock)
         {
