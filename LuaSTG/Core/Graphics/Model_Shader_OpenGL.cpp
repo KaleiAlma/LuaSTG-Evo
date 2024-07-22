@@ -167,7 +167,7 @@ void main()
     wpos = world * vec4(pos_in, 1.0);
     pos = view_proj * wpos;
     gl_Position = pos;
-    // wpos = wpos;
+    // wpos_out = wpos;
     norm = norm_world * vec4(norm_in, 0.0); // no move
     col = col_in;
     uv = uv_in;

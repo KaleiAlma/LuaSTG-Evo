@@ -810,24 +810,20 @@ namespace Core::Graphics
         auto set_state_from_block = [&](ModelBlock& mblock)
         {
             glBindVertexArray(mblock.vao);
-            if (mblock.vertex_buffer) {
+            // if (mblock.vertex_buffer)
                 glEnableVertexAttribArray(0);
-            }
-            if (mblock.uv_buffer) {
+            // if (mblock.uv_buffer)
                 glEnableVertexAttribArray(1);
-            }
-            if (mblock.color_buffer) {
+            // if (mblock.color_buffer)
                 glEnableVertexAttribArray(2);
-            }
-            if (mblock.normal_buffer) {
+            // if (mblock.normal_buffer)
                 glEnableVertexAttribArray(3);
-            }
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mblock.index_buffer);
 
             set_state_matrix_from_block(mblock);
-            glBindBufferBase(GL_UNIFORM_BUFFER, 1, shared_->ubo_mlw);
 
             upload_local_world_matrix(mblock);
+            glBindBufferBase(GL_UNIFORM_BUFFER, 1, shared_->ubo_mlw);
 
             glActiveTexture(GL_TEXTURE0);
             glBindTexture(GL_TEXTURE_2D, mblock.image);
