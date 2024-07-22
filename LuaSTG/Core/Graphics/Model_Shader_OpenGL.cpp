@@ -164,7 +164,7 @@ layout(location = 4) out vec2 uv;
 
 void main()
 {
-    vec4 wpos = world * vec4(pos_in, 1.0);
+    wpos = world * vec4(pos_in, 1.0);
     pos = view_proj * wpos;
     gl_Position = pos;
     // wpos = wpos;
