@@ -219,27 +219,27 @@ uniform world_buffer
 };
 #endif
 
-layout(location = 0) in vec3 pos;
-layout(location = 1) in vec2 uv;
-layout(location = 2) in vec4 col;
+layout(location = 0) in vec3 pos_in;
+layout(location = 1) in vec2 uv_in;
+layout(location = 2) in vec4 col_in;
 
-layout(location = 0) out vec4 sxy_out;
-layout(location = 1) out vec4 pos_out;
-layout(location = 2) out vec2 uv_out;
-layout(location = 3) out vec4 col_out;
+layout(location = 0) out vec4 sxy;
+layout(location = 1) out vec4 pos;
+layout(location = 2) out vec2 uv;
+layout(location = 3) out vec4 col;
 
 void main()
 {
-    vec4 pos_world = vec4(pos, 1.0);
+    vec4 pos_world = vec4(pos_in, 1.0);
 #if defined(WORLD_MATRIX)
     pos_world = world * pos_world;
 #endif
 
     gl_Position = view_proj * pos_world;
-    sxy_out = view_proj * pos_world;
-    pos_out = pos_world;
-    uv_out = uv;
-    col_out = col;
+    sxy = view_proj * pos_world;
+    pos = pos_world;
+    uv = uv_in;
+    col = col_in;
 }
 )"};
 

@@ -151,26 +151,26 @@ uniform world_buffer
     mat4 norm_world;
 };
 
-layout(location = 0) in vec3 pos;
-layout(location = 1) in vec2 uv;
-layout(location = 2) in vec4 col;
-layout(location = 3) in vec3 norm;
+layout(location = 0) in vec3 pos_in;
+layout(location = 1) in vec2 uv_in;
+layout(location = 2) in vec4 col_in;
+layout(location = 3) in vec3 norm_in;
 
-layout(location = 0) out vec4 pos_out;
-layout(location = 1) out vec4 wpos_out;
-layout(location = 2) out vec4 norm_out;
-layout(location = 3) out vec4 col_out;
-layout(location = 4) out vec2 uv_out;
+layout(location = 0) out vec4 pos;
+layout(location = 1) out vec4 wpos;
+layout(location = 2) out vec4 norm;
+layout(location = 3) out vec4 col;
+layout(location = 4) out vec2 uv;
 
 void main()
 {
-    vec4 wpos = world * vec4(pos, 1.0);
-    pos_out = view_proj * wpos;
-    gl_Position = pos_out;
-    wpos_out = wpos;
-    norm_out = norm_world * vec4(norm, 0.0); // no move
-    col_out = col;
-    uv_out = uv;
+    vec4 wpos = world * vec4(pos_in, 1.0);
+    pos = view_proj * wpos;
+    gl_Position = pos;
+    // wpos = wpos;
+    norm = norm_world * vec4(norm_in, 0.0); // no move
+    col = col_in;
+    uv = uv_in;
 };
 )"};
 
