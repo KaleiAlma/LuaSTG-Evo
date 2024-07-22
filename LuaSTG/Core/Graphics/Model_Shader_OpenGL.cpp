@@ -171,7 +171,7 @@ void main()
     norm = norm_world * vec4(norm_in, 0.0); // no move
     col = col_in;
     uv = uv_in;
-};
+}
 )"};
 
 #define IDX(x) (size_t)static_cast<uint8_t>(x)
