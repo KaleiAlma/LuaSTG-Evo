@@ -7,7 +7,6 @@
 // #include "Platform/Monitor.hpp"
 // #include "Platform/WindowSizeMoveController.hpp"
 // #include "Platform/RuntimeLoader/DesktopWindowManager.hpp"
-#include <SDL_mouse.h>
 #include <SDL_rect.h>
 #include <SDL_surface.h>
 #include <SDL_video.h>

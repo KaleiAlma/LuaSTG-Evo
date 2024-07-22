@@ -4,7 +4,6 @@
 #include "Core/Type.hpp"
 #include "Core/i18n.hpp"
 #include "SDL_events.h"
-#include "SDL_mouse.h"
 #include "SDL_video.h"
 #include "glad/gl.h"
 #include "SDL.h"
@@ -154,6 +153,9 @@ namespace Core::Graphics
 		int version = gladLoadGL((GLADloadfunc) SDL_GL_GetProcAddress);
 		spdlog::info("[core] OpenGL {}.{}", GLAD_VERSION_MAJOR(version), GLAD_VERSION_MINOR(version));
 		spdlog::info("[core] {}", (const char*)glGetString(GL_VERSION));
+		GLint s;
+		glGetIntegerv(GL_MAX_TEXTURE_SIZE, &s);
+		spdlog::info("[core] max texture size: {}", s);
 
 #ifndef __APPLE__
 #ifndef NDEBUG
@@ -454,6 +456,7 @@ namespace Core::Graphics
 
 	Vector2U Window_SDL::getSize()
 	{
+		SDL_GetWindowSize(sdl_window, (int*)&sdl_window_width, (int*)&sdl_window_height);
 		return { sdl_window_width, sdl_window_height };
 	}
 	bool Window_SDL::setSize(Vector2U v)

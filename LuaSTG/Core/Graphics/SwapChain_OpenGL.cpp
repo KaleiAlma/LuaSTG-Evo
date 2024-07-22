@@ -368,33 +368,32 @@ namespace Core::Graphics
 	bool SwapChain_OpenGL::present()
 	{
 		Vector2U wsize = m_window->getSize();
-		Core::Vector2F scale_dim = Core::Vector2F((float) wsize.x / m_canvas_size.x, (float) wsize.y / m_canvas_size.y);
+		Vector2F scale_dim = Vector2F((float) wsize.x / m_canvas_size.x, (float) wsize.y / m_canvas_size.y);
 		float scale = std::min(scale_dim.x, scale_dim.y);
 		Vector2F d;
 
 		if (scale_dim.x > scale_dim.y)
 		{
-			d.x = (wsize.x - scale * m_canvas_size.x) / 2;
+			d.x = ((float)wsize.x - m_canvas_size.x * scale) * 0.5;
 			d.y = 0;
 		}
 		else
 		{
 			d.x = 0;
-			d.y = (wsize.y - scale * m_canvas_size.y) / 2;
+			d.y = ((float)wsize.y - m_canvas_size.y * scale) * 0.5;
 		}
 		
 		glBindFramebuffer(GL_READ_FRAMEBUFFER, rdr_fbo);
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+		glViewport(0, 0, wsize.x, wsize.y);
+		glScissor(0, 0, wsize.x, wsize.y);
 		glClearColor(0.f, 0.f, 0.f, 0.f);
 		glClearDepth(1.f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		glViewport(0, 0, wsize.x, wsize.y);
-		glScissor(0, 0, wsize.x, wsize.y);
 
 		glBlitFramebuffer(
 			0, 0, m_canvas_size.x, m_canvas_size.y,
-			(wsize.x - scale * (m_canvas_size.x + d.x)) / 2, (wsize.y + scale * (m_canvas_size.y + d.y)) / 2,
-			(wsize.x + scale * (m_canvas_size.x + d.x)) / 2, (wsize.y - scale * (m_canvas_size.y + d.y)) / 2,
+			d.x, scale * m_canvas_size.y + d.y, scale * m_canvas_size.x + d.x, d.y,
 			GL_COLOR_BUFFER_BIT, GL_LINEAR
 		);
 
