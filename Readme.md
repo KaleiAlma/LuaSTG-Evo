@@ -22,7 +22,7 @@ You can download LuaSTG Evo from the [Releases Page](https://github.com/KaleiAlm
 ## Build Requirements
 
 * CMake 3.24
-* Visual Studio 2022 or clang
+* Visual Studio 2022 or Clang 18
 
 ## Contributors
 
