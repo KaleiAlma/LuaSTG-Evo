@@ -16,7 +16,7 @@ You can download LuaSTG Evo from the [Releases Page](https://github.com/KaleiAlm
 
 ## Requirements
 
-* Operating System: Windows/macOS (Experimental Support)/Linux
+* Operating System: Windows/macOS/Linux
 * Graphics Card: compatible with OpenGL 4.1
 
 ## Build Requirements
