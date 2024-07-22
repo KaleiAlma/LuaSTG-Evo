@@ -2,14 +2,14 @@
 local version = {
     major = 0,
     minor = 1,
-    patch = 0,
+    patch = 1,
 }
 
 local utf8_bom = "\xEF\xBB\xBF"
 
 --------------------------------------------------------------------------------
 
--- 原始的 rc 文件
+-- original rc file
 --[[
 // Microsoft Visual C++ generated resource script.
 //
@@ -244,7 +244,7 @@ end
 
 --------------------------------------------------------------------------------
 
--- 原始的 manifest 文件
+-- original manifest file
 --[[
 <?xml version="1.0" encoding="utf-8"?>
 <assembly xmlns="urn:schemas-microsoft-com:asm.v1" manifestVersion="1.0" xmlns:asmv3="urn:schemas-microsoft-com:asm.v3">
@@ -347,7 +347,7 @@ end
 
 --------------------------------------------------------------------------------
 
--- 原始的 LConfig.h 文件
+-- original LConfig.h file
 --[[
 #pragma once
 
@@ -391,7 +391,6 @@ local function write_h()
         version.major, version.minor, version.patch)
     ---@type file*
     local f = assert(io.open("LuaSTG/LConfig.h", "wb"))
-    --f:write(utf8_bom) -- 大概不需要？
     f:write(h_str)
     f:close()
 end
@@ -399,11 +398,11 @@ end
 --------------------------------------------------------------------------------
 
 if arg then
-    -- 假设 arg 这个全局变量是独立 lua 解释器特有的，如果它存在，说明这是命令行环境
+    -- Assuming that the global variable arg is specific to the standalone lua interpreter, if it exists, this is the command-line environment
     write_rc()
     write_manifest()
     write_h()
-    print("[I] write 3 files")
+    print("[I] wrote 3 files")
 end
 
 return version
