@@ -810,13 +810,13 @@ namespace Core::Graphics
         auto set_state_from_block = [&](ModelBlock& mblock)
         {
             glBindVertexArray(mblock.vao);
-            // if (mblock.vertex_buffer)
+            if (mblock.vertex_buffer)
                 glEnableVertexAttribArray(0);
-            // if (mblock.uv_buffer)
+            if (mblock.uv_buffer)
                 glEnableVertexAttribArray(1);
-            // if (mblock.color_buffer)
+            if (mblock.color_buffer)
                 glEnableVertexAttribArray(2);
-            // if (mblock.normal_buffer)
+            if (mblock.normal_buffer)
                 glEnableVertexAttribArray(3);
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mblock.index_buffer);
 

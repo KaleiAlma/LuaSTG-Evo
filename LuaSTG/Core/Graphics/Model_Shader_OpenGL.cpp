@@ -253,26 +253,27 @@ namespace Core::Graphics
             std::string s_frag = std::format(dfrag_sv, fog_state[i], amask[j], btex[k], vc[l]);
             compileFragmentShaderMacro(s_frag.c_str(), s_frag.length(), frag);
 
-            programs[i][j][k][l] = glCreateProgram();
-            glAttachShader(programs[i][j][k][l], vert);
-            glAttachShader(programs[i][j][k][l], frag);
-            glLinkProgram(programs[i][j][k][l]);
+            GLuint prgm = glCreateProgram();
+            programs[i][j][k][l] = prgm;
+            glAttachShader(prgm, vert);
+            glAttachShader(prgm, frag);
+            glLinkProgram(prgm);
 
             glDeleteShader(frag);
 
-            idx_view_proj_buffer = glGetUniformBlockIndex(programs[i][j][k][l], "view_proj_buffer");
-            idx_world_buffer = glGetUniformBlockIndex(programs[i][j][k][l], "world_buffer");
-            idx_camera_data = glGetUniformBlockIndex(programs[i][j][k][l], "camera_data");
-            idx_fog_data = glGetUniformBlockIndex(programs[i][j][k][l], "fog_data");
-            idx_alpha_cull = glGetUniformBlockIndex(programs[i][j][k][l], "alpha_cull");
-            idx_light_info = glGetUniformBlockIndex(programs[i][j][k][l], "light_info");
+            idx_view_proj_buffer = glGetUniformBlockIndex(prgm, "view_proj_buffer");
+            idx_world_buffer = glGetUniformBlockIndex(prgm, "world_buffer");
+            idx_camera_data = glGetUniformBlockIndex(prgm, "camera_data");
+            idx_fog_data = glGetUniformBlockIndex(prgm, "fog_data");
+            idx_alpha_cull = glGetUniformBlockIndex(prgm, "alpha_cull");
+            idx_light_info = glGetUniformBlockIndex(prgm, "light_info");
 
-            glUniformBlockBinding(programs[i][j][k][l], idx_view_proj_buffer, 0);
-            glUniformBlockBinding(programs[i][j][k][l], idx_world_buffer, 1);
-            glUniformBlockBinding(programs[i][j][k][l], idx_camera_data, 2);
-            glUniformBlockBinding(programs[i][j][k][l], idx_fog_data, 3);
-            glUniformBlockBinding(programs[i][j][k][l], idx_alpha_cull, 4);
-            glUniformBlockBinding(programs[i][j][k][l], idx_light_info, 5);
+            glUniformBlockBinding(prgm, idx_view_proj_buffer, 0);
+            glUniformBlockBinding(prgm, idx_world_buffer, 1);
+            glUniformBlockBinding(prgm, idx_camera_data, 2);
+            glUniformBlockBinding(prgm, idx_fog_data, 3);
+            glUniformBlockBinding(prgm, idx_alpha_cull, 4);
+            glUniformBlockBinding(prgm, idx_light_info, 5);
         }
 
         glDeleteShader(vert);
