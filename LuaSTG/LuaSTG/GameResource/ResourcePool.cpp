@@ -16,7 +16,7 @@
 
 namespace LuaSTGPlus
 {
-    // 总体管理
+    // Overall management
 
     void ResourcePool::Clear() noexcept
     {
@@ -30,7 +30,7 @@ namespace LuaSTGPlus
         m_TTFFontPool.clear();
         m_FXPool.clear();
         m_ModelPool.clear();
-        spdlog::info("[luastg] 已清空资源池 '{}'", getResourcePoolTypeName());
+        spdlog::info("[luastg] '{}' pools cleared", getResourcePoolTypeName());
     }
 
     template<typename T>
@@ -39,13 +39,13 @@ namespace LuaSTGPlus
         auto i = pool.find(std::string_view(name));
         if (i == pool.end())
         {
-            spdlog::warn("[luastg] RemoveResource: 试图卸载一个不存在的资源 '{}'", name);
+            spdlog::warn("[luastg] RemoveResource: Attempted to remove non-existent resource '{}'", name);
             return;
         }
         pool.erase(i);
         if (ResourceMgr::GetResourceLoadingLog())
         {
-            spdlog::info("[luastg] RemoveResource: 资源 '{}' 已卸载", name);
+            spdlog::info("[luastg] RemoveResource: Resource '{}' removed", name);
         }
     }
 
@@ -96,7 +96,7 @@ namespace LuaSTGPlus
             removeResource(m_ModelPool, name);
             break;
         default:
-            spdlog::warn("[luastg] RemoveResource: 试图移除一个不存在的资源类型 ({})", (int)t);
+            spdlog::warn("[luastg] RemoveResource: Attempted to remove invalid resource type ({})", (int)t);
             return;
         }
     }
@@ -126,7 +126,7 @@ namespace LuaSTGPlus
         case ResourceType::Model:
             return m_ModelPool.find(name) != m_ModelPool.end();
         default:
-            spdlog::warn("[luastg] CheckRes: 试图检索一个不存在的资源类型({})", (int)t);
+            spdlog::warn("[luastg] CheckRes: Attempted to check invalid resource type ({})", (int)t);
             break;
         }
         return false;
@@ -182,7 +182,7 @@ namespace LuaSTGPlus
             listResourceName(L, m_ModelPool);
             break;
         default:
-            spdlog::warn("[luastg] EnumRes: 试图枚举一个不存在的资源类型({})", (int)t);
+            spdlog::warn("[luastg] EnumRes: Attempted to enumerate invalid resource type ({})", (int)t);
             S.create_array(0);
             break;
         }
@@ -197,7 +197,7 @@ namespace LuaSTGPlus
         {
             if (ResourceMgr::GetResourceLoadingLog())
             {
-                spdlog::warn("[luastg] LoadTexture: 纹理 '{}' 已存在，加载操作已取消", name);
+                spdlog::warn("[luastg] LoadTexture: Texture '{}' already exists, loading cancelled.", name);
             }
             return true;
         }
@@ -206,7 +206,7 @@ namespace LuaSTGPlus
         // spdlog::debug("tex_ptr: {}", (size_t)&p_texture); // 140737488345752 140737488345752
         if (!LAPP.GetAppModel()->getDevice()->createTextureFromFile(path, mipmaps, ~p_texture))
         {
-            spdlog::error("[luastg] 从 '{}' 创建纹理 '{}' 失败", path, name);
+            spdlog::error("[luastg] Failed to create texture '{}' from '{}'", name, path);
             return false;
         }
 
@@ -218,13 +218,13 @@ namespace LuaSTGPlus
         }
         catch (std::exception const& e)
         {
-            spdlog::error("[luastg] LoadTexture: 创建纹理 '{}' 失败 ({})", name, e.what());
+            spdlog::error("[luastg] LoadTexture: Failed to load texture '{}' ({})", name, e.what());
             return false;
         }
     
         if (ResourceMgr::GetResourceLoadingLog())
         {
-            spdlog::info("[luastg] LoadTexture: 已从 '{}' 加载纹理 '{}' ({})", path, name, getResourcePoolTypeName());
+            spdlog::info("[luastg] LoadTexture: path '{}', name '{}' ({})", path, name, getResourcePoolTypeName());
         }
     
         return true;
@@ -236,7 +236,7 @@ namespace LuaSTGPlus
         {
             if (ResourceMgr::GetResourceLoadingLog())
             {
-                spdlog::warn("[luastg] LoadTexture: 纹理 '{}' 已存在，加载操作已取消", name);
+                spdlog::warn("[luastg] CreateTexture: Texture '{}' already exists, loading cancelled", name);
             }
             return true;
         }
@@ -245,7 +245,7 @@ namespace LuaSTGPlus
         // spdlog::debug("tex_ptr: {}", (size_t)&p_texture); // 
         if (!LAPP.GetAppModel()->getDevice()->createTexture(Core::Vector2U((uint32_t)width, (uint32_t)height), ~p_texture))
         {
-            spdlog::error("[luastg] 创建纹理 '{}' ({}x{}) 失败", name, width, height);
+            spdlog::error("[luastg] Failed to create texture '{}' ({}x{})", name, width, height);
             return false;
         }
 
@@ -257,18 +257,18 @@ namespace LuaSTGPlus
         }
         catch (std::exception const& e)
         {
-            spdlog::error("[luastg] LoadTexture: {}", e.what());
+            spdlog::error("[luastg] CreateTexture: Failed to create texture ({})", e.what());
             return false;
         }
 
         if (ResourceMgr::GetResourceLoadingLog()) {
-            spdlog::info("[luastg] LoadTexture: 已创建纹理 '{}' ({}x{}) ({})", name, width, height, getResourcePoolTypeName());
+            spdlog::info("[luastg] CreateTexture: Created texture '{}' ({}x{}) ({})", name, width, height, getResourcePoolTypeName());
         }
 
         return true;
     }
 
-    // 创建渲染目标
+    // Creating render targets
 
     bool ResourcePool::CreateRenderTarget(const char* name, int width, int height, bool depth_buffer) noexcept
     {
@@ -276,12 +276,12 @@ namespace LuaSTGPlus
         {
             if (ResourceMgr::GetResourceLoadingLog())
             {
-                spdlog::warn("[luastg] CreateRenderTarget: 渲染目标 '{}' 已存在，创建操作已取消", name);
+                spdlog::warn("[luastg] CreateRenderTarget: Render target '{}' already exists, aborting", name);
             }
             return true;
         }
     
-        std::string_view ds_info("和深度缓冲区");
+        std::string_view ds_info(" with depth buffer");
 
         try
         {
@@ -298,7 +298,7 @@ namespace LuaSTGPlus
         }
         catch (std::runtime_error const& e)
         {
-            spdlog::error("[luastg] CreateRenderTarget: 创建渲染目标 '{}' 失败 ({})", name, e.what());
+            spdlog::error("[luastg] CreateRenderTarget: Failed to create render target '{}' ({})", name, e.what());
             return false;
         }
     
@@ -306,18 +306,18 @@ namespace LuaSTGPlus
         {
             if (width <= 0 || height <= 0)
             {
-                spdlog::info("[luastg] CreateRenderTarget: 已创建渲染目标{} '{}' ({})", ds_info, name, getResourcePoolTypeName());
+                spdlog::info("[luastg] CreateRenderTarget: Render target created{} '{}' ({})", ds_info, name, getResourcePoolTypeName());
             }
             else
             {
-                spdlog::info("[luastg] CreateRenderTarget: 已创建渲染目标{} '{}' ({}x{}) ({})", ds_info, name, width, height, getResourcePoolTypeName());
+                spdlog::info("[luastg] CreateRenderTarget: Render target created{} '{}' ({}x{}) ({})", ds_info, name, width, height, getResourcePoolTypeName());
             }
         }
     
         return true;
     }
 
-    // 创建图片精灵
+    // Create an image sprite
 
     bool ResourcePool::CreateSprite(const char* name, const char* texname,
                                     double x, double y, double w, double h,
@@ -327,7 +327,7 @@ namespace LuaSTGPlus
         {
             if (ResourceMgr::GetResourceLoadingLog())
             {
-                spdlog::warn("[luastg] CreateSprite: 图片精灵 '{}' 已存在，创建操作已取消", name);
+                spdlog::warn("[luastg] CreateSprite: Image sprite '{}' already exists, aborting", name);
             }
             return true;
         }
@@ -335,7 +335,7 @@ namespace LuaSTGPlus
         Core::ScopeObject<IResourceTexture> pTex = m_pMgr->FindTexture(texname);
         if (!pTex)
         {
-            spdlog::error("[luastg] CreateSprite: 无法创建图片精灵 '{}'，无法找到纹理 '{}'", name, texname);
+            spdlog::error("[luastg] CreateSprite: Unable to create sprite '{}', can't find texture '{}'", name, texname);
             return false;
         }
     
@@ -346,12 +346,12 @@ namespace LuaSTGPlus
             ~p_sprite
         ))
         {
-            spdlog::error("[luastg] 从纹理 '{}' 创建图片精灵 '{}' 失败", texname, name);
+            spdlog::error("[luastg] Failed to create image sprite '{}' from texture '{}'", texname, name);
             return false;
         }
         p_sprite->setTextureRect(Core::RectF((float)x, (float)y, (float)(x + w), (float)(y + h)));
         p_sprite->setTextureCenter(Core::Vector2F((float)(x + w * 0.5), (float)(y + h * 0.5)));
-    
+
         try
         {
             Core::ScopeObject<IResourceSprite> tRes;
@@ -360,19 +360,19 @@ namespace LuaSTGPlus
         }
         catch (std::exception const& e)
         {
-            spdlog::error("[luastg] CreateSprite: 创建图片精灵 '{}' 失败 ({})", name, e.what());
+            spdlog::error("[luastg] CreateSprite: Failed to create sprite '{}' ({})", name, e.what());
             return false;
         }
     
         if (ResourceMgr::GetResourceLoadingLog())
         {
-            spdlog::info("[luastg] CreateSprite: 已从纹理 '{}' 创建图片精灵 '{}' ({})", texname, name, getResourcePoolTypeName());
+            spdlog::info("[luastg] CreateSprite: texture '{}', image name '{}' ({})", texname, name, getResourcePoolTypeName());
         }
     
         return true;
     }
 
-    // 创建动画精灵
+    // Create animated sprite
 
     bool ResourcePool::CreateAnimation(const char* name, const char* texname,
                                        double x, double y, double w, double h, int n, int m, int intv,
@@ -382,18 +382,18 @@ namespace LuaSTGPlus
         {
             if (ResourceMgr::GetResourceLoadingLog())
             {
-                spdlog::warn("[luastg] CreateAnimation: 动画精灵 '{}' 已存在，创建操作已取消", name);
+                spdlog::warn("[luastg] CreateAnimation: Animation '{}' already exists, aborting", name);
             }
             return true;
         }
-    
+
         Core::ScopeObject<IResourceTexture> pTex = m_pMgr->FindTexture(texname);
         if (!pTex)
         {
-            spdlog::error("[luastg] CreateAnimation: 无法创建动画精灵 '{}'，无法找到纹理 '{}'", name, texname);
+            spdlog::error("[luastg] CreateAnimation: Unable to create animation '{}', can't find texture '{}'", name, texname);
             return false;
         }
-    
+
         try {
             Core::ScopeObject<IResourceAnimation> tRes;
             tRes.attach(
@@ -407,13 +407,13 @@ namespace LuaSTGPlus
         }
         catch (std::exception const& e)
         {
-            spdlog::error("[luastg] CreateAnimation: 创建动画精灵 '{}' 失败 ({})", name, e.what());
+            spdlog::error("[luastg] CreateAnimation: Failed to create animation '{}' ({})", name, e.what());
             return false;
         }
-    
+
         if (ResourceMgr::GetResourceLoadingLog())
         {
-            spdlog::info("[luastg] CreateAnimation: 已从 '{}' 创建动画精灵 '{}' ({})", texname, name, getResourcePoolTypeName());
+            spdlog::info("[luastg] CreateAnimation: texture '{}', animation name '{}' ({})", texname, name, getResourcePoolTypeName());
         }
     
         return true;
@@ -428,7 +428,7 @@ namespace LuaSTGPlus
         {
             if (ResourceMgr::GetResourceLoadingLog())
             {
-                spdlog::warn("[luastg] CreateAnimation: 动画精灵 '{}' 已存在，创建操作已取消", name);
+                spdlog::warn("[luastg] CreateAnimation: Animation '{}' already exists, aborting", name);
             }
             return true;
         }
@@ -442,19 +442,19 @@ namespace LuaSTGPlus
         }
         catch (std::exception const& e)
         {
-            spdlog::error("[luastg] CreateAnimation: 创建动画精灵 '{}' 失败 ({})", name, e.what());
+            spdlog::error("[luastg] CreateAnimation: Failed to create animation '{}' ({})", name, e.what());
             return false;
         }
 
         if (ResourceMgr::GetResourceLoadingLog())
         {
-            spdlog::info("[luastg] CreateAnimation: 已创建动画精灵 '{}' ({})", name, getResourcePoolTypeName());
+            spdlog::info("[luastg] CreateAnimation: Created animation '{}' ({})", name, getResourcePoolTypeName());
         }
 
         return true;
     }
 
-    // 加载音乐
+    // Load music
 
     bool ResourcePool::LoadMusic(const char* name, const char* path, double start, double end, bool once_decode) noexcept
     {
@@ -462,20 +462,19 @@ namespace LuaSTGPlus
         {
             if (ResourceMgr::GetResourceLoadingLog())
             {
-                spdlog::warn("[luastg] LoadMusic: 音乐 '{}' 已存在，创建操作已取消", name);
+                spdlog::warn("[luastg] LoadMusic: Music '{}' already exists, loading cancelled", name);
             }
-            //m_MusicPool.find(name)->second->Stop(); // 注：以前确实不判断同名资源是否存在，但是 emplace 失败了，所以没有打断旧 BGM
             return true;
         }
     
         using namespace Core;
         using namespace Core::Audio;
 
-        // 创建解码器
+        // Create decoder
         ScopeObject<IDecoder> p_decoder;
         if (!IDecoder::create(path, ~p_decoder))
         {
-            spdlog::error("[luastg] LoadMusic: 无法解码文件 '{}'，要求文件格式为 WAV 或 OGG", path);
+            spdlog::error("[luastg] LoadMusic: Cannot decode file '{}', format must be WAV/OGG/MP3/FLAC", path);
             return false;
         }
         auto to_sample = [&p_decoder](double t) -> uint32_t
@@ -483,39 +482,39 @@ namespace LuaSTGPlus
             return (uint32_t)(t * (double)p_decoder->getSampleRate());
         };
 
-        // 检查循环节
+        // Check loop section
         if (0 == to_sample(start) && to_sample(start) == to_sample(end))
         {
             end = (double)p_decoder->getFrameCount() / (double)p_decoder->getSampleRate();
-            spdlog::info("[luastg] LoadMusic: 循环节范围设置为整首背景音乐 (start = {}, end = {})", start, end);
+            spdlog::info("[luastg] LoadMusic: Loop range set to entire track (start = {}, end = {})", start, end);
         }
         if (to_sample(start) >= to_sample(end))
         {
-            spdlog::error("[luastg] LoadMusic: 循环节范围格式错误，结束位置不能等于或先于开始位置 (start = {}, end = {})", start, end);
+            spdlog::error("[luastg] LoadMusic: End position cannot be less than or equal to start position (start = {}, end = {})", start, end);
             return false;
         }
     
-        // 配置循环解码器（这里不用担心出现 exception，因为上面已经处理了）
+        // Configure loop decoder (don't worry about exeptions, they're handled above)
         // ScopeObject<Audio::LoopDecoder> p_loop_decoder;
         // p_loop_decoder.attach(new ResourceMusicImpl::LoopDecoder(p_decoder.get(), start, end));
 
-        // 创建播放器
+        // Create a player
         ScopeObject<IAudioPlayer> p_player;
         if (!once_decode)
         {
-            // 流式播放器
+            // Stream player
             if (!LAPP.GetAppModel()->getAudioDevice()->createStreamAudioPlayer(p_decoder.get(), ~p_player))
             {
-                spdlog::error("[luastg] LoadMusic: 无法创建音频播放器");
+                spdlog::error("[luastg] LoadMusic: Unable to create stream audio player");
                 return false;
             }
         }
         else
         {
-            // 一次性解码的播放器
+            // One-time decoder
             if (!LAPP.GetAppModel()->getAudioDevice()->createLoopAudioPlayer(p_decoder.get(), ~p_player))
             {
-                spdlog::error("[luastg] LoadMusic: 无法创建音频播放器");
+                spdlog::error("[luastg] LoadMusic: Unable to create once-decode audio player");
                 return false;
             }
             p_player->setLoop(true, start, end - start);
@@ -523,26 +522,26 @@ namespace LuaSTGPlus
 
         try
         {
-            //存入资源池
+            // Place into resource pool
             Core::ScopeObject<IResourceMusic> tRes;
             tRes.attach(new ResourceMusicImpl(name, p_player.get()));
             m_MusicPool.emplace(name, tRes);
         }
         catch (std::exception const& e)
         {
-            spdlog::error("[luastg] LoadMusic: 加载音乐 '{}' 失败 ({})", name, e.what());
+            spdlog::error("[luastg] LoadMusic: Failed to load music '{}' ({})", name, e.what());
             return false;
         }
-    
+
         if (ResourceMgr::GetResourceLoadingLog())
         {
-            spdlog::info("[luastg] LoadMusic: 已从 '{}' 加载音乐 '{}'{} ({})", path, name, once_decode ? " 并一次性解码" : "", getResourcePoolTypeName());
+            spdlog::info("[luastg] LoadMusic: path '{}', name '{}'{} ({})", path, name, once_decode ? " (decode immediately)" : "", getResourcePoolTypeName());
         }
-    
+
         return true;
     }
 
-    // 加载音效
+    // Load sound effects
 
     bool ResourcePool::LoadSoundEffect(const char* name, const char* path) noexcept
     {
@@ -550,7 +549,7 @@ namespace LuaSTGPlus
         {
             if (ResourceMgr::GetResourceLoadingLog())
             {
-                spdlog::warn("[luastg] LoadSoundEffect: 音效 '{}' 已存在，创建操作已取消", name);
+                spdlog::warn("[luastg] LoadSoundEffect: Sound effect '{}' already exists, loading cancelled.", name);
             }
             return true;
         }
@@ -558,19 +557,19 @@ namespace LuaSTGPlus
         using namespace Core;
         using namespace Core::Audio;
 
-        // 创建解码器
+        // Create decoder
         ScopeObject<IDecoder> p_decoder;
         if (!IDecoder::create(path, ~p_decoder))
         {
-            spdlog::error("[luastg] LoadSoundEffect: 无法解码文件 '{}'，要求文件格式为 WAV 或 OGG", path);
+            spdlog::error("[luastg] LoadSoundEffect: Cannot decode file '{}', format must be WAV/OGG/MP3/FLAC", path);
             return false;
         }
 
-        // 创建播放器
+        // Create audio player
         ScopeObject<IAudioPlayer> p_player;
         if (!LAPP.GetAppModel()->getAudioDevice()->createAudioPlayer(p_decoder.get(), ~p_player))
         {
-            spdlog::error("[luastg] LoadSoundEffect: 无法创建音频播放器");
+            spdlog::error("[luastg] LoadSoundEffect: Unable to create audiio player");
             return false;
         }
 
@@ -582,19 +581,19 @@ namespace LuaSTGPlus
         }
         catch (std::exception const& e)
         {
-            spdlog::error("[luastg] LoadSoundEffect: 加载音效 '{}' 失败 ({})", name, e.what());
+            spdlog::error("[luastg] LoadSoundEffect: Unable to load sound effect '{}' ({})", name, e.what());
             return false;
         }
     
         if (ResourceMgr::GetResourceLoadingLog())
         {
-            spdlog::info("[luastg] LoadSoundEffect: 已从 '{}' 加载音效 '{}' ({})", path, name, getResourcePoolTypeName());
+            spdlog::info("[luastg] LoadSoundEffect: path '{}', name '{}' ({})", path, name, getResourcePoolTypeName());
         }
     
         return true;
     }
 
-    // 创建粒子特效
+    // Load particle effects (HGE)
 
     bool ResourcePool::LoadParticle(const char* name, const hgeParticleSystemInfo& info, const char* img_name,
                                     double a,double b, bool rect, bool _nolog) noexcept
@@ -603,7 +602,7 @@ namespace LuaSTGPlus
         {
             if (ResourceMgr::GetResourceLoadingLog())
             {
-                spdlog::warn("[luastg] LoadParticle: 粒子特效 '{}' 已存在，创建操作已取消", name);
+                spdlog::warn("[luastg] LoadParticle: Particle System '{}' already exists, loading cancelled.", name);
             }
             return true;
         }
@@ -611,14 +610,14 @@ namespace LuaSTGPlus
         Core::ScopeObject<IResourceSprite> pSprite = m_pMgr->FindSprite(img_name);
         if (!pSprite)
         {
-            spdlog::error("[luastg] LoadParticle: 无法创建粒子特效 '{}'，找不到图片精灵 '{}'", name, img_name);
+            spdlog::error("[luastg] LoadParticle: Unable to load particle system '{}', cannot find image sprite '{}'", name, img_name);
             return false;
         }
     
         Core::ScopeObject<Core::Graphics::ISprite> p_sprite;
         if (!pSprite->GetSprite()->clone(~p_sprite))
         {
-            spdlog::error("[luastg] LoadParticle: 无法创建粒子特效 '{}'，复制图片精灵 '{}' 失败", name, img_name);
+            spdlog::error("[luastg] LoadParticle: Unable to load particle system '{}', unable to copy sprite '{}'", name, img_name);
             return false;
         }
 
@@ -630,13 +629,13 @@ namespace LuaSTGPlus
         }
         catch (std::exception const& e)
         {
-            spdlog::error("[luastg] LoadParticle: 创建粒子特效 '{}' 失败 ({})", name, e.what());
+            spdlog::error("[luastg] LoadParticle: Unable to load particle system '{}' ({})", name, e.what());
             return false;
         }
     
         if (!_nolog && ResourceMgr::GetResourceLoadingLog())
         {
-            spdlog::info("[luastg] LoadParticle: 已创建粒子特效 '{}' ({})", name, getResourcePoolTypeName());
+            spdlog::info("[luastg] LoadParticle: name '{}' ({})", name, getResourcePoolTypeName());
         }
     
         return true;
@@ -648,13 +647,13 @@ namespace LuaSTGPlus
         std::vector<uint8_t> src;
         if (!GFileManager().loadEx(path, src))
         {
-            spdlog::error("[luastg] LoadParticle：无法从 '{}' 加载粒子特效 '{}'，读取文件失败", path, name);
+            spdlog::error("[luastg] LoadParticle: Unable to load particle system '{}' from '{}', failed to read file", path, name);
             return false;
         }
     
         if (src.size() != sizeof(hgeParticleSystemInfo))
         {
-            spdlog::error("[luastg] LoadParticle: 粒子特效定义文件 '{}' 格式不正确", path);
+            spdlog::error("[luastg] LoadParticle: Particle effect definition file '{}' is ill-formed", path);
             return false;
         }
         hgeParticleSystemInfo tInfo;
@@ -667,13 +666,13 @@ namespace LuaSTGPlus
     
         if (ResourceMgr::GetResourceLoadingLog())
         {
-            spdlog::info("[luastg] LoadParticle: 已从 '{}' 创建粒子特效 '{}' ({})", path, name, getResourcePoolTypeName());
+            spdlog::info("[luastg] LoadParticle: path '{}', name '{}' ({})", path, name, getResourcePoolTypeName());
         }
     
         return true;
     }
 
-    // 加载纹理字体（HGE）
+    // Load texture fonts（HGE）
 
     bool ResourcePool::LoadSpriteFont(const char* name, const char* path, bool mipmaps) noexcept
     {
@@ -681,12 +680,12 @@ namespace LuaSTGPlus
         {
             if (ResourceMgr::GetResourceLoadingLog())
             {
-                spdlog::warn("[luastg] LoadSpriteFont: 纹理字体 '{}' 已存在，加载操作已取消", name);
+                spdlog::warn("[luastg] LoadSpriteFont: Texture font '{}' already exists, loading cancelled.", name);
             }
             return true;
         }
-    
-        // 创建定义
+
+        // Create definitions
         try
         {
             Core::ScopeObject<IResourceFont> tRes;
@@ -695,19 +694,19 @@ namespace LuaSTGPlus
         }
         catch (std::exception const& e)
         {
-            spdlog::error("[luastg] LoadSpriteFont: 无法加载 HGE 纹理字体 '{}' ({})", name, e.what());
+            spdlog::error("[luastg] LoadSpriteFont: Unable to load HGE texture font '{}' ({})", name, e.what());
             return false;
         }
-    
+
         if (ResourceMgr::GetResourceLoadingLog())
         {
-            spdlog::info("[luastg] LoadSpriteFont: 已从 '{}' 加载 HGE 纹理字体 '{}' ({})", path, name, getResourcePoolTypeName());
+            spdlog::info("[luastg] LoadSpriteFont (HGE): path '{}', name '{}' ({})", path, name, getResourcePoolTypeName());
         }
     
         return true;
     }
 
-    // 加载纹理字体（fancy2d）
+    // Load texture fonts (fancy2d)
 
     bool ResourcePool::LoadSpriteFont(const char* name, const char* path, const char* tex_path, bool mipmaps) noexcept
     {
@@ -715,12 +714,12 @@ namespace LuaSTGPlus
         {
             if (ResourceMgr::GetResourceLoadingLog())
             {
-                spdlog::warn("[luastg] LoadSpriteFont: 纹理字体 '{}' 已存在，加载操作已取消", name);
+                spdlog::warn("[luastg] LoadSpriteFont: Texture font '{}' already exists, loading cancelled.", name);
             }
             return true;
         }
     
-        // 创建定义
+        // Create definitions
         try
         {
             Core::ScopeObject<IResourceFont> tRes;
@@ -729,19 +728,19 @@ namespace LuaSTGPlus
         }
         catch (std::exception const& e)
         {
-            spdlog::error("[luastg] LoadSpriteFont: 无法加载 fancy2d 纹理字体 '{}' ({})", name, e.what());
+            spdlog::error("[luastg] LoadSpriteFont: Unable to load fancy2d texture font '{}' ({})", name, e.what());
             return false;
         }
     
         if (ResourceMgr::GetResourceLoadingLog())
         {
-            spdlog::info("[luastg] LoadSpriteFont: 已从 '{}' 和 '{}' 加载 fancy2d 纹理字体 '{}' ({})", path, tex_path, name, getResourcePoolTypeName());
+            spdlog::info("[luastg] LoadSpriteFont (fancy2d): path '{}' & '{}', name '{}' ({})", path, tex_path, name, getResourcePoolTypeName());
         }
     
         return true;
     }
 
-    // 加载TrueType字体
+    // Load TTFs
 
     bool ResourcePool::LoadTTFFont(const char* name, const char* path, float width, float height) noexcept
     {
@@ -749,7 +748,7 @@ namespace LuaSTGPlus
         {
             if (ResourceMgr::GetResourceLoadingLog())
             {
-                spdlog::warn("[luastg] LoadTTFFont: 矢量字体 '{}' 已存在，加载操作已取消", name);
+                spdlog::warn("[luastg] LoadTTFFont: TTF '{}' already exists, loading cancelled", name);
             }
             return true;
         }
@@ -764,11 +763,11 @@ namespace LuaSTGPlus
         };
         if (!Core::Graphics::IGlyphManager::create(LAPP.GetAppModel()->getDevice(), &create_info, 1, ~p_glyphmgr))
         {
-            spdlog::error("[luastg] LoadTTFFont: 加载矢量字体 '{}' 失败", name);
+            spdlog::error("[luastg] LoadTTFFont: Loading TTF '{}' failed", name);
             return false;
         }
 
-        // 创建定义
+        // Create definitions
         try
         {
             Core::ScopeObject<IResourceFont> tRes;
@@ -777,13 +776,13 @@ namespace LuaSTGPlus
         }
         catch (std::exception const& e)
         {
-            spdlog::error("[luastg] LoadTTFFont: 无法加载矢量字体 '{}' ({})", name, e.what());
+            spdlog::error("[luastg] LoadTTFFont: Unable to load TTF '{}' ({})", name, e.what());
             return false;
         }
     
         if (ResourceMgr::GetResourceLoadingLog())
         {
-            spdlog::info("[luastg] LoadTTFFont: 已从 '{}' 加载矢量字体 '{}' ({})", path, name, getResourcePoolTypeName());
+            spdlog::info("[luastg] LoadTTFFont: path '{}', name '{}' ({})", path, name, getResourcePoolTypeName());
         }
     
         return true;
@@ -795,7 +794,7 @@ namespace LuaSTGPlus
         {
             if (ResourceMgr::GetResourceLoadingLog())
             {
-                spdlog::warn("[luastg] LoadTrueTypeFont: 矢量字体组 '{}' 已存在，加载操作已取消", name);
+                spdlog::warn("[luastg] LoadTrueTypeFont: TTF '{}' already exists, loading cancelled", name);
             }
             return true;
         }
@@ -803,11 +802,11 @@ namespace LuaSTGPlus
         Core::ScopeObject<Core::Graphics::IGlyphManager> p_glyphmgr;
         if (!Core::Graphics::IGlyphManager::create(LAPP.GetAppModel()->getDevice(), fonts, count, ~p_glyphmgr))
         {
-            spdlog::error("[luastg] LoadTrueTypeFont: 加载矢量字体组 '{}' 失败", name);
+            spdlog::error("[luastg] LoadTrueTypeFont: Loading TTF '{}' failed", name);
             return false;
         }
 
-        // 创建定义
+        // Create definitions
         try
         {
             Core::ScopeObject<IResourceFont> tRes;
@@ -816,19 +815,19 @@ namespace LuaSTGPlus
         }
         catch (std::exception const& e)
         {
-            spdlog::error("[luastg] LoadTrueTypeFont: 无法加载矢量字体组 '{}' ({})", name, e.what());
+            spdlog::error("[luastg] LoadTrueTypeFont: Unable to load TTF '{}' ({})", name, e.what());
             return false;
         }
     
         if (ResourceMgr::GetResourceLoadingLog())
         {
-            spdlog::info("[luastg] LoadTrueTypeFont: 已加载矢量字体组 '{}' ({})", name, getResourcePoolTypeName());
+            spdlog::info("[luastg] LoadTrueTypeFont: Loaded TTF '{}' ({})", name, getResourcePoolTypeName());
         }
     
         return true;
     }
 
-    // 加载后处理特效
+    // Load PostEffects
 
     bool ResourcePool::LoadFX(const char* name, const char* path) noexcept
     {
@@ -836,7 +835,7 @@ namespace LuaSTGPlus
         {
             if (ResourceMgr::GetResourceLoadingLog())
             {
-                spdlog::warn("[luastg] LoadFX: 后处理特效 '{}' 已存在，加载操作已取消", name);
+                spdlog::warn("[luastg] LoadFX: FX '{}' already exists, loading cancelled.", name);
             }
             return true;
         }
@@ -847,26 +846,26 @@ namespace LuaSTGPlus
             tRes.attach(new ResourcePostEffectShaderImpl(name, path));
             if (!tRes->GetPostEffectShader())
             {
-                spdlog::error("[luastg] LoadFX: 从 '{}' 加载后处理特效 '{}' 失败", path, name);
+                spdlog::error("[luastg] LoadFX: Failed to load FX '{}' from '{}'", name, path);
                 return false;
             }
             m_FXPool.emplace(name, tRes);
         }
         catch (std::exception const& e)
         {
-            spdlog::error("[luastg] LoadFX: 无法加载后处理特效 '{}' ({})", name, e.what());
+            spdlog::error("[luastg] LoadFX: Failed to load FX '{}' ({})", name, e.what());
             return false;
         }
 
         if (ResourceMgr::GetResourceLoadingLog())
         {
-            spdlog::info("[luastg] LoadFX: 已从 '{}' 加载后处理特效 '{}' ({})", path, name, getResourcePoolTypeName());
+            spdlog::info("[luastg] LoadFX: path '{}', name '{}' ({})", path, name, getResourcePoolTypeName());
         }
     
         return true;
     }
 
-    // 加载模型
+    // Load Models
 
     bool ResourcePool::LoadModel(const char* name, const char* path) noexcept
     {
@@ -874,7 +873,7 @@ namespace LuaSTGPlus
         {
             if (ResourceMgr::GetResourceLoadingLog())
             {
-                spdlog::warn("[luastg] LoadModel: 模型 '{}' 已存在，加载操作已取消", name);
+                spdlog::warn("[luastg] LoadModel: Model '{}' already exists, loading cancelled.", name);
             }
             return true;
         }
@@ -887,19 +886,19 @@ namespace LuaSTGPlus
         }
         catch (std::exception const& e)
         {
-            spdlog::error("[luastg] LoadModel: 无法加载模型 '{}' ({})", name, e.what());
+            spdlog::error("[luastg] LoadModel: Unable to load model '{}' ({})", name, e.what());
             return false;
         }
     
         if (ResourceMgr::GetResourceLoadingLog())
         {
-            spdlog::info("[luastg] LoadModel: 已从 '{}' 加载模型 '{}' ({})", path, name, getResourcePoolTypeName());
+            spdlog::info("[luastg] LoadModel: path '{}', name '{}' ({})", path, name, getResourcePoolTypeName());
         }
     
         return true;
     }
 
-    // 查找并获取
+    // Find and retrieve
 
     template<typename T>
     inline T::value_type::second_type findResource(T& resource_set, std::string_view name)
@@ -911,55 +910,55 @@ namespace LuaSTGPlus
             return i->second;
     }
 
-	Core::ScopeObject<IResourceTexture> ResourcePool::GetTexture(std::string_view name) noexcept
+    Core::ScopeObject<IResourceTexture> ResourcePool::GetTexture(std::string_view name) noexcept
     {
         return findResource(m_TexturePool, name);
-	}
+    }
 
-	Core::ScopeObject<IResourceSprite> ResourcePool::GetSprite(std::string_view name) noexcept
+    Core::ScopeObject<IResourceSprite> ResourcePool::GetSprite(std::string_view name) noexcept
     {
         return findResource(m_SpritePool, name);
-	}
+    }
 
-	Core::ScopeObject<IResourceAnimation> ResourcePool::GetAnimation(std::string_view name) noexcept
+    Core::ScopeObject<IResourceAnimation> ResourcePool::GetAnimation(std::string_view name) noexcept
     {
         return findResource(m_AnimationPool, name);
-	}
+    }
 
-	Core::ScopeObject<IResourceMusic> ResourcePool::GetMusic(std::string_view name) noexcept
+    Core::ScopeObject<IResourceMusic> ResourcePool::GetMusic(std::string_view name) noexcept
     {
         return findResource(m_MusicPool, name);
-	}
+    }
 
-	Core::ScopeObject<IResourceSoundEffect> ResourcePool::GetSound(std::string_view name) noexcept
+    Core::ScopeObject<IResourceSoundEffect> ResourcePool::GetSound(std::string_view name) noexcept
     {
         return findResource(m_SoundSpritePool, name);
-	}
+    }
 
-	Core::ScopeObject<IResourceParticle> ResourcePool::GetParticle(std::string_view name) noexcept
+    Core::ScopeObject<IResourceParticle> ResourcePool::GetParticle(std::string_view name) noexcept
     {
         return findResource(m_ParticlePool, name);
-	}
+    }
 
-	Core::ScopeObject<IResourceFont> ResourcePool::GetSpriteFont(std::string_view name) noexcept
+    Core::ScopeObject<IResourceFont> ResourcePool::GetSpriteFont(std::string_view name) noexcept
     {
         return findResource(m_SpriteFontPool, name);
-	}
+    }
 
-	Core::ScopeObject<IResourceFont> ResourcePool::GetTTFFont(std::string_view name) noexcept
+    Core::ScopeObject<IResourceFont> ResourcePool::GetTTFFont(std::string_view name) noexcept
     {
         return findResource(m_TTFFontPool, name);
-	}
+    }
 
-	Core::ScopeObject<IResourcePostEffectShader> ResourcePool::GetFX(std::string_view name) noexcept
+    Core::ScopeObject<IResourcePostEffectShader> ResourcePool::GetFX(std::string_view name) noexcept
     {
         return findResource(m_FXPool, name);
-	}
+    }
 
-	Core::ScopeObject<IResourceModel> ResourcePool::GetModel(std::string_view name) noexcept
-	{
+    Core::ScopeObject<IResourceModel> ResourcePool::GetModel(std::string_view name) noexcept
+    {
         return findResource(m_ModelPool, name);
-	}
+    }
 
     ResourcePool::ResourcePool(ResourceMgr* mgr, ResourcePoolType t)
         : m_pMgr(mgr)

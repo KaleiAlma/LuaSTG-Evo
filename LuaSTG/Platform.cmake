@@ -1,12 +1,9 @@
-# Windows Platform
-
-# find_package(SDL2 REQUIRED)
+# Platform Library
 
 set(PLATFORM_SOURCES
     Platform/Shared.hpp
     Platform/CommandLineArguments.cpp
     Platform/CommandLineArguments.hpp
-    Platform/All.cpp
 
     Platform/AdapterPolicy.hpp
     Platform/AdapterPolicy.cpp

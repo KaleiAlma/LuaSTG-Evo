@@ -124,7 +124,7 @@ namespace LuaSTGPlus
         bool LoadSpriteFont(const char* name, const char* path, bool mipmaps = true) noexcept;
         // 装载纹理字体(fancy2d)
         bool LoadSpriteFont(const char* name, const char* path, const char* tex_path, bool mipmaps = true) noexcept;
-        // 加载矢量字体
+        // Load vector fonts
         bool LoadTTFFont(const char* name, const char* path, float width, float height) noexcept;
         bool LoadTrueTypeFont(const char* name, Core::Graphics::TrueTypeFontInfo* fonts, size_t count) noexcept;
         // 特效
