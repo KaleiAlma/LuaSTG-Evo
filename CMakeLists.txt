@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.22)
-project(LuaSTGSub LANGUAGES C CXX)
+project(LuaSTGEvo LANGUAGES C CXX)
 
 if(APPLE)
     set(CMAKE_XCODE_GENERATE_TOP_LEVEL_PROJECT_ONLY TRUE)
