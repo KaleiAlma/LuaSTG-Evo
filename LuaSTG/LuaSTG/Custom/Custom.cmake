@@ -10,7 +10,7 @@ if(WIN32)
     )
 elseif(APPLE)
     set(_LuaSTG_res
-        ${CMAKE_CURRENT_LIST_DIR}/LuaSTG.icns
+        ${CMAKE_CURRENT_LIST_DIR}/app.icns
     )
 endif()
 
@@ -26,7 +26,7 @@ target_sources(LuaSTG PRIVATE
 )
 
 if(APPLE)
-    set_source_files_properties(${CMAKE_CURRENT_LIST_DIR}/LuaSTG.icns PROPERTIES
+    set_source_files_properties(${CMAKE_CURRENT_LIST_DIR}/app.icns PROPERTIES
         MACOSX_PACKAGE_LOCATION "Resources"
     )
     set(MACOSX_BUNDLE_ICON_FILE app.icns)
