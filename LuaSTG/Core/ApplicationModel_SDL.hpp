@@ -98,7 +98,7 @@ namespace Core
 		bool run();
 
 	public:
-		ApplicationModel_SDL(ApplicationModelCreationParameters param, IApplicationEventListener* p_listener);
+		ApplicationModel_SDL(IApplicationEventListener* p_listener);
 		~ApplicationModel_SDL();
 	};
 }

@@ -39,13 +39,7 @@ layout(location = 3) in vec4 col;
 
 layout(location = 0) out vec4 col_out;
 
-// subroutine vec4 Blend();
-// subroutine vec4 Fog(vec4);
 
-// subroutine uniform Blend blend_uniform;
-// subroutine uniform Fog fog_uniform;
-
-// subroutine(Blend)
 vec4 vb_zero()
 {{
     vec4 color = texture(sampler0, uv);
@@ -53,13 +47,11 @@ vec4 vb_zero()
     return color;
 }}
 
-// subroutine(Blend)
 vec4 vb_zero_pmul()
 {{
     return texture(sampler0, uv); // pass through
 }}
 
-// subroutine(Blend)
 vec4 vb_one()
 {{
     vec4 color = col;
@@ -67,7 +59,6 @@ vec4 vb_one()
     return color;
 }}
 
-// subroutine(Blend)
 vec4 vb_one_pmul()
 {{
     return col; // pass through
@@ -84,14 +75,12 @@ vec4 add_common(vec4 color)
     return color;
 }}
 
-// subroutine(Blend)
 vec4 vb_add()
 {{
     vec4 color = texture(sampler0, uv);
     return add_common(color);
 }}
 
-// subroutine(Blend)
 vec4 vb_add_pmul()
 {{
     vec4 color = texture(sampler0, uv);
@@ -106,7 +95,6 @@ vec4 vb_add_pmul()
     return add_common(color);
 }}
 
-// subroutine(Blend)
 vec4 vb_mul()
 {{
     vec4 color = texture(sampler0, uv) * col;
@@ -114,7 +102,6 @@ vec4 vb_mul()
     return color;
 }}
 
-// subroutine(Blend)
 vec4 vb_mul_pmul()
 {{
     vec4 color = texture(sampler0, uv) * col;
@@ -123,13 +110,11 @@ vec4 vb_mul_pmul()
 }}
 
 
-// subroutine(Fog)
 vec4 fog_none(vec4 color)
 {{
     return color; // pass through
 }}
 
-// subroutine(Fog)
 vec4 fog_linear(vec4 color)
 {{
     float dist = distance(camera_pos.xyz, pos.xyz);
@@ -142,7 +127,6 @@ vec4 fog_linear(vec4 color)
     return color;
 }}
 
-// subroutine(Fog)
 vec4 fog_exp(vec4 color)
 {{
     float dist = distance(camera_pos.xyz, pos.xyz);
@@ -155,7 +139,6 @@ vec4 fog_exp(vec4 color)
     return color;
 }}
 
-// subroutine(Fog)
 vec4 fog_exp2(vec4 color)
 {{
     float dist = distance(camera_pos.xyz, pos.xyz);
@@ -170,7 +153,6 @@ vec4 fog_exp2(vec4 color)
 
 void main()
 {{
-    // col_out = fog_uniform(blend_uniform());
 #if defined(PREMUL_ALPHA)
     #if defined(VERTEX_ADD)
         col_out = vb_add_pmul();
@@ -347,10 +329,6 @@ namespace Core::Graphics
         GLint amt_uniform_blocks = 0;
         glGetProgramiv(opengl_prgm, GL_ACTIVE_UNIFORM_BLOCKS, &amt_uniform_blocks);
 
-        // const size_t block_properties_size = 4;
-        // GLenum block_properties[block_properties_size] = { GL_BUFFER_BINDING, GL_BUFFER_DATA_SIZE, GL_NUM_ACTIVE_VARIABLES, GL_NAME_LENGTH };
-        // GLint block_values[block_properties_size];
-
         std::vector<GLchar> name_buffer(128);
         int block_offs = 1;
 
@@ -383,14 +361,8 @@ namespace Core::Graphics
             }
         }
 
-        //GLuint idx_view_proj_buffer = glGetUniformBlockIndex(opengl_prgm, "view_proj_buffer");
-
         GLint amt_uniforms = 0;
         glGetProgramiv(opengl_prgm, GL_ACTIVE_UNIFORMS, &amt_uniforms);
-
-        // const size_t uniform_properties_size = 5;
-        // GLenum uniform_properties[uniform_properties_size] = { GL_TYPE, GL_NAME_LENGTH, GL_OFFSET, GL_ARRAY_SIZE, GL_BLOCK_INDEX };
-        // GLint uniform_values[uniform_properties_size];
 
         GLint amt_samplers = 0;
         GLuint tex_idx = 0;
@@ -460,15 +432,6 @@ namespace Core::Graphics
             }
         }
 
-        // Create buffers
-
-        //for (auto& v : m_buffer_map)
-        //{
-        //	glGenBuffers(1, &v.second.opengl_buffer);
-        //	if (v.second.opengl_buffer == 0)
-        //		return false;
-        //}
-
         return true;
     }
 
@@ -501,10 +464,6 @@ namespace Core::Graphics
         }
 
         glDeleteShader(vert);
-
-
-        // idx_blend_uniform = glGetSubroutineUniformLocation(_program, GL_FRAGMENT_SHADER, "blend_uniform");
-        // idx_fog_uniform = glGetSubroutineUniformLocation(_program, GL_FRAGMENT_SHADER, "fog_uniform");
 
         return true;
     }

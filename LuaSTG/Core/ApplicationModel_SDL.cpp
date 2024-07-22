@@ -328,7 +328,7 @@ namespace Core
 		return runSingleThread();
 	}
 
-	ApplicationModel_SDL::ApplicationModel_SDL(ApplicationModelCreationParameters param, IApplicationEventListener* p_listener)
+	ApplicationModel_SDL::ApplicationModel_SDL(IApplicationEventListener* p_listener)
 		: m_listener(p_listener)
 	{
 		assert(m_listener);
@@ -365,11 +365,11 @@ namespace Core
 		std::ignore = 0;
 	}
 
-	bool IApplicationModel::create(ApplicationModelCreationParameters param, IApplicationEventListener* p_app, IApplicationModel** pp_model)
+	bool IApplicationModel::create(IApplicationEventListener* p_app, IApplicationModel** pp_model)
 	{
 		try
 		{
-			*pp_model = new ApplicationModel_SDL(param, p_app);
+			*pp_model = new ApplicationModel_SDL(p_app);
 			return true;
 		}
 		catch (...)

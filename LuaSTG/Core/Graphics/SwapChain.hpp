@@ -31,7 +31,6 @@ namespace Core::Graphics
 
 		virtual void clearRenderAttachment() = 0;
 		virtual void applyRenderAttachment() = 0;
-		// virtual void waitFrameLatency() = 0;
 		virtual void setVSync(bool enable) = 0;
 		virtual bool present() = 0;
 

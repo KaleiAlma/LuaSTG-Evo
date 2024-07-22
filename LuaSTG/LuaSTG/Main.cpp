@@ -1,5 +1,4 @@
 ﻿#include "Platform/MessageBox.hpp"
-#include "Platform/ApplicationSingleInstance.hpp"
 #include "Platform/CommandLineArguments.hpp"
 #include "Core/InitializeConfigure.hpp"
 #include "Debugger/Logger.hpp"
@@ -28,28 +27,6 @@ int main(int argc, char *argv[])
 #endif
 #endif
 	Platform::CommandLineArguments::Get().Update(argc, argv);
-
-	// [[maybe_unused]] Platform::ApplicationSingleInstance single_instance(LUASTG_INFO);
-	// Core::InitializeConfigure cfg;
-	// if (cfg.loadFromFile("config.json")) {
-	// 	if (cfg.single_application_instance && !cfg.application_instance_id.empty()) {
-	// 		single_instance.Initialize(cfg.application_instance_id);
-	// 	}
-	// }
-
-	// if (!LuaSTG::CheckUserRuntime())
-	// {
-	// 	return EXIT_FAILURE;
-	// }
-
-	// LuaSTGPlus::CoInitializeScope com_runtime;
-	// if (!com_runtime())
-	// {
-	// 	Platform::MessageBox::Error(LUASTG_INFO,
-	// 		"Engine Initialization Failed!\n"
-	// 		"Failed to initialize COM runtime, try relaunching.");
-	// 	return EXIT_FAILURE;
-	// }
 
 #ifdef __APPLE__
 	chdir(SDL_GetBasePath());
@@ -85,10 +62,3 @@ int main(int argc, char *argv[])
 
 	return result;
 }
-
-// #include "Platform/CleanWindows.hpp"
-
-// _Use_decl_annotations_ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int)
-// {
-// 	return main();
-// }

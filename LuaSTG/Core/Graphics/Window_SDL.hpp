@@ -31,8 +31,6 @@ namespace Core::Graphics
 		SDL_Cursor* sdl_window_cursor{ nullptr };
 
 		WindowFrameStyle m_framestyle{ WindowFrameStyle::Fixed };
-		// DWORD win32_window_style{ WS_OVERLAPPEDWINDOW ^ (WS_THICKFRAME | WS_MAXIMIZEBOX) };
-		// DWORD win32_window_style_ex{ 0 };
 		uint32_t sdl_window_flags{ SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI };
 		bool m_hidewindow{ true };
 		bool m_redirect_bitmap{ true };
@@ -40,40 +38,19 @@ namespace Core::Graphics
 		bool m_alt_down{ false };
 		FullscreenMode m_fullscreen_mode{ FullscreenMode::Windowed };
 		int32_t m_monitor_idx{};
-		bool m_ignore_size_message{ false }; // 在 SetWindowLongPtr 修改窗口样式时，可以忽略 WM_SIZE
 
-		// bool win32_window_is_sizemove{ false };
-		// bool win32_window_is_menu_loop{ false };
-		// bool win32_window_want_track_focus{ false };
-		// bool enable_track_window_focus{ false };
-
-		// Platform::WindowSizeMoveController m_sizemove;
-		// Platform::MonitorList m_monitors;
-		// Platform::RuntimeLoader::DesktopWindowManager dwmapi_loader;
-
-		// LRESULT onMessage(HWND window, UINT message, WPARAM arg1, LPARAM arg2);
-
-		// bool createWindowClass();
-		// void destroyWindowClass();
 		bool createWindow();
 		void destroyWindow();
 
 		IApplicationModel* m_framework{};
 
 	public:
-		// 内部方法
+		// Internal Method
 
 		SDL_Window* GetWindow() { return sdl_window; }
 
-		// void convertTitleText();
-
 		RectI getRect();
 		bool setRect(RectI v);
-		// RectI getClientRect();
-		// bool setClientRect(RectI v);
-		// uint32_t getDPI();
-		// void setRedirectBitmapEnable(bool enable);
-		// bool getRedirectBitmapEnable();
 		bool recreateWindow();
 		void _toggleFullScreenMode();
 		void _setWindowMode(Vector2U size, bool ignore_size);
@@ -97,7 +74,6 @@ namespace Core::Graphics
 
 			WindowSize,
 			WindowFullscreenStateChange,
-			// WindowDpiChanged,
 
 			NativeWindowMessage,
 
@@ -119,10 +95,6 @@ namespace Core::Graphics
 		void removeEventListener(IWindowEventListener* e);
 
 		void* getNativeHandle();
-		// void setNativeIcon(void* id);
-
-		// void setIMEState(bool enable);
-		// bool getIMEState();
 
 		void setTitleText(StringView str);
 		StringView getTitleText();
@@ -136,8 +108,6 @@ namespace Core::Graphics
 		WindowLayer getLayer();
 		bool setLayer(WindowLayer layer);
 
-		// float getDPIScaling();
-
 		void setWindowMode(Vector2U size);
 		void setExclusiveFullScreenMode();
 		void setBorderlessFullScreenMode();
@@ -147,15 +117,8 @@ namespace Core::Graphics
 		void setMonitorCentered(uint32_t index);
 		void setMonitorFullScreen(uint32_t index);
 
-		// void setCustomSizeMoveEnable(bool v);
-		// void setCustomMinimizeButtonRect(RectI v);
-		// void setCustomCloseButtonRect(RectI v);
-		// void setCustomMoveButtonRect(RectI v);
-
 		bool setCursor(WindowCursor type);
 		WindowCursor getCursor();
-
-		// void setWindowCornerPreference(bool allow);
 
 	public:
 		Window_SDL();

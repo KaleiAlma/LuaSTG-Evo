@@ -30,7 +30,6 @@ namespace Core::Graphics
 				switch (ev.window.event)
 				{
 				case SDL_WINDOWEVENT_RESIZED:
-					if (!m_ignore_size_message)
 					{
 						EventData d = {};
 						d.window_size = Vector2I(ev.window.data1, ev.window.data2);
@@ -167,7 +166,6 @@ namespace Core::Graphics
 		//Set up the type of debug information we want to receive
 		uint32_t uiUnusedIDs = 0;
 		glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, &uiUnusedIDs, GL_TRUE); //Enable all
-		// glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_NOTIFICATION, 0, NULL, GL_FALSE); //Disable notifications
 #endif
 #endif
 
@@ -348,12 +346,6 @@ namespace Core::Graphics
 				if (v) v->onWindowSize(d.window_size);
 			}
 			break;
-		// case EventType::WindowFullscreenStateChange:
-		// 	for (auto& v : m_eventobj)
-		// 	{
-		// 		if (v) v->onWindowFullscreenStateChange(d.window_fullscreen_state);
-		// 	}
-		// 	break;
 		case EventType::NativeWindowMessage:
 			for (auto& v : m_eventobj)
 			{

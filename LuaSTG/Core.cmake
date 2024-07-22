@@ -53,8 +53,6 @@ set(Core_SRC
     Core/Graphics/Font.hpp
     Core/Graphics/Font_OpenGL.hpp
     Core/Graphics/Font_OpenGL.cpp
-    # Core/Graphics/DearImGui_SDL_OpenGL.hpp
-    # Core/Graphics/DearImGui_SDL_OpenGL.cpp
     Core/Application.hpp
     Core/ApplicationModel.hpp
     Core/ApplicationModel_SDL.hpp
@@ -62,12 +60,6 @@ set(Core_SRC
     Core/EventDispatcherImpl.hpp
 
     Core/Audio/Decoder.hpp
-    # Core/Audio/Decoder_VorbisOGG.cpp
-    # Core/Audio/Decoder_VorbisOGG.hpp
-    # Core/Audio/Decoder_FLAC.hpp
-    # Core/Audio/Decoder_FLAC.cpp
-    # Core/Audio/Decoder_WAV.cpp
-    # Core/Audio/Decoder_WAV.hpp
     Core/Audio/Decoder_ma.cpp
     Core/Audio/Decoder_ma.hpp
     Core/Audio/Decoder_ALL.cpp

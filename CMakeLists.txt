@@ -16,16 +16,11 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 include(cmake/TargetCommonOptions.cmake)
-# include(cmake/msvc.crt.cmake)
-# msvc_hybrid_runtime_library()
-# msvc_static_runtime_library()
 include(cmake/loader.cpm.cmake)
 
 CPMInitialize()
 
 include(cmake/packages.cpm.cmake)
-# include(cmake/packages.nuget.cmake)
-# include(cmake/packages.directx.cmake)
 include(cmake/packages.xiph.cmake)
 include(cmake/packages.z.cmake)
 add_subdirectory(external)
@@ -33,5 +28,4 @@ include(cmake/packages.lua.cmake)
 
 add_subdirectory(imgui)
 
-# add_subdirectory(utility)
 add_subdirectory(LuaSTG)

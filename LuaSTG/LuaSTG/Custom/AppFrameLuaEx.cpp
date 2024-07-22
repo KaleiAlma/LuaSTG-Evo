@@ -3,26 +3,24 @@
 #include "Core/FileManager.hpp"
 #include "Core/InitializeConfigure.hpp"
 
-#include "Platform/HResultChecker.hpp"
-
 namespace LuaSTGPlus
 {
     bool AppFrame::OnLoadLaunchScriptAndFiles()
     {
         bool is_launch_loaded = false;
         #ifdef USING_LAUNCH_FILE
-        spdlog::info("[luastg] 加载初始化脚本");
+        spdlog::info("[luastg] Loading launch script");
         std::vector<uint8_t> src;
         if (GFileManager().loadEx("launch", src))
         {
             if (SafeCallScript((char const*)src.data(), src.size(), "launch"))
             {
                 is_launch_loaded = true;
-                spdlog::info("[luastg] 加载脚本'launch'");
+                spdlog::info("[luastg] Loaded launch script");
             }
             else
             {
-                spdlog::error("[luastg] 加载初始化脚本'launch'失败");
+                spdlog::error("[luastg] Loading launch script failed");
             }
         }
         #endif
@@ -31,21 +29,17 @@ namespace LuaSTGPlus
             Core::InitializeConfigure config;
             if (config.loadFromFile("config.json"))
             {
-                spdlog::info("[luastg] 发现配置文件'config.json'");
+                spdlog::info("[luastg] Engine config found: 'config.json'");
                 LAPP.SetWindowed(!config.fullscreen_enable);
                 LAPP.SetVsync(config.vsync_enable);
                 LAPP.SetResolution(config.canvas_width, config.canvas_height);
-                if (!config.target_graphics_device.empty())
-                {
-                    LAPP.SetPreferenceGPU(config.target_graphics_device.c_str());
-                }
                 is_launch_loaded = true;
             }
         }
         #ifdef USING_LAUNCH_FILE
         if (!is_launch_loaded)
         {
-            spdlog::error("[luastg] 找不到文件'launch'");
+            spdlog::error("[luastg] Can't find launch script ('./launch')");
         }
         #endif
 
@@ -54,7 +48,7 @@ namespace LuaSTGPlus
     
     bool AppFrame::OnLoadMainScriptAndFiles()
     {
-        spdlog::info("[luastg] 加载入口点脚本");
+        spdlog::info("[luastg] Load main script");
         std::string_view entry_scripts[3] = {
             "core.lua",
             "main.lua",
@@ -68,7 +62,7 @@ namespace LuaSTGPlus
             {
                 if (SafeCallScript((char const*)src.data(), src.size(), v.data()))
                 {
-                    spdlog::info("[luastg] 加载脚本'{}'", v);
+                    spdlog::info("[luastg] Loading main script '{}'", v);
                     is_load = true;
                     break;
                 }
@@ -76,7 +70,7 @@ namespace LuaSTGPlus
         }
         if (!is_load)
         {
-            spdlog::error("[luastg] 找不到文件'{}'、'{}'或'{}'", entry_scripts[0], entry_scripts[1], entry_scripts[2]);
+            spdlog::error("[luastg] No main script found (searched: '{}', '{}', '{}')", entry_scripts[0], entry_scripts[1], entry_scripts[2]);
         }
         return true;
     }

@@ -16,11 +16,6 @@ namespace Core::Graphics
 	class Device_OpenGL : public Object<IDevice>
 	{
 	private:
-		// std::string preferred_adapter_name;
-		// std::string current_adapter_name;
-		// std::vector<std::string> adapter_name_list;
-
-	private:
 		enum class EventType
 		{
 			DeviceCreate,
@@ -35,13 +30,7 @@ namespace Core::Graphics
 		void addEventListener(IDeviceEventListener* e);
 		void removeEventListener(IDeviceEventListener* e);
 
-		// DeviceMemoryUsageStatistics getMemoryUsageStatistics();
-
 		bool recreate();
-		// void setPreferenceGpu(StringView prefered_gpu) { preferred_adapter_name = prefered_gpu; }
-		// uint32_t getGpuCount() { return static_cast<uint32_t>(adapter_name_list.size()); }
-		// StringView getGpuName(uint32_t index) { return adapter_name_list[index]; }
-		// StringView getCurrentGpuName() const noexcept { return current_adapter_name; }
 
 		void* getNativeHandle() { return nullptr; }
 		void* getNativeRendererHandle() { return SDL_GL_GetCurrentContext(); }
@@ -53,39 +42,13 @@ namespace Core::Graphics
 		bool createRenderTarget(Vector2U size, IRenderTarget** pp_rt);
 		bool createDepthStencilBuffer(Vector2U size, IDepthStencilBuffer** pp_ds);
 
-		// bool createSamplerState(SamplerState const& def, ISamplerState** pp_sampler);
-
 	public:
-		// Device_OpenGL(std::string_view const& prefered_gpu = "");
 		Device_OpenGL();
 		~Device_OpenGL();
 
 	public:
 		static bool create(Device_OpenGL** p_device);
 	};
-
-	// class SamplerState_OpenGL
-	// 	: public Object<ISamplerState>
-	// 	, public IDeviceEventListener
-	// {
-	// private:
-	// 	ScopeObject<Device_OpenGL> m_device;
-	// 	SamplerState m_info;
-	// 	GLuint opengl_sampler = 0;
-
-	// public:
-	// 	void onDeviceCreate();
-	// 	void onDeviceDestroy();
-
-	// 	bool createResource();
-
-	// public:
-	// 	GLuint GetState() { return opengl_sampler; }
-
-	// public:
-	// 	SamplerState_OpenGL(Device_OpenGL* p_device, SamplerState const& def);
-	// 	~SamplerState_OpenGL();
-	// };
 
 	class Texture2D_OpenGL
 		: public Object<ITexture2D>
@@ -97,7 +60,6 @@ namespace Core::Graphics
 		ScopeObject<IData> m_data;
 		std::string source_path;
 		GLuint opengl_texture2d = 0;
-		// GLuint opengl_texview;
 		Vector2U m_size{};
 		bool m_dynamic{ false };
 		bool m_premul{ false };
@@ -112,7 +74,6 @@ namespace Core::Graphics
 
 	public:
 		GLuint GetResource() { return opengl_texture2d; }
-		// GLuint GetView() { return opengl_texview; }
 		GLuint GetView() { return opengl_texture2d; }
 
 	public:
@@ -190,7 +151,6 @@ namespace Core::Graphics
 
 	public:
 		bool DepthStencilBufferEnabled() { return m_depthstencilbuffer_enable; }
-		// bool SetDepthStencilBufferEnable(bool enable);
 
 	public:
 		void* getNativeHandle() { return (void*)(intptr_t)opengl_framebuffer; }

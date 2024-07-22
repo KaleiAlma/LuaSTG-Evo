@@ -13,16 +13,12 @@ extern int luaopen_string_pack(lua_State* L);
 extern int luaopen_mime_core(lua_State* L);
 extern int luaopen_socket_core(lua_State* L);
 }
-//#include "lua_xlsx_csv.h"
 #include "lua_steam.h"
-#include "LuaBinding/lua_xinput.hpp"
 #include "LuaBinding/lua_random.hpp"
 #include "LuaBinding/lua_particle.hpp"
-// #include "LuaBinding/lua_dwrite.hpp"
 #include "LuaBinding/Resource.hpp"
 
 #include "Core/FileManager.hpp"
-// #include "utf8.hpp"
 #include "Platform/CommandLineArguments.hpp"
 #include "Platform/MessageBox.hpp"
 

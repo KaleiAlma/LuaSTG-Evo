@@ -6,20 +6,20 @@ namespace Core::Graphics
 {
 	struct GlyphInfo
 	{
-		uint32_t texture_index = 0; // 字形在哪个纹理上
-		RectF    texture_rect;      // 字形在纹理上的uv坐标
-		Vector2F size;              // 字形大小
-		Vector2F position;          // 笔触距离字形左上角坐标
-		Vector2F advance;           // 前进量
+		uint32_t texture_index = 0; // Texture the glyph is on
+		RectF    texture_rect;      // UV coordinates of glyph on texture
+		Vector2F size;              // Glyph size
+		Vector2F position;          // Distance of stroke from upper-left corner of glyph coordinates
+		Vector2F advance;           // Advance
 	};
 
 	struct TrueTypeFontInfo
 	{
 		StringView source;
-		uint32_t   font_face;        // 字面索引，一个字体文件中有多个字面
-		Vector2F   font_size;        // 像素大小
-		bool       is_force_to_file; // source 参数代表文件路径，且强制以文件的方式打开，不读取进内存，当 is_buffer = true 时忽略该选项
-		bool       is_buffer;        // source 参数代表二进制数据，而不是文件路径
+		uint32_t   font_face;        // Font index, multiple fonts in a font file
+		Vector2F   font_size;        // Pixel size
+		bool       is_force_to_file; // If true, `source` is taken as a path to a file, and does not read it into memory. This option ignored when `is_buffer = true`
+		bool       is_buffer;        // If true, `source` is taken as binary data, not the file path.
 	};
 
 	struct IGlyphManager : public IObject
@@ -51,13 +51,13 @@ namespace Core::Graphics
 		virtual void setGlyphManager(IGlyphManager* p_mgr) = 0;
 		virtual IGlyphManager* getGlyphManager() = 0;
 
-		// 测量一个字符串绘制的精确包围盒大小（受到 setScale 影响）
+		// Get the bounding box of a drawn string (affected by setScale)
 		virtual RectF getTextBoundary(StringView str) = 0;
-		// 测量一个字符串绘制的前进量（受到 setScale 影响）
+		// Get text advance (affected by setScale)
 		virtual Vector2F getTextAdvance(StringView str) = 0;
-		// 绘制文字，y 轴朝上（受到 setScale 影响）
+		// Draw text with y-axis facing up (affected by setScale)
 		virtual bool drawText(StringView str, Vector2F const& start, Vector2F* endout) = 0;
-		// 绘制文字，提供 3D 的移动向量，以便在空间中绘制（受到 setScale 影响）
+		// Draw text in 3D space (affected by setScale)
 		virtual bool drawTextInSpace(StringView str,
 			Vector3F const& start, Vector3F const& right_vec, Vector3F const& down_vec,
 			Vector3F* endout) = 0;

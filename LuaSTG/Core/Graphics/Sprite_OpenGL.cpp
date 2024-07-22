@@ -6,7 +6,7 @@ namespace Core::Graphics
 {
 	void Sprite_OpenGL::updateRect()
 	{
-		// 纹理坐标系需要归一化
+		// Normalize texture coordinates
 
 		Vector2U const size = m_texture->getSize();
 		float const uscale = 1.0f / (float)size.x;
@@ -17,7 +17,7 @@ namespace Core::Graphics
 		m_uv.b.x *= uscale;
 		m_uv.b.y *= vscale;
 
-		// 纹理坐标系 y 轴朝下，渲染坐标系 y 轴朝上
+		// Texture coordinate system is y-axis-down, fix it to be y-axis-up for rendering
 
 		m_pos_rc = m_rect - m_center;
 		m_pos_rc.a.x *= m_scale;

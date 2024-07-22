@@ -3,8 +3,6 @@
 #include "Utility/Utility.h"
 #include "Debugger/ImGuiExtension.h"
 #include "LuaBinding/LuaAppFrame.hpp"
-// #include "utf8.hpp"
-// #include "resource.h"
 
 using namespace LuaSTGPlus;
 
@@ -58,17 +56,6 @@ void AppFrame::SetTitle(const char* v)noexcept
 		spdlog::error("[luastg] SetTitle: 内存不足");
 	}
 }
-void AppFrame::SetPreferenceGPU(const char* v) noexcept
-{
-	try
-	{
-		m_Setting.preferred_gpu = v;
-	}
-	catch (const std::bad_alloc&)
-	{
-		spdlog::error("[luastg] SetPreferenceGPU: 内存不足");
-	}
-}
 void AppFrame::SetSplash(bool v)noexcept
 {
 	m_Setting.show_cursor = v;
@@ -77,12 +64,6 @@ void AppFrame::SetSplash(bool v)noexcept
 		m_pAppModel->getWindow()->setCursor(m_Setting.show_cursor ? Core::Graphics::WindowCursor::Arrow : Core::Graphics::WindowCursor::None);
 	}
 }
-// void AppFrame::SetWindowCornerPreference(bool allow)
-// {
-// 	m_Setting.allow_windows_11_window_corner = allow;
-// 	if (m_pAppModel)
-// 		m_pAppModel->getWindow()->setWindowCornerPreference(allow);
-// }
 
 int AppFrame::LoadTextFile(lua_State* L_, const char* path, const char *packname)noexcept
 {
@@ -145,9 +126,7 @@ bool AppFrame::Init()noexcept
 	
 	//////////////////////////////////////// 初始化引擎
 	{
-		Core::ApplicationModelCreationParameters app_param = {};
-		app_param.gpu = m_Setting.preferred_gpu;
-		if (!Core::IApplicationModel::create(app_param, this, ~m_pAppModel))
+		if (!Core::IApplicationModel::create(this, ~m_pAppModel))
 			return false;
 		if (!Core::Graphics::ITextRenderer::create(m_pAppModel->getRenderer(), ~m_pTextRenderer))
 			return false;

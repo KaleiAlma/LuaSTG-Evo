@@ -68,11 +68,6 @@ void LuaSTGPlus::BuiltInFunctionWrapper::Register(lua_State* L)noexcept
 			);
 			return 0;
 		}
-		static int SetPreferenceGPU(lua_State* L)noexcept
-		{
-			LAPP.SetPreferenceGPU(luaL_checkstring(L, 1));
-			return 0;
-		}
 		static int SetFPS(lua_State* L)noexcept
 		{
 			int v = luaL_checkinteger(L, 1);
@@ -257,7 +252,6 @@ void LuaSTGPlus::BuiltInFunctionWrapper::Register(lua_State* L)noexcept
 		{ "SetFPS", &WrapperImplement::SetFPS },
 		{ "GetFPS", &WrapperImplement::GetFPS },
 		{ "SetVsync", &WrapperImplement::SetVsync },
-		{ "SetPreferenceGPU", &WrapperImplement::SetPreferenceGPU },
 		{ "SetResolution", &WrapperImplement::SetResolution },
 		{ "Log", &WrapperImplement::Log },
 		{ "DoFile", &WrapperImplement::DoFile },

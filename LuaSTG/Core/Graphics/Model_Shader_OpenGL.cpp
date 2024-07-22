@@ -45,23 +45,11 @@ layout(location = 4) in vec2 uv;
 
 layout(location = 0) out vec4 col_out;
 
-// subroutine vec4 Fog(vec4);
-// subroutine vec4 BaseTexture();
-// subroutine vec4 VertexColor();
-// subroutine bool AlphaMask(vec4);
-
-// subroutine uniform Fog fog_uniform;
-// subroutine uniform BaseTexture btex_uniform;
-// subroutine uniform VertexColor vc_uniform;
-// subroutine uniform AlphaMask amask_uniform;
-
-// subroutine(Fog)
 vec4 fog_none(vec4 color)
 {{
     return color; // pass through
 }}
 
-// subroutine(Fog)
 vec4 fog_linear(vec4 color)
 {{
     float dist = distance(camera_pos.xyz, wpos.xyz);
@@ -74,7 +62,6 @@ vec4 fog_linear(vec4 color)
     return color;
 }}
 
-// subroutine(Fog)
 vec4 fog_exp(vec4 color)
 {{
     float dist = distance(camera_pos.xyz, wpos.xyz);
@@ -87,7 +74,6 @@ vec4 fog_exp(vec4 color)
     return color;
 }}
 
-// subroutine(Fog)
 vec4 fog_exp2(vec4 color)
 {{
     float dist = distance(camera_pos.xyz, wpos.xyz);
@@ -167,7 +153,6 @@ void main()
     wpos = world * vec4(pos_in, 1.0);
     pos = view_proj * wpos;
     gl_Position = pos;
-    // wpos_out = wpos;
     norm = norm_world * vec4(norm_in, 0.0); // no move
     col = col_in;
     uv = uv_in;

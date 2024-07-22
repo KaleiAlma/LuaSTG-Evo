@@ -86,12 +86,8 @@ set(LUASTG_ENGINE_SOURCES
 
     LuaSTG/LuaBinding/lua_particle.hpp
     LuaSTG/LuaBinding/lua_particle.cpp
-    # LuaSTG/LuaBinding/lua_dwrite.hpp
-    # LuaSTG/LuaBinding/lua_dwrite.cpp
     LuaSTG/LuaBinding/lua_random.hpp
     LuaSTG/LuaBinding/lua_random.cpp
-    # LuaSTG/LuaBinding/lua_xinput.hpp
-    # LuaSTG/LuaBinding/lua_xinput.cpp
     LuaSTG/LuaBinding/lua_utility.hpp
     LuaSTG/LuaBinding/lua_luastg_hash.cpp
     LuaSTG/LuaBinding/lua_luastg_hash.hpp
@@ -109,7 +105,6 @@ set(LUASTG_ENGINE_SOURCES
     LuaSTG/LuaBinding/LW_Audio.cpp
     LuaSTG/LuaBinding/LW_BentLaser.cpp
     LuaSTG/LuaBinding/LW_Color.cpp
-    # LuaSTG/LuaBinding/LW_DInput.cpp
     LuaSTG/LuaBinding/LW_FileManager.cpp
     LuaSTG/LuaBinding/LW_Input.cpp
     LuaSTG/LuaBinding/LW_LuaSTG.cpp
@@ -120,7 +115,6 @@ set(LUASTG_ENGINE_SOURCES
     LuaSTG/LuaBinding/LW_StopWatch.cpp
     LuaSTG/LuaBinding/LW_Window.cpp
     LuaSTG/LuaBinding/LW_ResourceMgr.cpp
-    # LuaSTG/LuaBinding/LW_Platform.cpp
     LuaSTG/LuaBinding/LW_GameObjectManager.cpp
     LuaSTG/LuaBinding/LB_Mesh.cpp
     LuaSTG/LuaBinding/PostEffectShader.hpp
@@ -153,11 +147,7 @@ set(LUASTG_ENGINE_SOURCES
     LuaSTG/AppFrameRenderEx.cpp
     LuaSTG/LConfig.h
     LuaSTG/LMathConstant.hpp
-    # LuaSTG/RuntimeCheck.hpp
-    # LuaSTG/RuntimeCheck.cpp
     LuaSTG/Main.cpp
-
-    # LuaSTG/LuaSTG.manifest
 )
 
 if(MSVC)
@@ -191,14 +181,12 @@ target_link_libraries(LuaSTG PRIVATE
     Core
     xmath
     # fmt
-    # lua51static
     libluajit
     imgui
     implot
     lua_cjson
     lua_filesystem
     luasocket
-    #lua_xlsx_csv
     lua_imgui
     imgui_impl_sdl2
     imgui_impl_opengl3
@@ -211,25 +199,11 @@ target_link_libraries(LuaSTG PRIVATE
 
 set(LUASTG_BUILD_OUTPUT_DIR ${CMAKE_BINARY_DIR}/bin)
 if(APPLE)
-    # apple fixes
-    # set_property(TARGET LuaSTG PROPERTY XCODE_EMBED_FRAMEWORKS 
-    #     "/usr/local/opt/zstd/lib/libzstd.1.dylib"
-    #     "/usr/local/opt/openssl@3/lib/libssl.3.dylib"
-    #     "/usr/local/opt/xz/lib/liblzma.5.dylib"
-    # )
-    # set_target_properties(LuaSTG PROPERTIES XCODE_EMBED_FRAMEWORKS_PATH "Frameworks")
-    # set_target_properties(LuaSTG PROPERTIES XCODE_EMBED_FRAMEWORKS_REMOVE_HEADERS_ON_COPY ON)
-    # set_target_properties(LuaSTG PROPERTIES XCODE_EMBED_FRAMEWORKS_CODE_SIGN_ON_COPY ON)
-
     add_custom_command(TARGET LuaSTG POST_BUILD
         # apple fixes
-        # COMMAND ${CMAKE_COMMAND} -E copy /usr/local/opt/zstd/lib/libzstd.1.dylib ${CMAKE_BINARY_DIR}/LuaSTG/LuaSTG.app/Contents/MacOS
-        # COMMAND ${CMAKE_COMMAND} -E copy /usr/local/opt/openssl@3/lib/libssl.3.dylib ${CMAKE_BINARY_DIR}/LuaSTG/LuaSTG.app/Contents/MacOS
-        # COMMAND ${CMAKE_COMMAND} -E copy /usr/local/opt/xz/lib/liblzma.5.dylib ${CMAKE_BINARY_DIR}/LuaSTG/LuaSTG.app/Contents/MacOS
-
         COMMAND dylibbundler -of -cd -b -x ${CMAKE_BINARY_DIR}/LuaSTG/LuaSTG.app/Contents/MacOS/LuaSTG -d ${CMAKE_BINARY_DIR}/LuaSTG/LuaSTG.app/Contents/Frameworks -p @executable_path/../Frameworks/
         COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/LuaSTG/LuaSTG.app/Contents/Resources
-        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_LIST_DIR}/LuaSTG/Custom/LuaSTG.icns ${CMAKE_BINARY_DIR}/LuaSTG/LuaSTG.app/
+        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_LIST_DIR}/LuaSTG/Custom/LuaSTG.icns ${CMAKE_BINARY_DIR}/LuaSTG/Contents/LuaSTG.app/
 
         COMMAND ${CMAKE_COMMAND} -E make_directory ${LUASTG_BUILD_OUTPUT_DIR}
 

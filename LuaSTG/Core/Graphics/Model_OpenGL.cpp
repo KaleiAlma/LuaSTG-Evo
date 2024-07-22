@@ -125,7 +125,7 @@ namespace Core::Graphics
             return false;
         }
 
-        // // built-in: alpha mask
+        // built-in: alpha mask
 
         glGenBuffers(1, &ubo_alpha);
         if (ubo_alpha == 0) {
@@ -133,7 +133,7 @@ namespace Core::Graphics
             return false;
         }
 
-        // // built-in: light
+        // built-in: light
 
         glGenBuffers(1, &ubo_light);
         if (ubo_light == 0) {
@@ -145,7 +145,7 @@ namespace Core::Graphics
     }
     bool ModelSharedComponent_OpenGL::createState()
     {
-        // OpenGL doesn't do state like DirectX
+        // OpenGL doesn't do state in the same way as DirectX
 
         return true;
     }
@@ -438,38 +438,6 @@ namespace Core::Graphics
     }
     bool Model_OpenGL::createSampler(tinygltf::Model& model)
     {
-        
-        // auto* device = m_device->GetD3D11Device();
-
-        // HRESULT hr = S_OK;
-
-        // gltf: create
-
-        // sampler.resize(model.samplers.size());
-        // for (size_t idx = 0; idx < model.samplers.size(); idx += 1)
-        // {
-        //     tinygltf::Sampler& samp = model.samplers[idx];
-        //     D3D11_SAMPLER_DESC samp_def = {
-        //         .Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR,
-        //         .AddressU = D3D11_TEXTURE_ADDRESS_WRAP,
-        //         .AddressV = D3D11_TEXTURE_ADDRESS_WRAP,
-        //         .AddressW = D3D11_TEXTURE_ADDRESS_WRAP,
-        //         .MipLODBias = D3D11_DEFAULT_MIP_LOD_BIAS,
-        //         .MaxAnisotropy = D3D11_DEFAULT_MAX_ANISOTROPY,
-        //         .ComparisonFunc = D3D11_COMPARISON_ALWAYS,
-        //         .BorderColor = {},
-        //         .MinLOD = 0.0f,
-        //         .MaxLOD = D3D11_FLOAT32_MAX,
-        //     };
-        //     map_sampler_to_opengl(samp, samp_def);
-        //     samp_def.Filter = D3D11_FILTER_ANISOTROPIC; // TODO: better?
-        //     hr = device->CreateSamplerState(&samp_def, &sampler[idx]);
-        //     if (FAILED(hr))
-        //     {
-        //         assert(false);
-        //         return false;
-        //     }
-        // }
         sampler = model.samplers;
 
         return true;
@@ -772,8 +740,6 @@ namespace Core::Graphics
 
     void Model_OpenGL::draw(IRenderer::FogState fog)
     {
-        // glUseProgram(shared_->shader_program);
-
         // common data
 
         glBindBuffer(GL_UNIFORM_BUFFER, shared_->ubo_light);
@@ -782,19 +748,6 @@ namespace Core::Graphics
 
         auto set_state_matrix_from_block = [&](ModelBlock& mblock)
         {
-            //GLuint subroutines[4]{
-            //    (GLuint)IDX(fog),
-            //    (GLuint)(mblock.image ? 1 : 0) + 4,
-            //    (GLuint)(mblock.color_buffer ? 1 : 0) + 6,
-            //    (GLuint)(mblock.alpha_cull ? 1 : 0) + 8,
-            //};
-            // GLuint subroutines[4];
-            // subroutines[shared_->idx_fog_uniform] = (GLuint)IDX(fog);
-            // subroutines[shared_->idx_btex_uniform] = (GLuint)(mblock.image ? 1 : 0) + 4;
-            // subroutines[shared_->idx_vc_uniform] = (GLuint)(mblock.color_buffer ? 1 : 0) + 6;
-            // subroutines[shared_->idx_amask_uniform] = (GLuint)(mblock.alpha_cull ? 1 : 0) + 8;
-
-            // glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 4, subroutines);
             glUseProgram(shared_->programs[IDX(fog)][mblock.alpha_cull ? 1 : 0][mblock.image ? 1 : 0][mblock.color_buffer ? 1 : 0]);
         };
         auto upload_local_world_matrix = [&](ModelBlock& mblock)
@@ -849,12 +802,6 @@ namespace Core::Graphics
                 glBindBuffer(GL_UNIFORM_BUFFER, shared_->ubo_alpha);
                 glBufferData(GL_UNIFORM_BUFFER, sizeof(alpha), &alpha, GL_STATIC_DRAW);
             }
-            // GLuint buffers[2] = {
-            //     // camera position and look to vector are setup by Renderer at register(b0)
-            //     shared_->ubo_alpha,
-            //     shared_->ubo_light,
-            // };
-            // glBindBuffersBase(GL_UNIFORM_BUFFER, 4, 2, buffers);
 
             glBindBufferBase(GL_UNIFORM_BUFFER, 4, shared_->ubo_alpha);
             glBindBufferBase(GL_UNIFORM_BUFFER, 5, shared_->ubo_light);
@@ -915,7 +862,7 @@ namespace Core::Graphics
         glDisableVertexAttribArray(1);
         glDisableVertexAttribArray(2);
         glDisableVertexAttribArray(3);
-        // glDisable(GL_DEPTH_TEST);
+        glDisable(GL_DEPTH_TEST);
     }
 
     Model_OpenGL::Model_OpenGL(Device_OpenGL* p_device, ModelSharedComponent_OpenGL* p_model_shared, StringView path)

@@ -2,9 +2,6 @@
 #include "Core/FileManager.hpp"
 #include "Core/Type.hpp"
 #include "Core/i18n.hpp"
-// #include "Platform/WindowsVersion.hpp"
-// #include "Platform/AdapterPolicy.hpp"
-// #include "Platform/CommandLineArguments.hpp"
 
 #include <cstdint>
 #include <memory>
@@ -16,19 +13,8 @@
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "stb_image_write.h"
 
-// #include "utf8.hpp"
-
-// #define HRNew HRESULT hr = S_OK;
-// #define HRGet hr = gHR
-// #define HRCheckCallReport(x) if (FAILED(hr)) { i18n_core_system_call_report_error(x); }
-// #define HRCheckCallReturnBool(x) if (FAILED(hr)) { i18n_core_system_call_report_error(x); assert(false); return false; }
-// #define HRCheckCallNoAssertReturnBool(x) if (FAILED(hr)) { i18n_core_system_call_report_error(x); return false; }
-
 namespace Core::Graphics
 {
-
-	// Device_OpenGL::Device_OpenGL(std::string_view const& prefered_gpu)
-		// : preferred_adapter_name(prefered_gpu)
 	Device_OpenGL::Device_OpenGL()
 	{
 		// Create graphics components...
@@ -199,140 +185,6 @@ namespace Core::Graphics
 
 namespace Core::Graphics
 {
-	// SamplerState
-
-	// void SamplerState_OpenGL::onDeviceCreate()
-	// {
-	// 	createResource();
-	// }
-	// void SamplerState_OpenGL::onDeviceDestroy()
-	// {
-	// 	glDeleteSamplers(1, &opengl_sampler);
-	// }
-
-	// bool SamplerState_OpenGL::createResource()
-	// {
-	// 	glGenSamplers(1, &opengl_sampler);
-	// 	if (opengl_sampler == 0) {
-	// 		i18n_core_system_call_report_error("glGenSamplers");
-	// 		return false;
-	// 	}
-
-	// 	// switch (m_info.filter)
-	// 	// {
-	// 	// default: assert(false); return false;
-	// 	// case Filter::Nearest:
-	// 	// 	glSamplerParameteri(opengl_sampler, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	// 	// 	glSamplerParameteri(opengl_sampler, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	// 	// 	break;
-	// 	// case Filter::PointMinLinear:
-	// 	// 	glSamplerParameteri(opengl_sampler, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	// 	// 	glSamplerParameteri(opengl_sampler, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	// 	// 	break;
-	// 	// case Filter::PointMagLinear:
-	// 	// 	glSamplerParameteri(opengl_sampler, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	// 	// 	glSamplerParameteri(opengl_sampler, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	// 	// 	break;
-	// 	// case Filter::PointMipLinear: // unsupported
-	// 	// 	glSamplerParameteri(opengl_sampler, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	// 	// 	glSamplerParameteri(opengl_sampler, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	// 	// 	break;
-	// 	// case Filter::LinearMinPoint:
-	// 	// 	glSamplerParameteri(opengl_sampler, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	// 	// 	glSamplerParameteri(opengl_sampler, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	// 	// 	break;
-	// 	// case Filter::LinearMagPoint:
-	// 	// 	glSamplerParameteri(opengl_sampler, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	// 	// 	glSamplerParameteri(opengl_sampler, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	// 	// 	break;
-	// 	// case Filter::LinearMipPoint: // unsupported
-	// 	// 	glSamplerParameteri(opengl_sampler, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	// 	// 	glSamplerParameteri(opengl_sampler, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	// 	// 	break;
-	// 	// case Filter::Linear:
-	// 	// 	glSamplerParameteri(opengl_sampler, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	// 	// 	glSamplerParameteri(opengl_sampler, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	// 	// 	break;
-	// 	// case Filter::Anisotropic:
-	// 	// 	glSamplerParameteri(opengl_sampler, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	// 	// 	glSamplerParameteri(opengl_sampler, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	// 	// 	glSamplerParameterf(opengl_sampler, GL_TEXTURE_MAX_ANISOTROPY_EXT, m_info.max_anisotropy);
-	// 	// 	break;
-	// 	// }
-		
-	// 	auto mapAddressMode_ = [](TextureAddressMode mode) -> GLint
-	// 	{
-	// 		switch (mode)
-	// 		{
-	// 		default: assert(false); return (GLint)0;
-	// 		case TextureAddressMode::Wrap: return GL_REPEAT;
-	// 		case TextureAddressMode::Mirror: return GL_MIRRORED_REPEAT;
-	// 		case TextureAddressMode::Clamp: return GL_CLAMP_TO_EDGE;
-	// 		case TextureAddressMode::Border: return GL_CLAMP_TO_BORDER;
-	// 		case TextureAddressMode::MirrorOnce: return GL_MIRRORED_REPEAT;
-	// 		}
-	// 	};
-
-	// #define mapAddressMode(_X, _Y) \
-	// 	GLint wrap##_Y = mapAddressMode_(m_info._X);\
-	// 	if (wrap##_Y == (GLint)0) { assert(false); return false; }\
-	// 	glSamplerParameteri(opengl_sampler, GL_TEXTURE_WRAP_##_Y, wrap##_Y);
-
-	// 	mapAddressMode(address_u, S);
-	// 	mapAddressMode(address_v, T);
-	// 	mapAddressMode(address_w, R);
-
-	// #undef mapAddressMode
-
-	// 	glSamplerParameterf(opengl_sampler, GL_TEXTURE_LOD_BIAS, m_info.mip_lod_bias);
-	// 	glSamplerParameteri(opengl_sampler, GL_TEXTURE_COMPARE_FUNC, GL_NEVER);
-	// 	glSamplerParameterf(opengl_sampler, GL_TEXTURE_MIN_LOD, m_info.min_lod);
-	// 	glSamplerParameterf(opengl_sampler, GL_TEXTURE_MAX_LOD, m_info.max_lod);
-		
-	// 	float borderColor[4];
-	// #define makeColor(r, g, b, a) \
-	// 	borderColor[0] = r;\
-	// 	borderColor[1] = g;\
-	// 	borderColor[2] = b;\
-	// 	borderColor[3] = a;
-
-	// 	switch (m_info.border_color)
-	// 	{
-	// 	default: assert(false); return false;
-	// 	case BorderColor::Black:
-	// 		makeColor(0.0f, 0.0f, 0.0f, 0.0f);
-	// 		break;
-	// 	case BorderColor::OpaqueBlack:
-	// 		makeColor(0.0f, 0.0f, 0.0f, 1.0f);
-	// 		break;
-	// 	case BorderColor::TransparentWhite:
-	// 		makeColor(1.0f, 1.0f, 1.0f, 0.0f);
-	// 		break;
-	// 	case BorderColor::White:
-	// 		makeColor(1.0f, 1.0f, 1.0f, 1.0f);
-	// 		break;
-	// 	}
-
-	// #undef makeColor
-	// 	glSamplerParameterfv(opengl_sampler, GL_TEXTURE_BORDER_COLOR, &borderColor[0]);
-
-	// 	return true;
-	// }
-
-	// SamplerState_OpenGL::SamplerState_OpenGL(Device_OpenGL* p_device, SamplerState const& def)
-	// 	: m_device(p_device)
-	// 	, m_info(def)
-	// {
-	// 	if (!createResource())
-	// 		throw std::runtime_error("SamplerState_OpenGL::SamplerState_OpenGL");
-	// 	m_device->addEventListener(this);
-	// }
-	// SamplerState_OpenGL::~SamplerState_OpenGL()
-	// {
-	// 	m_device->removeEventListener(this);
-	// 	glDeleteSamplers(1, &opengl_sampler);
-	// }
-
 	// Texture2D
 
 	bool Texture2D_OpenGL::setSize(Vector2U size)
@@ -541,8 +393,6 @@ namespace Core::Graphics
 
 	bool DepthStencilBuffer_OpenGL::setSize(Vector2U size)
 	{
-		// d3d11_texture2d.Reset();
-		// d3d11_dsv.Reset();
 		glDeleteRenderbuffers(1, &opengl_depthstencilbuffer);
 		m_size = size;
 		return createResource();
@@ -554,8 +404,6 @@ namespace Core::Graphics
 	}
 	void DepthStencilBuffer_OpenGL::onDeviceDestroy()
 	{
-		// d3d11_texture2d.Reset();
-		// d3d11_dsv.Reset();
 		glDeleteRenderbuffers(1, &opengl_depthstencilbuffer);
 	}
 
