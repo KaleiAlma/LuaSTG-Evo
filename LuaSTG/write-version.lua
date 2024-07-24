@@ -2,7 +2,7 @@
 local version = {
     major = 0,
     minor = 1,
-    patch = 1,
+    patch = 2,
 }
 
 local utf8_bom = "\xEF\xBB\xBF"
@@ -82,9 +82,9 @@ BEGIN
             VALUE "CompanyName", "KaleiAlma"
             VALUE "FileDescription", "LuaSTG Evo"
             VALUE "FileVersion", "1.0.0.0"
-            VALUE "InternalName", "LuaSTG Sub"
+            VALUE "InternalName", "LuaSTG Evo"
             VALUE "LegalCopyright", "Copyright 2020-2023 KaleiAlma"
-            VALUE "OriginalFilename", "LuaSTGEvo.exe"
+            VALUE "OriginalFilename", "LuaSTG.exe"
             VALUE "ProductName", "LuaSTG Evo"
             VALUE "ProductVersion", "1.0.0.0"
         END
@@ -194,7 +194,7 @@ BEGIN
             VALUE "FileVersion", "%s"
             VALUE "InternalName", "LuaSTG Evo"
             VALUE "LegalCopyright", "Copyright 2020-2023 KaleiAlma"
-            VALUE "OriginalFilename", "LuaSTGEvo.exe"
+            VALUE "OriginalFilename", "LuaSTG.exe"
             VALUE "ProductName", "LuaSTG Evo"
             VALUE "ProductVersion", "%s"
         END
