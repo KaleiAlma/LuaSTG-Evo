@@ -71,7 +71,7 @@ vec4 add_common(vec4 color)
     color.g = min(color.g, 1.0);
     color.b = min(color.b, 1.0);
     color.a *= col.a;
-    color.rgb *= col.a;
+    color.rgb *= color.a;
     return color;
 }}
 

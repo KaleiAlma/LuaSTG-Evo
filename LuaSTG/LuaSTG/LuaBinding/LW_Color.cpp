@@ -1,5 +1,6 @@
 ﻿#include "LuaBinding/LuaWrapper.hpp"
 #include "LuaBinding/lua_luastg_hash.hpp"
+#include "spdlog/spdlog.h"
 #define GLM_ENABLE_EXPERIMENTAL
 #include "glm/gtx/color_space.hpp"
 
@@ -131,7 +132,8 @@ namespace LuaSTGPlus::LuaWrapper
 					lua_pushnumber(L, (lua_Number)RGB2HSV(p->r, p->g, p->b, p->a).z);
 					break;
 				case LuaSTG::ColorMember::m_argb:
-					lua_pushnumber(L, (lua_Number)p->color());
+					lua_pushnumber(L, (lua_Number)((p->color() & 0xFF00FF00) + ((p->color() & 0xFF0000) >> 16) + ((p->color() & 0xFF) << 16)));
+					// lua_pushnumber(L, (lua_Number)p->color());
 					break;
 				case LuaSTG::ColorMember::f_ARGB:
 					lua_pushcfunction(L, ARGB);

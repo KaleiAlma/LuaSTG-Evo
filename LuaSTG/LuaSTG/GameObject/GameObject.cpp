@@ -661,7 +661,7 @@ namespace LuaSTGPlus
 			return 1;
 		case LuaSTG::GameObjectMember::_R:
 			if (luaclass.IsRenderClass)
-				lua_pushinteger(L, (lua_Integer)((uint8_t*)&vertexcolor)[2]);
+				lua_pushinteger(L, (lua_Integer)((uint8_t*)&vertexcolor)[0]);
 			else
 				return_default(L);
 			return 1;
@@ -673,7 +673,7 @@ namespace LuaSTGPlus
 			return 1;
 		case LuaSTG::GameObjectMember::_B:
 			if (luaclass.IsRenderClass)
-				lua_pushinteger(L, (lua_Integer)((uint8_t*)&vertexcolor)[0]);
+				lua_pushinteger(L, (lua_Integer)((uint8_t*)&vertexcolor)[2]);
 			else
 				return_default(L);
 			return 1;
@@ -911,7 +911,10 @@ namespace LuaSTGPlus
 			return 0;
 		case LuaSTG::GameObjectMember::_COLOR:
 			if (luaclass.IsRenderClass)
+			{
 				vertexcolor = LuaWrapper::ColorWrapper::Cast(L, 3)->color();
+				vertexcolor = ((vertexcolor & 0xFF00FF00) + ((vertexcolor & 0xFF0000) >> 16) + ((vertexcolor & 0xFF) << 16));
+			}
 			else
 				lua_rawset(L, 1);
 			return 0;

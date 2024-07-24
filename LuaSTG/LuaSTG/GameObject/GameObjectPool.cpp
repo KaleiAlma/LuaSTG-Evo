@@ -3,6 +3,8 @@
 #include "LuaBinding/lua_luastg_hash.hpp"
 #include "AppFrame.h"
 
+#include "SDL_keycode.h"
+
 #define LOBJPOOL_SIZE_INTERNAL (LOBJPOOL_SIZE + 1)
 #define LOBJPOOL_METATABLE_IDX (LOBJPOOL_SIZE_INTERNAL)
 
@@ -759,8 +761,8 @@ namespace LuaSTGPlus
 		static bool f8 = false;
 		static bool kf8 = false;
 	
-		if (!kf8 && LAPP.GetKeyState(/* VK_F8 */ 0x77)) { kf8 = true; f8 = !f8; }
-		else if (kf8 && !LAPP.GetKeyState(/* VK_F8 */ 0x77)) { kf8 = false; }
+		if (!kf8 && LAPP.GetKeyState(SDLK_F8)) { kf8 = true; f8 = !f8; }
+		else if (kf8 && !LAPP.GetKeyState(SDLK_F8)) { kf8 = false; }
 	
 		if (f8)
 		{

@@ -191,10 +191,10 @@ namespace Core
 		uint8_t b;
 		uint8_t a;
 
-		Color4B() : b(0), g(0), r(0), a(0) {}
-		Color4B(uint32_t ARGB) : b(0), g(0), r(0), a(0) { color(ARGB); }
-		Color4B(uint8_t const r_, uint8_t const g_, uint8_t const b_) : b(b_), g(g_), r(r_), a(static_cast<uint8_t>(255u)) {}
-		Color4B(uint8_t const r_, uint8_t const g_, uint8_t const b_, uint8_t const a_) : b(b_), g(g_), r(r_), a(a_) {}
+		Color4B() : r(0), g(0), b(0), a(0) {}
+		Color4B(uint32_t ARGB) : r(0), g(0), b(0), a(0) { color(ARGB); }
+		Color4B(uint8_t const r_, uint8_t const g_, uint8_t const b_) : r(r_), g(g_), b(b_), a(static_cast<uint8_t>(255u)) {}
+		Color4B(uint8_t const r_, uint8_t const g_, uint8_t const b_, uint8_t const a_) : r(r_), g(g_), b(b_), a(a_) {}
 
 		inline void color(uint32_t ARGB) noexcept { *((uint32_t*)(&r)) = ARGB; }
 		inline uint32_t color() const noexcept { return *((uint32_t*)(&r)); }
