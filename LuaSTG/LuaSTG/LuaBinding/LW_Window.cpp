@@ -1,10 +1,13 @@
+#include "Core/Type.hpp"
 #include "LuaBinding/LuaWrapper.hpp"
 #include "LuaBinding/lua_utility.hpp"
 #include "AppFrame.h"
+#include "lua.h"
+#include <cstdint>
 
 inline Core::Graphics::IWindow* _get_window()
 {
-    return LuaSTGPlus::AppFrame::GetInstance().GetAppModel()->getWindow();
+    return LAPP.GetAppModel()->getWindow();
 }
 
 #define getwindow(__NAME__) auto* __NAME__ = _get_window()
@@ -120,19 +123,178 @@ static int lib_setTopMost(lua_State* L)
 //     return 1;
 // }
 
-static int lib_setTextInputEnable(lua_State*)
+static int lib_setTextInputEnable(lua_State* L)
 {
-    //const bool enable = lua_toboolean(L, 1);
+    getwindow(window);
+    const bool enable = lua_toboolean(L, 1);
+    window->setTextInputEnable(enable);
     return 0;
 }
+
 static int lib_getTextInput(lua_State* L)
 {
-    lua_pushstring(L, "");
+    getwindow(window);
+    lua_pushstring(L, window->getTextInput().c_str());
     return 1;
 }
+
+static int lib_getIMEComp(lua_State* L)
+{
+    getwindow(window);
+    lua_pushstring(L, window->getIMEComp().c_str());
+    return 1;
+}
+
+static int lib_setTextInput(lua_State* L)
+{
+    getwindow(window);
+    std::string_view const text = luaL_check_string_view(L, 1);
+    window->setTextInput(text);
+    return 0;
+}
+
 static int lib_clearTextInput(lua_State*)
 {
+    getwindow(window);
+    window->clearTextInput();
     return 0;
+}
+
+static int lib_getTextInputLength(lua_State* L)
+{
+    getwindow(window);
+    lua_pushinteger(L, window->getTextInputLength());
+    return 1;
+}
+
+static int lib_getTextCursorPos(lua_State* L)
+{
+    getwindow(window);
+    lua_pushinteger(L, window->getTextCursorPos());
+    return 1;
+}
+
+static int lib_getTextCursorPosRaw(lua_State* L)
+{
+    getwindow(window);
+    lua_pushinteger(L, window->getTextCursorPosRaw());
+    return 1;
+}
+
+static int lib_getIMECursorPos(lua_State* L)
+{
+    getwindow(window);
+    lua_pushinteger(L, window->getIMECursorPos());
+    return 1;
+}
+
+static int lib_setTextCursorPos(lua_State* L)
+{
+    getwindow(window);
+    int32_t pos = lua_tointeger(L, 1);
+    if (pos < 0)
+        pos += window->getTextInputLength() + 1;
+    if (!window->setTextCursorPos(pos))
+        return luaL_error(L, "text cursor position must be less than or equal to length of the text input");
+    return 0;
+}
+
+static int lib_insertInputTextAtCursor(lua_State* L)
+{
+    getwindow(window);
+    std::string_view const text = luaL_check_string_view(L, 1);
+    window->insertInputTextAtCursor(text, lua_toboolean(L, 2));
+    return 0;
+}
+
+static int lib_insertInputText(lua_State* L)
+{
+    getwindow(window);
+    std::string_view const text = luaL_check_string_view(L, 1);
+    int32_t pos = lua_tointeger(L, 2);
+    if (pos < 0)
+        pos += window->getTextInputLength() + 1;
+    if (!window->insertInputText(text, pos))
+        return luaL_error(L, "position for insertInputText must be less than or equal to length of the text input");
+    return 0;
+}
+
+static int lib_removeInputTextAtCursor(lua_State* L)
+{
+    getwindow(window);
+    uint32_t ret = window->removeInputTextAtCursor(lua_tointeger(L, 1), lua_toboolean(L, 2));
+    lua_pushinteger(L, ret);
+    return 1;
+}
+
+static int lib_removeInputText(lua_State* L)
+{
+    getwindow(window);
+    int32_t pos = lua_tointeger(L, 2);
+    if (pos < 0)
+        pos += window->getTextInputLength() + 1;
+    int32_t ret = window->removeInputText(lua_tointeger(L, 1), pos);
+    if (ret < 0)
+        return luaL_error(L, "position for removeInputText must be less than or equal to the length of the text input");
+    lua_pushinteger(L, ret);
+    return 1;
+}
+
+static int lib_setTextInputReturnEnable(lua_State* L)
+{
+    getwindow(window);
+    const bool enable = lua_toboolean(L, 1);
+    window->setTextInputReturnEnable(enable);
+    return 0;
+}
+
+inline Core::Vector2I MapLetterBoxingPosition(Core::Vector2U isize, Core::Vector2U osize, Core::Vector2I pos)
+{
+    float const hscale = (float)osize.x / (float)isize.x;
+    float const vscale = (float)osize.y / (float)isize.y;
+    float const scale = std::min(hscale, vscale);
+    float const sizew = scale * (float)isize.x;
+    float const sizeh = scale * (float)isize.y;
+    float const dx = ((float)osize.x - sizew) * 0.5f;
+    float const dy = ((float)osize.y - sizeh) * 0.5f;
+    float const x1 = (float)pos.x - dx;
+    float const y1 = (float)pos.y - dy;
+    float const x2 = x1 / scale;
+    float const y2 = y1 / scale;
+    return Core::Vector2I(x2, y2);
+}
+
+static int lib_setTextInputRect(lua_State* L)
+{
+    getwindow(window);
+    Core::Vector2U csize = LAPP.GetAppModel()->getSwapChain()->getCanvasSize();
+    Core::Vector2U wsize = window->getSize();
+
+    Core::RectI rect;
+
+    rect.a = MapLetterBoxingPosition(csize, wsize, Core::Vector2I(lua_tointeger(L, 1), csize.y - lua_tointeger(L, 3)));
+    rect.b = MapLetterBoxingPosition(csize, wsize, Core::Vector2I(lua_tointeger(L, 2), csize.y - lua_tointeger(L, 4)));
+
+    window->setTextInputRect(rect);
+    return 0;
+}
+
+static int lib_getClipboardText(lua_State* L)
+{
+    getwindow(window);
+    lua_pushstring(L, window->getClipboardText().c_str());
+    return 1;
+}
+
+static int lib_setClipboardText(lua_State* L)
+{
+    getwindow(window);
+    std::string_view const text = luaL_check_string_view(L, 1);
+    bool ret = window->setClipboardText(text);
+    if (!ret)
+        spdlog::warn("setClipboardText failed");
+    lua_pushboolean(L, ret);
+    return 1;
 }
 
 // static int lib_setCustomMoveSizeEnable(lua_State* L)
@@ -228,11 +390,27 @@ static const luaL_Reg lib[] = {
     makefname(setTopMost),
     // makefname(setIMEEnable),
     // makefname(getDPIScaling),
-    
+
     makefname(setTextInputEnable),
     makefname(getTextInput),
+    makefname(getIMEComp),
+    makefname(setTextInput),
     makefname(clearTextInput),
-    
+    makefname(getTextInputLength),
+    makefname(getTextCursorPos),
+    makefname(getTextCursorPosRaw),
+    makefname(getIMECursorPos),
+    makefname(setTextCursorPos),
+    makefname(insertInputTextAtCursor),
+    makefname(insertInputText),
+    makefname(removeInputTextAtCursor),
+    makefname(removeInputText),
+    makefname(setTextInputReturnEnable),
+    makefname(setTextInputRect),
+
+    makefname(getClipboardText),
+    makefname(setClipboardText),
+
     // makefname(setCustomMoveSizeEnable),
     // makefname(setCustomMinimizeButtonRect),
     // makefname(setCustomCloseButtonRect),

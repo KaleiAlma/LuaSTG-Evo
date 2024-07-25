@@ -281,3 +281,13 @@ if(xxhash_ADDED)
     )
     set_target_properties(xxhash PROPERTIES FOLDER external)
 endif()
+
+# uni-algo
+# Unicode utilities
+
+CPMAddPackage(
+    NAME uni-algo
+    VERSION 1.2.0
+    GITHUB_REPOSITORY uni-algo/uni-algo
+    OPTIONS
+)

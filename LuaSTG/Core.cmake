@@ -96,6 +96,7 @@ target_link_libraries(Core PUBLIC
     minizip
     # text
     freetype
+    uni-algo::uni-algo
     # model
     tinygltf
     # audio

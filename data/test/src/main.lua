@@ -89,6 +89,7 @@ end
 
 require("test_rendertarget")
 require("test_textrenderer")
+require("test_textinput")
 require("test_texture")
 require("test_sampler")
 require("test_model")

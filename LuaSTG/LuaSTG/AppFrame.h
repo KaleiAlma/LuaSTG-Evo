@@ -232,19 +232,19 @@ namespace LuaSTGPlus
     private:
         // Render target stack
 
-        bool BeginRenderTargetStack();
-        bool EndRenderTargetStack();
-        bool PushRenderTarget(IResourceTexture* rt);
-        bool PopRenderTarget();
-        bool CheckRenderTargetInUse(IResourceTexture* rt);
-        Core::Vector2U GetTopRenderTargetSize();
+        bool BeginRenderTargetStack() override;
+        bool EndRenderTargetStack() override;
+        bool PushRenderTarget(IResourceTexture* rt) override;
+        bool PopRenderTarget() override;
+        bool CheckRenderTargetInUse(IResourceTexture* rt) override;
+        Core::Vector2U GetTopRenderTargetSize() override;
 
         // Maintain auto-size render targets
 
-        void AddAutoSizeRenderTarget(IResourceTexture* rt);
-        void RemoveAutoSizeRenderTarget(IResourceTexture* rt);
-        Core::Vector2U GetAutoSizeRenderTargetSize();
-        bool ResizeAutoSizeRenderTarget(Core::Vector2U size);
+        void AddAutoSizeRenderTarget(IResourceTexture* rt) override;
+        void RemoveAutoSizeRenderTarget(IResourceTexture* rt) override;
+        Core::Vector2U GetAutoSizeRenderTargetSize() override;
+        bool ResizeAutoSizeRenderTarget(Core::Vector2U size) override;
 
     public:
         // Event listener

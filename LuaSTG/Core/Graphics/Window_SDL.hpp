@@ -11,121 +11,148 @@
 #include <SDL_surface.h>
 #include <SDL_video.h>
 #include <cstdint>
+#include <string>
 
 namespace Core::Graphics
 {
-	class Window_SDL : public Object<IWindow>
-	{
-	private:
+    class Window_SDL : public Object<IWindow>
+    {
+    private:
 
-		SDL_Window* sdl_window{ nullptr };
+        SDL_Window* sdl_window{ nullptr };
 
-		uint32_t sdl_window_width{ 640 };
-		uint32_t sdl_window_height{ 480 };
+        uint32_t sdl_window_width{ 640 };
+        uint32_t sdl_window_height{ 480 };
 
-		SDL_Surface* sdl_window_icon{ nullptr };
+        SDL_Surface* sdl_window_icon{ nullptr };
 
-		std::string sdl_window_text{ "Window" };
+        std::string sdl_window_text{ "Window" };
 
-		WindowCursor m_cursor{ WindowCursor::Arrow };
-		SDL_Cursor* sdl_window_cursor{ nullptr };
+        WindowCursor m_cursor{ WindowCursor::Arrow };
+        SDL_Cursor* sdl_window_cursor{ nullptr };
 
-		WindowFrameStyle m_framestyle{ WindowFrameStyle::Fixed };
-		uint32_t sdl_window_flags{ SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI };
-		bool m_hidewindow{ true };
-		bool m_redirect_bitmap{ true };
-		SDL_Rect m_last_window_rect{};
-		bool m_alt_down{ false };
-		FullscreenMode m_fullscreen_mode{ FullscreenMode::Windowed };
-		int32_t m_monitor_idx{};
+        WindowFrameStyle m_framestyle{ WindowFrameStyle::Fixed };
+        uint32_t sdl_window_flags{ SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI };
+        bool m_hidewindow{ true };
+        bool m_redirect_bitmap{ true };
+        SDL_Rect m_last_window_rect{};
+        bool m_alt_down{ false };
+        FullscreenMode m_fullscreen_mode{ FullscreenMode::Windowed };
+        int32_t m_monitor_idx{};
 
-		bool createWindow();
-		void destroyWindow();
+        std::string m_text_input;
+        std::string m_ime_comp;
+        uint32_t m_text_cursor_pos{ 0 };
+        int32_t m_ime_cursor_pos{ -1 };
+        bool m_return_enable{ false };
 
-		IApplicationModel* m_framework{};
+        bool createWindow();
+        void destroyWindow();
 
-	public:
-		// Internal Method
+        IApplicationModel* m_framework{};
 
-		SDL_Window* GetWindow() { return sdl_window; }
+    public:
+        // Internal Method
 
-		RectI getRect();
-		bool setRect(RectI v);
-		bool recreateWindow();
-		void _toggleFullScreenMode();
-		void _setWindowMode(Vector2U size, bool ignore_size);
-		void _setBorderlessFullScreenMode();
-		void _setFullScreenMode();
+        SDL_Window* GetWindow() { return sdl_window; }
 
-		void implSetApplicationModel(IApplicationModel* p_framework) { m_framework = p_framework; }
+        RectI getRect();
+        bool setRect(RectI v);
+        bool recreateWindow();
+        void _toggleFullScreenMode();
+        void _setWindowMode(Vector2U size, bool ignore_size);
+        void _setBorderlessFullScreenMode();
+        void _setFullScreenMode();
 
-		void handleEvents();
+        void implSetApplicationModel(IApplicationModel* p_framework) { m_framework = p_framework; }
 
-	private:
-		enum class EventType
-		{
-			WindowCreate,
-			WindowDestroy,
+        void handleEvents();
 
-			WindowActive,
-			WindowInactive,
+    private:
+        enum class EventType
+        {
+            WindowCreate,
+            WindowDestroy,
 
-			WindowClose,
+            WindowActive,
+            WindowInactive,
 
-			WindowSize,
-			WindowFullscreenStateChange,
+            WindowClose,
 
-			NativeWindowMessage,
+            WindowSize,
+            WindowFullscreenStateChange,
 
-			DeviceChange,
-		};
-		union EventData
-		{
-			Vector2I window_size;
-			bool window_fullscreen_state;
-			SDL_Event event;
-		};
-		bool m_is_dispatch_event{ false };
-		std::vector<IWindowEventListener*> m_eventobj;
-		std::vector<IWindowEventListener*> m_eventobj_late;
-		void dispatchEvent(EventType t, EventData d = {});
+            NativeWindowMessage,
 
-	public:
-		void addEventListener(IWindowEventListener* e);
-		void removeEventListener(IWindowEventListener* e);
+            DeviceChange,
+        };
+        union EventData
+        {
+            Vector2I window_size;
+            bool window_fullscreen_state;
+            SDL_Event event;
+        };
+        bool m_is_dispatch_event{ false };
+        std::vector<IWindowEventListener*> m_eventobj;
+        std::vector<IWindowEventListener*> m_eventobj_late;
+        void dispatchEvent(EventType t, EventData d = {});
 
-		void* getNativeHandle();
+    public:
+        void addEventListener(IWindowEventListener* e);
+        void removeEventListener(IWindowEventListener* e);
 
-		void setTitleText(StringView str);
-		StringView getTitleText();
+        void* getNativeHandle();
 
-		bool setFrameStyle(WindowFrameStyle style);
-		WindowFrameStyle getFrameStyle();
+        void setTitleText(StringView str);
+        StringView getTitleText();
 
-		Vector2U getSize();
-		bool setSize(Vector2U v);
+        bool setFrameStyle(WindowFrameStyle style);
+        WindowFrameStyle getFrameStyle();
 
-		WindowLayer getLayer();
-		bool setLayer(WindowLayer layer);
+        Vector2U getSize();
+        bool setSize(Vector2U v);
 
-		void setWindowMode(Vector2U size);
-		void setExclusiveFullScreenMode();
-		void setBorderlessFullScreenMode();
+        WindowLayer getLayer();
+        bool setLayer(WindowLayer layer);
 
-		uint32_t getMonitorCount();
-		RectI getMonitorRect(uint32_t index);
-		void setMonitorCentered(uint32_t index);
-		void setMonitorFullScreen(uint32_t index);
+        void setWindowMode(Vector2U size);
+        void setExclusiveFullScreenMode();
+        void setBorderlessFullScreenMode();
 
-		bool setCursor(WindowCursor type);
-		WindowCursor getCursor();
+        uint32_t getMonitorCount();
+        RectI getMonitorRect(uint32_t index);
+        void setMonitorCentered(uint32_t index);
+        void setMonitorFullScreen(uint32_t index);
 
-	public:
-		Window_SDL();
-		~Window_SDL();
+        bool setCursor(WindowCursor type);
+        WindowCursor getCursor();
 
-	public:
-		static bool create(Window_SDL** pp_window);
-		static bool create(Vector2U size, StringView title_text, WindowFrameStyle style, bool show, Window_SDL** pp_window);
-	};
+        void setTextInputEnable(bool enable);
+        std::string getTextInput();
+        std::string getIMEComp();
+        void setTextInput(StringView text);
+        void clearTextInput();
+        uint32_t getTextInputLength();
+        uint32_t getTextCursorPos();
+        uint32_t getTextCursorPosRaw();
+        int32_t getIMECursorPos();
+        bool setTextCursorPos(uint32_t pos);
+        void insertInputTextAtCursor(StringView text, bool move_cursor = true);
+        bool insertInputText(StringView text, uint32_t pos);
+        uint32_t removeInputTextAtCursor(uint32_t length, bool after);
+        int32_t removeInputText(uint32_t length, uint32_t pos);
+        void setTextInputReturnEnable(bool enable);
+        void setTextInputRect(RectI rect);
+
+        std::string getClipboardText();
+        bool setClipboardText(StringView text);
+
+    public:
+        Window_SDL();
+        ~Window_SDL();
+
+    public:
+        static bool create(Window_SDL** pp_window);
+        static bool create(Vector2U size, StringView title_text, WindowFrameStyle style, bool show, Window_SDL** pp_window);
+    };
 }
