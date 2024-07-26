@@ -4,6 +4,7 @@
 #include "Core/Audio/Device.hpp"
 #include "SDL_audio.h"
 #include "SDL_error.h"
+#include "spdlog/spdlog.h"
 // #include <cstddef>
 // #include <cstdint>
 #include <string>
@@ -761,9 +762,12 @@ namespace Core::Audio
 	{
 		// decoding
 
+		spdlog::debug("[core] decoder frame count: {}", p_decoder->getFrameCount());
+
 		m_pcm_data.resize(p_decoder->getFrameCount() * (uint32_t)p_decoder->getFrameSize());
 		uint64_t frames_read = 0;
-		if (p_decoder->read(p_decoder->getFrameCount(), m_pcm_data.data(), &frames_read) != MA_SUCCESS)
+		
+		if (!p_decoder->read(p_decoder->getFrameCount(), m_pcm_data.data(), &frames_read))
 		{
 			spdlog::error("[core] (IDecoder::read) Failed to read audio");
 			throw std::runtime_error("StreamAudioPlayer_SDL::StreamAudioPlayer_SDL (4)");

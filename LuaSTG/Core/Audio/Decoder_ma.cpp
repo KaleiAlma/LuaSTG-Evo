@@ -92,7 +92,11 @@ namespace Core::Audio
     uint32_t Decoder_ma::getFrameCount()
     {
         ma_uint64 len;
-        ma_decoder_get_length_in_pcm_frames(&m_decoder, &len);
+        ma_result r = ma_decoder_get_length_in_pcm_frames(&m_decoder, &len);
+
+        if (r != MA_SUCCESS)
+            spdlog::error("[core] could not get frame count of audio");
+
         return len;
     }
     
