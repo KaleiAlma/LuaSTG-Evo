@@ -13,7 +13,7 @@ namespace LuaSTGPlus
         // 发出警告
         if (!m_stRenderTargetStack.empty())
         {
-            spdlog::error("[luastg] 渲染结束时 RenderTarget 栈不为空，可能缺少对 lstg.PopRenderTarget 的调用");
+            spdlog::error("[luastg] Rendering finished and rendertarget stack wasn't empty, did you forget to call lstg.PopRenderTarget?");
             m_stRenderTargetStack.clear();
             GetAppModel()->getSwapChain()->applyRenderAttachment();
         }
@@ -28,7 +28,7 @@ namespace LuaSTGPlus
         }
         if (!m_bRenderStarted)
         {
-            spdlog::error("[luastg] PushRenderTarget: 无效调用");
+            spdlog::error("[luastg] PushRenderTarget: cannot call outside of RenderFunc");
             return false;
         }
 
@@ -44,13 +44,13 @@ namespace LuaSTGPlus
     {
         if (!m_bRenderStarted)
         {
-            spdlog::error("[luastg] PopRenderTarget: 无效调用");
+            spdlog::error("[luastg] PopRenderTarget: cannot call outside of RenderFunc");
             return false;
         }
 
         if (m_stRenderTargetStack.empty())
         {
-            spdlog::error("[luastg] PopRenderTarget: RenderTarget 栈已为空");
+            spdlog::error("[luastg] PopRenderTarget: rendertarget stack is empty");
             return false;
         }
 

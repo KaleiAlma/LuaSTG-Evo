@@ -434,7 +434,7 @@ namespace LuaSTGPlus
     {
         Core::ScopeObject<IResourceFont> p = m_ResourceMgr.FindTTFFont(name);
         if (!p) {
-            spdlog::error("[luastg] RenderTTF: 找不到字体资源'%m'", name);
+            spdlog::error("[luastg] RenderTTF: Can't find font '{}'", name);
             return false;
         }
         
@@ -444,7 +444,7 @@ namespace LuaSTGPlus
             s_TempStringBuf = std::string(str);
         }
         catch (const std::bad_alloc&) {
-            spdlog::error("[luastg] RenderTTF: 内存不足");
+            spdlog::error("[luastg] RenderTTF: Out of memory");
             return false;
         }
         
@@ -485,7 +485,7 @@ namespace LuaSTGPlus
         Core::ScopeObject<IResourceFont> p = m_ResourceMgr.FindTTFFont(name);
         if (!p)
         {
-            spdlog::error("[luastg] SetFontProvider: 找不到字体资源'{}'", name);
+            spdlog::error("[luastg] SetFontProvider: Can't find font '{}'", name);
             return false;
         }
         m_pTextRenderer->setGlyphManager(p->GetGlyphManager());
