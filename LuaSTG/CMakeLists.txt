@@ -185,6 +185,7 @@ target_link_libraries(LuaSTG PRIVATE
     imgui
     implot
     lua_cjson
+    toml.lua
     lua_filesystem
     luasocket
     lua_imgui

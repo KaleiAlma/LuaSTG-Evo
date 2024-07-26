@@ -155,3 +155,56 @@ if(luasocket_ADDED)
 
     set_target_properties(luasocket PROPERTIES FOLDER lualib)
 endif()
+
+CPMAddPackage(
+    NAME toml++
+    GITHUB_REPOSITORY marzer/tomlplusplus
+    VERSION 3.4.0
+)
+
+CPMAddPackage(
+    NAME sol2
+    GITHUB_REPOSITORY ThePhD/sol2
+    VERSION 3.3.0
+)
+
+CPMAddPackage(
+    NAME magic_enum
+    GITHUB_REPOSITORY Neargye/magic_enum
+    VERSION 0.9.6
+)
+
+CPMAddPackage(
+    NAME toml.lua
+    GITHUB_REPOSITORY LebJe/toml.lua
+    GIT_TAG 0.4.0
+    DOWNLOAD_ONLY YES
+)
+
+if(toml.lua_ADDED)
+    add_library(toml.lua STATIC)
+    target_sources(toml.lua
+    PRIVATE 
+        ${toml.lua_SOURCE_DIR}/src/toml.cpp
+        ${toml.lua_SOURCE_DIR}/src/decoding/decoding.cpp
+        ${toml.lua_SOURCE_DIR}/src/encoding/encoding.cpp
+        ${toml.lua_SOURCE_DIR}/src/DataTypes/DateAndTime/dateAndTime.cpp
+        ${toml.lua_SOURCE_DIR}/src/DataTypes/TOMLInt/TOMLInt.cpp
+        ${toml.lua_SOURCE_DIR}/src/utilities/utilities.cpp
+    )
+    set_target_properties(toml.lua PROPERTIES
+        FOLDER lualib
+        OUTPUT_NAME "toml"
+        PREFIX ""
+    )
+    target_include_directories(
+        toml.lua PRIVATE
+        # ${LUA_INCLUDE_DIR}
+        ${toml.lua_SOURCE_DIR}/src
+        ${toml.lua_SOURCE_DIR}/src/include
+        ${toml++_SOURCE_DIR}
+        ${sol2_SOURCE_DIR}/include
+        ${magic_enum_SOURCE_DIR}/include
+    )
+    target_link_libraries(toml.lua libluajit tomlplusplus::tomlplusplus)
+endif()
