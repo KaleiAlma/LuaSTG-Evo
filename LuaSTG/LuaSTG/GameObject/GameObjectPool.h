@@ -4,7 +4,7 @@
 
 // 对象池信息
 #define LOBJPOOL_SIZE   32768 // 最大对象数 //32768(full) //16384(half)
-#define LOBJPOOL_GROUPN 16    // 碰撞组数
+#define LOBJPOOL_GROUPN 24    // 碰撞组数
 
 namespace LuaSTGPlus
 {
