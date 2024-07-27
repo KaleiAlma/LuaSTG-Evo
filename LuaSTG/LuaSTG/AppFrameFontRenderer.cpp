@@ -173,7 +173,6 @@ namespace LuaSTGPlus
         IGlyphManager* pGlyphManager = p->GetGlyphManager();
         std::string_view u8_str(strBuf);
 
-        
         m_pTextRenderer->setGlyphManager(pGlyphManager);
         m_pTextRenderer->setScale(scale);
 

@@ -1,12 +1,13 @@
 ﻿#include "LuaBinding/LuaWrapper.hpp"
 #include "Platform/MessageBox.hpp"
-#include "lua.h"
-#include "lua_utility.hpp"
 #include <cstddef>
 #include <cstdint>
 #include <cstdlib>
 #include <string>
 #include <vector>
+#include "lua.h"
+#include "lua_utility.hpp"
+#include "uni_algo/conv.h"
 
 #ifdef _WIN32
 #define WIN32_LEAN_AND_MEAN
@@ -31,19 +32,18 @@ void LuaSTGPlus::LuaWrapper::PlatformWrapper::Register(lua_State* L) noexcept
                     try
                     {
 #ifdef _WIN32
-
-                        SHELLEXECUTEINFOA tShellExecuteInfo;
+                        SHELLEXECUTEINFO tShellExecuteInfo;
                         memset(&tShellExecuteInfo, 0, sizeof(SHELLEXECUTEINFO));
 
                         tShellExecuteInfo.cbSize = sizeof(SHELLEXECUTEINFO);
                         tShellExecuteInfo.fMask = bWait ? SEE_MASK_NOCLOSEPROCESS : 0;
-                        tShellExecuteInfo.lpVerb = "open";
-                        tShellExecuteInfo.lpFile = path;
-                        tShellExecuteInfo.lpParameters = args;
-                        tShellExecuteInfo.lpDirectory = directory;
+                        tShellExecuteInfo.lpVerb = L"open";
+                        tShellExecuteInfo.lpFile = una::utf8to16(path).c_str();
+                        tShellExecuteInfo.lpParameters = una::utf8to16(args).c_str();
+                        tShellExecuteInfo.lpDirectory = directory ? una::utf8to16(directory).c_str() : nullptr;
                         tShellExecuteInfo.nShow = bShow ? SW_SHOWDEFAULT : SW_HIDE;
                         
-                        if (FALSE == ShellExecuteExA(&tShellExecuteInfo))
+                        if (FALSE == ShellExecuteEx(&tShellExecuteInfo))
                             return false;
 
                         if (bWait)
