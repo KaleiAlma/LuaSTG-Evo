@@ -272,7 +272,6 @@ namespace LuaSTGPlus
             }
             
             luaopen_cjson(L);
-            luaopen_toml(L);
             luaopen_lfs(L);
             //lua_xlsx_open(L);
             //lua_csv_open(L);
@@ -290,6 +289,8 @@ namespace LuaSTGPlus
                     lua_setfield(L, -2, "socket.core"); // ... _LOADED
                     luaopen_mime_core(L);          // ... _LOADED mime
                     lua_setfield(L, -2, "mime.core");   // ... _LOADED
+                    luaopen_toml(L);               // ... _LOADED toml
+                    lua_setfield(L, -2, "toml");   // ... _LOADED
                 }
                 lua_pop(L, 1); // ...
             }

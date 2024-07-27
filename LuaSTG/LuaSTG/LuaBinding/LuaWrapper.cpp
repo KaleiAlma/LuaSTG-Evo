@@ -54,7 +54,7 @@ namespace LuaSTGPlus
 		LuaWrapper::GameObjectManagerWrapper::Register(L);
 		LuaWrapper::ResourceMgrWrapper::Register(L);
 		LuaWrapper::AudioWrapper::Register(L);
-		// LuaWrapper::PlatformWrapper::Register(L);
+		LuaWrapper::PlatformWrapper::Register(L);
 		FileManagerWrapper::Register(L); //内建函数库，文件资源管理，请确保位于内建函数库后加载
 		ArchiveWrapper::Register(L); //压缩包
 		LuaSTG::LuaBinding::PostEffectShader::Register(L);

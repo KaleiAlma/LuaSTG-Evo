@@ -1,14 +1,12 @@
-#include "Shared.hpp"
-#include "spdlog/spdlog.h"
-#include <SDL_messagebox.h>
-#include <SDL_video.h>
+#include "MessageBox.hpp"
 #include <cstdint>
 #include <sys/types.h>
-#include "MessageBox.hpp"
+#include "spdlog/spdlog.h"
+#include "SDL_messagebox.h"
 
 namespace Platform
 {
-    static bool Show(int type, std::string_view title, std::string_view message, SDL_Window* window = NULL)
+    bool MessageBox::Show(int type, std::string_view title, std::string_view message, SDL_Window* window)
     {
         std::string str_title(std::move(title));
         std::string str_message(std::move(message));
@@ -53,7 +51,7 @@ namespace Platform
         if (SDL_ShowMessageBox(&msg_box, &b_id))
         {
             spdlog::error("[luastg] (GetError = {}) SDL_ShowMessageBox failed", SDL_GetError());
-            assert(false);
+            // assert(false);
         }
         return 0 == b_id;
         // return IDOK == MessageBoxW(window, wide_message.c_str(), wide_title.c_str(), flags);

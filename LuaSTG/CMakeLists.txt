@@ -108,6 +108,7 @@ set(LUASTG_ENGINE_SOURCES
     LuaSTG/LuaBinding/LW_FileManager.cpp
     LuaSTG/LuaBinding/LW_Input.cpp
     LuaSTG/LuaBinding/LW_LuaSTG.cpp
+    LuaSTG/LuaBinding/LW_Platform.cpp
     LuaSTG/LuaBinding/LW_ParticleSystem.cpp
     LuaSTG/LuaBinding/LW_Randomizer.cpp
     LuaSTG/LuaBinding/LW_Render.cpp

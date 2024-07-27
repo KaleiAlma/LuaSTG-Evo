@@ -81,11 +81,11 @@ namespace LuaSTGPlus
 		public:
 			static void Register(lua_State* L) noexcept;
 		};
-		// class PlatformWrapper
-		// {
-		// public:
-		// 	static void Register(lua_State* L) noexcept;
-		// };
+		class PlatformWrapper
+		{
+		public:
+			static void Register(lua_State* L) noexcept;
+		};
 		
 		class ColorWrapper
 		{

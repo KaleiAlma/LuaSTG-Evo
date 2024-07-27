@@ -1,5 +1,6 @@
 #pragma once
 #include <string_view>
+#include "SDL_video.h"
 
 // FUCK MICROSOFT
 
@@ -16,5 +17,6 @@ namespace Platform
         static void Error(std::string_view title, std::string_view message);
         static bool WarningFromWindow(std::string_view title, std::string_view message, void* window);
         static void ErrorFromWindow(std::string_view title, std::string_view message, void* window);
+        static bool Show(int type, std::string_view title, std::string_view message, SDL_Window* window = NULL);
     };
 }
