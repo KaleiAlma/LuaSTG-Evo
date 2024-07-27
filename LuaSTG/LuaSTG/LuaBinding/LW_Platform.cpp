@@ -19,6 +19,12 @@
 #include <unistd.h>
 #endif
 
+// FUCK MICROSOFT
+
+#ifdef MessageBox
+#undef MessageBox
+#endif
+
 void LuaSTGPlus::LuaWrapper::PlatformWrapper::Register(lua_State* L) noexcept
 {
     struct Wrapper
