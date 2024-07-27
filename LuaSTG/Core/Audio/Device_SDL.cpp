@@ -554,7 +554,9 @@ namespace Core::Audio
 		uint32_t const loop_range_sample_count = (uint32_t)((double)m_sample_rate * m_loop_length);
 		ma_sound_set_looping(&m_sound, enable);
 		assert((loop_start_sample + loop_range_sample_count) <= m_total_frame);
-		ma_data_source_set_loop_point_in_pcm_frames(&m_sound.pDataSource, loop_start_sample, loop_start_sample + loop_range_sample_count);
+		ma_result res = ma_data_source_set_loop_point_in_pcm_frames(m_sound.pDataSource, loop_start_sample, loop_start_sample + loop_range_sample_count);
+		if (res != MA_SUCCESS)
+			spdlog::error("[core] setLoop failed: {}", res);
 		return (loop_start_sample + loop_range_sample_count) <= m_total_frame;
 	}
 
@@ -715,7 +717,9 @@ namespace Core::Audio
 		uint32_t const loop_range_sample_count = (uint32_t)((double)m_sample_rate * m_loop_length);
 		ma_sound_set_looping(&m_sound, enable);
 		assert((loop_start_sample + loop_range_sample_count) <= m_total_frame);
-		ma_data_source_set_loop_point_in_pcm_frames(&m_sound.pDataSource, loop_start_sample, loop_start_sample + loop_range_sample_count);
+		ma_result res = ma_data_source_set_loop_point_in_pcm_frames(m_sound.pDataSource, loop_start_sample, loop_start_sample + loop_range_sample_count);
+		if (res != MA_SUCCESS)
+			spdlog::error("[core] setLoop failed: {}", res);
 		return (loop_start_sample + loop_range_sample_count) <= m_total_frame;
 	}
 

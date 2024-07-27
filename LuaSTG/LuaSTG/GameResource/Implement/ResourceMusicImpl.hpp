@@ -61,6 +61,6 @@ namespace LuaSTGPlus
 		void SetLoop(bool v);
 
 	public:
-		ResourceMusicImpl(const char* name, Core::Audio::IAudioPlayer* p_player);
+		ResourceMusicImpl(const char* name, Core::Audio::IAudioPlayer* p_player, double start, double end);
 	};
 }

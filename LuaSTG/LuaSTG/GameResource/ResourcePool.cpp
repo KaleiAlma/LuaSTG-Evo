@@ -508,6 +508,8 @@ namespace LuaSTGPlus
                 spdlog::error("[luastg] LoadMusic: Unable to create stream audio player");
                 return false;
             }
+            if (!p_player->setLoop(true, start, end - start))
+                spdlog::error("[luastg] StreamAudioPlayer: invalid loop");
         }
         else
         {
@@ -517,14 +519,15 @@ namespace LuaSTGPlus
                 spdlog::error("[luastg] LoadMusic: Unable to create once-decode audio player");
                 return false;
             }
-            p_player->setLoop(true, start, end - start);
+            if (!p_player->setLoop(true, start, end - start))
+                spdlog::error("[luastg] LoopAudioPlayer: invalid loop");
         }
 
         try
         {
             // Place into resource pool
             Core::ScopeObject<IResourceMusic> tRes;
-            tRes.attach(new ResourceMusicImpl(name, p_player.get()));
+            tRes.attach(new ResourceMusicImpl(name, p_player.get(), start, end));
             m_MusicPool.emplace(name, tRes);
         }
         catch (std::exception const& e)

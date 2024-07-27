@@ -147,9 +147,11 @@ namespace LuaSTGPlus
 	float ResourceMusicImpl::GetSpeed() { return m_player->getSpeed(); }
 	void ResourceMusicImpl::SetLoop(bool v) { m_player->setLoop(v, m_start, m_end - m_start); }
 
-	ResourceMusicImpl::ResourceMusicImpl(const char* name, Core::Audio::IAudioPlayer* p_player)
+	ResourceMusicImpl::ResourceMusicImpl(const char* name, Core::Audio::IAudioPlayer* p_player, double start, double end)
 		: ResourceBaseImpl(ResourceType::Music, name)
 		, m_player(p_player)
+		, m_start(start)
+		, m_end(end)
 	{
 	}
 }
