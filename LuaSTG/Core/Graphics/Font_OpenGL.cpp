@@ -773,6 +773,7 @@ namespace Core::Graphics
                 {
                     start_pos.x = start.x;
                     start_pos.y -= line_height; // 向下换行
+                    spdlog::debug("[core] linebreak");
                     continue;
                 }
                 

@@ -1,5 +1,6 @@
 ﻿#include "AppFrame.h"
 // #include "utf8.hpp"
+#include "spdlog/spdlog.h"
 #include "utility/utf.hpp"
 #include "uni_algo/ranges_grapheme.h"
 #include <iterator>
@@ -273,7 +274,8 @@ namespace LuaSTGPlus
         {
 
             char32_t code_ = 0;
-            utf::utf8reader reader_(u8_str.data() + iCurrChar, u8_str.size() - iCurrChar);
+            int currCharActual = std::next(view.begin(), iCurrChar).begin() - u8_str.begin();
+            utf::utf8reader reader_(u8_str.data() + currCharActual, u8_str.size() - currCharActual);
             while (reader_(code_))
             {
                 if (code_ == U'\n' || code_ == U'\0')
