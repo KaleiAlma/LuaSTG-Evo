@@ -132,7 +132,7 @@ namespace LuaSTGPlus::LuaWrapper
 					lua_pushnumber(L, (lua_Number)RGB2HSV(p->r, p->g, p->b, p->a).z);
 					break;
 				case LuaSTG::ColorMember::m_argb:
-					lua_pushnumber(L, (lua_Number)((p->color() & 0xFF00FF00) + ((p->color() & 0xFF0000) >> 16) + ((p->color() & 0xFF) << 16)));
+					lua_pushnumber(L, (lua_Number)((p->a << 24) + (p->r << 16) + (p->g << 8) + p->b));
 					// lua_pushnumber(L, (lua_Number)p->color());
 					break;
 				case LuaSTG::ColorMember::f_ARGB:
