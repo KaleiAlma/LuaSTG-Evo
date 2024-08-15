@@ -524,7 +524,7 @@ bool GameObjectBentLaser::Render(const char* tex_name, BlendMode blend, Core::Co
 		p_vert[0] = IRenderer::DrawVertex(
 			node.pos.x - pos_x,
 			node.pos.y - pos_y,
-			0.5f,
+			0.0f,
 			tex_u * u_scale,
 			v_top,
 			node.active ? vertex_color : vertex_color_alpha
@@ -532,7 +532,7 @@ bool GameObjectBentLaser::Render(const char* tex_name, BlendMode blend, Core::Co
 		p_vert[1] = IRenderer::DrawVertex(
 			node.pos.x + pos_x,
 			node.pos.y + pos_y,
-			0.5f,
+			0.0f,
 			tex_u * u_scale,
 			v_bottom,
 			node.active ? vertex_color : vertex_color_alpha
