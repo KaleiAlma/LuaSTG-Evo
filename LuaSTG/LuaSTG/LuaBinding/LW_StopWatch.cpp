@@ -1,8 +1,10 @@
 ﻿#include "LuaBinding/LuaWrapper.hpp"
+#include <chrono>
+#include <ratio>
 
-using Duration = std::chrono::duration<double>;
+using Duration = std::chrono::duration<double, std::micro>;
 using Clock = std::chrono::high_resolution_clock;
-using TimePoint = std::chrono::time_point<Clock>;
+using TimePoint = std::chrono::time_point<Clock, Duration>;
 
 ////////////////////////////////////////////////////////////////////////////////
 /// @brief High-precision stopwatch
@@ -12,7 +14,7 @@ class fcyStopWatch
 private:
 	TimePoint m_cLast{};     // Last time
 	TimePoint m_cFixStart{}; // Time fix parameter on pause
-	TimePoint m_cFixAll{};   // Time fix parameter on pause
+	Duration m_cFixAll{};   // Time fix parameter on pause
 public:
 	void Pause();
 	void Resume();
@@ -46,12 +48,12 @@ void fcyStopWatch::Resume()
 void fcyStopWatch::Reset()
 {
 	m_cLast = Clock::now();
-	m_cFixAll = TimePoint::min();
+	m_cFixAll = Duration(0);
 }
 
 double fcyStopWatch::GetElapsed()
 {
-	return (TimePoint(Clock::now() - m_cLast) - m_cFixAll).count();
+	return std::chrono::duration_cast<std::chrono::seconds>(Clock::now() - m_cLast - m_cFixAll).count();
 }
 
 namespace LuaSTGPlus::LuaWrapper
