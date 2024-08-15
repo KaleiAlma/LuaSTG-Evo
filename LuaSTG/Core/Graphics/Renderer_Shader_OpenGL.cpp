@@ -363,8 +363,8 @@ namespace Core::Graphics
 
         GLint amt_uniforms = 0;
         glGetProgramiv(opengl_prgm, GL_ACTIVE_UNIFORMS, &amt_uniforms);
+        glUseProgram(opengl_prgm);
 
-        GLint amt_samplers = 0;
         GLuint tex_idx = 0;
 
         for (GLuint uniform = 0; uniform < amt_uniforms; uniform++)
@@ -383,8 +383,10 @@ namespace Core::Graphics
             {
                 LocalTexture2D local_texture2d;
                 local_texture2d.index = tex_idx;
-                tex_idx++;
 
+                glUniform1i(uniform, tex_idx);
+
+                tex_idx++;
                 m_texture2d_map.emplace(name, std::move(local_texture2d));
             }
             else // Handle Uniform Buffers

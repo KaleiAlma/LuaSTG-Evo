@@ -22,7 +22,7 @@ void LuaSTGPlus::LuaWrapper::RenderWrapper::Register(lua_State* L) noexcept
                 ))
             {
                 return luaL_error(L, "can't draw text '%s'.", luaL_checkstring(L, 1));
-            }	
+            }
             return 0;
         }
         static int RenderTTF(lua_State* L) noexcept
@@ -36,7 +36,7 @@ void LuaSTGPlus::LuaWrapper::RenderWrapper::Register(lua_State* L) noexcept
                 (float)luaL_checknumber(L, 6),
                 LRES.GetGlobalImageScaleFactor() * (float)luaL_optnumber(L, 9, 1.0),
                 luaL_checkinteger(L, 7),
-                *LuaWrapper::ColorWrapper::Cast(L, 8)
+                *ColorWrapper::Cast(L, 8)
             ))
             {
                 return luaL_error(L, "can't render font '%s'.", luaL_checkstring(L, 1));
@@ -69,7 +69,7 @@ void LuaSTGPlus::LuaWrapper::RenderWrapper::Register(lua_State* L) noexcept
             // group color
             LPOOL.DrawGroupCollider2(
                 luaL_checkinteger(L, 1),
-                *LuaWrapper::ColorWrapper::Cast(L, 2)
+                *ColorWrapper::Cast(L, 2)
             );
             return 0;
         }
