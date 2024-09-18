@@ -384,7 +384,7 @@ namespace Core::Graphics
                 LocalTexture2D local_texture2d;
                 local_texture2d.index = tex_idx;
 
-                glUniform1i(uniform, tex_idx);
+                glUniform1i(glGetUniformLocation(opengl_prgm, name.c_str()), tex_idx);
 
                 tex_idx++;
                 m_texture2d_map.emplace(name, std::move(local_texture2d));
