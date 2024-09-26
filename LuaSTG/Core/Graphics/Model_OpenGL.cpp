@@ -207,7 +207,7 @@ namespace Core::Graphics
     void map_sampler_to_opengl(tinygltf::Sampler& samp, GLuint tex)
     {
         glBindTexture(GL_TEXTURE_2D, tex);
-    #define MAKE_FILTER(MIN, MAG_MIP) ((MAG_MIP << 16) | (MIN))
+    #define MAKE_FILTER(MIN_MIP, MAG) ((MAG << 16) | (MIN_MIP))
         switch (MAKE_FILTER(samp.minFilter, samp.magFilter))
         {
         default:
@@ -220,29 +220,29 @@ namespace Core::Graphics
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_LOD, 0);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LOD, 0);
             break;
-        case MAKE_FILTER(TINYGLTF_TEXTURE_FILTER_NEAREST, TINYGLTF_TEXTURE_FILTER_LINEAR):
+        case MAKE_FILTER(TINYGLTF_TEXTURE_FILTER_LINEAR, TINYGLTF_TEXTURE_FILTER_NEAREST):
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_LOD, 0);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LOD, 0);
             break;
-        case MAKE_FILTER(TINYGLTF_TEXTURE_FILTER_NEAREST, TINYGLTF_TEXTURE_FILTER_NEAREST_MIPMAP_NEAREST):
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST_MIPMAP_NEAREST);
+        case MAKE_FILTER(TINYGLTF_TEXTURE_FILTER_NEAREST_MIPMAP_NEAREST, TINYGLTF_TEXTURE_FILTER_NEAREST):
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
             break;
-        case MAKE_FILTER(TINYGLTF_TEXTURE_FILTER_NEAREST, TINYGLTF_TEXTURE_FILTER_LINEAR_MIPMAP_NEAREST):
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_NEAREST);
+        case MAKE_FILTER(TINYGLTF_TEXTURE_FILTER_LINEAR_MIPMAP_NEAREST, TINYGLTF_TEXTURE_FILTER_NEAREST):
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
             break;
-        case MAKE_FILTER(TINYGLTF_TEXTURE_FILTER_NEAREST, TINYGLTF_TEXTURE_FILTER_NEAREST_MIPMAP_LINEAR):
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST_MIPMAP_LINEAR);
+        case MAKE_FILTER(TINYGLTF_TEXTURE_FILTER_NEAREST_MIPMAP_LINEAR, TINYGLTF_TEXTURE_FILTER_NEAREST):
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_LINEAR);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
             break;
-        case MAKE_FILTER(TINYGLTF_TEXTURE_FILTER_NEAREST, TINYGLTF_TEXTURE_FILTER_LINEAR_MIPMAP_LINEAR):
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+        case MAKE_FILTER(TINYGLTF_TEXTURE_FILTER_LINEAR_MIPMAP_LINEAR, TINYGLTF_TEXTURE_FILTER_NEAREST):
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
             break;
-        case MAKE_FILTER(TINYGLTF_TEXTURE_FILTER_LINEAR, TINYGLTF_TEXTURE_FILTER_NEAREST):
+        case MAKE_FILTER(TINYGLTF_TEXTURE_FILTER_NEAREST, TINYGLTF_TEXTURE_FILTER_LINEAR):
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_LOD, 0);
@@ -254,23 +254,25 @@ namespace Core::Graphics
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_LOD, 0);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LOD, 0);
             break;
-        case MAKE_FILTER(TINYGLTF_TEXTURE_FILTER_LINEAR, TINYGLTF_TEXTURE_FILTER_NEAREST_MIPMAP_NEAREST):
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST_MIPMAP_NEAREST);
+        case MAKE_FILTER(TINYGLTF_TEXTURE_FILTER_NEAREST_MIPMAP_NEAREST, TINYGLTF_TEXTURE_FILTER_LINEAR):
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
             break;
-        case MAKE_FILTER(TINYGLTF_TEXTURE_FILTER_LINEAR, TINYGLTF_TEXTURE_FILTER_LINEAR_MIPMAP_NEAREST):
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_NEAREST);
+        case MAKE_FILTER(TINYGLTF_TEXTURE_FILTER_LINEAR_MIPMAP_NEAREST, TINYGLTF_TEXTURE_FILTER_LINEAR):
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
             break;
-        case MAKE_FILTER(TINYGLTF_TEXTURE_FILTER_LINEAR, TINYGLTF_TEXTURE_FILTER_NEAREST_MIPMAP_LINEAR):
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST_MIPMAP_LINEAR);
+        case MAKE_FILTER(TINYGLTF_TEXTURE_FILTER_NEAREST_MIPMAP_LINEAR, TINYGLTF_TEXTURE_FILTER_LINEAR):
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_LINEAR);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
             break;
-        case MAKE_FILTER(TINYGLTF_TEXTURE_FILTER_LINEAR, TINYGLTF_TEXTURE_FILTER_LINEAR_MIPMAP_LINEAR):
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+        case MAKE_FILTER(TINYGLTF_TEXTURE_FILTER_LINEAR_MIPMAP_LINEAR, TINYGLTF_TEXTURE_FILTER_LINEAR):
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+            glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, 4.f);
             break;
         }
+        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_LOD_BIAS, -1.6f);
     #undef MAKE_FILTER
         switch (samp.wrapS)
         {
@@ -431,7 +433,7 @@ namespace Core::Graphics
 
             glBindTexture(GL_TEXTURE_2D, image[idx]);
             glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, img.width, img.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, img.image.data());
-            glGenerateMipmap(GL_TEXTURE_2D);
+            // glGenerateMipmap(GL_TEXTURE_2D);
         }
 
         return true;
@@ -599,6 +601,8 @@ namespace Core::Graphics
                         {
                             mblock.sampler = shared_->default_sampler;
                         }
+                        map_sampler_to_opengl(mblock.sampler, mblock.image);
+                        glGenerateMipmap(GL_TEXTURE_2D);
                     }
                     else
                     {
@@ -712,13 +716,13 @@ namespace Core::Graphics
             return false;
         }
 
-        // load image to shader resource
-
-        if (!createImage(model)) return false;
-
         // create sampler state
 
         if (!createSampler(model)) return false;
+
+        // load image to shader resource
+
+        if (!createImage(model)) return false;
 
         // create model block
 
