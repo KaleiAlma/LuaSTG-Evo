@@ -92,7 +92,15 @@ namespace Core
 		// 	return indexFPS(0);
 		// }
 
-		Duration const sleep_dur = Duration(wait_ - 0.00006) - Duration(curr_ - last_);
+		// i can't be assed to make a proper solution for
+		// platform framerate discrepancies
+		// so this'll have to do.
+#ifdef _WIN32
+		const double x = 0.00015;
+#else
+		const double x = 0.00006;
+#endif
+		Duration const sleep_dur = Duration(wait_ - x) - Duration(curr_ - last_);
 		if (sleep_dur > Duration::zero())
 		{
 			std::this_thread::sleep_for(sleep_dur);
