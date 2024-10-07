@@ -92,7 +92,7 @@ namespace Core
 		// 	return indexFPS(0);
 		// }
 
-		Duration const sleep_dur = Duration(wait_ - 0.0001) - (Duration)(curr_ - last_);
+		Duration const sleep_dur = Duration(wait_ - 0.00006) - Duration(curr_ - last_);
 		if (sleep_dur > Duration::zero())
 		{
 			std::this_thread::sleep_for(sleep_dur);
@@ -103,6 +103,8 @@ namespace Core
 		// {
 		// 	curr_ = Clock::now();
 		// } while ((curr_ - last_) < Duration(wait_));
+
+		curr_ = Clock::now();
 
 		return udateData(curr_);
 	}
