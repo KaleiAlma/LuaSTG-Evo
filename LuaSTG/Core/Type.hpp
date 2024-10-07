@@ -283,6 +283,14 @@ namespace Core
 		Matrix2(vec const v1, vec const v2) noexcept : value{v1, v2} {}
 		Matrix2(T const x1, T const x2, T const y1, T const y2) noexcept : value{{x1, y1}, {x2, y2}} {}
 
+		static inline Matrix2 identity()
+		{
+			return Matrix2<T>(
+				1, 0,
+				0, 1
+			);
+		}
+
 		inline Matrix2 operator+() const noexcept { return this; }
 		inline Matrix2 operator-() const noexcept { return Matrix2(-value[0], -value[1]); }
 
@@ -313,7 +321,7 @@ namespace Core
 		inline bool operator==(Matrix2 const& r) const noexcept { return value[0] == r[0] && value[1] == r[1]; }
 		inline bool operator!=(Matrix2 const& r) const noexcept { return !(*this == r); }
 
-		inline T& operator[](size_t const i) { return value[i]; }
+		inline vec& operator[](size_t const i) { return value[i]; }
 
 		inline Matrix2 inverse() const noexcept
 		{
@@ -357,6 +365,15 @@ namespace Core
 		Matrix3(T const x1, T const y1, T const z1, T const x2, T const y2, T const z2, T const x3, T const y3, T const z3) noexcept
 		: value{{x1, y1, z1}, {x2, y2, z2}, {x3, y3, z3}} {}
 
+		static inline Matrix3 identity()
+		{
+			return Matrix3<T>(
+				1, 0, 0,
+				0, 1, 0,
+				0, 0, 1
+			);
+		}
+
 		inline Matrix3 operator+() const noexcept { return this; }
 		inline Matrix3 operator-() const noexcept { return Matrix3(-value[0], -value[1], -value[2]); }
 
@@ -387,7 +404,7 @@ namespace Core
 		inline bool operator==(Matrix3 const& r) const noexcept { return value[0] == r[0] && value[1] == r[1] && value[2] == r[2]; }
 		inline bool operator!=(Matrix3 const& r) const noexcept { return !(*this == r); }
 
-		inline T& operator[](size_t const i) { return value[i]; }
+		inline vec& operator[](size_t const i) { return value[i]; }
 
 		inline Matrix3 inverse() const noexcept
 		{
@@ -446,6 +463,16 @@ namespace Core
 		Matrix4(T const x1, T const y1, T const z1, T const w1, T const x2, T const y2, T const z2, T const w2, T const x3, T const y3, T const z3, T const w3, T const x4, T const y4, T const z4, T const w4) noexcept
 		: value{{x1, y1, z1, w1}, {x2, y2, z2, w2}, {x3, y3, z3, w3}, {x4, y4, z4, w4}} {}
 
+		static inline Matrix4 identity()
+		{
+			return Matrix4<T>(
+				1, 0, 0, 0,
+				0, 1, 0, 0,
+				0, 0, 1, 0,
+				0, 0, 0, 1
+			);
+		}
+
 		inline Matrix4 operator+() const noexcept { return this; }
 		inline Matrix4 operator-() const noexcept { return Matrix4(-value[0], -value[1], -value[2], -value[3]); }
 
@@ -476,7 +503,7 @@ namespace Core
 		inline bool operator==(Matrix4 const& r) const noexcept { return value[0] == r[0] && value[1] == r[1] && value[2] == r[2] && value[3] == r[3]; }
 		inline bool operator!=(Matrix4 const& r) const noexcept { return !(*this == r); }
 
-		inline T& operator[](size_t const i) { return value[i]; }
+		inline vec& operator[](size_t const i) { return value[i]; }
 
 		inline Matrix4 inverse() const noexcept
 		{
