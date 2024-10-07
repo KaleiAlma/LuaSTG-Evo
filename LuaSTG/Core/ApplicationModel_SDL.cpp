@@ -96,7 +96,7 @@ namespace Core
 		// platform framerate discrepancies
 		// so this'll have to do.
 #ifdef _WIN32
-		const double x = 0.0008;
+		const double x = 0.0009;
 #else
 		const double x = 0.00006;
 #endif
