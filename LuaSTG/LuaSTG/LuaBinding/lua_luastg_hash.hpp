@@ -98,3 +98,46 @@ namespace LuaSTG {
     ColorMember MapColorMember(const char* key);
 }
 
+namespace LuaSTG {
+    enum class Vector2Member {
+        __NOT_FOUND = -1,
+        f_Angle = 1,
+        f_Dot = 2,
+        f_Length = 3,
+        f_Normalize = 4,
+        f_Normalized = 5,
+        m_x = 6,
+        m_y = 7,
+    };
+    Vector2Member MapVector2Member(const char* key);
+}
+
+namespace LuaSTG {
+    enum class Vector3Member {
+        __NOT_FOUND = -1,
+        f_Dot = 1,
+        f_Length = 2,
+        f_Normalize = 3,
+        f_Normalized = 4,
+        m_x = 5,
+        m_y = 6,
+        m_z = 7,
+    };
+    Vector3Member MapVector3Member(const char* key);
+}
+
+namespace LuaSTG {
+    enum class Vector4Member {
+        __NOT_FOUND = -1,
+        f_Dot = 1,
+        f_Length = 2,
+        f_Normalize = 3,
+        f_Normalized = 4,
+        m_w = 5,
+        m_x = 6,
+        m_y = 7,
+        m_z = 8,
+    };
+    Vector4Member MapVector4Member(const char* key);
+}
+

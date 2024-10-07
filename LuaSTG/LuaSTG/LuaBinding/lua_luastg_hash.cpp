@@ -1047,3 +1047,349 @@ LuaSTG::ColorMember LuaSTG::MapColorMember(const char* key) {
   return LuaSTG::ColorMember::__NOT_FOUND;
 }
 
+LuaSTG::Vector2Member LuaSTG::MapVector2Member(const char* key) {
+  switch(key[0]) {
+    case 'A':
+      switch(key[1]) {
+        case 'n':
+          switch(key[2]) {
+            case 'g':
+              switch(key[3]) {
+                case 'l':
+                  switch(key[4]) {
+                    case 'e':
+                      switch(key[5]) {
+                        case '\0':
+                          return LuaSTG::Vector2Member::f_Angle;
+                      }
+                      break;
+                  }
+                  break;
+              }
+              break;
+          }
+          break;
+      }
+      break;
+    case 'D':
+      switch(key[1]) {
+        case 'o':
+          switch(key[2]) {
+            case 't':
+              switch(key[3]) {
+                case '\0':
+                  return LuaSTG::Vector2Member::f_Dot;
+              }
+              break;
+          }
+          break;
+      }
+      break;
+    case 'L':
+      switch(key[1]) {
+        case 'e':
+          switch(key[2]) {
+            case 'n':
+              switch(key[3]) {
+                case 'g':
+                  switch(key[4]) {
+                    case 't':
+                      switch(key[5]) {
+                        case 'h':
+                          switch(key[6]) {
+                            case '\0':
+                              return LuaSTG::Vector2Member::f_Length;
+                          }
+                          break;
+                      }
+                      break;
+                  }
+                  break;
+              }
+              break;
+          }
+          break;
+      }
+      break;
+    case 'N':
+      switch(key[1]) {
+        case 'o':
+          switch(key[2]) {
+            case 'r':
+              switch(key[3]) {
+                case 'm':
+                  switch(key[4]) {
+                    case 'a':
+                      switch(key[5]) {
+                        case 'l':
+                          switch(key[6]) {
+                            case 'i':
+                              switch(key[7]) {
+                                case 'z':
+                                  switch(key[8]) {
+                                    case 'e':
+                                      switch(key[9]) {
+                                        case '\0':
+                                          return LuaSTG::Vector2Member::f_Normalize;
+                                        case 'd':
+                                          switch(key[10]) {
+                                            case '\0':
+                                              return LuaSTG::Vector2Member::f_Normalized;
+                                          }
+                                          break;
+                                      }
+                                      break;
+                                  }
+                                  break;
+                              }
+                              break;
+                          }
+                          break;
+                      }
+                      break;
+                  }
+                  break;
+              }
+              break;
+          }
+          break;
+      }
+      break;
+    case 'x':
+      switch(key[1]) {
+        case '\0':
+          return LuaSTG::Vector2Member::m_x;
+      }
+      break;
+    case 'y':
+      switch(key[1]) {
+        case '\0':
+          return LuaSTG::Vector2Member::m_y;
+      }
+      break;
+  }
+  return LuaSTG::Vector2Member::__NOT_FOUND;
+}
+
+LuaSTG::Vector3Member LuaSTG::MapVector3Member(const char* key) {
+  switch(key[0]) {
+    case 'D':
+      switch(key[1]) {
+        case 'o':
+          switch(key[2]) {
+            case 't':
+              switch(key[3]) {
+                case '\0':
+                  return LuaSTG::Vector3Member::f_Dot;
+              }
+              break;
+          }
+          break;
+      }
+      break;
+    case 'L':
+      switch(key[1]) {
+        case 'e':
+          switch(key[2]) {
+            case 'n':
+              switch(key[3]) {
+                case 'g':
+                  switch(key[4]) {
+                    case 't':
+                      switch(key[5]) {
+                        case 'h':
+                          switch(key[6]) {
+                            case '\0':
+                              return LuaSTG::Vector3Member::f_Length;
+                          }
+                          break;
+                      }
+                      break;
+                  }
+                  break;
+              }
+              break;
+          }
+          break;
+      }
+      break;
+    case 'N':
+      switch(key[1]) {
+        case 'o':
+          switch(key[2]) {
+            case 'r':
+              switch(key[3]) {
+                case 'm':
+                  switch(key[4]) {
+                    case 'a':
+                      switch(key[5]) {
+                        case 'l':
+                          switch(key[6]) {
+                            case 'i':
+                              switch(key[7]) {
+                                case 'z':
+                                  switch(key[8]) {
+                                    case 'e':
+                                      switch(key[9]) {
+                                        case '\0':
+                                          return LuaSTG::Vector3Member::f_Normalize;
+                                        case 'd':
+                                          switch(key[10]) {
+                                            case '\0':
+                                              return LuaSTG::Vector3Member::f_Normalized;
+                                          }
+                                          break;
+                                      }
+                                      break;
+                                  }
+                                  break;
+                              }
+                              break;
+                          }
+                          break;
+                      }
+                      break;
+                  }
+                  break;
+              }
+              break;
+          }
+          break;
+      }
+      break;
+    case 'x':
+      switch(key[1]) {
+        case '\0':
+          return LuaSTG::Vector3Member::m_x;
+      }
+      break;
+    case 'y':
+      switch(key[1]) {
+        case '\0':
+          return LuaSTG::Vector3Member::m_y;
+      }
+      break;
+    case 'z':
+      switch(key[1]) {
+        case '\0':
+          return LuaSTG::Vector3Member::m_z;
+      }
+      break;
+  }
+  return LuaSTG::Vector3Member::__NOT_FOUND;
+}
+
+LuaSTG::Vector4Member LuaSTG::MapVector4Member(const char* key) {
+  switch(key[0]) {
+    case 'D':
+      switch(key[1]) {
+        case 'o':
+          switch(key[2]) {
+            case 't':
+              switch(key[3]) {
+                case '\0':
+                  return LuaSTG::Vector4Member::f_Dot;
+              }
+              break;
+          }
+          break;
+      }
+      break;
+    case 'L':
+      switch(key[1]) {
+        case 'e':
+          switch(key[2]) {
+            case 'n':
+              switch(key[3]) {
+                case 'g':
+                  switch(key[4]) {
+                    case 't':
+                      switch(key[5]) {
+                        case 'h':
+                          switch(key[6]) {
+                            case '\0':
+                              return LuaSTG::Vector4Member::f_Length;
+                          }
+                          break;
+                      }
+                      break;
+                  }
+                  break;
+              }
+              break;
+          }
+          break;
+      }
+      break;
+    case 'N':
+      switch(key[1]) {
+        case 'o':
+          switch(key[2]) {
+            case 'r':
+              switch(key[3]) {
+                case 'm':
+                  switch(key[4]) {
+                    case 'a':
+                      switch(key[5]) {
+                        case 'l':
+                          switch(key[6]) {
+                            case 'i':
+                              switch(key[7]) {
+                                case 'z':
+                                  switch(key[8]) {
+                                    case 'e':
+                                      switch(key[9]) {
+                                        case '\0':
+                                          return LuaSTG::Vector4Member::f_Normalize;
+                                        case 'd':
+                                          switch(key[10]) {
+                                            case '\0':
+                                              return LuaSTG::Vector4Member::f_Normalized;
+                                          }
+                                          break;
+                                      }
+                                      break;
+                                  }
+                                  break;
+                              }
+                              break;
+                          }
+                          break;
+                      }
+                      break;
+                  }
+                  break;
+              }
+              break;
+          }
+          break;
+      }
+      break;
+    case 'w':
+      switch(key[1]) {
+        case '\0':
+          return LuaSTG::Vector4Member::m_w;
+      }
+      break;
+    case 'x':
+      switch(key[1]) {
+        case '\0':
+          return LuaSTG::Vector4Member::m_x;
+      }
+      break;
+    case 'y':
+      switch(key[1]) {
+        case '\0':
+          return LuaSTG::Vector4Member::m_y;
+      }
+      break;
+    case 'z':
+      switch(key[1]) {
+        case '\0':
+          return LuaSTG::Vector4Member::m_z;
+      }
+      break;
+  }
+  return LuaSTG::Vector4Member::__NOT_FOUND;
+}
+

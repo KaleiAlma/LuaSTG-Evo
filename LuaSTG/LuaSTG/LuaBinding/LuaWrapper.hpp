@@ -96,6 +96,33 @@ namespace LuaSTGPlus
 			static void CreateAndPush(lua_State* L, Core::Color4B const& color);
 		};
 
+		class Vector2Wrapper
+		{
+		public:
+			static std::string_view const ClassID;
+			static Core::Vector2F* Cast(lua_State* L, int idx);
+			static void Register(lua_State* L) noexcept;
+			static void CreateAndPush(lua_State* L, Core::Vector2F const& color);
+		};
+
+		class Vector3Wrapper
+		{
+		public:
+			static std::string_view const ClassID;
+			static Core::Vector3F* Cast(lua_State* L, int idx);
+			static void Register(lua_State* L) noexcept;
+			static void CreateAndPush(lua_State* L, Core::Vector3F const& color);
+		};
+
+		class Vector4Wrapper
+		{
+		public:
+			static std::string_view const ClassID;
+			static Core::Vector4F* Cast(lua_State* L, int idx);
+			static void Register(lua_State* L) noexcept;
+			static void CreateAndPush(lua_State* L, Core::Vector4F const& color);
+		};
+
 		class StopWatchWrapper
 		{
 		public:

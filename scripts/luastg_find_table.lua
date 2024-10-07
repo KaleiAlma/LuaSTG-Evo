@@ -106,10 +106,62 @@ local lstg_Color = {
         E("argb", "m_argb"),
         E("ARGB", "f_ARGB"),
         -- ext
-        E("h"   , "m_h"   ), -- TODO: remove it
-        E("s"   , "m_s"   ), -- TODO: remove it
-        E("v"   , "m_v"   ), -- TODO: remove it
-        E("AHSV", "f_AHSV"), -- TODO: remove it
+        E("h"   , "m_h"   ),
+        E("s"   , "m_s"   ),
+        E("v"   , "m_v"   ),
+        E("AHSV", "f_AHSV"),
+    },
+}
+
+---@type findtable.config
+local lstg_Vector2 = {
+    cpp_namespace = { "LuaSTG" },
+    func_name = "MapVector2Member",
+    enum_name = "Vector2Member",
+    enum_entry = {
+        -- basic
+        E("x"         , "m_x"         ),
+        E("y"         , "m_y"         ),
+        E("Dot"       , "f_Dot"       ),
+        E("Length"    , "f_Length"    ),
+        E("Normalize" , "f_Normalize" ),
+        E("Normalized", "f_Normalized"),
+        E("Angle"     , "f_Angle"     ),
+    },
+}
+
+---@type findtable.config
+local lstg_Vector3 = {
+    cpp_namespace = { "LuaSTG" },
+    func_name = "MapVector3Member",
+    enum_name = "Vector3Member",
+    enum_entry = {
+        -- basic
+        E("x"         , "m_x"         ),
+        E("y"         , "m_y"         ),
+        E("z"         , "m_z"         ),
+        E("Dot"       , "f_Dot"       ),
+        E("Length"    , "f_Length"    ),
+        E("Normalize" , "f_Normalize" ),
+        E("Normalized", "f_Normalized"),
+    },
+}
+
+---@type findtable.config
+local lstg_Vector4 = {
+    cpp_namespace = { "LuaSTG" },
+    func_name = "MapVector4Member",
+    enum_name = "Vector4Member",
+    enum_entry = {
+        -- basic
+        E("x"         , "m_x"         ),
+        E("y"         , "m_y"         ),
+        E("z"         , "m_z"         ),
+        E("w"         , "m_w"         ),
+        E("Dot"       , "f_Dot"       ),
+        E("Length"    , "f_Length"    ),
+        E("Normalize" , "f_Normalize" ),
+        E("Normalized", "f_Normalized"),
     },
 }
 
@@ -117,4 +169,7 @@ findtable.makeSource("lua_luastg_hash", {
     lstg_GameObject,
     lstg_BlendMode,
     lstg_Color,
+    lstg_Vector2,
+    lstg_Vector3,
+    lstg_Vector4,
 })
