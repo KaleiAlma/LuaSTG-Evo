@@ -53,7 +53,7 @@ void fcyStopWatch::Reset()
 
 double fcyStopWatch::GetElapsed()
 {
-	return std::chrono::duration_cast<std::chrono::seconds>(Clock::now() - m_cLast - m_cFixAll).count();
+	return std::chrono::duration_cast<std::chrono::duration<double, std::ratio<1>>>(Clock::now() - m_cLast - m_cFixAll).count();
 }
 
 namespace LuaSTGPlus::LuaWrapper
