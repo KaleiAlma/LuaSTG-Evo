@@ -146,6 +146,7 @@ set(LUASTG_ENGINE_SOURCES
     LuaSTG/AppFrameLua.cpp
     LuaSTG/AppFrameRender.cpp
     LuaSTG/AppFrameRenderEx.cpp
+    LuaSTG/AppFrameFileEx.cpp
     LuaSTG/LConfig.h
     LuaSTG/LMathConstant.hpp
     LuaSTG/Main.cpp

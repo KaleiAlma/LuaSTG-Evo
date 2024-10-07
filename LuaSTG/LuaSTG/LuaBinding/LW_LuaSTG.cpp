@@ -97,6 +97,11 @@ void LuaSTGPlus::BuiltInFunctionWrapper::Register(lua_State* L)noexcept
 		static int LoadTextFile(lua_State* L)noexcept
 		{
 			return LAPP.LoadTextFile(L, luaL_checkstring(L, 1), luaL_optstring(L, 2, NULL));
+	
+		}
+		static int LoadCompressedTextFile(lua_State* L)noexcept
+		{
+			return LAPP.LoadCompressedTextFile(L, luaL_checkstring(L, 1), luaL_optstring(L, 2, NULL));
 		}
 		#pragma endregion
 		
@@ -256,6 +261,7 @@ void LuaSTGPlus::BuiltInFunctionWrapper::Register(lua_State* L)noexcept
 		{ "Log", &WrapperImplement::Log },
 		{ "DoFile", &WrapperImplement::DoFile },
 		{ "LoadTextFile", &WrapperImplement::LoadTextFile },
+		{ "LoadCompressedTextFile", &WrapperImplement::LoadCompressedTextFile },
 		#pragma endregion
 		
 		#pragma region 窗口与交换链控制函数

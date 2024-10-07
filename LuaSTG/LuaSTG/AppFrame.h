@@ -195,6 +195,7 @@ namespace LuaSTGPlus
         // Read a text file from a resource package.  
         // It is possible to read other files, but you may get meaningless results.
         int LoadTextFile(lua_State* L, const char* path, const char *packname) noexcept;
+        int LoadCompressedTextFile(lua_State* L, const char* path, const char *packname) noexcept;
 
         // TODO: LoadBinaryFile?
 
