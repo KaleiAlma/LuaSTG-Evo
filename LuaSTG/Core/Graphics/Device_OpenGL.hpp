@@ -4,6 +4,7 @@
 #include "Core/Type.hpp"
 #include "glad/gl.h"
 #include <SDL_video.h>
+#include <cstddef>
 #include <cstdint>
 #include <optional>
 // #include "Platform/RuntimeLoader/DXGI.hpp"
@@ -36,7 +37,7 @@ namespace Core::Graphics
 		void* getNativeRendererHandle() { return SDL_GL_GetCurrentContext(); }
 
 		bool createTextureFromFile(StringView path, bool mipmap, ITexture2D** pp_texutre);
-		//bool createTextureFromMemory(void const* data, size_t size, bool mipmap, ITexture2D** pp_texutre);
+		bool createTextureFromMemory(void const* data, size_t size, bool mipmap, ITexture2D** pp_texutre);
 		bool createTexture(Vector2U size, ITexture2D** pp_texutre);
 
 		bool createRenderTarget(Vector2U size, IRenderTarget** pp_rt);
@@ -95,6 +96,7 @@ namespace Core::Graphics
 
 	public:
 		Texture2D_OpenGL(Device_OpenGL* device, StringView path, bool mipmap);
+		Texture2D_OpenGL(Device_OpenGL* device, void const* data, size_t size, bool mipmap);
 		Texture2D_OpenGL(Device_OpenGL* device, Vector2U size, bool rendertarget); // if rendertarget, then hand over control to RenderTarget_OpenGL
 		~Texture2D_OpenGL();
 	};

@@ -12,7 +12,10 @@
 #include "Core/FileManager.hpp"
 #include "AppFrame.h"
 #include "LuaBinding/lua_utility.hpp"
+#include <cstdint>
 #include <spdlog/spdlog.h>
+#include <sys/types.h>
+#include <vector>
 
 namespace LuaSTGPlus
 {
@@ -225,6 +228,44 @@ namespace LuaSTGPlus
         if (ResourceMgr::GetResourceLoadingLog())
         {
             spdlog::info("[luastg] LoadTexture: path '{}', name '{}' ({})", path, name, getResourcePoolTypeName());
+        }
+    
+        return true;
+    }
+
+    bool ResourcePool::LoadTextureBin(const char* name, std::vector<uint8_t> data, bool mipmaps) noexcept
+    {
+        if (m_TexturePool.find(std::string_view(name)) != m_TexturePool.end())
+        {
+            if (ResourceMgr::GetResourceLoadingLog())
+            {
+                spdlog::warn("[luastg] LoadTexture: Texture '{}' already exists, loading cancelled.", name);
+            }
+            return true;
+        }
+    
+        Core::ScopeObject<Core::Graphics::ITexture2D> p_texture;
+        if (!LAPP.GetAppModel()->getDevice()->createTextureFromMemory(data.data(), data.size(), mipmaps, ~p_texture))
+        {
+            spdlog::error("[luastg] Failed to create texture '{}' from binary data", name);
+            return false;
+        }
+
+        try
+        {
+            Core::ScopeObject<IResourceTexture> tRes;
+            tRes.attach(new ResourceTextureImpl(name, p_texture.get()));
+            m_TexturePool.emplace(name, tRes);
+        }
+        catch (std::exception const& e)
+        {
+            spdlog::error("[luastg] LoadTexture: Failed to load texture '{}' ({})", name, e.what());
+            return false;
+        }
+    
+        if (ResourceMgr::GetResourceLoadingLog())
+        {
+            spdlog::info("[luastg] LoadTexture: <binary data>, name '{}' ({})", name, getResourcePoolTypeName());
         }
     
         return true;

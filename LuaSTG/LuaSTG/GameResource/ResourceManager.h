@@ -96,6 +96,7 @@ namespace LuaSTGPlus
         
         // 纹理
         bool LoadTexture(const char* name, const char* path, bool mipmaps = true) noexcept;
+        bool LoadTextureBin(const char* name, std::vector<uint8_t> data, bool mipmaps = true) noexcept;
         bool CreateTexture(const char* name, int width, int height) noexcept;
         // 渲染目标
         bool CreateRenderTarget(const char* name, int width = 0, int height = 0, bool depth_buffer = false) noexcept;

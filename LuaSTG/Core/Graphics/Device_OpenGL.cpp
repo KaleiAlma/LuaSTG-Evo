@@ -1,10 +1,15 @@
 ﻿#include "Core/Graphics/Device_OpenGL.hpp"
 #include "Core/FileManager.hpp"
+#include "Core/Object.hpp"
 #include "Core/Type.hpp"
 #include "Core/i18n.hpp"
 
+#include <cstddef>
 #include <cstdint>
+#include <cstring>
 #include <memory>
+#include <string>
+#include <string_view>
 
 #include "glad/gl.h"
 #include "spdlog/spdlog.h"
@@ -112,7 +117,18 @@ namespace Core::Graphics
 			return false;
 		}
 	}
-	//bool createTextureFromMemory(void const* data, size_t size, bool mipmap, ITexture2D** pp_texture);
+	bool Device_OpenGL::createTextureFromMemory(void const* data, size_t size, bool mipmap, ITexture2D** pp_texture) {
+		try
+		{
+			*pp_texture = new Texture2D_OpenGL(this, data, size, mipmap);
+			return true;
+		}
+		catch (...)
+		{
+			*pp_texture = nullptr;
+			return false;
+		}
+	}
 	bool Device_OpenGL::createTexture(Vector2U size, ITexture2D** pp_texture)
 	{
 		try
@@ -238,14 +254,27 @@ namespace Core::Graphics
 	{
 		if (m_data)
 		{
+			Vector2I size;
+			uint8_t* data = stbi_load_from_memory((uint8_t*)m_data->data(), m_data->size(), &size.x, &size.y, NULL, 4);
+			if (data == NULL)
+			{
+				spdlog::error("[core] Unable to parse binary data");
+				return false;
+			}
+			// image size will never be negative
+			m_size.x = size.x;
+			m_size.y = size.y;
+
 			glGenTextures(1, &opengl_texture2d);
 			if (opengl_texture2d == 0) {
 				i18n_core_system_call_report_error("glGenTextures");
 				return false;
 			}
 			glBindTexture(GL_TEXTURE_2D, opengl_texture2d);
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_size.x, m_size.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, m_data->data());
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_size.x, m_size.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
 			glGenerateMipmap(GL_TEXTURE_2D);
+
+			stbi_image_free(data);
 		}
 		else if (!source_path.empty())
 		{
@@ -309,6 +338,22 @@ namespace Core::Graphics
 	{
 		if (path.empty())
 			throw std::runtime_error("Texture2D::Texture2D(1)");
+		if (!createResource())
+			throw std::runtime_error("Texture2D::Texture2D(2)");
+		m_device->addEventListener(this);
+	}
+	Texture2D_OpenGL::Texture2D_OpenGL(Device_OpenGL* device, void const* data, size_t size, bool mipmap)
+		: m_device(device)
+		, m_dynamic(false)
+		, m_premul(false)
+		, m_mipmap(mipmap)
+		, m_isrt(false)
+	{
+		if (!IData::create(size, ~m_data))
+			throw std::runtime_error("Texture2D::Texture2D(1)");
+
+		std::memcpy(m_data->data(), data, size);
+
 		if (!createResource())
 			throw std::runtime_error("Texture2D::Texture2D(2)");
 		m_device->addEventListener(this);

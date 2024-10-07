@@ -2,6 +2,9 @@
 #include "LuaBinding/lua_utility.hpp"
 #include "Core/FileManager.hpp"
 #include "AppFrame.h"
+#include <cstdint>
+#include <string_view>
+#include <vector>
 
 void LuaSTGPlus::LuaWrapper::ResourceMgrWrapper::Register(lua_State* L) noexcept
 {
@@ -51,6 +54,20 @@ void LuaSTGPlus::LuaWrapper::ResourceMgrWrapper::Register(lua_State* L) noexcept
 				return luaL_error(L, "can't load resource at this time.");
 			if (!pActivedPool->LoadTexture(name, path, lua_toboolean(L, 3) == 0 ? false : true))
 				return luaL_error(L, "can't load texture from file '%s'.", path);
+			return 0;
+		}
+		static int LoadTextureBin(lua_State* L) noexcept
+		{
+			const char* name = luaL_checkstring(L, 1);
+			// const char* path = luaL_checkstring(L, 2);
+			std::string_view bin_init = luaL_check_string_view(L, 2);
+			std::vector<uint8_t> bin(bin_init.begin(), bin_init.end());
+
+			ResourcePool* pActivedPool = LRES.GetActivedPool();
+			if (!pActivedPool)
+				return luaL_error(L, "can't load resource at this time.");
+			if (!pActivedPool->LoadTextureBin(name, bin, lua_toboolean(L, 3) == 0 ? false : true))
+				return luaL_error(L, "can't load texture '%s' from binary data.", name);
 			return 0;
 		}
 		static int LoadSprite(lua_State* L) noexcept
@@ -651,6 +668,7 @@ void LuaSTGPlus::LuaWrapper::ResourceMgrWrapper::Register(lua_State* L) noexcept
 		{ "SetResourceStatus", &Wrapper::SetResourceStatus },
 		{ "GetResourceStatus", &Wrapper::GetResourceStatus },
 		{ "LoadTexture", &Wrapper::LoadTexture },
+		{ "LoadTextureBin", &Wrapper::LoadTextureBin },
 		{ "LoadImage", &Wrapper::LoadSprite },
 		{ "LoadAnimation", &Wrapper::LoadAnimation },
 		{ "LoadPS", &Wrapper::LoadPS },
