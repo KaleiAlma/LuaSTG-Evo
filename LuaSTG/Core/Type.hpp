@@ -341,6 +341,10 @@ namespace Core
 		}
 	};
 
+	using Matrix2I = Matrix2<int32_t>;
+	using Matrix2U = Matrix2<uint32_t>;
+	using Matrix2F = Matrix2<float>;
+
 	template<typename T>
 	struct Matrix3
 	{
