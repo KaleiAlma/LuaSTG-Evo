@@ -22,77 +22,37 @@ namespace LuaSTGPlus::LuaWrapper // Vector2
 			static int Angle(lua_State* L) noexcept
 			{
 				GETUDATA(p, 1);
-				int const argc = lua_gettop(L);
-				if (argc == 1)
-				{
-					lua_pushnumber(L, (lua_Number)p->angle());
-					return 1;
-				}
-				else
-				{
-					return luaL_error(L, "Invalid args.");
-				}
+				lua_pushnumber(L, (lua_Number)p->angle());
+				return 1;
 			}
 
 			static int Dot(lua_State* L) noexcept
 			{
 				GETUDATA(p, 1);
-				int const argc = lua_gettop(L);
-				if (argc == 2)
-				{
-					GETUDATA(v, 2);
-					lua_pushnumber(L, (lua_Number)p->dot(*v));
-					return 1;
-				}
-				else
-				{
-					return luaL_error(L, "Invalid args.");
-				}
+				GETUDATA(v, 2);
+				lua_pushnumber(L, (lua_Number)p->dot(*v));
+				return 1;
 			}
 
 			static int Length(lua_State* L) noexcept
 			{
 				GETUDATA(p, 1);
-				int const argc = lua_gettop(L);
-				if (argc == 1)
-				{
-					lua_pushnumber(L, (lua_Number)p->length());
-					return 1;
-				}
-				else
-				{
-					return luaL_error(L, "Invalid args.");
-				}
+				lua_pushnumber(L, (lua_Number)p->length());
+				return 1;
 			}
 
 			static int Normalize(lua_State* L) noexcept
 			{
 				GETUDATA(p, 1);
-				int const argc = lua_gettop(L);
-				if (argc == 1)
-				{
-					CreateAndPush(L, p->normalize());
-					return 1;
-				}
-				else
-				{
-					return luaL_error(L, "Invalid args.");
-				}
+				CreateAndPush(L, p->normalize());
+				return 1;
 			}
 
 			static int Normalized(lua_State* L) noexcept
 			{
 				GETUDATA(p, 1);
-				int const argc = lua_gettop(L);
-				if (argc == 1)
-				{
-					CreateAndPush(L, p->normalized());
-					return 1;
-				}
-				else
-				{
-					return luaL_error(L, "Invalid args.");
-				}
+				CreateAndPush(L, p->normalized());
+				return 1;
 			}
 
 			static int Meta_Index(lua_State* L) noexcept
@@ -317,62 +277,30 @@ namespace LuaSTGPlus::LuaWrapper // Vector3
 			static int Dot(lua_State* L) noexcept
 			{
 				GETUDATA(p, 1);
-				int const argc = lua_gettop(L);
-				if (argc == 2)
-				{
-					GETUDATA(v, 2);
-					lua_pushnumber(L, (lua_Number)p->dot(*v));
-					return 1;
-				}
-				else
-				{
-					return luaL_error(L, "Invalid args.");
-				}
+				GETUDATA(v, 2);
+				lua_pushnumber(L, (lua_Number)p->dot(*v));
+				return 1;
 			}
 
 			static int Length(lua_State* L) noexcept
 			{
 				GETUDATA(p, 1);
-				int const argc = lua_gettop(L);
-				if (argc == 1)
-				{
-					lua_pushnumber(L, (lua_Number)p->length());
-					return 1;
-				}
-				else
-				{
-					return luaL_error(L, "Invalid args.");
-				}
+				lua_pushnumber(L, (lua_Number)p->length());
+				return 1;
 			}
 
 			static int Normalize(lua_State* L) noexcept
 			{
 				GETUDATA(p, 1);
-				int const argc = lua_gettop(L);
-				if (argc == 1)
-				{
-					CreateAndPush(L, p->normalize());
-					return 1;
-				}
-				else
-				{
-					return luaL_error(L, "Invalid args.");
-				}
+				CreateAndPush(L, p->normalize());
+				return 1;
 			}
 
 			static int Normalized(lua_State* L) noexcept
 			{
 				GETUDATA(p, 1);
-				int const argc = lua_gettop(L);
-				if (argc == 1)
-				{
-					CreateAndPush(L, p->normalized());
-					return 1;
-				}
-				else
-				{
-					return luaL_error(L, "Invalid args.");
-				}
+				CreateAndPush(L, p->normalized());
+				return 1;
 			}
 
 			static int Meta_Index(lua_State* L) noexcept
@@ -595,62 +523,30 @@ namespace LuaSTGPlus::LuaWrapper // Vector4
 			static int Dot(lua_State* L) noexcept
 			{
 				GETUDATA(p, 1);
-				int const argc = lua_gettop(L);
-				if (argc == 2)
-				{
-					GETUDATA(v, 2);
-					lua_pushnumber(L, (lua_Number)p->dot(*v));
-					return 1;
-				}
-				else
-				{
-					return luaL_error(L, "Invalid args.");
-				}
+				GETUDATA(v, 2);
+				lua_pushnumber(L, (lua_Number)p->dot(*v));
+				return 1;
 			}
 
 			static int Length(lua_State* L) noexcept
 			{
 				GETUDATA(p, 1);
-				int const argc = lua_gettop(L);
-				if (argc == 1)
-				{
-					lua_pushnumber(L, (lua_Number)p->length());
-					return 1;
-				}
-				else
-				{
-					return luaL_error(L, "Invalid args.");
-				}
+				lua_pushnumber(L, (lua_Number)p->length());
+				return 1;
 			}
 
 			static int Normalize(lua_State* L) noexcept
 			{
 				GETUDATA(p, 1);
-				int const argc = lua_gettop(L);
-				if (argc == 1)
-				{
-					CreateAndPush(L, p->normalize());
-					return 1;
-				}
-				else
-				{
-					return luaL_error(L, "Invalid args.");
-				}
+				CreateAndPush(L, p->normalize());
+				return 1;
 			}
 
 			static int Normalized(lua_State* L) noexcept
 			{
 				GETUDATA(p, 1);
-				int const argc = lua_gettop(L);
-				if (argc == 1)
-				{
-					CreateAndPush(L, p->normalized());
-					return 1;
-				}
-				else
-				{
-					return luaL_error(L, "Invalid args.");
-				}
+				CreateAndPush(L, p->normalized());
+				return 1;
 			}
 
 			static int Meta_Index(lua_State* L) noexcept
