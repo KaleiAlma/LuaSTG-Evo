@@ -41,6 +41,9 @@ namespace Core
 		inline bool operator==(Vector2 const& r) const noexcept { return x == r.x && y == r.y; }
 		inline bool operator!=(Vector2 const& r) const noexcept { return x != r.x || y != r.y; }
 
+		inline T& operator[](size_t const i) { return (&x)[i]; }
+		inline T& operator[](size_t const i) const { return (&x)[i]; }
+
 		inline float dot(Vector2 const& r) const noexcept { return x * r.x + y * r.y; }
 
 		inline Vector2& normalize() noexcept
@@ -70,8 +73,6 @@ namespace Core
 		}
 		inline T length() const noexcept { return std::sqrt(x * x + y * y); }
 		inline T angle() const noexcept { return std::atan2(y, x); }
-
-		inline T& operator[](size_t const i) { return (&x)[i]; }
 	};
 
 	using Vector2I = Vector2<int32_t>;
@@ -143,6 +144,9 @@ namespace Core
 		inline bool operator==(Vector3 const& r) const noexcept { return x == r.x && y == r.y && z == r.z; }
 		inline bool operator!=(Vector3 const& r) const noexcept { return x != r.x || y != r.y || z != r.z; }
 
+		inline T& operator[](size_t const i) { return (&x)[i]; }
+		inline T& operator[](size_t const i) const { return (&x)[i]; }
+
 		inline float dot(Vector3 const& r) const noexcept { return x * r.x + y * r.y + z * r.z; }
 
 		inline Vector3& normalize() noexcept
@@ -171,8 +175,6 @@ namespace Core
 			}
 		}
 		inline T length() const noexcept { return std::sqrt(x * x + y * y + z * z); }
-
-		inline T& operator[](size_t const i) { return (&x)[i]; }
 	};
 
 	using Vector3I = Vector3<int32_t>;
@@ -236,6 +238,10 @@ namespace Core
 		inline bool operator==(Vector4 const& r) const noexcept { return x == r.x && y == r.y && z == r.z && w == r.w; }
 		inline bool operator!=(Vector4 const& r) const noexcept { return x != r.x || y != r.y || z != r.z || w != r.w; }
 
+		inline T& operator[](size_t const i) { return (&x)[i]; }
+		inline T& operator[](size_t const i) const { return (&x)[i]; }
+
+
 		inline float dot(Vector4 const& r) const noexcept { return x * r.x + y * r.y + z * r.z + w * r.w; }
 
 		inline Vector4& normalize() noexcept
@@ -264,8 +270,6 @@ namespace Core
 			}
 		}
 		inline T length() const noexcept { return std::sqrt(x * x + y * y + z * z + w * w); }
-
-		inline T& operator[](size_t const i) { return (&x)[i]; }
 	};
 
 	using Vector4I = Vector4<int32_t>;
@@ -322,6 +326,7 @@ namespace Core
 		inline bool operator!=(Matrix2 const& r) const noexcept { return !(*this == r); }
 
 		inline vec& operator[](size_t const i) { return value[i]; }
+		inline vec& operator[](size_t const i) const { return value[i]; }
 
 		inline Matrix2 inverse() const noexcept
 		{
@@ -405,6 +410,7 @@ namespace Core
 		inline bool operator!=(Matrix3 const& r) const noexcept { return !(*this == r); }
 
 		inline vec& operator[](size_t const i) { return value[i]; }
+		inline vec& operator[](size_t const i) const { return value[i]; }
 
 		inline Matrix3 inverse() const noexcept
 		{
@@ -504,6 +510,7 @@ namespace Core
 		inline bool operator!=(Matrix4 const& r) const noexcept { return !(*this == r); }
 
 		inline vec& operator[](size_t const i) { return value[i]; }
+		inline vec& operator[](size_t const i) const { return value[i]; }
 
 		inline Matrix4 inverse() const noexcept
 		{
