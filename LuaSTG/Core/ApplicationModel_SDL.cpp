@@ -99,10 +99,10 @@ namespace Core
 		}
 
 		// Make sure the duration has fully elapsed by spinning the CPU
-		do
-		{
-			curr_ = Clock::now();
-		} while ((curr_ - last_) < Duration(wait_));
+		// do
+		// {
+		// 	curr_ = Clock::now();
+		// } while ((curr_ - last_) < Duration(wait_));
 
 		return udateData(curr_);
 	}
