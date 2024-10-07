@@ -17,21 +17,31 @@ namespace Core
 		Vector2() noexcept : x(0), y(0) {}
 		Vector2(T const x_, T const y_) noexcept : x(x_), y(y_) {}
 
+		inline Vector2 operator+() const noexcept { return this; }
+		inline Vector2 operator-() const noexcept { return Vector2(-x, -y); }
+
 		inline Vector2 operator+(Vector2 const& r) const noexcept { return Vector2(x + r.x, y + r.y); }
 		inline Vector2 operator-(Vector2 const& r) const noexcept { return Vector2(x - r.x, y - r.y); }
+		inline Vector2 operator+(T const r) const noexcept { return Vector2(x + r, y + r); }
+		inline Vector2 operator-(T const r) const noexcept { return Vector2(x - r, y - r); }
+		inline Vector2 operator*(Vector2 const& r) const noexcept { return Vector2(x * r.x, y * r.y); }
+		inline Vector2 operator/(Vector2 const& r) const noexcept { return Vector2(x / r.x, y / r.y); }
 		inline Vector2 operator*(T const r) const noexcept { return Vector2(x * r, y * r); }
 		inline Vector2 operator/(T const r) const noexcept { return Vector2(x / r, y / r); }
 
 		inline Vector2& operator+=(Vector2 const& r) noexcept { x += r.x; y += r.y; return *this; }
 		inline Vector2& operator-=(Vector2 const& r) noexcept { x -= r.x; y -= r.y; return *this; }
+		inline Vector2& operator+=(T const r) noexcept { x += r; y += r; return *this; }
+		inline Vector2& operator-=(T const r) noexcept { x -= r; y -= r; return *this; }
+		inline Vector2& operator*=(Vector2 const& r) noexcept { x *= r.x; y *= r.y; return *this; }
+		inline Vector2& operator/=(Vector2 const& r) noexcept { x /= r.x; y /= r.y; return *this; }
 		inline Vector2& operator*=(T const r) noexcept { x *= r; y *= r; return *this; }
 		inline Vector2& operator/=(T const r) noexcept { x /= r; y /= r; return *this; }
 
 		inline bool operator==(Vector2 const& r) const noexcept { return x == r.x && y == r.y; }
 		inline bool operator!=(Vector2 const& r) const noexcept { return x != r.x || y != r.y; }
 
-		inline float operator*(Vector2 const& r) const noexcept { return x * r.x + y * r.y; }
-		inline Vector2 operator-() const noexcept { return Vector2(-x, -y); }
+		inline float dot(Vector2 const& r) const noexcept { return x * r.x + y * r.y; }
 
 		inline Vector2& normalize() noexcept
 		{
@@ -109,18 +119,58 @@ namespace Core
 		Vector3() noexcept : x(0), y(0), z(0) {}
 		Vector3(T const x_, T const y_, T const z_) noexcept : x(x_), y(y_), z(z_) {}
 
+		inline Vector3 operator+() const noexcept { return this; }
+		inline Vector3 operator-() const noexcept { return Vector3(-x, -y, -z); }
+
 		inline Vector3 operator+(Vector3 const& r) const noexcept { return Vector3(x + r.x, y + r.y, z + r.z); }
 		inline Vector3 operator-(Vector3 const& r) const noexcept { return Vector3(x - r.x, y - r.y, z - r.z); }
+		inline Vector3 operator+(T const r) const noexcept { return Vector3(x + r, y + r, z + r); }
+		inline Vector3 operator-(T const r) const noexcept { return Vector3(x - r, y - r, z - r); }
+		inline Vector3 operator*(Vector3 const& r) const noexcept { return Vector3(x * r.x, y * r.y, z * r.z); }
+		inline Vector3 operator/(Vector3 const& r) const noexcept { return Vector3(x / r.x, y / r.y, z / r.z); }
 		inline Vector3 operator*(T const r) const noexcept { return Vector3(x * r, y * r, z * r); }
 		inline Vector3 operator/(T const r) const noexcept { return Vector3(x / r, y / r, z / r); }
 
 		inline Vector3& operator+=(Vector3 const& r) noexcept { x += r.x; y += r.y; z += r.z; return *this; }
 		inline Vector3& operator-=(Vector3 const& r) noexcept { x -= r.x; y -= r.y; z -= r.z; return *this; }
+		inline Vector3& operator+=(T const r) noexcept { x += r; y += r; z += r; return *this; }
+		inline Vector3& operator-=(T const r) noexcept { x -= r; y -= r; z -= r; return *this; }
+		inline Vector3& operator*=(Vector3 const& r) noexcept { x *= r.x; y *= r.y; z *= r.z; return *this; }
+		inline Vector3& operator/=(Vector3 const& r) noexcept { x /= r.x; y /= r.y; z /= r.z; return *this; }
 		inline Vector3& operator*=(T const r) noexcept { x *= r; y *= r; z *= r; return *this; }
 		inline Vector3& operator/=(T const r) noexcept { x /= r; y /= r; z /= r; return *this; }
 
 		inline bool operator==(Vector3 const& r) const noexcept { return x == r.x && y == r.y && z == r.z; }
 		inline bool operator!=(Vector3 const& r) const noexcept { return x != r.x || y != r.y || z != r.z; }
+
+		inline float dot(Vector3 const& r) const noexcept { return x * r.x + y * r.y + z * r.z; }
+
+		inline Vector3& normalize() noexcept
+		{
+			T const l = length();
+			if (l >= std::numeric_limits<T>::min())
+			{
+				x /= l; y /= l; z /= l;
+			}
+			else
+			{
+				x = T{}; y = T{}; z = T{};
+			}
+			return *this;
+		}
+		inline Vector3 normalized() const noexcept
+		{
+			T const l = length();
+			if (l >= std::numeric_limits<T>::min())
+			{
+				return Vector3(x / l, y / l, z / l);
+			}
+			else
+			{
+				return Vector3();
+			}
+		}
+		inline T length() const noexcept { return std::sqrt(x * x + y * y + z * z); }
 
 		inline T& operator[](size_t const i) { return (&x)[i]; }
 	};
@@ -162,18 +212,58 @@ namespace Core
 		Vector4() noexcept : x(0), y(0), z(0), w(0) {}
 		Vector4(T const x_, T const y_, T const z_, T const w_) noexcept : x(x_), y(y_), z(z_), w(w_) {}
 
+		inline Vector4 operator+() const noexcept { return this; }
+		inline Vector4 operator-() const noexcept { return Vector4(-x, -y, -z, -w); }
+
 		inline Vector4 operator+(Vector4 const& r) const noexcept { return Vector4(x + r.x, y + r.y, z + r.z, w + r.w); }
 		inline Vector4 operator-(Vector4 const& r) const noexcept { return Vector4(x - r.x, y - r.y, z - r.z, w - r.w); }
+		inline Vector4 operator+(T const r) const noexcept { return Vector4(x + r, y + r, z + r, w + r); }
+		inline Vector4 operator-(T const r) const noexcept { return Vector4(x - r, y - r, z - r, w - r); }
+		inline Vector4 operator*(Vector4 const& r) const noexcept { return Vector4(x * r.x, y * r.y, z * r.z, w * r.w); }
+		inline Vector4 operator/(Vector4 const& r) const noexcept { return Vector4(x / r.x, y / r.y, z / r.z, w / r.w); }
 		inline Vector4 operator*(T const r) const noexcept { return Vector4(x * r, y * r, z * r, w * r); }
 		inline Vector4 operator/(T const r) const noexcept { return Vector4(x / r, y / r, z / r, w / r); }
 
 		inline Vector4& operator+=(Vector4 const& r) noexcept { x += r.x; y += r.y; z += r.z; w += r.w; return *this; }
 		inline Vector4& operator-=(Vector4 const& r) noexcept { x -= r.x; y -= r.y; z -= r.z; w -= r.w; return *this; }
+		inline Vector4& operator+=(T const r) noexcept { x += r; y += r; z += r; w += r; return *this; }
+		inline Vector4& operator-=(T const r) noexcept { x -= r; y -= r; z -= r; w -= r; return *this; }
+		inline Vector4& operator*=(Vector4 const& r) noexcept { x *= r.x; y *= r.y; z *= r.z; w *= r.w; return *this; }
+		inline Vector4& operator/=(Vector4 const& r) noexcept { x /= r.x; y /= r.y; z /= r.z; w /= r.w; return *this; }
 		inline Vector4& operator*=(T const r) noexcept { x *= r; y *= r; z *= r; w *= r; return *this; }
 		inline Vector4& operator/=(T const r) noexcept { x /= r; y /= r; z /= r; w /= r; return *this; }
 
 		inline bool operator==(Vector4 const& r) const noexcept { return x == r.x && y == r.y && z == r.z && w == r.w; }
 		inline bool operator!=(Vector4 const& r) const noexcept { return x != r.x || y != r.y || z != r.z || w != r.w; }
+
+		inline float dot(Vector4 const& r) const noexcept { return x * r.x + y * r.y + z * r.z + w * r.w; }
+
+		inline Vector4& normalize() noexcept
+		{
+			T const l = length();
+			if (l >= std::numeric_limits<T>::min())
+			{
+				x /= l; y /= l; z /= l; w /= l;
+			}
+			else
+			{
+				x = T{}; y = T{}; z = T{}; w = T{};
+			}
+			return *this;
+		}
+		inline Vector4 normalized() const noexcept
+		{
+			T const l = length();
+			if (l >= std::numeric_limits<T>::min())
+			{
+				return Vector4(x / l, y / l, z / l, w / l);
+			}
+			else
+			{
+				return Vector4();
+			}
+		}
+		inline T length() const noexcept { return std::sqrt(x * x + y * y + z * z + w * w); }
 
 		inline T& operator[](size_t const i) { return (&x)[i]; }
 	};
@@ -181,6 +271,308 @@ namespace Core
 	using Vector4I = Vector4<int32_t>;
 	using Vector4U = Vector4<uint32_t>;
 	using Vector4F = Vector4<float>;
+
+	template<typename T>
+	struct Matrix2
+	{
+		using vec = Vector2<T>;
+
+		vec value[2]{ vec(), vec() };
+
+		Matrix2() noexcept {}
+		Matrix2(vec const v1, vec const v2) noexcept : value{v1, v2} {}
+		Matrix2(T const x1, T const x2, T const y1, T const y2) noexcept : value{{x1, y1}, {x2, y2}} {}
+
+		inline Matrix2 operator+() const noexcept { return this; }
+		inline Matrix2 operator-() const noexcept { return Matrix2(-value[0], -value[1]); }
+
+		inline Matrix2 operator+(Matrix2 const& r) const noexcept { return Matrix2(value[0] + r[0], value[1] + r[1]); }
+		inline Matrix2 operator-(Matrix2 const& r) const noexcept { return Matrix2(value[0] - r[0], value[1] - r[1]); }
+		inline Matrix2 operator+(T const r) const noexcept { return Matrix2(value[0] + r, value[1] + r); }
+		inline Matrix2 operator-(T const r) const noexcept { return Matrix2(value[0] - r, value[1] - r); }
+
+		inline Matrix2 operator*(Matrix2 const& r) const noexcept { return Matrix2(value[0] * r[0].x + value[1] * r[0].y, value[0] * r[1].x + value[1] * r[1].y); }
+		inline Matrix2 operator/(Matrix2 const& r) const noexcept { return *this * r.inverse(); }
+		inline vec operator*(vec const& r) const noexcept { return value[0] * r.x + value[1] * r.y; }
+		inline vec operator/(vec const& r) const noexcept { return this->inverse() * r; }
+		friend inline Matrix2 operator*(vec const& r, Matrix2 const& m) noexcept { return vec(m[0][0] * r.x + m[0][1] * r.y, m[1][0] * r.x + m[1][1] * r.y); }
+		friend inline Matrix2 operator/(vec const& r, Matrix2 const& m) noexcept { return r * m.inverse(); }
+		inline Matrix2 operator*(T const r) const noexcept { return Matrix2(value[0] * r, value[1] * r); }
+		inline Matrix2 operator/(T const r) const noexcept { return Matrix2(value[0] / r, value[1] / r); }
+		friend inline Matrix2 operator/(T const r, Matrix2 const& m) noexcept { return Matrix2(r / m[0], r / m[1]); }
+
+		inline Matrix2& operator+=(Matrix2 const& r) noexcept { value[0] += r[0]; value[1] += r[1]; return *this; }
+		inline Matrix2& operator-=(Matrix2 const& r) noexcept { value[0] -= r[0]; value[1] -= r[1]; return *this; }
+		inline Matrix2& operator+=(T const r) noexcept { value[0] += r; value[1] += r; return *this; }
+		inline Matrix2& operator-=(T const r) noexcept { value[0] -= r; value[1] -= r; return *this; }
+		inline Matrix2& operator*=(Matrix2 const r) noexcept { *this = *this * r; return *this; }
+		inline Matrix2& operator/=(Matrix2 const r) noexcept { *this *= r.inverse(); return *this; }
+		inline Matrix2& operator*=(T const r) noexcept { value[0] *= r; value[1] *= r; return *this; }
+		inline Matrix2& operator/=(T const r) noexcept { value[0] /= r; value[1] /= r; return *this; }
+
+		inline bool operator==(Matrix2 const& r) const noexcept { return value[0] == r[0] && value[1] == r[1]; }
+		inline bool operator!=(Matrix2 const& r) const noexcept { return !(*this == r); }
+
+		inline T& operator[](size_t const i) { return value[i]; }
+
+		inline Matrix2 inverse() const noexcept
+		{
+			T inverse_determinant = 1 / determinant();
+
+			return Matrix2(
+				+value[1][1] * inverse_determinant,
+				-value[0][1] * inverse_determinant,
+				-value[1][0] * inverse_determinant,
+				+value[0][0] * inverse_determinant
+			);
+		}
+		inline T determinant() const noexcept
+		{
+			return value[0][0] * value[1][1] - value[1][0] * value[0][1];
+		}
+		inline Matrix2 transpose() const noexcept
+		{
+			return Matrix2(
+				value[0][0],
+				value[1][0],
+				value[0][1],
+				value[1][1]
+			);
+		}
+	};
+
+	template<typename T>
+	struct Matrix3
+	{
+		using vec = Vector3<T>;
+
+		vec value[3]{ vec(), vec(), vec() };
+
+		Matrix3() noexcept {}
+		Matrix3(vec const v1, vec const v2, vec const v3) noexcept : value{v1, v2, v3} {}
+		Matrix3(T const x1, T const y1, T const z1, T const x2, T const y2, T const z2, T const x3, T const y3, T const z3) noexcept
+		: value{{x1, y1, z1}, {x2, y2, z2}, {x3, y3, z3}} {}
+
+		inline Matrix3 operator+() const noexcept { return this; }
+		inline Matrix3 operator-() const noexcept { return Matrix3(-value[0], -value[1], -value[2]); }
+
+		inline Matrix3 operator+(Matrix3 const& r) const noexcept { return Matrix3(value[0] + r[0], value[1] + r[1], value[2] + r[2]); }
+		inline Matrix3 operator-(Matrix3 const& r) const noexcept { return Matrix3(value[0] - r[0], value[1] - r[1], value[2] - r[2]); }
+		inline Matrix3 operator+(T const r) const noexcept { return Matrix3(value[0] + r, value[1] + r, value[2] + r); }
+		inline Matrix3 operator-(T const r) const noexcept { return Matrix3(value[0] - r, value[1] - r, value[2] - r); }
+
+		inline Matrix3 operator*(Matrix3 const& r) const noexcept { return Matrix3(value[0] * r[0].x + value[1] * r[0].y + value[2] * r[0].z, value[0] * r[1].x + value[1] * r[1].y + value[2] * r[1].z, value[0] * r[2].x + value[1] * r[2].y + value[2] * r[2].z); }
+		inline Matrix3 operator/(Matrix3 const& r) const noexcept { return *this * r.inverse(); }
+		inline vec operator*(vec const& r) const noexcept { return value[0] * r.x + value[1] * r.y + value[2] * r.z; }
+		inline vec operator/(vec const& r) const noexcept { return this->inverse() * r; }
+		friend inline Matrix3 operator*(vec const& r, Matrix3 const& m) noexcept { return vec(m[0].dot(r.x), m[1].dot(r.y), m[2].dot(r.z)); }
+		friend inline Matrix3 operator/(vec const& r, Matrix3 const& m) noexcept { return r * m.inverse(); }
+		inline Matrix3 operator*(T const r) const noexcept { return Matrix3(value[0] * r, value[1] * r, value[2] * r); }
+		inline Matrix3 operator/(T const r) const noexcept { return Matrix3(value[0] / r, value[1] / r, value[2] / r); }
+		friend inline Matrix3 operator/(T const r, Matrix3 const& m) noexcept { return Matrix3(r / m[0], r / m[1], r / m[2]); }
+
+		inline Matrix3& operator+=(Matrix3 const& r) noexcept { value[0] += r[0]; value[1] += r[1]; value[2] += r[2]; return *this; }
+		inline Matrix3& operator-=(Matrix3 const& r) noexcept { value[0] -= r[0]; value[1] -= r[1]; value[2] -= r[2]; return *this; }
+		inline Matrix3& operator+=(T const r) noexcept { value[0] += r; value[1] += r; value[2] += r; return *this; }
+		inline Matrix3& operator-=(T const r) noexcept { value[0] -= r; value[1] -= r; value[2] -= r; return *this; }
+		inline Matrix3& operator*=(Matrix3 const r) noexcept { *this = *this * r; return *this; }
+		inline Matrix3& operator/=(Matrix3 const r) noexcept { *this *= r.inverse(); return *this; }
+		inline Matrix3& operator*=(T const r) noexcept { value[0] *= r; value[1] *= r; value[2] *= r; return *this; }
+		inline Matrix3& operator/=(T const r) noexcept { value[0] /= r; value[1] /= r; value[2] /= r; return *this; }
+
+		inline bool operator==(Matrix3 const& r) const noexcept { return value[0] == r[0] && value[1] == r[1] && value[2] == r[2]; }
+		inline bool operator!=(Matrix3 const& r) const noexcept { return !(*this == r); }
+
+		inline T& operator[](size_t const i) { return value[i]; }
+
+		inline Matrix3 inverse() const noexcept
+		{
+			T inverse_determinant = 1 / determinant();
+
+			return Matrix3(
+				+(value[1][1] * value[2][2] - value[2][1] * value[1][2]),
+				-(value[1][0] * value[2][2] - value[2][0] * value[1][2]),
+				+(value[1][0] * value[2][1] - value[2][0] * value[1][1]),
+
+				-(value[0][1] * value[2][2] - value[2][1] * value[0][2]),
+				+(value[0][0] * value[2][2] - value[2][0] * value[0][2]),
+				-(value[0][0] * value[2][1] - value[2][0] * value[0][1]),
+				
+				+(value[0][1] * value[1][2] - value[1][1] * value[0][2]),
+				-(value[0][0] * value[1][2] - value[1][0] * value[0][2]),
+				+(value[0][0] * value[1][1] - value[1][0] * value[0][1])
+			) * inverse_determinant;
+		}
+		inline T determinant() const noexcept
+		{
+			return
+				+value[0][0] * (value[1][1] * value[2][2] - value[2][1] * value[1][2])
+				-value[1][0] * (value[0][1] * value[2][2] - value[2][1] * value[0][2])
+				+value[2][0] * (value[0][1] * value[1][2] - value[1][1] * value[0][2]);
+		}
+		inline Matrix3 transpose() const noexcept
+		{
+			return Matrix3(
+				value[0][0],
+				value[1][0],
+				value[2][0],
+				value[0][1],
+				value[1][1],
+				value[2][1],
+				value[0][2],
+				value[1][2],
+				value[2][2]
+			);
+		}
+	};
+
+	using Matrix3I = Matrix3<int32_t>;
+	using Matrix3U = Matrix3<uint32_t>;
+	using Matrix3F = Matrix3<float>;
+
+	template<typename T>
+	struct Matrix4
+	{
+		using vec = Vector4<T>;
+
+		vec value[4]{ vec(), vec(), vec() };
+
+		Matrix4() noexcept {}
+		Matrix4(vec const v1, vec const v2, vec const v3) noexcept : value{v1, v2, v3} {}
+		Matrix4(T const x1, T const y1, T const z1, T const w1, T const x2, T const y2, T const z2, T const w2, T const x3, T const y3, T const z3, T const w3, T const x4, T const y4, T const z4, T const w4) noexcept
+		: value{{x1, y1, z1, w1}, {x2, y2, z2, w2}, {x3, y3, z3, w3}, {x4, y4, z4, w4}} {}
+
+		inline Matrix4 operator+() const noexcept { return this; }
+		inline Matrix4 operator-() const noexcept { return Matrix4(-value[0], -value[1], -value[2], -value[3]); }
+
+		inline Matrix4 operator+(Matrix4 const& r) const noexcept { return Matrix4(value[0] + r[0], value[1] + r[1], value[2] + r[2], value[3] + r[3]); }
+		inline Matrix4 operator-(Matrix4 const& r) const noexcept { return Matrix4(value[0] - r[0], value[1] - r[1], value[2] - r[2], value[3] - r[3]); }
+		inline Matrix4 operator+(T const r) const noexcept { return Matrix4(value[0] + r, value[1] + r, value[2] + r, value[3] + r); }
+		inline Matrix4 operator-(T const r) const noexcept { return Matrix4(value[0] - r, value[1] - r, value[2] - r, value[3] - r); }
+
+		inline Matrix4 operator*(Matrix4 const& r) const noexcept { return Matrix4(value[0] * r[0].x + value[1] * r[0].y + value[2] * r[0].z + value[3] * r[0].w, value[0] * r[1].x + value[1] * r[1].y + value[2] * r[1].z + value[3] * r[1].w, value[0] * r[2].x + value[1] * r[2].y + value[2] * r[2].z + value[3] * r[2].w, value[0] * r[3].x + value[1] * r[3].y + value[2] * r[3].z + value[3] * r[3].w); }
+		inline Matrix4 operator/(Matrix4 const& r) const noexcept { return *this * r.inverse(); }
+		inline vec operator*(vec const& r) const noexcept { return value[0] * r.x + value[1] * r.y + value[2] * r.z + value[3] * r.w; }
+		inline vec operator/(vec const& r) const noexcept { return this->inverse() * r; }
+		friend inline Matrix4 operator*(vec const& r, Matrix4 const& m) noexcept { return vec(m[0].dot(r.x), m[1].dot(r.y), m[2].dot(r.z), m[3].dot(r.w)); }
+		friend inline Matrix4 operator/(vec const& r, Matrix4 const& m) noexcept { return r * m.inverse(); }
+		inline Matrix4 operator*(T const r) const noexcept { return Matrix4(value[0] * r, value[1] * r, value[2] * r, value[3] * r); }
+		inline Matrix4 operator/(T const r) const noexcept { return Matrix4(value[0] / r, value[1] / r, value[2] / r, value[3] / r); }
+		friend inline Matrix4 operator/(T const r, Matrix4 const& m) noexcept { return Matrix4(r / m[0], r / m[1], r / m[2], r / m[3]); }
+
+		inline Matrix4& operator+=(Matrix4 const& r) noexcept { value[0] += r[0]; value[1] += r[1]; value[2] += r[2]; value[3] += r[3]; return *this; }
+		inline Matrix4& operator-=(Matrix4 const& r) noexcept { value[0] -= r[0]; value[1] -= r[1]; value[2] -= r[2]; value[3] -= r[3]; return *this; }
+		inline Matrix4& operator+=(T const r) noexcept { value[0] += r; value[1] += r; value[2] += r; value[3] += r; return *this; }
+		inline Matrix4& operator-=(T const r) noexcept { value[0] -= r; value[1] -= r; value[2] -= r; value[3] -= r; return *this; }
+		inline Matrix4& operator*=(Matrix4 const r) noexcept { *this = *this * r; return *this; }
+		inline Matrix4& operator/=(Matrix4 const r) noexcept { *this *= r.inverse(); return *this; }
+		inline Matrix4& operator*=(T const r) noexcept { value[0] *= r; value[1] *= r; value[2] *= r; value[3] *= r; return *this; }
+		inline Matrix4& operator/=(T const r) noexcept { value[0] /= r; value[1] /= r; value[2] /= r; value[3] /= r; return *this; }
+
+		inline bool operator==(Matrix4 const& r) const noexcept { return value[0] == r[0] && value[1] == r[1] && value[2] == r[2] && value[3] == r[3]; }
+		inline bool operator!=(Matrix4 const& r) const noexcept { return !(*this == r); }
+
+		inline T& operator[](size_t const i) { return value[i]; }
+
+		inline Matrix4 inverse() const noexcept
+		{
+			// adapted from GLM because i can't be assed to write this myself
+			T c00 = value[2][2] * value[3][3] - value[3][2] * value[2][3];
+			T c02 = value[1][2] * value[3][3] - value[3][2] * value[1][3];
+			T c03 = value[1][2] * value[2][3] - value[2][2] * value[1][3];
+
+			T c04 = value[2][1] * value[3][3] - value[3][1] * value[2][3];
+			T c06 = value[1][1] * value[3][3] - value[3][1] * value[1][3];
+			T c07 = value[1][1] * value[2][3] - value[2][1] * value[1][3];
+
+			T c08 = value[2][1] * value[3][2] - value[3][1] * value[2][2];
+			T c10 = value[1][1] * value[3][2] - value[3][1] * value[1][2];
+			T c11 = value[1][1] * value[2][2] - value[2][1] * value[1][2];
+
+			T c12 = value[2][0] * value[3][3] - value[3][0] * value[2][3];
+			T c14 = value[1][0] * value[3][3] - value[3][0] * value[1][3];
+			T c15 = value[1][0] * value[2][3] - value[2][0] * value[1][3];
+
+			T c16 = value[2][0] * value[3][2] - value[3][0] * value[2][2];
+			T c18 = value[1][0] * value[3][2] - value[3][0] * value[1][2];
+			T c19 = value[1][0] * value[2][2] - value[2][0] * value[1][2];
+
+			T c20 = value[2][0] * value[3][1] - value[3][0] * value[2][1];
+			T c22 = value[1][0] * value[3][1] - value[3][0] * value[1][1];
+			T c23 = value[1][0] * value[2][1] - value[2][0] * value[1][1];
+
+			vec f0(c00, c00, c02, c03);
+			vec f1(c04, c04, c06, c07);
+			vec f2(c08, c08, c10, c11);
+			vec f3(c12, c12, c14, c15);
+			vec f4(c16, c16, c18, c19);
+			vec f5(c20, c20, c22, c23);
+
+			vec v0(value[1][0], value[0][0], value[0][0], value[0][0]);
+			vec v1(value[1][1], value[0][1], value[0][1], value[0][1]);
+			vec v2(value[1][2], value[0][2], value[0][2], value[0][2]);
+			vec v3(value[1][3], value[0][3], value[0][3], value[0][3]);
+
+			vec i0(v1 * f0 - v2 * f1 + v3 * f2);
+			vec i1(v0 * f0 - v2 * f3 + v3 * f4);
+			vec i2(v0 * f1 - v1 * f3 + v3 * f5);
+			vec i3(v0 * f2 - v1 * f4 + v2 * f5);
+
+			vec signA(+1, -1, +1, -1);
+			vec signB(-1, +1, -1, +1);
+
+			T inverse_determinant = 1 / determinant();
+
+			return Matrix4(
+				i0 * signA, i1 * signB, i2 * signA, i3 * signB
+			) * inverse_determinant;
+		}
+		inline T determinant() const noexcept
+		{
+			T c0 = value[2][2] * value[3][3] - value[3][2] * value[2][3];
+			T c1 = value[2][1] * value[3][3] - value[3][1] * value[2][3];
+			T c2 = value[2][1] * value[3][2] - value[3][1] * value[2][2];
+			T c3 = value[2][0] * value[3][3] - value[3][0] * value[2][3];
+			T c4 = value[2][0] * value[3][2] - value[3][0] * value[2][2];
+			T c5 = value[2][0] * value[3][1] - value[3][0] * value[2][1];
+
+			vec det_cof(
+				+ (value[1][1] * c0 - value[1][2] * c1 + value[1][3] * c2),
+				- (value[1][0] * c0 - value[1][2] * c3 + value[1][3] * c4),
+				+ (value[1][0] * c1 - value[1][1] * c3 + value[1][3] * c5),
+				- (value[1][0] * c2 - value[1][1] * c4 + value[1][2] * c5)
+			);
+
+			return
+				value[0][0] * det_cof[0] + value[0][1] * det_cof[1] +
+				value[0][2] * det_cof[2] + value[0][3] * det_cof[3];
+		}
+		inline Matrix4 transpose() const noexcept
+		{
+			return Matrix4(
+				value[0][0],
+				value[1][0],
+				value[2][0],
+				value[3][0],
+				value[0][1],
+				value[1][1],
+				value[2][1],
+				value[3][1],
+				value[0][2],
+				value[1][2],
+				value[2][2],
+				value[3][2],
+				value[0][3],
+				value[1][3],
+				value[2][3],
+				value[3][3]
+			);
+		}
+	};
+
+	using Matrix4I = Matrix4<int32_t>;
+	using Matrix4U = Matrix4<uint32_t>;
+	using Matrix4F = Matrix4<float>;
 
 	// 颜色（有黑魔法）
 
