@@ -96,6 +96,15 @@ namespace LuaSTGPlus
 			static void CreateAndPush(lua_State* L, Core::Color4B const& color);
 		};
 
+		class RectWrapper
+		{
+		public:
+			static std::string_view const ClassID;
+			static Core::RectF* Cast(lua_State* L, int idx);
+			static void Register(lua_State* L) noexcept;
+			static void CreateAndPush(lua_State* L, Core::RectF const& v);
+		};
+
 		class Vector2Wrapper
 		{
 		public:

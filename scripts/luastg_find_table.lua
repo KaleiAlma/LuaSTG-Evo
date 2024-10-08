@@ -114,6 +114,31 @@ local lstg_Color = {
 }
 
 ---@type findtable.config
+local lstg_Rect = {
+    cpp_namespace = { "LuaSTG" },
+    func_name = "MapRectMember",
+    enum_name = "RectMember",
+    enum_entry = {
+        -- basic
+        E("l"         , "m_l"         ),
+        E("t"         , "m_t"         ),
+        E("r"         , "m_r"         ),
+        E("b"         , "m_b"         ),
+        E("lt"        , "m_lt"        ),
+        E("rt"        , "m_rt"        ),
+        E("rb"        , "m_rb"        ),
+        E("lb"        , "m_lb"        ),
+        E("ratio"     , "m_ratio"     ),
+        E("width"     , "m_width"     ),
+        E("height"    , "m_height"    ),
+        E("center"    , "m_center"    ),
+        E("dimension" , "m_dimension" ),
+        E("Resize"    , "f_Resize"    ),
+        E("GetPointInside","f_GetPointInside"),
+        E("IsPointInside","f_IsPointInside"),
+    },
+}
+---@type findtable.config
 local lstg_Vector2 = {
     cpp_namespace = { "LuaSTG" },
     func_name = "MapVector2Member",
@@ -208,6 +233,7 @@ findtable.makeSource("lua_luastg_hash", {
     lstg_GameObject,
     lstg_BlendMode,
     lstg_Color,
+    lstg_Rect,
     lstg_Vector2,
     lstg_Vector3,
     lstg_Vector4,

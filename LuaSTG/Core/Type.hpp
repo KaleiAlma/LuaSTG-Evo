@@ -99,9 +99,13 @@ namespace Core
 		inline Rect operator+(Vector2<T> const& r) const noexcept { return Rect(a + r, b + r); }
 		inline Rect operator-(Vector2<T> const& r) const noexcept { return Rect(a - r, b - r); }
 
+		inline T& operator[](size_t const i) { return ((T*)(&a))[i]; }
+		inline T const& operator[](size_t const i) const { return ((T*)(&a))[i]; }
+
 		inline T width() const noexcept { return b.x - a.x; }
 		inline T height() const noexcept { return b.y - a.y; }
 		inline Vector2<T> dim() const noexcept { return b - a; }
+		inline T ratio() const noexcept { return width() / height() }
 
 		//inline Rect operator*(T const r) const noexcept { return Rect(a * r, b * r); }
 	};

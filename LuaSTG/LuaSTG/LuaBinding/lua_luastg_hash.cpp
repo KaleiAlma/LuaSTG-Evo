@@ -1047,6 +1047,328 @@ LuaSTG::ColorMember LuaSTG::MapColorMember(const char* key) {
   return LuaSTG::ColorMember::__NOT_FOUND;
 }
 
+LuaSTG::RectMember LuaSTG::MapRectMember(const char* key) {
+  switch(key[0]) {
+    case 'G':
+      switch(key[1]) {
+        case 'e':
+          switch(key[2]) {
+            case 't':
+              switch(key[3]) {
+                case 'P':
+                  switch(key[4]) {
+                    case 'o':
+                      switch(key[5]) {
+                        case 'i':
+                          switch(key[6]) {
+                            case 'n':
+                              switch(key[7]) {
+                                case 't':
+                                  switch(key[8]) {
+                                    case 'I':
+                                      switch(key[9]) {
+                                        case 'n':
+                                          switch(key[10]) {
+                                            case 's':
+                                              switch(key[11]) {
+                                                case 'i':
+                                                  switch(key[12]) {
+                                                    case 'd':
+                                                      switch(key[13]) {
+                                                        case 'e':
+                                                          switch(key[14]) {
+                                                            case '\0':
+                                                              return LuaSTG::RectMember::f_GetPointInside;
+                                                          }
+                                                          break;
+                                                      }
+                                                      break;
+                                                  }
+                                                  break;
+                                              }
+                                              break;
+                                          }
+                                          break;
+                                      }
+                                      break;
+                                  }
+                                  break;
+                              }
+                              break;
+                          }
+                          break;
+                      }
+                      break;
+                  }
+                  break;
+              }
+              break;
+          }
+          break;
+      }
+      break;
+    case 'I':
+      switch(key[1]) {
+        case 's':
+          switch(key[2]) {
+            case 'P':
+              switch(key[3]) {
+                case 'o':
+                  switch(key[4]) {
+                    case 'i':
+                      switch(key[5]) {
+                        case 'n':
+                          switch(key[6]) {
+                            case 't':
+                              switch(key[7]) {
+                                case 'I':
+                                  switch(key[8]) {
+                                    case 'n':
+                                      switch(key[9]) {
+                                        case 's':
+                                          switch(key[10]) {
+                                            case 'i':
+                                              switch(key[11]) {
+                                                case 'd':
+                                                  switch(key[12]) {
+                                                    case 'e':
+                                                      switch(key[13]) {
+                                                        case '\0':
+                                                          return LuaSTG::RectMember::f_IsPointInside;
+                                                      }
+                                                      break;
+                                                  }
+                                                  break;
+                                              }
+                                              break;
+                                          }
+                                          break;
+                                      }
+                                      break;
+                                  }
+                                  break;
+                              }
+                              break;
+                          }
+                          break;
+                      }
+                      break;
+                  }
+                  break;
+              }
+              break;
+          }
+          break;
+      }
+      break;
+    case 'R':
+      switch(key[1]) {
+        case 'e':
+          switch(key[2]) {
+            case 's':
+              switch(key[3]) {
+                case 'i':
+                  switch(key[4]) {
+                    case 'z':
+                      switch(key[5]) {
+                        case 'e':
+                          switch(key[6]) {
+                            case '\0':
+                              return LuaSTG::RectMember::f_Resize;
+                          }
+                          break;
+                      }
+                      break;
+                  }
+                  break;
+              }
+              break;
+          }
+          break;
+      }
+      break;
+    case 'b':
+      switch(key[1]) {
+        case '\0':
+          return LuaSTG::RectMember::m_b;
+      }
+      break;
+    case 'c':
+      switch(key[1]) {
+        case 'e':
+          switch(key[2]) {
+            case 'n':
+              switch(key[3]) {
+                case 't':
+                  switch(key[4]) {
+                    case 'e':
+                      switch(key[5]) {
+                        case 'r':
+                          switch(key[6]) {
+                            case '\0':
+                              return LuaSTG::RectMember::m_center;
+                          }
+                          break;
+                      }
+                      break;
+                  }
+                  break;
+              }
+              break;
+          }
+          break;
+      }
+      break;
+    case 'd':
+      switch(key[1]) {
+        case 'i':
+          switch(key[2]) {
+            case 'm':
+              switch(key[3]) {
+                case 'e':
+                  switch(key[4]) {
+                    case 'n':
+                      switch(key[5]) {
+                        case 's':
+                          switch(key[6]) {
+                            case 'i':
+                              switch(key[7]) {
+                                case 'o':
+                                  switch(key[8]) {
+                                    case 'n':
+                                      switch(key[9]) {
+                                        case '\0':
+                                          return LuaSTG::RectMember::m_dimension;
+                                      }
+                                      break;
+                                  }
+                                  break;
+                              }
+                              break;
+                          }
+                          break;
+                      }
+                      break;
+                  }
+                  break;
+              }
+              break;
+          }
+          break;
+      }
+      break;
+    case 'h':
+      switch(key[1]) {
+        case 'e':
+          switch(key[2]) {
+            case 'i':
+              switch(key[3]) {
+                case 'g':
+                  switch(key[4]) {
+                    case 'h':
+                      switch(key[5]) {
+                        case 't':
+                          switch(key[6]) {
+                            case '\0':
+                              return LuaSTG::RectMember::m_height;
+                          }
+                          break;
+                      }
+                      break;
+                  }
+                  break;
+              }
+              break;
+          }
+          break;
+      }
+      break;
+    case 'l':
+      switch(key[1]) {
+        case '\0':
+          return LuaSTG::RectMember::m_l;
+        case 'b':
+          switch(key[2]) {
+            case '\0':
+              return LuaSTG::RectMember::m_lb;
+          }
+          break;
+        case 't':
+          switch(key[2]) {
+            case '\0':
+              return LuaSTG::RectMember::m_lt;
+          }
+          break;
+      }
+      break;
+    case 'r':
+      switch(key[1]) {
+        case '\0':
+          return LuaSTG::RectMember::m_r;
+        case 'a':
+          switch(key[2]) {
+            case 't':
+              switch(key[3]) {
+                case 'i':
+                  switch(key[4]) {
+                    case 'o':
+                      switch(key[5]) {
+                        case '\0':
+                          return LuaSTG::RectMember::m_ratio;
+                      }
+                      break;
+                  }
+                  break;
+              }
+              break;
+          }
+          break;
+        case 'b':
+          switch(key[2]) {
+            case '\0':
+              return LuaSTG::RectMember::m_rb;
+          }
+          break;
+        case 't':
+          switch(key[2]) {
+            case '\0':
+              return LuaSTG::RectMember::m_rt;
+          }
+          break;
+      }
+      break;
+    case 't':
+      switch(key[1]) {
+        case '\0':
+          return LuaSTG::RectMember::m_t;
+      }
+      break;
+    case 'w':
+      switch(key[1]) {
+        case 'i':
+          switch(key[2]) {
+            case 'd':
+              switch(key[3]) {
+                case 't':
+                  switch(key[4]) {
+                    case 'h':
+                      switch(key[5]) {
+                        case '\0':
+                          return LuaSTG::RectMember::m_width;
+                      }
+                      break;
+                  }
+                  break;
+              }
+              break;
+          }
+          break;
+      }
+      break;
+  }
+  return LuaSTG::RectMember::__NOT_FOUND;
+}
+
 LuaSTG::Vector2Member LuaSTG::MapVector2Member(const char* key) {
   switch(key[0]) {
     case 'A':
