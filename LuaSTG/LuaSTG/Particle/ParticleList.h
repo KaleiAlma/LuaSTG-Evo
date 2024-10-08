@@ -73,8 +73,9 @@ namespace LuaSTGPlus::Particle
                     arr[current].next = free;
                     free = current;
                 }
+                else
+                    last = current;
 
-                last = current;
                 current = temp;
             }
         }
