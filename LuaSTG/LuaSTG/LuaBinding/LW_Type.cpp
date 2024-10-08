@@ -1662,7 +1662,7 @@ namespace LuaSTGPlus::LuaWrapper // Matrix4
 		(*p)[0] = v[0];
 		(*p)[1] = v[1];
 		(*p)[2] = v[2];
-		(*p)[4] = v[4];
+		(*p)[3] = v[3];
 		luaL_getmetatable(L, ClassID.data()); // udata mt
 		lua_setmetatable(L, -2); // udata
 	}
