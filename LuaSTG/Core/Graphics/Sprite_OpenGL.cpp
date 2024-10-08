@@ -192,6 +192,7 @@ namespace Core::Graphics
 		rotate_xy(1);
 		rotate_xy(2);
 		rotate_xy(3);
+#undef rotate_xy
 
 		vert[0].x += pos.x; vert[0].y += pos.y;
 		vert[1].x += pos.x; vert[1].y += pos.y;

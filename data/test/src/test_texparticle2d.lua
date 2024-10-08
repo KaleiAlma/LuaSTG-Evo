@@ -13,11 +13,11 @@ function M:onCreate()
     local old_pool = lstg.GetResourceStatus()
     lstg.SetResourceStatus("global")
     lstg.LoadTexture('tex:white', 'res/white.png')
-    lstg.LoadImage('img:white', 'tex:white', 0, 0, lstg.GetTextureSize('tex:white'))
+    -- lstg.LoadImage('img:white', 'tex:white', 0, 0, lstg.GetTextureSize('tex:white'))
     lstg.SetResourceStatus(old_pool)
 
 
-    particle_pool = particle.NewPool2D("img:white", "mul+add", 8192 / 32)
+    particle_pool = particle.NewTexPool2D("tex:white", "mul+add", 8192 / 32)
 end
 
 function M:onDestroy()
@@ -28,7 +28,7 @@ function M:onUpdate()
     local scale = 1.6
     for _ = 1, 128 / 32 do
         local pdx = rnd:number(-2, 2) * scale
-        local p = particle_pool:AddParticle(500, 480, 90, pdx, rnd:number(-0.1, 1) * scale)
+        local p = particle_pool:AddParticle(0, 0, 16, 16, 500, 480, 90, pdx, rnd:number(-0.1, 1) * scale)
         p.ax = -pdx / 40
         p.ay = rnd:number(0.06)
         p.sx = 0.8 * scale
@@ -46,4 +46,4 @@ function M:onRender()
     particle_pool:Render()
 end
 
-test.registerTest("test.Module.Particle2D", M)
+test.registerTest("test.Module.TexParticle2D", M)

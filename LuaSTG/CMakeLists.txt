@@ -86,6 +86,8 @@ set(LUASTG_ENGINE_SOURCES
 
     LuaSTG/LuaBinding/lua_particle.hpp
     LuaSTG/LuaBinding/lua_particle.cpp
+    LuaSTG/LuaBinding/lua_particle_hash.hpp
+    LuaSTG/LuaBinding/lua_particle_hash.cpp
     LuaSTG/LuaBinding/lua_random.hpp
     LuaSTG/LuaBinding/lua_random.cpp
     LuaSTG/LuaBinding/lua_utility.hpp
@@ -138,6 +140,10 @@ set(LUASTG_ENGINE_SOURCES
     LuaSTG/Particle/Particle2D.h
     LuaSTG/Particle/Particle3D.cpp
     LuaSTG/Particle/Particle3D.h
+    LuaSTG/Particle/TexParticle2D.cpp
+    LuaSTG/Particle/TexParticle2D.h
+    LuaSTG/Particle/TexParticle3D.cpp
+    LuaSTG/Particle/TexParticle3D.h
 
     LuaSTG/AppFrame.h
     LuaSTG/AppFrame.cpp
