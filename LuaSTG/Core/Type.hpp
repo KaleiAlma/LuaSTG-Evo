@@ -74,7 +74,7 @@ namespace Core
 		}
 
 		inline T length() const noexcept { return std::sqrt(x * x + y * y); }
-		inline float angle() const noexcept { return std::atan2(y, x) * 180.f / 3.1415926535897932384626433832795f; }
+		inline float angle() const noexcept { return std::atan2(y, x); }
 	};
 
 	using Vector2I = Vector2<int32_t>;
