@@ -859,7 +859,7 @@ namespace LuaSTGPlus::LuaWrapper // Vector4
 		p->x = v.x;
 		p->y = v.y;
 		p->z = v.z;
-		p->z = v.w;
+		p->w = v.w;
 		luaL_getmetatable(L, ClassID.data()); // udata mt
 		lua_setmetatable(L, -2); // udata
 	}
