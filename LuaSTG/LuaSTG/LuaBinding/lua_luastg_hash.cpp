@@ -1393,3 +1393,363 @@ LuaSTG::Vector4Member LuaSTG::MapVector4Member(const char* key) {
   return LuaSTG::Vector4Member::__NOT_FOUND;
 }
 
+LuaSTG::Matrix2Member LuaSTG::MapMatrix2Member(const char* key) {
+  switch(key[0]) {
+    case 'D':
+      switch(key[1]) {
+        case 'e':
+          switch(key[2]) {
+            case 't':
+              switch(key[3]) {
+                case 'e':
+                  switch(key[4]) {
+                    case 'r':
+                      switch(key[5]) {
+                        case 'm':
+                          switch(key[6]) {
+                            case 'i':
+                              switch(key[7]) {
+                                case 'n':
+                                  switch(key[8]) {
+                                    case 'a':
+                                      switch(key[9]) {
+                                        case 'n':
+                                          switch(key[10]) {
+                                            case 't':
+                                              switch(key[11]) {
+                                                case '\0':
+                                                  return LuaSTG::Matrix2Member::f_Determinant;
+                                              }
+                                              break;
+                                          }
+                                          break;
+                                      }
+                                      break;
+                                  }
+                                  break;
+                              }
+                              break;
+                          }
+                          break;
+                      }
+                      break;
+                  }
+                  break;
+              }
+              break;
+          }
+          break;
+      }
+      break;
+    case 'I':
+      switch(key[1]) {
+        case 'n':
+          switch(key[2]) {
+            case 'v':
+              switch(key[3]) {
+                case 'e':
+                  switch(key[4]) {
+                    case 'r':
+                      switch(key[5]) {
+                        case 's':
+                          switch(key[6]) {
+                            case 'e':
+                              switch(key[7]) {
+                                case '\0':
+                                  return LuaSTG::Matrix2Member::f_Inverse;
+                              }
+                              break;
+                          }
+                          break;
+                      }
+                      break;
+                  }
+                  break;
+              }
+              break;
+          }
+          break;
+      }
+      break;
+    case 'T':
+      switch(key[1]) {
+        case 'r':
+          switch(key[2]) {
+            case 'a':
+              switch(key[3]) {
+                case 'n':
+                  switch(key[4]) {
+                    case 's':
+                      switch(key[5]) {
+                        case 'p':
+                          switch(key[6]) {
+                            case 'o':
+                              switch(key[7]) {
+                                case 's':
+                                  switch(key[8]) {
+                                    case 'e':
+                                      switch(key[9]) {
+                                        case '\0':
+                                          return LuaSTG::Matrix2Member::f_Transpose;
+                                      }
+                                      break;
+                                  }
+                                  break;
+                              }
+                              break;
+                          }
+                          break;
+                      }
+                      break;
+                  }
+                  break;
+              }
+              break;
+          }
+          break;
+      }
+      break;
+  }
+  return LuaSTG::Matrix2Member::__NOT_FOUND;
+}
+
+LuaSTG::Matrix3Member LuaSTG::MapMatrix3Member(const char* key) {
+  switch(key[0]) {
+    case 'D':
+      switch(key[1]) {
+        case 'e':
+          switch(key[2]) {
+            case 't':
+              switch(key[3]) {
+                case 'e':
+                  switch(key[4]) {
+                    case 'r':
+                      switch(key[5]) {
+                        case 'm':
+                          switch(key[6]) {
+                            case 'i':
+                              switch(key[7]) {
+                                case 'n':
+                                  switch(key[8]) {
+                                    case 'a':
+                                      switch(key[9]) {
+                                        case 'n':
+                                          switch(key[10]) {
+                                            case 't':
+                                              switch(key[11]) {
+                                                case '\0':
+                                                  return LuaSTG::Matrix3Member::f_Determinant;
+                                              }
+                                              break;
+                                          }
+                                          break;
+                                      }
+                                      break;
+                                  }
+                                  break;
+                              }
+                              break;
+                          }
+                          break;
+                      }
+                      break;
+                  }
+                  break;
+              }
+              break;
+          }
+          break;
+      }
+      break;
+    case 'I':
+      switch(key[1]) {
+        case 'n':
+          switch(key[2]) {
+            case 'v':
+              switch(key[3]) {
+                case 'e':
+                  switch(key[4]) {
+                    case 'r':
+                      switch(key[5]) {
+                        case 's':
+                          switch(key[6]) {
+                            case 'e':
+                              switch(key[7]) {
+                                case '\0':
+                                  return LuaSTG::Matrix3Member::f_Inverse;
+                              }
+                              break;
+                          }
+                          break;
+                      }
+                      break;
+                  }
+                  break;
+              }
+              break;
+          }
+          break;
+      }
+      break;
+    case 'T':
+      switch(key[1]) {
+        case 'r':
+          switch(key[2]) {
+            case 'a':
+              switch(key[3]) {
+                case 'n':
+                  switch(key[4]) {
+                    case 's':
+                      switch(key[5]) {
+                        case 'p':
+                          switch(key[6]) {
+                            case 'o':
+                              switch(key[7]) {
+                                case 's':
+                                  switch(key[8]) {
+                                    case 'e':
+                                      switch(key[9]) {
+                                        case '\0':
+                                          return LuaSTG::Matrix3Member::f_Transpose;
+                                      }
+                                      break;
+                                  }
+                                  break;
+                              }
+                              break;
+                          }
+                          break;
+                      }
+                      break;
+                  }
+                  break;
+              }
+              break;
+          }
+          break;
+      }
+      break;
+  }
+  return LuaSTG::Matrix3Member::__NOT_FOUND;
+}
+
+LuaSTG::Matrix4Member LuaSTG::MapMatrix4Member(const char* key) {
+  switch(key[0]) {
+    case 'D':
+      switch(key[1]) {
+        case 'e':
+          switch(key[2]) {
+            case 't':
+              switch(key[3]) {
+                case 'e':
+                  switch(key[4]) {
+                    case 'r':
+                      switch(key[5]) {
+                        case 'm':
+                          switch(key[6]) {
+                            case 'i':
+                              switch(key[7]) {
+                                case 'n':
+                                  switch(key[8]) {
+                                    case 'a':
+                                      switch(key[9]) {
+                                        case 'n':
+                                          switch(key[10]) {
+                                            case 't':
+                                              switch(key[11]) {
+                                                case '\0':
+                                                  return LuaSTG::Matrix4Member::f_Determinant;
+                                              }
+                                              break;
+                                          }
+                                          break;
+                                      }
+                                      break;
+                                  }
+                                  break;
+                              }
+                              break;
+                          }
+                          break;
+                      }
+                      break;
+                  }
+                  break;
+              }
+              break;
+          }
+          break;
+      }
+      break;
+    case 'I':
+      switch(key[1]) {
+        case 'n':
+          switch(key[2]) {
+            case 'v':
+              switch(key[3]) {
+                case 'e':
+                  switch(key[4]) {
+                    case 'r':
+                      switch(key[5]) {
+                        case 's':
+                          switch(key[6]) {
+                            case 'e':
+                              switch(key[7]) {
+                                case '\0':
+                                  return LuaSTG::Matrix4Member::f_Inverse;
+                              }
+                              break;
+                          }
+                          break;
+                      }
+                      break;
+                  }
+                  break;
+              }
+              break;
+          }
+          break;
+      }
+      break;
+    case 'T':
+      switch(key[1]) {
+        case 'r':
+          switch(key[2]) {
+            case 'a':
+              switch(key[3]) {
+                case 'n':
+                  switch(key[4]) {
+                    case 's':
+                      switch(key[5]) {
+                        case 'p':
+                          switch(key[6]) {
+                            case 'o':
+                              switch(key[7]) {
+                                case 's':
+                                  switch(key[8]) {
+                                    case 'e':
+                                      switch(key[9]) {
+                                        case '\0':
+                                          return LuaSTG::Matrix4Member::f_Transpose;
+                                      }
+                                      break;
+                                  }
+                                  break;
+                              }
+                              break;
+                          }
+                          break;
+                      }
+                      break;
+                  }
+                  break;
+              }
+              break;
+          }
+          break;
+      }
+      break;
+  }
+  return LuaSTG::Matrix4Member::__NOT_FOUND;
+}
+

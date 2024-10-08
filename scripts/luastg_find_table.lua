@@ -165,6 +165,45 @@ local lstg_Vector4 = {
     },
 }
 
+---@type findtable.config
+local lstg_Matrix2 = {
+    cpp_namespace = { "LuaSTG" },
+    func_name = "MapMatrix2Member",
+    enum_name = "Matrix2Member",
+    enum_entry = {
+        -- basic
+        E("Determinant", "f_Determinant"),
+        E("Inverse"    , "f_Inverse"    ),
+        E("Transpose"  , "f_Transpose"  ),
+    },
+}
+
+---@type findtable.config
+local lstg_Matrix3 = {
+    cpp_namespace = { "LuaSTG" },
+    func_name = "MapMatrix3Member",
+    enum_name = "Matrix3Member",
+    enum_entry = {
+        -- basic
+        E("Determinant", "f_Determinant"),
+        E("Inverse"    , "f_Inverse"    ),
+        E("Transpose"  , "f_Transpose"  ),
+    },
+}
+
+---@type findtable.config
+local lstg_Matrix4 = {
+    cpp_namespace = { "LuaSTG" },
+    func_name = "MapMatrix4Member",
+    enum_name = "Matrix4Member",
+    enum_entry = {
+        -- basic
+        E("Determinant", "f_Determinant"),
+        E("Inverse"    , "f_Inverse"    ),
+        E("Transpose"  , "f_Transpose"  ),
+    },
+}
+
 findtable.makeSource("lua_luastg_hash", {
     lstg_GameObject,
     lstg_BlendMode,
@@ -172,4 +211,7 @@ findtable.makeSource("lua_luastg_hash", {
     lstg_Vector2,
     lstg_Vector3,
     lstg_Vector4,
+    lstg_Matrix2,
+    lstg_Matrix3,
+    lstg_Matrix4,
 })

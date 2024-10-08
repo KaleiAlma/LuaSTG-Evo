@@ -141,3 +141,33 @@ namespace LuaSTG {
     Vector4Member MapVector4Member(const char* key);
 }
 
+namespace LuaSTG {
+    enum class Matrix2Member {
+        __NOT_FOUND = -1,
+        f_Determinant = 1,
+        f_Inverse = 2,
+        f_Transpose = 3,
+    };
+    Matrix2Member MapMatrix2Member(const char* key);
+}
+
+namespace LuaSTG {
+    enum class Matrix3Member {
+        __NOT_FOUND = -1,
+        f_Determinant = 1,
+        f_Inverse = 2,
+        f_Transpose = 3,
+    };
+    Matrix3Member MapMatrix3Member(const char* key);
+}
+
+namespace LuaSTG {
+    enum class Matrix4Member {
+        __NOT_FOUND = -1,
+        f_Determinant = 1,
+        f_Inverse = 2,
+        f_Transpose = 3,
+    };
+    Matrix4Member MapMatrix4Member(const char* key);
+}
+

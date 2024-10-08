@@ -123,6 +123,33 @@ namespace LuaSTGPlus
 			static void CreateAndPush(lua_State* L, Core::Vector4F const& v);
 		};
 
+		class Matrix2Wrapper
+		{
+		public:
+			static std::string_view const ClassID;
+			static Core::Matrix2F* Cast(lua_State* L, int idx);
+			static void Register(lua_State* L) noexcept;
+			static void CreateAndPush(lua_State* L, Core::Matrix2F const& m);
+		};
+
+		class Matrix3Wrapper
+		{
+		public:
+			static std::string_view const ClassID;
+			static Core::Matrix3F* Cast(lua_State* L, int idx);
+			static void Register(lua_State* L) noexcept;
+			static void CreateAndPush(lua_State* L, Core::Matrix3F const& m);
+		};
+
+		class Matrix4Wrapper
+		{
+		public:
+			static std::string_view const ClassID;
+			static Core::Matrix4F* Cast(lua_State* L, int idx);
+			static void Register(lua_State* L) noexcept;
+			static void CreateAndPush(lua_State* L, Core::Matrix4F const& m);
+		};
+
 		class StopWatchWrapper
 		{
 		public:
