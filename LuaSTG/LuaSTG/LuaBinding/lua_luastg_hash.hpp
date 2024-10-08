@@ -99,6 +99,29 @@ namespace LuaSTG {
 }
 
 namespace LuaSTG {
+    enum class RectMember {
+        __NOT_FOUND = -1,
+        f_GetPointInside = 1,
+        f_IsPointInside = 2,
+        f_Resize = 3,
+        m_b = 4,
+        m_center = 5,
+        m_dimension = 6,
+        m_height = 7,
+        m_l = 8,
+        m_lb = 9,
+        m_lt = 10,
+        m_r = 11,
+        m_ratio = 12,
+        m_rb = 13,
+        m_rt = 14,
+        m_t = 15,
+        m_width = 16,
+    };
+    RectMember MapRectMember(const char* key);
+}
+
+namespace LuaSTG {
     enum class Vector2Member {
         __NOT_FOUND = -1,
         f_Angle = 1,

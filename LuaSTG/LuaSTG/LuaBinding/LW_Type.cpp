@@ -6,6 +6,287 @@
 #include "lua.h"
 #include "spdlog/spdlog.h"
 
+
+namespace LuaSTGPlus::LuaWrapper // Rect
+{
+	std::string_view const RectWrapper::ClassID = "lstg.Rect";
+
+	Core::RectF* RectWrapper::Cast(lua_State* L, int idx)
+	{
+		return static_cast<Core::RectF*>(luaL_checkudata(L, idx, ClassID.data()));
+	}
+
+	void RectWrapper::Register(lua_State* L) noexcept
+	{
+		struct Function
+		{
+#define GETUDATA(p, i) Core::RectF* (p) = Cast(L, i);
+#define GETVECDATA(p, i) Core::Vector2F* (p) = Vector2Wrapper::Cast(L, i);
+
+			static int GetPointInside(lua_State* L) noexcept
+			{
+				GETUDATA(p, 1);
+				GETVECDATA(v, 2);
+
+				Vector2Wrapper::CreateAndPush(L, Core::Vector2F(
+					(float)std::clamp(v->x, p->a.x, p->b.x),
+					(float)std::clamp(v->y, p->a.y, p->b.y)
+				));
+				return 1;
+			}
+
+
+			static int Meta_Index(lua_State* L) noexcept
+			{
+				GETUDATA(p, 1);
+				if (lua_isnumber(L, 2)) {
+					const lua_Integer idx = luaL_checkinteger(L, 2);
+					if (idx < 1 || idx > 4)
+						return luaL_error(L, "Rect index out of bounds: %d", idx);
+					lua_pushnumber(L, (lua_Number)(*p)[idx - 1]);
+					return 1;
+				}
+				const char* key = luaL_checkstring(L, 2);
+				switch (LuaSTG::MapRectMember(key))
+				{
+				case LuaSTG::RectMember::m_l:
+					lua_pushnumber(L, (lua_Number)p->a.x);
+					break;
+				case LuaSTG::RectMember::m_r:
+					lua_pushnumber(L, (lua_Number)p->b.x);
+					break;
+				case LuaSTG::RectMember::m_b:
+					lua_pushnumber(L, (lua_Number)p->b.y);
+					break;
+				case LuaSTG::RectMember::m_t:
+					lua_pushnumber(L, (lua_Number)p->a.y);
+					break;
+				case LuaSTG::RectMember::m_lt:
+					Vector2Wrapper::CreateAndPush(L, Core::Vector2F(
+						p->a.x,
+						p->a.y
+					));
+					break;
+				case LuaSTG::RectMember::m_lb:
+					Vector2Wrapper::CreateAndPush(L, Core::Vector2F(
+						p->a.x,
+						p->b.y
+					));
+					break;
+				case LuaSTG::RectMember::m_rb:
+					Vector2Wrapper::CreateAndPush(L, Core::Vector2F(
+						p->b.x,
+						p->b.y
+					));
+					break;
+				case LuaSTG::RectMember::m_rt:
+					Vector2Wrapper::CreateAndPush(L, Core::Vector2F(
+						p->b.x,
+						p->a.y
+					));
+					break;
+
+				case LuaSTG::RectMember::m_ratio:
+					lua_pushnumber(L, p->ratio());
+					break;
+				case LuaSTG::RectMember::m_width:
+					lua_pushnumber(L, p->width());
+					break;
+				case LuaSTG::RectMember::m_height:
+					lua_pushnumber(L, p->height());
+					break;
+				case LuaSTG::RectMember::m_center:
+					Vector2Wrapper::CreateAndPush(L, Core::Vector2F(
+						(p->a.x + p->b.x) / 2,
+						(p->a.y + p->b.y) / 2
+					));
+					break;
+				case LuaSTG::RectMember::m_dimension:
+					Vector2Wrapper::CreateAndPush(L, p->dim());
+					break;
+				case LuaSTG::RectMember::f_GetPointInside:
+					lua_pushcfunction(L, GetPointInside);
+					break;
+				default:
+					return luaL_error(L, "Invalid index key.");
+				}
+				return 1;
+			}
+			static int Meta_NewIndex(lua_State* L) noexcept
+			{
+				GETUDATA(p, 1);
+				if (lua_isnumber(L, 2)) {
+					const lua_Integer idx = luaL_checkinteger(L, 2);
+					if (idx < 1 || idx > 4)
+						return luaL_error(L, "Rect index out of bounds: %d", idx);
+					(*p)[idx - 1] = (float)luaL_checknumber(L, 3);
+					return 0;
+				}
+				const char* key = luaL_checkstring(L, 2);
+				switch (LuaSTG::MapRectMember(key))
+				{
+				case LuaSTG::RectMember::m_l:
+					p->a.x = (float)luaL_checknumber(L, 3);
+					break;
+				case LuaSTG::RectMember::m_r:
+					p->b.x = (float)luaL_checknumber(L, 3);
+					break;
+				case LuaSTG::RectMember::m_b:
+					p->b.y = (float)luaL_checknumber(L, 3);
+					break;
+				case LuaSTG::RectMember::m_t:
+					p->a.y = (float)luaL_checknumber(L, 3);
+					break;
+				case LuaSTG::RectMember::m_lt:
+					GETVECDATA(v, 3);
+					p->a.x = v->x;
+					p->a.y = v->y;
+					break;
+				case LuaSTG::RectMember::m_lb:
+					GETVECDATA(v, 3);
+					p->a.x = v->x;
+					p->b.y = v->y;
+					break;
+				case LuaSTG::RectMember::m_rb:
+					GETVECDATA(v, 3);
+					p->b.x = v->x;
+					p->b.y = v->y;
+					break;
+				case LuaSTG::RectMember::m_rt:
+					GETVECDATA(v, 3);
+					p->b.x = v->x;
+					p->a.y = v->y;
+					break;
+				case LuaSTG::RectMember::m_width:
+					const float w = (float)luaL_checknumber(L, 3);
+					const float cx = (p->a.x + p->b.x) / 2;
+					p->a.x = cx - w / 2;
+					p->b.x = cx + w / 2;
+					break;
+				case LuaSTG::RectMember::m_height:
+					const float h = (float)luaL_checknumber(L, 3);
+					const float cy = (p->a.y + p->b.y) / 2;
+					p->a.y = cy - h / 2;
+					p->b.y = cy + h / 2;
+					break;
+				case LuaSTG::RectMember::m_center:
+					GETVECDATA(v, 3);
+					const float w = p->width();
+					const float h = p->height();
+					p->a.x = v->x - w / 2;
+					p->b.x = v->x + w / 2;
+					p->a.y = v->y - h / 2;
+					p->b.y = v->y + h / 2;
+					break;
+				case LuaSTG::RectMember::m_dimension:
+					GETVECDATA(v, 3);
+					const float cx = (p->a.x + p->b.x) / 2;
+					const float cy = (p->a.y + p->b.y) / 2;
+					const float w = v->x;
+					const float h = v->y;
+					p->a.x = cx - w / 2;
+					p->b.x = cx + w / 2;
+					p->a.y = cy - h / 2;
+					p->b.y = cy + h / 2;
+					break;
+				default:
+					return luaL_error(L, "Invalid index key.");
+				}
+				return 0;
+			}
+			static int Meta_Eq(lua_State* L) noexcept
+			{
+				GETUDATA(pA, 1);
+				GETUDATA(pB, 2);
+				lua_pushboolean(L, *pA == *pB);
+				return 1;
+			}
+			static int Meta_Add(lua_State* L) noexcept
+			{
+				if (lua_isnumber(L, 1))
+				{
+					return luaL_error(L, "Rect cannot add with numbers.");
+				}
+				else
+				{
+					GETUDATA(pA, 1);
+					GETVECDATA(pB, 2);
+					RectWrapper::CreateAndPush(L, *pA + *pB);
+				}
+				return 1;
+			}
+			static int Meta_Sub(lua_State* L) noexcept
+			{
+
+				if (lua_isnumber(L, 1))
+				{
+					return luaL_error(L, "Rect cannot subtract with numbers.");
+				}
+				else
+				{
+					GETUDATA(pA, 1);
+					GETVECDATA(pB, 2);
+					RectWrapper::CreateAndPush(L, *pA + *pB);
+				}
+				return 1;
+			}
+			static int Meta_ToString(lua_State* L) noexcept
+			{
+				GETUDATA(p, 1);
+				lua_pushfstring(L, "lstg.Rect(%f, %f, %f, %f)", p->a.x, p->a.y,p->b.x,p->b.y);
+				return 1;
+			}
+			static int Rect(lua_State* L) noexcept
+			{
+				CreateAndPush(L, Core::RectF(
+					(float)luaL_checknumber(L, 1),
+					(float)luaL_checknumber(L, 2),
+					(float)luaL_checknumber(L, 3),
+					(float)luaL_checknumber(L, 4)
+				));
+				return 1;
+			}
+
+#undef GETUDATA
+#undef GETVECDATA
+		};
+
+		luaL_Reg tMethods[] = {
+			{ "GetPointInside", &Function::GetPointInside },
+			{ NULL, NULL }
+		};
+
+		luaL_Reg tMetaTable[] = {
+			{ "__index", &Function::Meta_Index },
+			{ "__newindex", &Function::Meta_NewIndex },
+			{ "__eq", &Function::Meta_Eq },
+			{ "__add", &Function::Meta_Add },
+			{ "__sub", &Function::Meta_Sub },
+			{ "__tostring", &Function::Meta_ToString },
+			{ NULL, NULL }
+		};
+
+		luaL_Reg lib[] = {
+			{ "Rect", &Function::Rect },
+			{ NULL, NULL }
+		};
+
+		luaL_register(L, LUASTG_LUA_LIBNAME, lib);
+		RegisterClassIntoTable2(L, ".Rect", tMethods, ClassID.data(), tMetaTable);
+		lua_pop(L, 1);
+	}
+
+	void RectWrapper::CreateAndPush(lua_State* L, Core::RectF const& v)
+	{
+		Core::RectF* p = static_cast<Core::RectF*>(lua_newuserdata(L, sizeof(Core::RectF))); // udata
+		p->a.x = v.a.x;
+		p->a.y = v.a.y;
+		p->b.x = v.b.x;
+		p->b.y = v.b.y;
+		luaL_getmetatable(L, ClassID.data()); // udata mt
+		lua_setmetatable(L, -2); // udata
+	}
+} // Rect
 namespace LuaSTGPlus::LuaWrapper // Vector2
 {
 	std::string_view const Vector2Wrapper::ClassID = "lstg.Vector2";
