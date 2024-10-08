@@ -1057,7 +1057,7 @@ namespace LuaSTGPlus::LuaWrapper // Matrix2
 			static int Meta_ToString(lua_State* L) noexcept
 			{
 				GETUDATA(p, 1);
-				lua_pushfstring(L, "lstg.Matrix2(%.2f,%.2f|%.2f,%.2f)", (*p)[0][0], (*p)[0][1], (*p)[1][0], (*p)[1][1]);
+				lua_pushfstring(L, "lstg.Matrix2(%f,%f|%f,%f)", (*p)[0][0], (*p)[0][1], (*p)[1][0], (*p)[1][1]);
 				return 1;
 			}
 
@@ -1314,7 +1314,7 @@ namespace LuaSTGPlus::LuaWrapper // Matrix3
 			static int Meta_ToString(lua_State* L) noexcept
 			{
 				GETUDATA(p, 1);
-				lua_pushfstring(L, "lstg.Matrix3(%.2f,%.2f,%.2f|%.2f,%.2f,%.2f|%.2f,%.2f,%.2f)",
+				lua_pushfstring(L, "lstg.Matrix3(%f,%f,%f|%f,%f,%f|%f,%f,%f)",
 					(*p)[0][0], (*p)[0][1], (*p)[0][2],
 					(*p)[1][0], (*p)[1][1], (*p)[1][2],
 					(*p)[2][0], (*p)[2][1], (*p)[2][2]
@@ -1582,7 +1582,7 @@ namespace LuaSTGPlus::LuaWrapper // Matrix4
 			static int Meta_ToString(lua_State* L) noexcept
 			{
 				GETUDATA(p, 1);
-				lua_pushfstring(L, "lstg.Matrix4(%.2f,%.2f,%.2f,%.2f|%.2f,%.2f,%.2f,%.2f|%.2f,%.2f,%.2f,%.2f|%.2f,%.2f,%.2f,%.2f)",
+				lua_pushfstring(L, "lstg.Matrix4(%f,%f,%f,%f|%f,%f,%f,%f|%f,%f,%f,%f|%f,%f,%f,%f)",
 					(*p)[0][0], (*p)[0][1], (*p)[0][2], (*p)[0][3],
 					(*p)[1][0], (*p)[1][1], (*p)[1][2], (*p)[1][3],
 					(*p)[2][0], (*p)[2][1], (*p)[2][2], (*p)[2][3],
