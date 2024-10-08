@@ -43,52 +43,52 @@ namespace LuaSTGPlus
 
 		// 位置
 
-		lua_Number lastx;				// [8] [不可见] 对象上一帧坐标 x
-		lua_Number lasty;				// [8] [不可见] 对象上一帧坐标 y
-		lua_Number x;					// [8] 对象坐标 x
-		lua_Number y;					// [8] 对象坐标 y
-		lua_Number dx;					// [8] [只读] 对象坐标增量 x
-		lua_Number dy;					// [8] [只读] 对象坐标增量 y
+		float lastx;				// [4] [不可见] 对象上一帧坐标 x
+		float lasty;				// [4] [不可见] 对象上一帧坐标 y
+		float x;					// [4] 对象坐标 x
+		float y;					// [4] 对象坐标 y
+		float dx;					// [4] [只读] 对象坐标增量 x
+		float dy;					// [4] [只读] 对象坐标增量 y
 
 		// 运动学
 
-		lua_Number vx;					// [8] 对象速度 x 分量
-		lua_Number vy;					// [8] 对象速度 y 分量
-		lua_Number ax;					// [8] 对象加速度 x 分量
-		lua_Number ay;					// [8] 对象加速度 x 分量
+		float vx;					// [4] 对象速度 x 分量
+		float vy;					// [4] 对象速度 y 分量
+		float ax;					// [4] 对象加速度 x 分量
+		float ay;					// [4] 对象加速度 x 分量
 	#ifdef USER_SYSTEM_OPERATION
-		lua_Number maxvx;				// [8] 对象速度 x 分量最大值
-		lua_Number maxvy;				// [8] 对象速度 y 分量最大值
-		lua_Number maxv;				// [8] 对象速度最大值
-		lua_Number ag;					// [8] 重力加速度
+		float maxvx;				// [4] 对象速度 x 分量最大值
+		float maxvy;				// [4] 对象速度 y 分量最大值
+		float maxv;				// [4] 对象速度最大值
+		float ag;					// [4] 重力加速度
 	#endif
 		//lua_Number va, speed; // 速度方向 速度值
 
 		// 碰撞体
 
 		lua_Integer group;				// [P] 对象所在的碰撞组
-		uint8_t bound;					// [1] 是否离开边界自动回收
-		uint8_t colli;					// [1] 是否参与碰撞
-		uint8_t rect;					// [1] 是否为矩形碰撞盒
-		lua_Number a;					// [8] 矩形模式下，为横向宽度一半；非矩形模式下，为圆半径或椭圆横向宽度一半
-		lua_Number b;					// [8] 矩形模式下，为纵向宽度一半；非矩形模式下，为圆半径或椭圆纵向宽度一半
-		lua_Number col_r;				// [8] [不可见] 碰撞体外接圆半径
+		// uint8_t bound;					// [1] 是否离开边界自动回收
+		// uint8_t colli;					// [1] 是否参与碰撞
+		// uint8_t rect;					// [1] 是否为矩形碰撞盒
+		float a;					// [4] 矩形模式下，为横向宽度一半；非矩形模式下，为圆半径或椭圆横向宽度一半
+		float b;					// [4] 矩形模式下，为纵向宽度一半；非矩形模式下，为圆半径或椭圆纵向宽度一半
+		float col_r;				// [4] [不可见] 碰撞体外接圆半径
 
 		// 渲染
 
 		lua_Number layer;				// [8] 图层
 		lua_Number nextlayer;			// [8] [不可见] 对象要切换到的图层
-		lua_Number hscale;				// [8] 横向渲染缩放
-		lua_Number vscale;				// [8] 纵向渲染缩放
-		lua_Number rot;					// [8] 平面渲染旋转角
-		lua_Number omega;				// [8] 平面渲染旋转角加速度
+		float hscale;				// [4] 横向渲染缩放
+		float vscale;				// [4] 纵向渲染缩放
+		float rot;					// [4] 平面渲染旋转角
+		float omega;				// [4] 平面渲染旋转角加速度
 	#ifdef USING_ADVANCE_GAMEOBJECT_CLASS
 		BlendMode blendmode;			// [4] 混合模式
 		uint32_t vertexcolor;			// [4] 顶点颜色
 	#endif // USING_ADVANCE_GAMEOBJECT_CLASS
 		lua_Integer ani_timer;			// [P] [只读] 动画自增计数器
-		uint8_t hide;					// [1] 不渲染
-		uint8_t navi;					// [1] 根据坐标增量自动设置渲染旋转角
+		// uint8_t hide;					// [1] 不渲染
+		// uint8_t navi;					// [1] 根据坐标增量自动设置渲染旋转角
 		IResourceBase* res;					// [P] 渲染资源
 		IParticlePool* ps;	// [P] 粒子系统
 
@@ -97,10 +97,28 @@ namespace LuaSTGPlus
 		lua_Integer timer;				// [P] 自增计数器
 	#ifdef LUASTG_ENABLE_GAME_OBJECT_PROPERTY_PAUSE
 		lua_Integer pause;				// [P] 对象被暂停的时间(帧) 对象被暂停时，将跳过速度计算，但是timer会增加，frame仍会调用
-		uint8_t resolve_move;			// [1] 是否为计算速度而非计算位置
+		// uint8_t resolve_move;			// [1] 是否为计算速度而非计算位置
 	#endif
-		uint8_t ignore_superpause;		// [1] 是否无视超级暂停。 超级暂停时，timer不会增加，frame不会调用，但render会调用。
-		uint8_t touch_lastx_lasty;		// [1] 是否已经更新过 lastx 和 lasty 值，如果未更新过，表明对象刚生成，获取 dx 和 dy 时应当返回 0
+		// uint8_t ignore_superpause;		// [1] 是否无视超级暂停。 超级暂停时，timer不会增加，frame不会调用，但render会调用。
+		// uint8_t touch_lastx_lasty;		// [1] 是否已经更新过 lastx 和 lasty 值，如果未更新过，表明对象刚生成，获取 dx 和 dy 时应当返回 0
+
+		union
+		{
+			struct
+			{
+				uint8_t bound : 1;
+				uint8_t colli : 1;
+				uint8_t rect : 1;
+				uint8_t hide : 1;
+				uint8_t navi : 1;
+				uint8_t ignore_superpause : 1;
+				uint8_t touch_lastx_lasty : 1;
+#ifdef LUASTG_ENABLE_GAME_OBJECT_PROPERTY_PAUSE
+				uint8_t resolve_move : 1;
+#endif
+			};
+			uint8_t __Flags{};
+		};
 	
 
 		// 成员方法
