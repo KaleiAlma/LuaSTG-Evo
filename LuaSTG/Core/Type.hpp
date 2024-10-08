@@ -43,7 +43,7 @@ namespace Core
 		inline bool operator!=(Vector2 const& r) const noexcept { return x != r.x || y != r.y; }
 
 		inline T& operator[](size_t const i) { return (&x)[i]; }
-		inline T& operator[](size_t const i) const { return (&x)[i]; }
+		inline T const& operator[](size_t const i) const { return (&x)[i]; }
 
 		inline float dot(Vector2 const& r) const noexcept { return x * r.x + y * r.y; }
 
@@ -147,7 +147,7 @@ namespace Core
 		inline bool operator!=(Vector3 const& r) const noexcept { return x != r.x || y != r.y || z != r.z; }
 
 		inline T& operator[](size_t const i) { return (&x)[i]; }
-		inline T& operator[](size_t const i) const { return (&x)[i]; }
+		inline T const& operator[](size_t const i) const { return (&x)[i]; }
 
 		inline float dot(Vector3 const& r) const noexcept { return x * r.x + y * r.y + z * r.z; }
 
@@ -242,8 +242,7 @@ namespace Core
 		inline bool operator!=(Vector4 const& r) const noexcept { return x != r.x || y != r.y || z != r.z || w != r.w; }
 
 		inline T& operator[](size_t const i) { return (&x)[i]; }
-		inline T& operator[](size_t const i) const { return (&x)[i]; }
-
+		inline T const& operator[](size_t const i) const { return (&x)[i]; }
 
 		inline float dot(Vector4 const& r) const noexcept { return x * r.x + y * r.y + z * r.z + w * r.w; }
 
@@ -329,7 +328,7 @@ namespace Core
 		inline bool operator!=(Matrix2 const& r) const noexcept { return !(*this == r); }
 
 		inline vec& operator[](size_t const i) { return value[i]; }
-		inline vec& operator[](size_t const i) const { return value[i]; }
+		inline vec const& operator[](size_t const i) const { return value[i]; }
 
 		inline Matrix2 inverse() const noexcept
 		{
@@ -394,7 +393,7 @@ namespace Core
 		inline Matrix3 operator/(Matrix3 const& r) const noexcept { return *this * r.inverse(); }
 		inline vec operator*(vec const& r) const noexcept { return value[0] * r.x + value[1] * r.y + value[2] * r.z; }
 		inline vec operator/(vec const& r) const noexcept { return this->inverse() * r; }
-		friend inline vec operator*(vec const& r, Matrix3 const& m) noexcept { return vec(m[0].dot(r.x), m[1].dot(r.y), m[2].dot(r.z)); }
+		friend inline vec operator*(vec const& r, Matrix3 const& m) noexcept { return vec(m[0].dot(r), m[1].dot(r), m[2].dot(r)); }
 		friend inline vec operator/(vec const& r, Matrix3 const& m) noexcept { return r * m.inverse(); }
 		inline Matrix3 operator*(T const r) const noexcept { return Matrix3(value[0] * r, value[1] * r, value[2] * r); }
 		inline Matrix3 operator/(T const r) const noexcept { return Matrix3(value[0] / r, value[1] / r, value[2] / r); }
@@ -413,7 +412,7 @@ namespace Core
 		inline bool operator!=(Matrix3 const& r) const noexcept { return !(*this == r); }
 
 		inline vec& operator[](size_t const i) { return value[i]; }
-		inline vec& operator[](size_t const i) const { return value[i]; }
+		inline vec const& operator[](size_t const i) const { return value[i]; }
 
 		inline Matrix3 inverse() const noexcept
 		{
@@ -494,7 +493,7 @@ namespace Core
 		inline Matrix4 operator/(Matrix4 const& r) const noexcept { return *this * r.inverse(); }
 		inline vec operator*(vec const& r) const noexcept { return value[0] * r.x + value[1] * r.y + value[2] * r.z + value[3] * r.w; }
 		inline vec operator/(vec const& r) const noexcept { return this->inverse() * r; }
-		friend inline vec operator*(vec const& r, Matrix4 const& m) noexcept { return vec(m[0].dot(r.x), m[1].dot(r.y), m[2].dot(r.z), m[3].dot(r.w)); }
+		friend inline vec operator*(vec const& r, Matrix4 const& m) noexcept { return vec(m[0].dot(r), m[1].dot(r), m[2].dot(r), m[3].dot(r)); }
 		friend inline vec operator/(vec const& r, Matrix4 const& m) noexcept { return r * m.inverse(); }
 		inline Matrix4 operator*(T const r) const noexcept { return Matrix4(value[0] * r, value[1] * r, value[2] * r, value[3] * r); }
 		inline Matrix4 operator/(T const r) const noexcept { return Matrix4(value[0] / r, value[1] / r, value[2] / r, value[3] / r); }
@@ -513,7 +512,7 @@ namespace Core
 		inline bool operator!=(Matrix4 const& r) const noexcept { return !(*this == r); }
 
 		inline vec& operator[](size_t const i) { return value[i]; }
-		inline vec& operator[](size_t const i) const { return value[i]; }
+		inline vec const& operator[](size_t const i) const { return value[i]; }
 
 		inline Matrix4 inverse() const noexcept
 		{
