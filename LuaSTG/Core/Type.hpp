@@ -28,6 +28,7 @@ namespace Core
 		inline Vector2 operator/(Vector2 const& r) const noexcept { return Vector2(x / r.x, y / r.y); }
 		inline Vector2 operator*(T const r) const noexcept { return Vector2(x * r, y * r); }
 		inline Vector2 operator/(T const r) const noexcept { return Vector2(x / r, y / r); }
+		friend inline Vector2 operator/(T const r, Vector2 const& v) noexcept { return Vector2(r / v.x, r / v.y); }
 
 		inline Vector2& operator+=(Vector2 const& r) noexcept { x += r.x; y += r.y; return *this; }
 		inline Vector2& operator-=(Vector2 const& r) noexcept { x -= r.x; y -= r.y; return *this; }
@@ -131,6 +132,7 @@ namespace Core
 		inline Vector3 operator/(Vector3 const& r) const noexcept { return Vector3(x / r.x, y / r.y, z / r.z); }
 		inline Vector3 operator*(T const r) const noexcept { return Vector3(x * r, y * r, z * r); }
 		inline Vector3 operator/(T const r) const noexcept { return Vector3(x / r, y / r, z / r); }
+		friend inline Vector3 operator/(T const r, Vector3 const& v) noexcept { return Vector3(r / v.x, r / v.y, r / v.z); }
 
 		inline Vector3& operator+=(Vector3 const& r) noexcept { x += r.x; y += r.y; z += r.z; return *this; }
 		inline Vector3& operator-=(Vector3 const& r) noexcept { x -= r.x; y -= r.y; z -= r.z; return *this; }
@@ -225,6 +227,7 @@ namespace Core
 		inline Vector4 operator/(Vector4 const& r) const noexcept { return Vector4(x / r.x, y / r.y, z / r.z, w / r.w); }
 		inline Vector4 operator*(T const r) const noexcept { return Vector4(x * r, y * r, z * r, w * r); }
 		inline Vector4 operator/(T const r) const noexcept { return Vector4(x / r, y / r, z / r, w / r); }
+		friend inline Vector4 operator/(T const r, Vector4 const& v) noexcept { return Vector4(r / v.x, r / v.y, r / v.z, r / v.w); }
 
 		inline Vector4& operator+=(Vector4 const& r) noexcept { x += r.x; y += r.y; z += r.z; w += r.w; return *this; }
 		inline Vector4& operator-=(Vector4 const& r) noexcept { x -= r.x; y -= r.y; z -= r.z; w -= r.w; return *this; }
@@ -307,8 +310,8 @@ namespace Core
 		inline Matrix2 operator/(Matrix2 const& r) const noexcept { return *this * r.inverse(); }
 		inline vec operator*(vec const& r) const noexcept { return value[0] * r.x + value[1] * r.y; }
 		inline vec operator/(vec const& r) const noexcept { return this->inverse() * r; }
-		friend inline Matrix2 operator*(vec const& r, Matrix2 const& m) noexcept { return vec(m[0][0] * r.x + m[0][1] * r.y, m[1][0] * r.x + m[1][1] * r.y); }
-		friend inline Matrix2 operator/(vec const& r, Matrix2 const& m) noexcept { return r * m.inverse(); }
+		friend inline vec operator*(vec const& r, Matrix2 const& m) noexcept { return vec(m[0][0] * r.x + m[0][1] * r.y, m[1][0] * r.x + m[1][1] * r.y); }
+		friend inline vec operator/(vec const& r, Matrix2 const& m) noexcept { return r * m.inverse(); }
 		inline Matrix2 operator*(T const r) const noexcept { return Matrix2(value[0] * r, value[1] * r); }
 		inline Matrix2 operator/(T const r) const noexcept { return Matrix2(value[0] / r, value[1] / r); }
 		friend inline Matrix2 operator/(T const r, Matrix2 const& m) noexcept { return Matrix2(r / m[0], r / m[1]); }
@@ -391,8 +394,8 @@ namespace Core
 		inline Matrix3 operator/(Matrix3 const& r) const noexcept { return *this * r.inverse(); }
 		inline vec operator*(vec const& r) const noexcept { return value[0] * r.x + value[1] * r.y + value[2] * r.z; }
 		inline vec operator/(vec const& r) const noexcept { return this->inverse() * r; }
-		friend inline Matrix3 operator*(vec const& r, Matrix3 const& m) noexcept { return vec(m[0].dot(r.x), m[1].dot(r.y), m[2].dot(r.z)); }
-		friend inline Matrix3 operator/(vec const& r, Matrix3 const& m) noexcept { return r * m.inverse(); }
+		friend inline vec operator*(vec const& r, Matrix3 const& m) noexcept { return vec(m[0].dot(r.x), m[1].dot(r.y), m[2].dot(r.z)); }
+		friend inline vec operator/(vec const& r, Matrix3 const& m) noexcept { return r * m.inverse(); }
 		inline Matrix3 operator*(T const r) const noexcept { return Matrix3(value[0] * r, value[1] * r, value[2] * r); }
 		inline Matrix3 operator/(T const r) const noexcept { return Matrix3(value[0] / r, value[1] / r, value[2] / r); }
 		friend inline Matrix3 operator/(T const r, Matrix3 const& m) noexcept { return Matrix3(r / m[0], r / m[1], r / m[2]); }
@@ -491,8 +494,8 @@ namespace Core
 		inline Matrix4 operator/(Matrix4 const& r) const noexcept { return *this * r.inverse(); }
 		inline vec operator*(vec const& r) const noexcept { return value[0] * r.x + value[1] * r.y + value[2] * r.z + value[3] * r.w; }
 		inline vec operator/(vec const& r) const noexcept { return this->inverse() * r; }
-		friend inline Matrix4 operator*(vec const& r, Matrix4 const& m) noexcept { return vec(m[0].dot(r.x), m[1].dot(r.y), m[2].dot(r.z), m[3].dot(r.w)); }
-		friend inline Matrix4 operator/(vec const& r, Matrix4 const& m) noexcept { return r * m.inverse(); }
+		friend inline vec operator*(vec const& r, Matrix4 const& m) noexcept { return vec(m[0].dot(r.x), m[1].dot(r.y), m[2].dot(r.z), m[3].dot(r.w)); }
+		friend inline vec operator/(vec const& r, Matrix4 const& m) noexcept { return r * m.inverse(); }
 		inline Matrix4 operator*(T const r) const noexcept { return Matrix4(value[0] * r, value[1] * r, value[2] * r, value[3] * r); }
 		inline Matrix4 operator/(T const r) const noexcept { return Matrix4(value[0] / r, value[1] / r, value[2] / r, value[3] / r); }
 		friend inline Matrix4 operator/(T const r, Matrix4 const& m) noexcept { return Matrix4(r / m[0], r / m[1], r / m[2], r / m[3]); }
