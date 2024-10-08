@@ -1,4 +1,5 @@
 ﻿#include "Core/Type.hpp"
+#include "LMathConstant.hpp"
 #include "LuaBinding/LuaWrapper.hpp"
 #include "LuaBinding/lua_luastg_hash.hpp"
 #include "lauxlib.h"
@@ -24,7 +25,7 @@ namespace LuaSTGPlus::LuaWrapper // Vector2
 			static int Angle(lua_State* L) noexcept
 			{
 				GETUDATA(p, 1);
-				lua_pushnumber(L, (lua_Number)p->angle());
+				lua_pushnumber(L, (lua_Number)p->angle() * L_RAD_TO_DEG);
 				return 1;
 			}
 
