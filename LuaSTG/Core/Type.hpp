@@ -465,10 +465,10 @@ namespace Core
 	{
 		using vec = Vector4<T>;
 
-		vec value[4]{ vec(), vec(), vec() };
+		vec value[4]{ vec(), vec(), vec(), vec() };
 
 		Matrix4() noexcept {}
-		Matrix4(vec const v1, vec const v2, vec const v3) noexcept : value{v1, v2, v3} {}
+		Matrix4(vec const v1, vec const v2, vec const v3, vec const v4) noexcept : value{v1, v2, v3, v4} {}
 		Matrix4(T const x1, T const y1, T const z1, T const w1, T const x2, T const y2, T const z2, T const w2, T const x3, T const y3, T const z3, T const w3, T const x4, T const y4, T const z4, T const w4) noexcept
 		: value{{x1, y1, z1, w1}, {x2, y2, z2, w2}, {x3, y3, z3, w3}, {x4, y4, z4, w4}} {}
 
