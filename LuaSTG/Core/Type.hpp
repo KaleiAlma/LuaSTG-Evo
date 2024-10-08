@@ -1,5 +1,4 @@
 ﻿#pragma once
-#include "LMathConstant.hpp"
 #include <cstdint>
 #include <cmath>
 #include <limits>
@@ -73,8 +72,9 @@ namespace Core
 				return Vector2();
 			}
 		}
+
 		inline T length() const noexcept { return std::sqrt(x * x + y * y); }
-		inline float angle() const noexcept { return std::atan2(y, x) * L_RAD_TO_DEG; }
+		inline float angle() const noexcept { return std::atan2(y, x) * 180.f / 3.1415926535897932384626433832795f; }
 	};
 
 	using Vector2I = Vector2<int32_t>;
