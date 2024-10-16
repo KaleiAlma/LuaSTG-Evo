@@ -35,6 +35,20 @@ namespace LuaSTGPlus::LuaWrapper // Rect
 				return 1;
 			}
 
+			static int IsPointInside(lua_State* L) noexcept
+			{
+				GETUDATA(p, 1);
+				GETVECDATA(v, 2);
+
+				if (v->x >= p->a.x && v->x <= p->b.x && v->y >= p->a.y && v->y <= p->b.y) {
+					lua_pushboolean(L, 1);
+				}
+				else {
+					lua_pushboolean(L, 0);
+				}
+				
+				return 1;
+			}
 
 			static int Meta_Index(lua_State* L) noexcept
 			{
@@ -253,6 +267,7 @@ namespace LuaSTGPlus::LuaWrapper // Rect
 
 		luaL_Reg tMethods[] = {
 			{ "GetPointInside", &Function::GetPointInside },
+			{ "IsPointInside", &Function::IsPointInside },
 			{ NULL, NULL }
 		};
 
