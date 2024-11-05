@@ -152,57 +152,73 @@ namespace LuaSTGPlus::LuaWrapper // Rect
 					p->a.y = (float)luaL_checknumber(L, 3);
 					break;
 				case LuaSTG::RectMember::m_lt:
-					GETVECDATA(v, 3);
-					p->a.x = v->x;
-					p->a.y = v->y;
+					{
+						GETVECDATA(v, 3);
+						p->a.x = v->x;
+						p->a.y = v->y;
+					}
 					break;
 				case LuaSTG::RectMember::m_lb:
-					GETVECDATA(v, 3);
-					p->a.x = v->x;
-					p->b.y = v->y;
+					{
+						GETVECDATA(v, 3);
+						p->a.x = v->x;
+						p->b.y = v->y;
+					}
 					break;
 				case LuaSTG::RectMember::m_rb:
-					GETVECDATA(v, 3);
-					p->b.x = v->x;
-					p->b.y = v->y;
+					{
+						GETVECDATA(v, 3);
+						p->b.x = v->x;
+						p->b.y = v->y;
+					}
 					break;
 				case LuaSTG::RectMember::m_rt:
-					GETVECDATA(v, 3);
-					p->b.x = v->x;
-					p->a.y = v->y;
+					{
+						GETVECDATA(v, 3);
+						p->b.x = v->x;
+						p->a.y = v->y;
+					}
 					break;
 				case LuaSTG::RectMember::m_width:
-					const float w = (float)luaL_checknumber(L, 3);
-					const float cx = (p->a.x + p->b.x) / 2;
-					p->a.x = cx - w / 2;
-					p->b.x = cx + w / 2;
+					{
+						const float w = (float)luaL_checknumber(L, 3);
+						const float cx = (p->a.x + p->b.x) / 2;
+						p->a.x = cx - w / 2;
+						p->b.x = cx + w / 2;
+					}
 					break;
 				case LuaSTG::RectMember::m_height:
-					const float h = (float)luaL_checknumber(L, 3);
-					const float cy = (p->a.y + p->b.y) / 2;
-					p->a.y = cy - h / 2;
-					p->b.y = cy + h / 2;
+					{
+						const float h = (float)luaL_checknumber(L, 3);
+						const float cy = (p->a.y + p->b.y) / 2;
+						p->a.y = cy - h / 2;
+						p->b.y = cy + h / 2;
+					}
 					break;
 				case LuaSTG::RectMember::m_center:
-					GETVECDATA(v, 3);
-					const float w = p->width();
-					const float h = p->height();
-					p->a.x = v->x - w / 2;
-					p->b.x = v->x + w / 2;
-					p->a.y = v->y - h / 2;
-					p->b.y = v->y + h / 2;
+					{
+						GETVECDATA(v, 3);
+						const float w = p->width();
+						const float h = p->height();
+						p->a.x = v->x - w / 2;
+						p->b.x = v->x + w / 2;
+						p->a.y = v->y - h / 2;
+						p->b.y = v->y + h / 2;
+					}
 					break;
 				case LuaSTG::RectMember::m_dimension:
-					GETVECDATA(v, 3);
-					const float cx = (p->a.x + p->b.x) / 2;
-					const float cy = (p->a.y + p->b.y) / 2;
-					const float w = v->x;
-					const float h = v->y;
-					p->a.x = cx - w / 2;
-					p->b.x = cx + w / 2;
-					p->a.y = cy - h / 2;
-					p->b.y = cy + h / 2;
-					break;
+					{
+						GETVECDATA(v, 3);
+						const float cx = (p->a.x + p->b.x) / 2;
+						const float cy = (p->a.y + p->b.y) / 2;
+						const float w = v->x;
+						const float h = v->y;
+						p->a.x = cx - w / 2;
+						p->b.x = cx + w / 2;
+						p->a.y = cy - h / 2;
+						p->b.y = cy + h / 2;
+						break;
+					}
 				default:
 					return luaL_error(L, "Invalid index key.");
 				}

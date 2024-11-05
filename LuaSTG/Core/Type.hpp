@@ -105,7 +105,7 @@ namespace Core
 		inline T width() const noexcept { return b.x - a.x; }
 		inline T height() const noexcept { return b.y - a.y; }
 		inline Vector2<T> dim() const noexcept { return b - a; }
-		inline float ratio() const noexcept { return (float)width() / height() }
+		inline float ratio() const noexcept { return (float)width() / height(); }
 
 		//inline Rect operator*(T const r) const noexcept { return Rect(a * r, b * r); }
 	};
