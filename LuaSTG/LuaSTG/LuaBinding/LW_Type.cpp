@@ -671,6 +671,9 @@ namespace LuaSTGPlus::LuaWrapper // Vector3
 				case LuaSTG::Vector3Member::m_y:
 					lua_pushnumber(L, (lua_Number)p->y);
 					break;
+				case LuaSTG::Vector3Member::m_z:
+					lua_pushnumber(L, (lua_Number)p->z);
+					break;
 				case LuaSTG::Vector3Member::f_Dot:
 					lua_pushcfunction(L, Dot);
 					break;
@@ -953,6 +956,12 @@ namespace LuaSTGPlus::LuaWrapper // Vector4
 					break;
 				case LuaSTG::Vector4Member::m_y:
 					lua_pushnumber(L, (lua_Number)p->y);
+					break;
+				case LuaSTG::Vector4Member::m_z:
+					lua_pushnumber(L, (lua_Number)p->z);
+					break;
+				case LuaSTG::Vector4Member::m_w:
+					lua_pushnumber(L, (lua_Number)p->w);
 					break;
 				case LuaSTG::Vector4Member::f_Dot:
 					lua_pushcfunction(L, Dot);
