@@ -2,16 +2,16 @@
 #include "Core/Audio/Decoder.hpp"
 #include "Core/Audio/Decoder_ma.hpp"
 #include "Core/Audio/Device.hpp"
+
+#include <algorithm>
+#include <string>
+
 #include "SDL_audio.h"
 #include "SDL_error.h"
 #include "spdlog/spdlog.h"
-// #include <cstddef>
-// #include <cstdint>
-#include <algorithm>
-#include <cmath>
-#include <cstdint>
-#include <cstring>
-#include <string>
+
+// because windows headers get included in miniaudio implementation
+#define NOMINMAX
 #define MINIAUDIO_IMPLEMENTATION
 #include "miniaudio.h"
 #include "minivorbis.h"
