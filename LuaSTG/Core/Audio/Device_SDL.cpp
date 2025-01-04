@@ -19,9 +19,9 @@
 
 static std::array<float, 1> s_empty_fft_data{};
 
-using Duration = std::chrono::duration<double>;
-using Clock = std::chrono::high_resolution_clock;
-using TimePoint = std::chrono::time_point<Clock, Duration>;
+// using Duration = std::chrono::duration<double>;
+// using Clock = std::chrono::high_resolution_clock;
+// using TimePoint = std::chrono::time_point<Clock, Duration>;
 
 namespace Core::Audio
 {
