@@ -1115,16 +1115,16 @@ int lua_texparticle3d_mtIndex(lua_State* L)
         lua_pushnumber(L, (*self)->extra4);
         break;
     case TexParticle3DMember::u:
-        (*self)->uv.a.x = luaL_checkinteger(L, 3);
+        lua_pushinteger(L, (*self)->uv.a.x);
         break;
     case TexParticle3DMember::v:
-        (*self)->uv.a.y = luaL_checkinteger(L, 3);
+        lua_pushinteger(L, (*self)->uv.a.y);
         break;
     case TexParticle3DMember::w:
-        (*self)->uv.b.x = (*self)->uv.a.x + luaL_checkinteger(L, 3);
+        lua_pushinteger(L, (*self)->uv.width());
         break;
     case TexParticle3DMember::h:
-        (*self)->uv.b.y = (*self)->uv.a.y + luaL_checkinteger(L, 3);
+        lua_pushinteger(L, (*self)->uv.height());
         break;
     default:
         lua_pushnil(L);
