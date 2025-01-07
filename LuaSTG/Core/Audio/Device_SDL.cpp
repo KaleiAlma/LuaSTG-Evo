@@ -136,7 +136,7 @@ namespace Core::Audio
         }
 
         SDL_AudioSpec want, have;
-        SDL_AudioDeviceID dev;
+        // SDL_AudioDeviceID dev;
 
         SDL_zero(want);
         want.freq = 48000;
@@ -147,14 +147,14 @@ namespace Core::Audio
         want.callback = data_callback;
         if (device_name.empty())
         {
-            dev = SDL_OpenAudioDevice(NULL, 0, &want, &have, SDL_AUDIO_ALLOW_FORMAT_CHANGE);
+            m_dev = SDL_OpenAudioDevice(NULL, 0, &want, &have, SDL_AUDIO_ALLOW_FORMAT_CHANGE);
         }
         else
         {
-            dev = SDL_OpenAudioDevice(std::string(device_name).c_str(), 0, &want, &have, SDL_AUDIO_ALLOW_FORMAT_CHANGE);
+            m_dev = SDL_OpenAudioDevice(std::string(device_name).c_str(), 0, &want, &have, SDL_AUDIO_ALLOW_FORMAT_CHANGE);
         }
 
-        if (!dev)
+        if (!m_dev)
         {
             spdlog::error("[core] Failed to initialize audio device. {}", SDL_GetError());
             return false;
@@ -193,14 +193,16 @@ namespace Core::Audio
         
         m_current_audio_device_name = device_name;
         dispatchEventAudioDeviceCreate();
-        SDL_PauseAudioDevice(dev, 0);
+        SDL_PauseAudioDevice(m_dev, 0);
 
         return true;
     }
     void Device_SDL::destroyResources()
     {
+        SDL_CloseAudioDevice(m_dev);
         dispatchEventAudioDeviceDestroy();
         m_current_audio_device_name.clear();
+        ma_engine_uninit(&m_shared->engine);
         m_shared.reset();
     }
 
@@ -314,6 +316,7 @@ namespace Core::Audio
     }
     Device_SDL::~Device_SDL()
     {
+        destroyResources();
     }
 
     bool Device_SDL::create(Device_SDL** pp_audio)
@@ -681,6 +684,7 @@ namespace Core::Audio
     void StreamAudioPlayer_SDL::destoryResources()
     {
         ma_sound_uninit(&m_sound);
+        ma_node_uninit(&m_node, nullptr);
         m_shared.reset();
     }
 

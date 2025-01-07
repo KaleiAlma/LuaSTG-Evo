@@ -2,6 +2,7 @@
 #include "Core/Audio/Decoder.hpp"
 #include "Core/Object.hpp"
 #include "Core/Audio/Device.hpp"
+#include "SDL_audio.h"
 #include "miniaudio.h"
 #include <cstdint>
 #include <vector>
@@ -49,6 +50,7 @@ namespace Core::Audio
 
     private:
         ScopeObject<Shared_SDL> m_shared;
+        SDL_AudioDeviceID m_dev = 0;
         float m_volume_direct = 1.0f;
         float m_volume_sound_effect = 1.0f;
         float m_volume_music = 1.0f;
