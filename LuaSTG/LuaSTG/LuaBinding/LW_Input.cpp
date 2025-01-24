@@ -1,7 +1,6 @@
 ﻿#include "LuaBinding/LuaWrapper.hpp"
 #include "AppFrame.h"
-#include "SDL_keycode.h"
-#include "SDL_mouse.h"
+#include "SDL.h"
 // #include "Platform/Keyboard.hpp"
 // #include "Platform/Mouse.hpp"
 

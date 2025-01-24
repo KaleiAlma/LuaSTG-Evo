@@ -6,8 +6,7 @@
 #include <algorithm>
 #include <string>
 
-#include "SDL_audio.h"
-#include "SDL_error.h"
+#include "SDL.h"
 #include "spdlog/spdlog.h"
 
 // because windows headers get included in miniaudio implementation

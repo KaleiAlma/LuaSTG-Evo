@@ -1,10 +1,6 @@
 #include "AppFrame.h"
 #include "Core/Type.hpp"
-#include "SDL_keyboard.h"
-#include "SDL_events.h"
-#include "SDL_keycode.h"
-#include "SDL_mouse.h"
-#include "SDL_video.h"
+#include "SDL.h"
 #include <cstddef>
 
 // #include "Platform/Keyboard.hpp"

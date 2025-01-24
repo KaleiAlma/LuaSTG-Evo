@@ -3,7 +3,7 @@
 #include "LuaBinding/lua_luastg_hash.hpp"
 #include "AppFrame.h"
 
-#include "SDL_keycode.h"
+#include "SDL.h"
 
 #define LOBJPOOL_SIZE_INTERNAL (LOBJPOOL_SIZE + 1)
 #define LOBJPOOL_METATABLE_IDX (LOBJPOOL_SIZE_INTERNAL)

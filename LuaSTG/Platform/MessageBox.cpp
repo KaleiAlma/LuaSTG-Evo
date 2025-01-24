@@ -2,7 +2,7 @@
 #include <cstdint>
 #include <sys/types.h>
 #include "spdlog/spdlog.h"
-#include "SDL_messagebox.h"
+#include "SDL.h"
 
 namespace Platform
 {

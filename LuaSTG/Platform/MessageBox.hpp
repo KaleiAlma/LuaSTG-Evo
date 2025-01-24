@@ -1,6 +1,6 @@
 #pragma once
 #include <string_view>
-#include "SDL_video.h"
+#include "SDL.h"
 
 // FUCK MICROSOFT
 

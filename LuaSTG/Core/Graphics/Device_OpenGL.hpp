@@ -3,7 +3,7 @@
 #include "Core/Graphics/Device.hpp"
 #include "Core/Type.hpp"
 #include "glad/gl.h"
-#include <SDL_video.h>
+#include "SDL.h"
 #include <cstddef>
 #include <cstdint>
 #include <optional>

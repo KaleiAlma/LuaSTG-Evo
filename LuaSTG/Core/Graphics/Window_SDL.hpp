@@ -3,13 +3,10 @@
 #include "Core/ApplicationModel.hpp"
 #include "Core/Graphics/Window.hpp"
 #include "Core/Type.hpp"
-#include "SDL_events.h"
+#include "SDL.h"
 // #include "Platform/Monitor.hpp"
 // #include "Platform/WindowSizeMoveController.hpp"
 // #include "Platform/RuntimeLoader/DesktopWindowManager.hpp"
-#include <SDL_rect.h>
-#include <SDL_surface.h>
-#include <SDL_video.h>
 #include <cstdint>
 #include <string>
 

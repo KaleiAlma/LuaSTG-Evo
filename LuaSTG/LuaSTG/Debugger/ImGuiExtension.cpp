@@ -1,15 +1,13 @@
 ﻿#include "ImGuiExtension.h"
 #include "Core/Graphics/SwapChain_OpenGL.hpp"
 #include "Core/Type.hpp"
-#include "SDL_events.h"
+#include "SDL.h"
 // #include "backends/imgui_impl_sdl2.h"
 // #include "imgui_impl_opengl3_loader.h"
-#include <SDL_video.h>
 
 // #define WIN32_LEAN_AND_MEAN
 // #define NOMINMAX
 // #include <d3d11.h>
-#include "SDL_video.h"
 #include "glad/gl.h"
 // #include <Xinput.h>
 

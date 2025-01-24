@@ -5,7 +5,7 @@
 #include "Core/Type.hpp"
 #include "Core/i18n.hpp"
 #include "glad/gl.h"
-#include "SDL_video.h"
+#include "SDL.h"
 #include "spdlog/spdlog.h"
 #include "stb_image_write.h"
 

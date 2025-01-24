@@ -2,7 +2,7 @@
 #include "Core/Audio/Decoder.hpp"
 #include "Core/Object.hpp"
 #include "Core/Audio/Device.hpp"
-#include "SDL_audio.h"
+#include "SDL.h"
 #include "miniaudio.h"
 #include <cstdint>
 #include <vector>
