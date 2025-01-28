@@ -120,7 +120,7 @@ vec4 vb_hue()
     vec3 RCPSQRT3 = vec3(inversesqrt(3.0));
     color.rgb = color.rgb * hue.y + cross(RCPSQRT3,color.rgb) * hue.x + RCPSQRT3 * dot(RCPSQRT3,color.rgb) * (1.0 - hue.y); //hue
     float avg = (color.r + color.g + color.b) / 3.0;
-    color.rgb = mix(color.rgb, vec3(avg),col.g); //sat
+    color.rgb = mix(color.rgb, vec3(avg),1.0-col.g); //sat
     color.rgb = mix(color.rgb, vec3(1.0,0.0,0.0), col.b); //stop
 
     color *= col.a;
@@ -134,7 +134,7 @@ vec4 vb_hue_pmul()
     vec3 RCPSQRT3 = vec3(inversesqrt(3.0));
     color.rgb = color.rgb * hue.y + cross(RCPSQRT3,color.rgb) * hue.x + RCPSQRT3 * dot(RCPSQRT3,color.rgb) * (1.0 - hue.y); //hue
     float avg = (color.r + color.g + color.b) / 3.0;
-    color.rgb = mix(color.rgb, vec3(avg),col.g); //sat
+    color.rgb = mix(color.rgb, vec3(avg),1.0-col.g); //sat
     color.rgb = mix(color.rgb, vec3(1.0,0.0,0.0), col.b); //stop
 
     color.a *= col.a;
@@ -267,7 +267,7 @@ void main()
     uv = uv_in;
     col = col_in;
 #if defined(VVALVERTEX_HUE)
-    hue = vec2(cos(col.r * PI * 2.0), sin(col.r * PI * 2.0));
+    hue = vec2(cos(col.r * PI * 4.0), sin(col.r * PI * 4.0));
 #endif
 }}
 )"};
