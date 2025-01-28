@@ -109,6 +109,28 @@ vec4 vb_mul_pmul()
     return color;
 }}
 
+vec4 vb_hue()
+{{
+    vec4 color = texture(sampler0, uv);
+    vec3 RCPSQRT3 = vec3(inversesqrt(3.0));
+    vec2 hue = col.rg * 2.0 - 1.0;
+    color.rgb = color.rgb * hue.y + cross(RCPSQRT3,color.rgb) * hue.x + RCPSQRT3 * dot(RCPSQRT3,color.rgb) * (1.0 - hue.y);
+    color *= col.a;
+    color.rgb *= color.a;
+    return color;
+}}
+
+vec4 vb_hue_pmul()
+{{
+    vec4 color = texture(sampler0, uv);
+    vec3 RCPSQRT3 = vec3(inversesqrt(3.0));
+    vec2 hue = col.rg * 2.0 - 1.0;
+    color.rgb = color.rgb * hue.y + cross(RCPSQRT3,color.rgb) * hue.x + RCPSQRT3 * dot(RCPSQRT3,color.rgb) * (1.0 - hue.y);
+    color.a *= col.a;
+    return color;
+}}
+
+
 
 vec4 fog_none(vec4 color)
 {{
@@ -160,6 +182,8 @@ void main()
         col_out = vb_one_pmul();
     #elif defined(VERTEX_ZERO)
         col_out = vb_zero_pmul();
+    #elif defined(VERTEX_HUE)
+        col_out = vb_hue_pmul();
     #else // VERTEX_MUL
         col_out = vb_mul_pmul();
     #endif
@@ -170,6 +194,8 @@ void main()
         col_out = vb_one();
     #elif defined(VERTEX_ZERO)
         col_out = vb_zero();
+    #elif defined(VERTEX_HUE)
+        col_out = vb_hue();
     #else // VERTEX_MUL
         col_out = vb_mul();
     #endif
@@ -233,6 +259,7 @@ namespace Core::Graphics
         "VERTEX_ZERO",
         "VERTEX_ONE",
         "VERTEX_ADD",
+        "VERTEX_HUE",
         "VERTEX_MUL",
     };
     const constexpr char* fog_state[IDX(IRenderer::FogState::MAX_COUNT)]{

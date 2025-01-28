@@ -105,6 +105,22 @@ inline Core::Graphics::IRenderer::BlendState translate_blend_3d(const LuaSTGPlus
         return Core::Graphics::IRenderer::BlendState::Screen;
     case LuaSTGPlus::BlendMode::One:
         return Core::Graphics::IRenderer::BlendState::One;
+    case LuaSTGPlus::BlendMode::HueAlpha:
+        return Core::Graphics::IRenderer::BlendState::Alpha;
+    case LuaSTGPlus::BlendMode::HueAdd:
+        return Core::Graphics::IRenderer::BlendState::Add;
+    case LuaSTGPlus::BlendMode::HueRev:
+        return Core::Graphics::IRenderer::BlendState::RevSub;
+    case LuaSTGPlus::BlendMode::HueSub:
+        return Core::Graphics::IRenderer::BlendState::Sub;
+    case LuaSTGPlus::BlendMode::HueMin:
+        return Core::Graphics::IRenderer::BlendState::Min;
+    case LuaSTGPlus::BlendMode::HueMax:
+        return Core::Graphics::IRenderer::BlendState::Max;
+    case LuaSTGPlus::BlendMode::HueMul:
+        return Core::Graphics::IRenderer::BlendState::Mul;
+    case LuaSTGPlus::BlendMode::HueScreen:
+        return Core::Graphics::IRenderer::BlendState::Screen;
     }
 }
 

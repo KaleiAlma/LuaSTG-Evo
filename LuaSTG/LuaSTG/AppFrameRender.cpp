@@ -81,6 +81,38 @@ namespace LuaSTGPlus
             ctx->setVertexColorBlendState(IRenderer::VertexColorBlendState::Mul);
             ctx->setBlendState(IRenderer::BlendState::One);
             break;
+        case LuaSTGPlus::BlendMode::HueAlpha:
+            ctx->setVertexColorBlendState(IRenderer::VertexColorBlendState::Hue);
+            ctx->setBlendState(IRenderer::BlendState::Alpha);
+            break;
+        case LuaSTGPlus::BlendMode::HueAdd:
+            ctx->setVertexColorBlendState(IRenderer::VertexColorBlendState::Hue);
+            ctx->setBlendState(IRenderer::BlendState::Add);
+            break;
+        case LuaSTGPlus::BlendMode::HueRev:
+            ctx->setVertexColorBlendState(IRenderer::VertexColorBlendState::Hue);
+            ctx->setBlendState(IRenderer::BlendState::RevSub);
+            break;
+        case LuaSTGPlus::BlendMode::HueSub:
+            ctx->setVertexColorBlendState(IRenderer::VertexColorBlendState::Hue);
+            ctx->setBlendState(IRenderer::BlendState::Sub);
+            break;
+        case LuaSTGPlus::BlendMode::HueMin:
+            ctx->setVertexColorBlendState(IRenderer::VertexColorBlendState::Hue);
+            ctx->setBlendState(IRenderer::BlendState::Min);
+            break;
+        case LuaSTGPlus::BlendMode::HueMax:
+            ctx->setVertexColorBlendState(IRenderer::VertexColorBlendState::Hue);
+            ctx->setBlendState(IRenderer::BlendState::Max);
+            break;
+        case LuaSTGPlus::BlendMode::HueMul:
+            ctx->setVertexColorBlendState(IRenderer::VertexColorBlendState::Hue);
+            ctx->setBlendState(IRenderer::BlendState::Mul);
+            break;
+        case LuaSTGPlus::BlendMode::HueScreen:
+            ctx->setVertexColorBlendState(IRenderer::VertexColorBlendState::Hue);
+            ctx->setBlendState(IRenderer::BlendState::Screen);
+            break;
         }
     }
     
