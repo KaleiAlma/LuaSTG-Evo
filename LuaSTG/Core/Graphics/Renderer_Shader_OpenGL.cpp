@@ -36,8 +36,9 @@ layout(location = 0) in vec4 sxy;
 layout(location = 1) in vec4 pos;
 layout(location = 2) in vec2 uv;
 layout(location = 3) in vec4 col;
-#ifdef defined(VERTEX_HUE)
-    layout(location = 4) in vec2 hue;
+
+#if defined(VERTEX_HUE)
+layout(location = 4) in vec2 hue;
 #endif
 
 layout(location = 0) out vec4 col_out;
@@ -112,14 +113,15 @@ vec4 vb_mul_pmul()
     return color;
 }}
 
+#if defined(VERTEX_HUE)
 vec4 vb_hue()
 {{
     vec4 color = texture(sampler0, uv);
     vec3 RCPSQRT3 = vec3(inversesqrt(3.0));
     color.rgb = color.rgb * hue.y + cross(RCPSQRT3,color.rgb) * hue.x + RCPSQRT3 * dot(RCPSQRT3,color.rgb) * (1.0 - hue.y); //hue
     float avg = (color.r + color.g + color.b) / 3.0;
-    color.rgb = lerp(color.rgb, vec3(avg),col.g); //sat
-    color.rgb = lerp(color.rgb, vec3(1.0,0.0,0.0), col.b); //stop
+    color.rgb = mix(color.rgb, vec3(avg),col.g); //sat
+    color.rgb = mix(color.rgb, vec3(1.0,0.0,0.0), col.b); //stop
 
     color *= col.a;
     color.rgb *= color.a;
@@ -132,14 +134,13 @@ vec4 vb_hue_pmul()
     vec3 RCPSQRT3 = vec3(inversesqrt(3.0));
     color.rgb = color.rgb * hue.y + cross(RCPSQRT3,color.rgb) * hue.x + RCPSQRT3 * dot(RCPSQRT3,color.rgb) * (1.0 - hue.y); //hue
     float avg = (color.r + color.g + color.b) / 3.0;
-    color.rgb = lerp(color.rgb, vec3(avg),col.g); //sat
-    color.rgb = lerp(color.rgb, vec3(1.0,0.0,0.0), col.b); //stop
+    color.rgb = mix(color.rgb, vec3(avg),col.g); //sat
+    color.rgb = mix(color.rgb, vec3(1.0,0.0,0.0), col.b); //stop
 
     color.a *= col.a;
     return color;
 }}
-
-
+#endif
 
 vec4 fog_none(vec4 color)
 {{
