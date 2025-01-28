@@ -340,14 +340,14 @@ namespace Core::Graphics
                     return false;
                 if (!compileFragmentShaderMacro((const GLchar*)src.data(), src.size(), opengl_frag))
                     return false;
-                if (!compileVertexShaderMacro(s_vert.c_str(), s_vert.length(), vert))
+                if (!compileVertexShaderMacro(s_vert.c_str(), s_vert.length(), opengl_vert))
                     return false;
             }
             else
             {
                 if (!compileFragmentShaderMacro((const GLchar*)source.data(), source.size(), opengl_frag))
                     return false;
-                if (!compileVertexShaderMacro(s_vert.c_str(), s_vert.length(), vert))
+                if (!compileVertexShaderMacro(s_vert.c_str(), s_vert.length(), opengl_vert))
                     return false;
             }
         }
