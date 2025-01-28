@@ -36,6 +36,9 @@ layout(location = 0) in vec4 sxy;
 layout(location = 1) in vec4 pos;
 layout(location = 2) in vec2 uv;
 layout(location = 3) in vec4 col;
+#ifdef defined(VERTEX_HUE)
+    layout(location = 4) in vec2 hue;
+endif
 
 layout(location = 0) out vec4 col_out;
 
@@ -113,8 +116,11 @@ vec4 vb_hue()
 {{
     vec4 color = texture(sampler0, uv);
     vec3 RCPSQRT3 = vec3(inversesqrt(3.0));
-    vec2 hue = col.rg * 2.0 - 1.0;
-    color.rgb = color.rgb * hue.y + cross(RCPSQRT3,color.rgb) * hue.x + RCPSQRT3 * dot(RCPSQRT3,color.rgb) * (1.0 - hue.y);
+    color.rgb = color.rgb * hue.y + cross(RCPSQRT3,color.rgb) * hue.x + RCPSQRT3 * dot(RCPSQRT3,color.rgb) * (1.0 - hue.y); //hue
+    float avg = (color.r + color.g + color.b) / 3.0;
+    color.rgb = lerp(color.rgb, vec3(avg),col.g); //sat
+    color.rgb = lerp(color.rgb, vec3(1.0,0.0,0.0), col.b); //stop
+
     color *= col.a;
     color.rgb *= color.a;
     return color;
@@ -124,8 +130,11 @@ vec4 vb_hue_pmul()
 {{
     vec4 color = texture(sampler0, uv);
     vec3 RCPSQRT3 = vec3(inversesqrt(3.0));
-    vec2 hue = col.rg * 2.0 - 1.0;
-    color.rgb = color.rgb * hue.y + cross(RCPSQRT3,color.rgb) * hue.x + RCPSQRT3 * dot(RCPSQRT3,color.rgb) * (1.0 - hue.y);
+    color.rgb = color.rgb * hue.y + cross(RCPSQRT3,color.rgb) * hue.x + RCPSQRT3 * dot(RCPSQRT3,color.rgb) * (1.0 - hue.y); //hue
+    float avg = (color.r + color.g + color.b) / 3.0;
+    color.rgb = lerp(color.rgb, vec3(avg),col.g); //sat
+    color.rgb = lerp(color.rgb, vec3(1.0,0.0,0.0), col.b); //stop
+
     color.a *= col.a;
     return color;
 }}
@@ -216,15 +225,17 @@ const constexpr std::string_view dfrag_sv{default_fragment};
 const constexpr GLchar default_vertex[]{R"(
 #version 410 core
 
+#define VVAL{}
+
 uniform view_proj_buffer
-{
+{{
     mat4 view_proj;
-};
+}};
 #if defined(WORLD_MATRIX)
 uniform world_buffer
-{
+{{
     mat4 world;
-};
+}};
 #endif
 
 layout(location = 0) in vec3 pos_in;
@@ -236,8 +247,14 @@ layout(location = 1) out vec4 pos;
 layout(location = 2) out vec2 uv;
 layout(location = 3) out vec4 col;
 
+#if defined(VVALVERTEX_HUE)
+layout(location = 4) out vec2 hue;
+#endif
+
+#define PI 3.1415926538
+
 void main()
-{
+{{
     vec4 pos_world = vec4(pos_in, 1.0);
 #if defined(WORLD_MATRIX)
     pos_world = world * pos_world;
@@ -248,8 +265,13 @@ void main()
     pos = pos_world;
     uv = uv_in;
     col = col_in;
-}
+#if defined(VVALVERTEX_HUE)
+    hue = vec2(cos(col.r * PI * 2.0), sin(col.r * PI * 2.0));
+#endif
+}}
 )"};
+
+const constexpr std::string_view dvert_sv{default_vertex};
 
 #define IDX(x) (size_t)static_cast<uint8_t>(x)
 
@@ -306,6 +328,9 @@ namespace Core::Graphics
     {
         GLuint opengl_frag = 0;
         GLuint opengl_vert = 0;
+        std::string s_vert = std::format(dvert_sv, "");
+            
+        
         if (!opengl_frag)
         {
             if (is_path)
@@ -315,14 +340,14 @@ namespace Core::Graphics
                     return false;
                 if (!compileFragmentShaderMacro((const GLchar*)src.data(), src.size(), opengl_frag))
                     return false;
-                if (!compileVertexShaderMacro(default_vertex, sizeof(default_vertex), opengl_vert))
+                if (!compileVertexShaderMacro(s_vert.c_str(), s_vert.length(), vert))
                     return false;
             }
             else
             {
                 if (!compileFragmentShaderMacro((const GLchar*)source.data(), source.size(), opengl_frag))
                     return false;
-                if (!compileVertexShaderMacro(default_vertex, sizeof(default_vertex), opengl_vert))
+                if (!compileVertexShaderMacro(s_vert.c_str(), s_vert.length(), vert))
                     return false;
             }
         }
@@ -467,7 +492,6 @@ namespace Core::Graphics
     bool Renderer_OpenGL::createShaders()
     {
         GLuint vert = 0;
-        compileVertexShaderMacro(default_vertex, sizeof(default_vertex), vert);
 
         for (int i = 0; i < IDX(VertexColorBlendState::MAX_COUNT); i++)
         for (int j = 0; j < IDX(FogState::MAX_COUNT); j++)
@@ -476,12 +500,15 @@ namespace Core::Graphics
             GLuint frag = 0;
             std::string s_frag = std::format(dfrag_sv, vertex_blend_state[i], fog_state[j], pmul_alpha_state[k]);
             compileFragmentShaderMacro(s_frag.c_str(), s_frag.length(), frag);
+            std::string s_vert = std::format(dvert_sv, vertex_blend_state[i]);
+            compileVertexShaderMacro(s_vert.c_str(), s_vert.length(), vert);
             _programs[i][j][k] = glCreateProgram();
             glAttachShader(_programs[i][j][k], vert);
             glAttachShader(_programs[i][j][k], frag);
             glLinkProgram(_programs[i][j][k]);
 
             glDeleteShader(frag);
+            glDeleteShader(vert);
 
             GLuint idx_view_proj_buffer = glGetUniformBlockIndex(_programs[i][j][k], "view_proj_buffer");
             GLuint idx_camera_data = glGetUniformBlockIndex(_programs[i][j][k], "camera_data");
@@ -492,7 +519,6 @@ namespace Core::Graphics
             glUniformBlockBinding(_programs[i][j][k], idx_fog_data, 3);
         }
 
-        glDeleteShader(vert);
 
         return true;
     }
