@@ -38,7 +38,7 @@ layout(location = 2) in vec2 uv;
 layout(location = 3) in vec4 col;
 #ifdef defined(VERTEX_HUE)
     layout(location = 4) in vec2 hue;
-endif
+#endif
 
 layout(location = 0) out vec4 col_out;
 
