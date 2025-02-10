@@ -16,25 +16,28 @@ void LuaSTGPlus::LuaWrapper::GameObjectManagerWrapper::Register(lua_State* L) no
 			lua_pushinteger(L, (lua_Integer)LPOOL.GetObjectCount());
 			return 1;
 		}
-		static int ObjFrame(lua_State* L) noexcept
+		static int ObjFrame(lua_State* L)
 		{
-			LPOOL.CheckIsMainThread(L);
+			if (!LPOOL.CheckIsMainThread(L))
+				luaL_error(L, "ObjFrame was called in coroutine, which is disallowed");
 			LPOOL.DoFrame();
 			return 0;
 		}
-		static int ObjRender(lua_State* L) noexcept
+		static int ObjRender(lua_State* L)
 		{
-			LPOOL.CheckIsMainThread(L);
+			if (!LPOOL.CheckIsMainThread(L))
+				luaL_error(L, "ObjRender was called in coroutine, which is disallowed");
 			LPOOL.DoRender();
 			return 0;
 		}
-		static int BoundCheck(lua_State* L) noexcept
+		static int BoundCheck(lua_State* L)
 		{
-			LPOOL.CheckIsMainThread(L);
+			if (!LPOOL.CheckIsMainThread(L))
+				luaL_error(L, "BoundCheck was called in coroutine, which is disallowed");
 			LPOOL.BoundCheck();
 			return 0;
 		}
-		static int SetBound(lua_State* L) noexcept
+		static int SetBound(lua_State* L)
 		{
 			LPOOL.SetBound(
 				luaL_checknumber(L, 1),
@@ -44,21 +47,24 @@ void LuaSTGPlus::LuaWrapper::GameObjectManagerWrapper::Register(lua_State* L) no
 			);
 			return 0;
 		}
-		static int CollisionCheck(lua_State* L) noexcept
+		static int CollisionCheck(lua_State* L)
 		{
-			LPOOL.CheckIsMainThread(L);
+			if (!LPOOL.CheckIsMainThread(L))
+				luaL_error(L, "CollisionCheck was called in coroutine, which is disallowed");
 			LPOOL.CollisionCheck(luaL_checkinteger(L, 1), luaL_checkinteger(L, 2));
 			return 0;
 		}
-		static int UpdateXY(lua_State* L) noexcept
+		static int UpdateXY(lua_State* L)
 		{
-			LPOOL.CheckIsMainThread(L);
+			if (!LPOOL.CheckIsMainThread(L))
+				luaL_error(L, "UpdateXY was called in coroutine, which is disallowed");
 			LPOOL.UpdateXY();
 			return 0;
 		}
-		static int AfterFrame(lua_State* L) noexcept
+		static int AfterFrame(lua_State* L)
 		{
-			LPOOL.CheckIsMainThread(L);
+			if (!LPOOL.CheckIsMainThread(L))
+				luaL_error(L, "AfterFrame was called in coroutine, which is disallowed");
 			LPOOL.AfterFrame();
 			return 0;
 		}
@@ -74,12 +80,12 @@ void LuaSTGPlus::LuaWrapper::GameObjectManagerWrapper::Register(lua_State* L) no
 			lua_pushinteger(L, LPOOL.GetNextFrameSuperPauseTime());
 			return 1;
 		}
-		static int SetSuperPause(lua_State* L) noexcept
+		static int SetSuperPause(lua_State* L)
 		{
 			LPOOL.SetNextFrameSuperPauseTime(luaL_checkinteger(L, 1));
 			return 0;
 		}
-		static int AddSuperPause(lua_State* L) noexcept
+		static int AddSuperPause(lua_State* L)
 		{
 			lua_Integer a = luaL_checkinteger(L, 1);
 			LPOOL.SetNextFrameSuperPauseTime(LPOOL.GetNextFrameSuperPauseTime() + a);
@@ -96,19 +102,19 @@ void LuaSTGPlus::LuaWrapper::GameObjectManagerWrapper::Register(lua_State* L) no
 			lua_pushinteger(L, LPOOL.GetWorldFlag());
 			return 1;
 		}
-		static int SetWorldFlag(lua_State* L) noexcept
+		static int SetWorldFlag(lua_State* L)
 		{
 			LPOOL.SetWorldFlag(luaL_checkinteger(L, 1));
 			return 1;
 		}
-		static int IsSameWorld(lua_State* L) noexcept
+		static int IsSameWorld(lua_State* L)
 		{
 			int a = luaL_checkinteger(L, 1);
 			int b = luaL_checkinteger(L, 2);
 			lua_pushboolean(L, GameObjectPool::CheckWorld(a, b));
 			return 1;
 		}
-		static int CheckWorlds(lua_State* L) noexcept
+		static int CheckWorlds(lua_State* L)
 		{
 			int a1 = luaL_checkinteger(L, 1);
 			int a2 = luaL_checkinteger(L, 2);

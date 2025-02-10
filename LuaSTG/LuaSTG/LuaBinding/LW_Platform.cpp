@@ -29,7 +29,7 @@ void LuaSTGPlus::LuaWrapper::PlatformWrapper::Register(lua_State* L) noexcept
 {
     struct Wrapper
     {
-        static int Execute(lua_State* L) noexcept
+        static int Execute(lua_State* L)
         {
             struct Detail_
             {

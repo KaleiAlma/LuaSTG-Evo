@@ -5,7 +5,7 @@ void LuaSTGPlus::LuaWrapper::RenderWrapper::Register(lua_State* L) noexcept
 {
     struct Wrapper
     {
-        static int RenderText(lua_State* L) noexcept
+        static int RenderText(lua_State* L)
         {
             FontAlignHorizontal halign = FontAlignHorizontal::Center;
             FontAlignVertical valign = FontAlignVertical::Middle;
@@ -25,7 +25,7 @@ void LuaSTGPlus::LuaWrapper::RenderWrapper::Register(lua_State* L) noexcept
             }
             return 0;
         }
-        static int RenderTTF(lua_State* L) noexcept
+        static int RenderTTF(lua_State* L)
         {
             if (!LAPP.RenderTTF(
                 luaL_checkstring(L, 1),
@@ -44,13 +44,13 @@ void LuaSTGPlus::LuaWrapper::RenderWrapper::Register(lua_State* L) noexcept
             return 0;
         }
         //EX
-        static int Snapshot(lua_State* L) noexcept
+        static int Snapshot(lua_State* L)
         {
             const char* path = luaL_checkstring(L, 1);
             LAPP.SnapShot(path);
             return 0;
         }
-        static int SaveTexture(lua_State* L) noexcept
+        static int SaveTexture(lua_State* L)
         {
             const char* tex_name = luaL_checkstring(L, 1);
             const char* path = luaL_checkstring(L, 2);
@@ -58,13 +58,13 @@ void LuaSTGPlus::LuaWrapper::RenderWrapper::Register(lua_State* L) noexcept
             return 0;
         }
         //EX+
-        static int DrawCollider(lua_State*) noexcept
+        static int DrawCollider(lua_State*)
         {
             LPOOL.DrawCollider();
             return 1;
         }
         //ETC
-        static int RenderGroupCollider(lua_State* L) noexcept
+        static int RenderGroupCollider(lua_State* L)
         {
             // group color
             LPOOL.DrawGroupCollider2(

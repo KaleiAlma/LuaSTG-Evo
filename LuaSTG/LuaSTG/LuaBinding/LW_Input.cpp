@@ -9,7 +9,7 @@ static int register_keyboard(lua_State* L)
 {
 	struct Wrapper
 	{
-		static int GetKeyState(lua_State* L) noexcept
+		static int GetKeyState(lua_State* L)
 		{
 			lua_pushboolean(L, LAPP.GetKeyState(luaL_checkinteger(L, -1)));
 			return 1;
@@ -235,7 +235,7 @@ static int register_mouse(lua_State* L)
 {
 	struct Wrapper
 	{
-		static int GetKeyState(lua_State* L) noexcept
+		static int GetKeyState(lua_State* L)
 		{
 			lua_pushboolean(L, LAPP.GetMouseState(luaL_checkinteger(L, 1)));
 			return 1;
@@ -298,12 +298,12 @@ void LuaSTGPlus::LuaWrapper::InputWrapper::Register(lua_State* L) noexcept
 {
 	struct Wrapper
 	{
-		static int GetKeyState(lua_State* L) noexcept
+		static int GetKeyState(lua_State* L)
 		{
 			lua_pushboolean(L, LAPP.GetKeyState(luaL_checkinteger(L, -1)));
 			return 1;
 		}
-		static int GetMouseState(lua_State* L) noexcept
+		static int GetMouseState(lua_State* L)
 		{
 			lua_pushboolean(L, LAPP.GetMouseState(luaL_checkinteger(L, 1) + 1));
 			return 1;
