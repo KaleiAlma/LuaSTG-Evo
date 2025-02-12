@@ -164,8 +164,8 @@ CPMAddPackage(
 
 CPMAddPackage(
     NAME sol2
-    GITHUB_REPOSITORY ThePhD/sol2
-    VERSION 3.3.0
+    GITHUB_REPOSITORY KaleiAlma/sol2
+    GIT_TAG main
 )
 
 CPMAddPackage(

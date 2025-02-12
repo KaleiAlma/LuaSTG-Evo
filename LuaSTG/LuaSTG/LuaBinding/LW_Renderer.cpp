@@ -225,20 +225,20 @@ static void api_setFogState(float start, float end, Core::Color4B color)
     }
 }
 
-static int lib_beginScene(lua_State* L)noexcept
+static int lib_beginScene(lua_State* L)
 {
     if (!LR2D()->beginBatch())
         return luaL_error(L, "[luastg] lstg.Renderer.BeginScene failed");
     return 0;
 }
-static int lib_endScene(lua_State* L)noexcept
+static int lib_endScene(lua_State* L)
 {
     if (!LR2D()->endBatch())
         return luaL_error(L, "[luastg] lstg.Renderer.endScene failed");
     return 0;
 }
 
-static int lib_clearRenderTarget(lua_State* L)noexcept
+static int lib_clearRenderTarget(lua_State* L)
 {
     Core::Color4B color;
     if (lua_isnumber(L, 1))
@@ -252,13 +252,13 @@ static int lib_clearRenderTarget(lua_State* L)noexcept
     LR2D()->clearRenderTarget(color);
     return 0;
 }
-static int lib_clearDepthBuffer(lua_State* L)noexcept
+static int lib_clearDepthBuffer(lua_State* L)
 {
     LR2D()->clearDepthBuffer((float)luaL_checknumber(L, 1));
     return 0;
 }
 
-static int lib_setOrtho(lua_State* L)noexcept
+static int lib_setOrtho(lua_State* L)
 {
     Core::BoxF box;
     if (lua_gettop(L) < 6)
@@ -286,7 +286,7 @@ static int lib_setOrtho(lua_State* L)noexcept
     LR2D()->setOrtho(box);
     return 0;
 }
-static int lib_setPerspective(lua_State* L)noexcept
+static int lib_setPerspective(lua_State* L)
 {
     Core::Vector3F eye;
     eye.x = (float)luaL_checknumber(L, 1);
@@ -313,7 +313,7 @@ static int lib_setPerspective(lua_State* L)noexcept
     return 0;
 }
 
-static int lib_setViewport(lua_State* L)noexcept
+static int lib_setViewport(lua_State* L)
 {
     Core::BoxF box;
     if (lua_gettop(L) < 6)
@@ -341,7 +341,7 @@ static int lib_setViewport(lua_State* L)noexcept
     LR2D()->setViewport(box);
     return 0;
 }
-static int lib_setScissorRect(lua_State* L)noexcept
+static int lib_setScissorRect(lua_State* L)
 {
     LR2D()->setScissorRect(Core::RectF(
         (float)luaL_checknumber(L, 1),
@@ -352,13 +352,13 @@ static int lib_setScissorRect(lua_State* L)noexcept
     return 0;
 }
 
-static int lib_setVertexColorBlendState(lua_State* L)noexcept
+static int lib_setVertexColorBlendState(lua_State* L)
 {
     validate_render_scope();
     LR2D()->setVertexColorBlendState((Core::Graphics::IRenderer::VertexColorBlendState)luaL_checkinteger(L, 1));
     return 0;
 }
-static int lib_setFogState(lua_State* L)noexcept
+static int lib_setFogState(lua_State* L)
 {
     validate_render_scope();
     Core::Color4B color;
@@ -377,19 +377,19 @@ static int lib_setFogState(lua_State* L)noexcept
         (float)luaL_optnumber(L, 4, 0.0));
     return 0;
 }
-static int lib_setDepthState(lua_State* L)noexcept
+static int lib_setDepthState(lua_State* L)
 {
     validate_render_scope();
     LR2D()->setDepthState((Core::Graphics::IRenderer::DepthState)luaL_checkinteger(L, 1));
     return 0;
 }
-static int lib_setBlendState(lua_State* L)noexcept
+static int lib_setBlendState(lua_State* L)
 {
     validate_render_scope();
     LR2D()->setBlendState((Core::Graphics::IRenderer::BlendState)luaL_checkinteger(L, 1));
     return 0;
 }
-static int lib_setTexture(lua_State* L)noexcept
+static int lib_setTexture(lua_State* L)
 {
     validate_render_scope();
     char const* name = luaL_checkstring(L, 1);
@@ -598,7 +598,7 @@ static int lib_drawSpriteSequence(lua_State* L)
     return 0;
 }
 
-static int lib_drawTexture(lua_State* L) noexcept
+static int lib_drawTexture(lua_State* L) 
 {
     validate_render_scope();
 
@@ -667,7 +667,7 @@ static int lib_drawTexture(lua_State* L) noexcept
 
     return 0;
 }
-static int lib_drawMesh(lua_State* L) noexcept
+static int lib_drawMesh(lua_State* L) 
 {
     validate_render_scope();
 
@@ -760,7 +760,7 @@ static luaL_Reg const lib_func[] = {
     { NULL, NULL },
 };
 
-static int compat_SetViewport(lua_State* L)noexcept
+static int compat_SetViewport(lua_State* L)
 {
     Core::BoxF box;
     if (lua_gettop(L) >= 6)
@@ -791,7 +791,7 @@ static int compat_SetViewport(lua_State* L)noexcept
     LR2D()->setViewport(box);
     return 0;
 }
-static int compat_SetScissorRect(lua_State* L)noexcept
+static int compat_SetScissorRect(lua_State* L)
 {
     Core::RectF rect(
         (float)luaL_checknumber(L, 1),
@@ -805,7 +805,7 @@ static int compat_SetScissorRect(lua_State* L)noexcept
     LR2D()->setScissorRect(rect);
     return 0;
 }
-static int compat_SetFog(lua_State* L)noexcept
+static int compat_SetFog(lua_State* L)
 {
     int const argc = lua_gettop(L);
     if (argc >= 3)
@@ -830,19 +830,19 @@ static int compat_SetFog(lua_State* L)noexcept
     }
     return 0;
 }
-static int compat_SetZBufferEnable(lua_State* L)noexcept
+static int compat_SetZBufferEnable(lua_State* L)
 {
     validate_render_scope();
     LR2D()->setDepthState((Core::Graphics::IRenderer::DepthState)luaL_checkinteger(L, 1));
     return 0;
 }
-static int compat_ClearZBuffer(lua_State* L)noexcept
+static int compat_ClearZBuffer(lua_State* L)
 {
     validate_render_scope();
     LR2D()->clearDepthBuffer((float)luaL_optnumber(L, 1, 1.0));
     return 0;
 }
-static int compat_PushRenderTarget(lua_State* L)noexcept
+static int compat_PushRenderTarget(lua_State* L)
 {
     validate_render_scope();
     LR2D()->flush();
@@ -857,7 +857,7 @@ static int compat_PushRenderTarget(lua_State* L)noexcept
     LR2D()->setViewportAndScissorRect();
     return 0;
 }
-static int compat_PopRenderTarget(lua_State* L)noexcept
+static int compat_PopRenderTarget(lua_State* L)
 {
     validate_render_scope();
     LR2D()->flush();

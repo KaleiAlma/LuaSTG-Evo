@@ -136,8 +136,8 @@ namespace LuaSTGPlus
 		void UpdateTimer();
 		void Render();
 
-		int GetAttr(lua_State* L) noexcept;
-		int SetAttr(lua_State* L) noexcept;
+		int GetAttr(lua_State* L);
+		int SetAttr(lua_State* L);
 
 		inline bool IsInRect(lua_Number l, lua_Number r, lua_Number b_, lua_Number t) const noexcept
 		{

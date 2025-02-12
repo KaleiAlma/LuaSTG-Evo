@@ -162,13 +162,13 @@ private:
 		other->seed = self->seed;
 		return 1;
 	}
-	static int serialize(lua_State* L)noexcept
+	static int serialize(lua_State* L)
 	{
 		Data* self = Cast(L, 1);
 		lua_pushstring(L, self->rng.serialize().c_str());
 		return 1;
 	}
-	static int deserialize(lua_State* L)noexcept
+	static int deserialize(lua_State* L)
 	{
 		Data* self = Cast(L, 1);
 		lua_pushboolean(L, self->rng.deserialize(luaL_checkstring(L, 2)));
@@ -420,13 +420,13 @@ private:
 		other->seed = self->seed;
 		return 1;
 	}
-	static int serialize(lua_State* L)noexcept
+	static int serialize(lua_State* L)
 	{
 		Data* self = Cast(L, 1);
 		lua_pushstring(L, self->rng.serialize().c_str());
 		return 1;
 	}
-	static int deserialize(lua_State* L)noexcept
+	static int deserialize(lua_State* L)
 	{
 		Data* self = Cast(L, 1);
 		lua_pushboolean(L, self->rng.deserialize(luaL_checkstring(L, 2)));

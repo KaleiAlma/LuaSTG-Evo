@@ -167,19 +167,19 @@ namespace LuaSTGPlus::LuaWrapper
 		struct Function
 		{
 		#define GETUDATA(p, i) fcyRandomWELL512* (p) = static_cast<fcyRandomWELL512*>(luaL_checkudata(L, (i), LUASTG_LUA_TYPENAME_RANDGEN));
-			static int Seed(lua_State* L)noexcept
+			static int Seed(lua_State* L)
 			{
 				GETUDATA(p, 1);
 				p->SetSeed((uint32_t)luaL_checkinteger(L, 2));
 				return 0;
 			}
-			static int GetSeed(lua_State* L)noexcept
+			static int GetSeed(lua_State* L)
 			{
 				GETUDATA(p, 1);
 				lua_pushinteger(L, (lua_Integer)p->GetRandSeed());
 				return 1;
 			}
-			static int Int(lua_State* L)noexcept
+			static int Int(lua_State* L)
 			{
 				GETUDATA(p, 1);
 				lua_Integer a = luaL_checkinteger(L, 2);
@@ -189,7 +189,7 @@ namespace LuaSTGPlus::LuaWrapper
 				lua_pushinteger(L, a + ret);
 				return 1;
 			}
-			static int Float(lua_State* L)noexcept
+			static int Float(lua_State* L)
 			{
 				GETUDATA(p, 1);
 				float a = (float)luaL_checknumber(L, 2);
@@ -198,13 +198,13 @@ namespace LuaSTGPlus::LuaWrapper
 				lua_pushnumber(L, (lua_Number)p->GetRandFloat(a, b));
 				return 1;
 			}
-			static int Sign(lua_State* L)noexcept
+			static int Sign(lua_State* L)
 			{
 				GETUDATA(p, 1);
 				lua_pushinteger(L, (lua_Integer)p->GetRandUInt(1) * 2 - 1);
 				return 1;
 			}
-			static int clone(lua_State* L)noexcept
+			static int clone(lua_State* L)
 			{
 				GETUDATA(self, 1);
 				RandomizerWrapper::CreateAndPush(L);
@@ -212,13 +212,13 @@ namespace LuaSTGPlus::LuaWrapper
 				*other = *self;
 				return 1;
 			}
-			static int serialize(lua_State* L)noexcept
+			static int serialize(lua_State* L)
 			{
 				GETUDATA(self, 1);
 				lua_pushstring(L, self->Serialize().c_str());
 				return 1;
 			}
-			static int deserialize(lua_State* L)noexcept
+			static int deserialize(lua_State* L)
 			{
 				GETUDATA(self, 1);
 				lua_pushboolean(L, self->Deserialize(luaL_checkstring(L, 2)));
