@@ -123,7 +123,7 @@ vec4 vb_hue()
     color.rgb = mix(color.rgb, vec3(avg),1.0-col.g); //sat
     color.rgb = mix(color.rgb, vec3(1.0,0.0,0.0), col.b); //stop
 
-    color *= col.a;
+    color.a *= col.a;
     color.rgb *= color.a;
     return color;
 }}
