@@ -223,6 +223,12 @@ LuaSTGPlus::Particle3DMember LuaSTGPlus::MapParticle3DMember(const char* key) {
               return LuaSTGPlus::Particle3DMember::ay;
           }
           break;
+        case 'z':
+          switch(key[2]) {
+            case '\0':
+              return LuaSTGPlus::Particle3DMember::az;
+          }
+          break;
       }
       break;
     case 'b':
@@ -317,6 +323,12 @@ LuaSTGPlus::Particle3DMember LuaSTGPlus::MapParticle3DMember(const char* key) {
               return LuaSTGPlus::Particle3DMember::oy;
           }
           break;
+        case 'z':
+          switch(key[2]) {
+            case '\0':
+              return LuaSTGPlus::Particle3DMember::oz;
+          }
+          break;
       }
       break;
     case 'r':
@@ -330,6 +342,12 @@ LuaSTGPlus::Particle3DMember LuaSTGPlus::MapParticle3DMember(const char* key) {
           }
           break;
         case 'y':
+          switch(key[2]) {
+            case '\0':
+              return LuaSTGPlus::Particle3DMember::ry;
+          }
+          break;
+        case 'z':
           switch(key[2]) {
             case '\0':
               return LuaSTGPlus::Particle3DMember::rz;
@@ -386,6 +404,12 @@ LuaSTGPlus::Particle3DMember LuaSTGPlus::MapParticle3DMember(const char* key) {
         case 'y':
           switch(key[2]) {
             case '\0':
+              return LuaSTGPlus::Particle3DMember::vy;
+          }
+          break;
+        case 'z':
+          switch(key[2]) {
+            case '\0':
               return LuaSTGPlus::Particle3DMember::vz;
           }
           break;
@@ -398,6 +422,12 @@ LuaSTGPlus::Particle3DMember LuaSTGPlus::MapParticle3DMember(const char* key) {
       }
       break;
     case 'y':
+      switch(key[1]) {
+        case '\0':
+          return LuaSTGPlus::Particle3DMember::y;
+      }
+      break;
+    case 'z':
       switch(key[1]) {
         case '\0':
           return LuaSTGPlus::Particle3DMember::z;
@@ -642,6 +672,12 @@ LuaSTGPlus::TexParticle3DMember LuaSTGPlus::MapTexParticle3DMember(const char* k
         case 'y':
           switch(key[2]) {
             case '\0':
+              return LuaSTGPlus::TexParticle3DMember::ay;
+          }
+          break;
+        case 'z':
+          switch(key[2]) {
+            case '\0':
               return LuaSTGPlus::TexParticle3DMember::az;
           }
           break;
@@ -742,6 +778,12 @@ LuaSTGPlus::TexParticle3DMember LuaSTGPlus::MapTexParticle3DMember(const char* k
         case 'y':
           switch(key[2]) {
             case '\0':
+              return LuaSTGPlus::TexParticle3DMember::oy;
+          }
+          break;
+        case 'z':
+          switch(key[2]) {
+            case '\0':
               return LuaSTGPlus::TexParticle3DMember::oz;
           }
           break;
@@ -761,6 +803,12 @@ LuaSTGPlus::TexParticle3DMember LuaSTGPlus::MapTexParticle3DMember(const char* k
           switch(key[2]) {
             case '\0':
               return LuaSTGPlus::TexParticle3DMember::ry;
+          }
+          break;
+        case 'z':
+          switch(key[2]) {
+            case '\0':
+              return LuaSTGPlus::TexParticle3DMember::rz;
           }
           break;
       }
@@ -822,6 +870,12 @@ LuaSTGPlus::TexParticle3DMember LuaSTGPlus::MapTexParticle3DMember(const char* k
         case 'y':
           switch(key[2]) {
             case '\0':
+              return LuaSTGPlus::TexParticle3DMember::vy;
+          }
+          break;
+        case 'z':
+          switch(key[2]) {
+            case '\0':
               return LuaSTGPlus::TexParticle3DMember::vz;
           }
           break;
@@ -843,6 +897,12 @@ LuaSTGPlus::TexParticle3DMember LuaSTGPlus::MapTexParticle3DMember(const char* k
       switch(key[1]) {
         case '\0':
           return LuaSTGPlus::TexParticle3DMember::y;
+      }
+      break;
+    case 'z':
+      switch(key[1]) {
+        case '\0':
+          return LuaSTGPlus::TexParticle3DMember::z;
       }
       break;
   }
