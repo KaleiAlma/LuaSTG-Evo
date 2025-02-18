@@ -698,7 +698,6 @@ static int lib_drawSimpleTexture(lua_State* L)
 
     Core::ScopeObject<LuaSTGPlus::IResourceTexture> ptex2dres = LRESMGR().FindTexture(name);
     auto* ctx = LR2D();
-    translate_blend(ctx, blend);
     check_rendertarget_usage(ptex2dres);
     Core::Graphics::ITexture2D* ptex2d = ptex2dres->GetTexture();
 
@@ -744,6 +743,7 @@ static int lib_drawSimpleTexture(lua_State* L)
     vert[1].x += pos->x; vert[1].y += pos->y;
     vert[2].x += pos->x; vert[2].y += pos->y;
     vert[3].x += pos->x; vert[3].y += pos->y;
+    translate_blend(ctx, blend);
 
     ctx->setTexture(ptex2d);
 

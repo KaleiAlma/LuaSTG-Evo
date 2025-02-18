@@ -267,10 +267,12 @@ void main()
     uv = uv_in;
     col = col_in;
 #if defined(VVALVERTEX_HUE)
-    hue = vec2(cos(col.r * PI * 4.0), sin(col.r * PI * 4.0));
+    float hue_angle = (col.r*2) * PI;
+    hue = vec2(sin(hue_angle), cos(hue_angle));
 #endif
 }}
 )"};
+
 
 const constexpr std::string_view dvert_sv{default_vertex};
 
