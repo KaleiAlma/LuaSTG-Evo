@@ -29,6 +29,9 @@ if(APPLE)
     set_source_files_properties(${CMAKE_CURRENT_LIST_DIR}/app.icns PROPERTIES
         MACOSX_PACKAGE_LOCATION "Resources"
     )
-    set(MACOSX_BUNDLE_ICON_FILE app.icns)
-    set_target_properties(LuaSTG PROPERTIES MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_LIST_DIR}/MacOSXBundleInfo.plist.in)
+    # set(MACOSX_BUNDLE_ICON_FILE app.icns)
+    set_target_properties(LuaSTG PROPERTIES
+        MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_LIST_DIR}/MacOSXBundleInfo.plist.in
+        MACOSX_BUNDLE_ICON_FILE Resources/app.icns
+    )
 endif()

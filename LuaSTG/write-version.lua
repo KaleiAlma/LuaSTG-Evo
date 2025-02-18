@@ -2,7 +2,7 @@
 local version = {
     major = 0,
     minor = 3,
-    patch = 1,
+    patch = 2,
 }
 
 local utf8_bom = "\xEF\xBB\xBF"
@@ -83,7 +83,7 @@ BEGIN
             VALUE "FileDescription", "LuaSTG Evo"
             VALUE "FileVersion", "1.0.0.0"
             VALUE "InternalName", "LuaSTG Evo"
-            VALUE "LegalCopyright", "Copyright 2020-2023 KaleiAlma"
+            VALUE "LegalCopyright", "Copyright 2024-2025 KaleiAlma"
             VALUE "OriginalFilename", "LuaSTG.exe"
             VALUE "ProductName", "LuaSTG Evo"
             VALUE "ProductVersion", "1.0.0.0"
@@ -193,7 +193,7 @@ BEGIN
             VALUE "FileDescription", "LuaSTG Evo"
             VALUE "FileVersion", "%s"
             VALUE "InternalName", "LuaSTG Evo"
-            VALUE "LegalCopyright", "Copyright 2020-2023 KaleiAlma"
+            VALUE "LegalCopyright", "Copyright 2024-2025 KaleiAlma"
             VALUE "OriginalFilename", "LuaSTG.exe"
             VALUE "ProductName", "LuaSTG Evo"
             VALUE "ProductVersion", "%s"
@@ -237,8 +237,80 @@ local function write_rc()
     local rc_str = string.format(rc_fmt, v_str_1, v_str_1, v_str_2, v_str_2)
     ---@type file*
     local f = assert(io.open("LuaSTG/Custom/resource.rc", "wb"))
-    f:write(utf8_bom)
+    -- f:write(utf8_bom)
     f:write(rc_str)
+    f:close()
+end
+
+--------------------------------------------------------------------------------
+
+-- original MacOSXBundleInfo.plist.in file
+--[[
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>English</string>
+	<key>CFBundleExecutable</key>
+	<string>${MACOSX_BUNDLE_EXECUTABLE_NAME}</string>
+	<key>CFBundleGetInfoString</key>
+	<string>${MACOSX_BUNDLE_ICON_FILE}</string>
+	<key>CFBundleIconFile</key>
+	<string>${MACOSX_BUNDLE_INFO_STRING}</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleName</key>
+	<string>LuaSTG</string>
+	<key>CFBundleVersion</key>
+	<string>1.0.0</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CSResourcesFileMapped</key>
+	<true/>
+	<key>SDL_FILESYSTEM_BASE_DIR_TYPE</key>
+	<string>parent</string>
+</dict>
+</plist>
+]]
+
+local app_fmt = [[
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>English</string>
+	<key>CFBundleExecutable</key>
+	<string>${MACOSX_BUNDLE_EXECUTABLE_NAME}</string>
+	<key>CFBundleGetInfoString</key>
+	<string>${MACOSX_BUNDLE_ICON_FILE}</string>
+	<key>CFBundleIconFile</key>
+	<string>${MACOSX_BUNDLE_INFO_STRING}</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleName</key>
+	<string>LuaSTG</string>
+	<key>CFBundleVersion</key>
+	<string>%d.%d.%d</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CSResourcesFileMapped</key>
+	<true/>
+	<key>NSHighResolutionCapable</key>
+	<true/>
+	<key>SDL_FILESYSTEM_BASE_DIR_TYPE</key>
+	<string>parent</string>
+</dict>
+</plist>
+]]
+
+local function write_app()
+    local h_str = string.format(app_fmt,
+        version.major, version.minor, version.patch)
+    ---@type file*
+    local f = assert(io.open("LuaSTG/Custom/MacOSXBundleInfo.plist.in", "wb"))
+    f:write(h_str)
     f:close()
 end
 
@@ -400,9 +472,10 @@ end
 if arg then
     -- Assuming that the global variable arg is specific to the standalone lua interpreter, if it exists, this is the command-line environment
     write_rc()
+    write_app()
     write_manifest()
     write_h()
-    print("[I] wrote 3 files")
+    print("[I] wrote 4 files")
 end
 
 return version

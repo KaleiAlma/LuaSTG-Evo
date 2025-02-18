@@ -7,14 +7,20 @@
 	<key>CFBundleExecutable</key>
 	<string>${MACOSX_BUNDLE_EXECUTABLE_NAME}</string>
 	<key>CFBundleGetInfoString</key>
+	<string>${MACOSX_BUNDLE_ICON_FILE}</string>
+	<key>CFBundleIconFile</key>
 	<string>${MACOSX_BUNDLE_INFO_STRING}</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
 	<string>LuaSTG</string>
+	<key>CFBundleVersion</key>
+	<string>0.3.2</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CSResourcesFileMapped</key>
+	<true/>
+	<key>NSHighResolutionCapable</key>
 	<true/>
 	<key>SDL_FILESYSTEM_BASE_DIR_TYPE</key>
 	<string>parent</string>
