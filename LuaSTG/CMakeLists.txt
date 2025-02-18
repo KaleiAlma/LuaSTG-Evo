@@ -3,7 +3,6 @@
 # add_subdirectory(Shader)
 include(Platform.cmake)
 include(Core.cmake)
-add_subdirectory(Configurer)
 
 # LuaSTG Engine
 
