@@ -172,7 +172,7 @@ set_target_properties(tracy PROPERTIES FOLDER external)
 
 add_library(libqoi STATIC)
 luastg_target_common_options(libqoi)
-target_compile_definitions(libqoi PUBLIC
+target_compile_definitions(libqoi PRIVATE
     QOI_NO_STDIO
     QOI_IMPLEMENTATION
 )
@@ -181,8 +181,9 @@ target_include_directories(libqoi PUBLIC
 )
 target_sources(libqoi PRIVATE
     image.qoi/qoi.h
+    image.qoi-patch/qoi.c
 )
-set_target_properties(libqoi PROPERTIES FOLDER external LINKER_LANGUAGE C)
+set_target_properties(libqoi PROPERTIES FOLDER external)
 
 # ==================== steam api ====================
 
