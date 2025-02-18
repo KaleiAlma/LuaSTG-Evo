@@ -187,7 +187,7 @@ target_sources(libqoi PRIVATE
     #image.qoi-patch/QOITextureLoader11.cpp
 )
 
-set_target_properties(libqoi PROPERTIES FOLDER external LINKER_LANGUAGE CXX)
+set_target_properties(libqoi PROPERTIES FOLDER external LINKER_LANGUAGE C)
 
 # ==================== steam api ====================
 
