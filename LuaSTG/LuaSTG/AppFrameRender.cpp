@@ -132,7 +132,7 @@ namespace LuaSTGPlus
     {
         if (!GetAppModel()->getSwapChain()->saveSnapshotToFile(path))
         {
-            spdlog::error("[luastg] SnapShot: 保存截图到文件'{}'失败", path);
+            spdlog::error("[luastg] SnapShot: Failed to save screenshot to '{}'", path);
             return;
         }
     }
@@ -141,12 +141,12 @@ namespace LuaSTGPlus
         Core::ScopeObject<IResourceTexture> resTex = LRES.FindTexture(tex_name);
         if (!resTex)
         {
-            spdlog::error("[luastg] SaveTexture: 找不到纹理资源'{}'", tex_name);
+            spdlog::error("[luastg] SaveTexture: Texture not found: '{}'", tex_name);
             return;
         }
         if (!resTex->GetTexture()->saveToFile(path))
         {
-            spdlog::error("[luastg] SaveTexture: 保存纹理'{}'到文件'{}'失败", tex_name, path);
+            spdlog::error("[luastg] SaveTexture: Failed to save texture '{}' to '{}'", tex_name, path);
             return;
         }
     }
