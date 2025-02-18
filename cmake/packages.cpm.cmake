@@ -295,4 +295,9 @@ CPMAddPackage(
 # libqoi
 # Unicode utilities
 
-
+CPMAddPackage(
+    NAME libqoi
+    GITHUB_REPOSITORY phoboslab/qoi    
+    GIT_TAG master
+    OPTIONS
+)
