@@ -22,7 +22,7 @@ namespace LuaSTGPlus::Particle
 			Core::Vector2F scale;
 			Core::Color4B color;
 			uint32_t timer;
-			Core::RectF uv;
+			Core::RectI uv;
 			float extra1;
 			float extra2;
 			float extra3;
