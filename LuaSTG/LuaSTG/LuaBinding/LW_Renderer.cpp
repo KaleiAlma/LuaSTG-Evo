@@ -668,9 +668,9 @@ static int lib_drawTexture(lua_State* L)
     return 0;
 }
 /*
-RenderSimpleTexture(tex, blend, pos, rect, rot, scale,color)
+RenderTextureRect(tex, blend, pos, rect, rot, scale, color)
 */
-static int lib_drawSimpleTexture(lua_State* L) 
+static int lib_drawTextureRect(lua_State* L) 
 {
     validate_render_scope();
 
@@ -1112,7 +1112,7 @@ static luaL_Reg const lib_compat[] = {
     { "Render3D", &lib_drawSprite3D },
     { "RenderAnimation", &lib_drawSpriteSequence },
     { "RenderTexture", &lib_drawTexture },
-    { "RenderSimpleTexture", &lib_drawSimpleTexture },
+    { "RenderTextureRect", &lib_drawTextureRect },
     { "RenderMesh", &lib_drawMesh },
     { "RenderModel", &lib_drawModel },
     { "SetFog", &compat_SetFog },
