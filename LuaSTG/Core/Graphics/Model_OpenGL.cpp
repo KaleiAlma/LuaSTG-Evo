@@ -485,7 +485,7 @@ namespace Core::Graphics
                     }
                     glBindBuffer(GL_ARRAY_BUFFER, mblock.vertex_buffer);
                     glBufferData(GL_ARRAY_BUFFER, bytewidth, buffer.data.data() + bufferview.byteOffset + accessor.byteOffset, GL_STATIC_DRAW);
-                    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+                    glVertexAttribPointer(0, tinygltf::GetNumComponentsInType(accessor.type), accessor.componentType, GL_FALSE, 0, 0);
 
                     mblock.draw_count = accessor.count;
                 }
@@ -505,7 +505,7 @@ namespace Core::Graphics
                     }
                     glBindBuffer(GL_ARRAY_BUFFER, mblock.normal_buffer);
                     glBufferData(GL_ARRAY_BUFFER, bytewidth, buffer.data.data() + bufferview.byteOffset + accessor.byteOffset, GL_STATIC_DRAW);
-                    glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 0, 0);
+                    glVertexAttribPointer(3, tinygltf::GetNumComponentsInType(accessor.type), accessor.componentType, GL_FALSE, 0, 0);
                 }
                 if (prim.attributes.contains("COLOR_0"))
                 {
@@ -523,7 +523,7 @@ namespace Core::Graphics
                     }
                     glBindBuffer(GL_ARRAY_BUFFER, mblock.color_buffer);
                     glBufferData(GL_ARRAY_BUFFER, bytewidth, buffer.data.data() + bufferview.byteOffset + accessor.byteOffset, GL_STATIC_DRAW);
-                    glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, 0, 0);
+                    glVertexAttribPointer(2, tinygltf::GetNumComponentsInType(accessor.type), accessor.componentType, GL_TRUE, 0, 0);
                 }
                 if (prim.attributes.contains("TEXCOORD_0"))
                 {
@@ -541,7 +541,7 @@ namespace Core::Graphics
                     }
                     glBindBuffer(GL_ARRAY_BUFFER, mblock.uv_buffer);
                     glBufferData(GL_ARRAY_BUFFER, bytewidth, buffer.data.data() + bufferview.byteOffset + accessor.byteOffset, GL_STATIC_DRAW);
-                    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, 0);
+                    glVertexAttribPointer(1, tinygltf::GetNumComponentsInType(accessor.type), accessor.componentType, GL_FALSE, 0, 0);
                 }
                 if (prim.indices >= 0)
                 {
