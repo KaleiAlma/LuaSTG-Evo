@@ -291,3 +291,13 @@ CPMAddPackage(
     GITHUB_REPOSITORY uni-algo/uni-algo
     OPTIONS
 )
+
+# libqoi
+# Unicode utilities
+
+CPMAddPackage(
+    NAME libqoi
+    GIT_TAG master
+    GITHUB_REPOSITORY phoboslab/qoi
+    OPTIONS
+)
