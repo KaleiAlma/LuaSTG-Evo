@@ -851,25 +851,29 @@ namespace LuaSTGPlus
             } while (false);
             return 0;  
         case LuaSTG::GameObjectMember::VPOS:
-            Core::Vector2F* const pos = LuaWrapper::Vector2Wrapper::Cast(L, 3);
-            x = pos->x;
-            y = pos->y;
-            return 0;
+            {
+                Core::Vector2F* const pos = LuaWrapper::Vector2Wrapper::Cast(L, 3);
+                x = pos->x;
+                y = pos->y;
+            } return 0;
         case LuaSTG::GameObjectMember::VVEL:
-            Core::Vector2F* const pos = LuaWrapper::Vector2Wrapper::Cast(L, 3);
-            vx = pos->x;
-            vy = pos->y;
-            return 0;
+            {
+                Core::Vector2F* const vel = LuaWrapper::Vector2Wrapper::Cast(L, 3);
+                vx = vel->x;
+                vy = vel->y;
+            } return 0;
         case LuaSTG::GameObjectMember::VACCEL:
-            Core::Vector2F* const pos = LuaWrapper::Vector2Wrapper::Cast(L, 3);
-            ax = pos->x;
-            ay = pos->y;
-            return 0;
+            {
+                Core::Vector2F* const accel = LuaWrapper::Vector2Wrapper::Cast(L, 3);
+                ax = accel->x;
+                ay = accel->y;
+            } return 0;
         case LuaSTG::GameObjectMember::VVSCALE:
-            Core::Vector2F* const pos = LuaWrapper::Vector2Wrapper::Cast(L, 3);
-            hscale = pos->x;
-            vscale = pos->y;
-            return 0;
+            {
+                Core::Vector2F* const scale = LuaWrapper::Vector2Wrapper::Cast(L, 3);
+                hscale = scale->x;
+                vscale = scale->y;
+            } return 0;
 
         case LuaSTG::GameObjectMember::GROUP:
             do {
