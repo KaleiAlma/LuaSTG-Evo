@@ -7,6 +7,7 @@ namespace LuaSTGPlus
         m_player->reset();
 
         m_player->setVolume(vol);
+        m_player->setTime(position);
 
         m_player->start();
         m_status = 2;
@@ -33,7 +34,13 @@ namespace LuaSTGPlus
     float ResourceMusicImpl::GetVolume() { return m_player->getVolume(); }
     bool ResourceMusicImpl::SetSpeed(float speed) { return m_player->setSpeed(speed); }
     float ResourceMusicImpl::GetSpeed() { return m_player->getSpeed(); }
-    void ResourceMusicImpl::SetLoop(bool v) { m_player->setLoop(v, m_start, m_end - m_start); }
+    void ResourceMusicImpl::SetLoop(bool v) { m_player->setLoop(v); }
+    bool ResourceMusicImpl::SetLoopRange(double a, double b) { return m_player->setLoopRange(a, b); }
+    bool ResourceMusicImpl::GetLoop() { return m_player->getLoop(); }
+    void ResourceMusicImpl::GetLoopRange(double& a, double& b) { m_player->getLoopRange(a, b); }
+    bool ResourceMusicImpl::SetTime(double position) { return m_player->setTime(position); }
+    double ResourceMusicImpl::GetTime() { return m_player->getTime(); }
+    double ResourceMusicImpl::GetTotalTime() { return m_player->getTotalTime(); }
 
     ResourceMusicImpl::ResourceMusicImpl(const char* name, Core::Audio::IAudioPlayer* p_player, double start, double end)
         : ResourceBaseImpl(ResourceType::Music, name)

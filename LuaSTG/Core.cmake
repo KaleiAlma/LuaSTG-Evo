@@ -6,6 +6,7 @@ luastg_target_common_options(Core)
 luastg_target_more_warning(Core)
 target_compile_definitions(Core PRIVATE
     LUASTG_CORE_USING_IMGUI
+    MA_USE_STDINT
 )
 target_include_directories(Core PUBLIC
     .

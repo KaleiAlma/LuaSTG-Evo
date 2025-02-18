@@ -109,7 +109,10 @@ namespace Core::Audio
         double getTotalTime();
         double getTime();
         bool setTime(double time);
-        bool setLoop(bool enable, double start_pos, double length);
+        bool getLoop();
+        void getLoopRange(double& start_pos, double& length);
+        bool setLoop(bool enable);
+        bool setLoopRange(double start_pos, double length);
 
         float getVolume();
         bool setVolume(float v);
@@ -167,7 +170,10 @@ namespace Core::Audio
         double getTotalTime();
         double getTime();
         bool setTime(double t);
-        bool setLoop(bool enable, double start_pos, double length);
+        bool getLoop();
+        void getLoopRange(double& start_pos, double& length);
+        bool setLoop(bool enable);
+        bool setLoopRange(double start_pos, double length);
 
         float getVolume();
         bool setVolume(float v);
@@ -262,7 +268,10 @@ namespace Core::Audio
         double getTotalTime();
         double getTime();
         bool setTime(double t);
-        bool setLoop(bool enable, double start_pos, double length);
+        bool getLoop();
+        void getLoopRange(double& start_pos, double& length);
+        bool setLoop(bool enable);
+        bool setLoopRange(double start_pos, double length);
 
         float getVolume();
         bool setVolume(float v);

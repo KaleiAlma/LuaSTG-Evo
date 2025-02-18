@@ -25,7 +25,10 @@ namespace Core::Audio
 		virtual double getTotalTime() = 0;
 		virtual double getTime() = 0;
 		virtual bool setTime(double t) = 0;
-		virtual bool setLoop(bool enable, double start_pos, double length) = 0;
+		virtual bool getLoop() = 0;
+		virtual void getLoopRange(double& start_pos, double& length) = 0;
+		virtual bool setLoop(bool enable) = 0;
+		virtual bool setLoopRange(double start_pos, double length) = 0;
 		
 		virtual float getVolume() = 0;
 		virtual bool setVolume(float v) = 0;

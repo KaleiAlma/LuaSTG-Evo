@@ -549,7 +549,8 @@ namespace LuaSTGPlus
                 spdlog::error("[luastg] LoadMusic: Unable to create stream audio player");
                 return false;
             }
-            if (!p_player->setLoop(true, start, end - start))
+            p_player->setLoop(true);
+            if (!p_player->setLoopRange(start, end - start))
                 spdlog::error("[luastg] StreamAudioPlayer: invalid loop");
         }
         else
@@ -560,7 +561,8 @@ namespace LuaSTGPlus
                 spdlog::error("[luastg] LoadMusic: Unable to create once-decode audio player");
                 return false;
             }
-            if (!p_player->setLoop(true, start, end - start))
+            p_player->setLoop(true);
+            if (!p_player->setLoopRange(start, end - start))
                 spdlog::error("[luastg] LoopAudioPlayer: invalid loop");
         }
 

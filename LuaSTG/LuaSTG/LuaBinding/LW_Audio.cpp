@@ -1,6 +1,9 @@
 #include "LuaBinding/LuaWrapper.hpp"
 #include "LuaBinding/lua_utility.hpp"
 #include "AppFrame.h"
+#include "lauxlib.h"
+#include "lua.h"
+#include <cassert>
 
 // 微软我日你仙人
 #ifdef PlaySound
@@ -133,7 +136,8 @@ void LuaSTGPlus::LuaWrapper::AudioWrapper::Register(lua_State* L)noexcept
         }
         static int UpdateSound(lua_State*)noexcept
         {
-            // 否决的方法
+            // Removed method
+            // TODO: why?
             return 0;
         }
 
@@ -180,13 +184,22 @@ void LuaSTGPlus::LuaWrapper::AudioWrapper::Register(lua_State* L)noexcept
             if (!p)
                 return luaL_error(L, "music '%s' not found.", s);
             if (p->IsPlaying())
+            {
+                assert(!p->IsPaused() && !p->IsStopped());
                 lua_pushstring(L, "playing");
+            }
             else if (p->IsPaused())
+            {
+                assert(!p->IsStopped());
                 lua_pushstring(L, "paused");
+            }
             //else if (p->IsStopped())
                 //lua_pushstring(L, "stopped");
             else
+            {
+                assert(p->IsStopped());
                 lua_pushstring(L, "stopped");
+            }
             //lua_pushstring(L, "paused");
             return 1;
         }
@@ -271,6 +284,60 @@ void LuaSTGPlus::LuaWrapper::AudioWrapper::Register(lua_State* L)noexcept
             p->SetLoop(loop);
             return 0;
         }
+        static int SetBGMLoopRange(lua_State* L) {
+            const char* s = luaL_checkstring(L, 1);
+            double a = luaL_checknumber(L, 2);
+            double b = luaL_checknumber(L, 3);
+            Core::ScopeObject<IResourceMusic> p = LRES.FindMusic(s);
+            if (!p)
+                return luaL_error(L, "music '%s' not found.", s);
+            p->SetLoopRange(a, b - a);
+            return 0;
+        }
+        static int GetBGMLoop(lua_State* L) {
+            const char* s = luaL_checkstring(L, 1);
+            Core::ScopeObject<IResourceMusic> p = LRES.FindMusic(s);
+            if (!p)
+                return luaL_error(L, "music '%s' not found.", s);
+            lua_pushboolean(L, p->GetLoop());
+            return 1;
+        }
+        static int GetBGMLoopRange(lua_State* L) {
+            const char* s = luaL_checkstring(L, 1);
+            Core::ScopeObject<IResourceMusic> p = LRES.FindMusic(s);
+            if (!p)
+                return luaL_error(L, "music '%s' not found.", s);
+            double a, b;
+            p->GetLoopRange(a, b);
+            lua_pushnumber(L, a);
+            lua_pushnumber(L, b + a);
+            return 2;
+        }
+        static int SetBGMTime(lua_State* L) {
+            const char* s = luaL_checkstring(L, 1);
+            double a = luaL_checkint(L, 2);
+            Core::ScopeObject<IResourceMusic> p = LRES.FindMusic(s);
+            if (!p)
+                return luaL_error(L, "music '%s' not found.", s);
+            p->SetTime(a);
+            return 0;
+        }
+        static int GetBGMTime(lua_State* L) {
+            const char* s = luaL_checkstring(L, 1);
+            Core::ScopeObject<IResourceMusic> p = LRES.FindMusic(s);
+            if (!p)
+                return luaL_error(L, "music '%s' not found.", s);
+            lua_pushnumber(L, p->GetTime());
+            return 1;
+        }
+        static int GetBGMTotalTime(lua_State* L) {
+            const char* s = luaL_checkstring(L, 1);
+            Core::ScopeObject<IResourceMusic> p = LRES.FindMusic(s);
+            if (!p)
+                return luaL_error(L, "music '%s' not found.", s);
+            lua_pushnumber(L, p->GetTotalTime());
+            return 1;
+        }
     };
 
     luaL_Reg const lib[] = {
@@ -300,6 +367,12 @@ void LuaSTGPlus::LuaWrapper::AudioWrapper::Register(lua_State* L)noexcept
         { "SetBGMSpeed", &Wrapper::SetBGMSpeed },
         { "GetBGMSpeed", &Wrapper::GetBGMSpeed },
         { "SetBGMLoop", &Wrapper::SetBGMLoop },
+        { "SetBGMLoopRange", &Wrapper::SetBGMLoopRange },
+        { "GetBGMLoop", &Wrapper::GetBGMLoop },
+        { "GetBGMLoopRange", &Wrapper::GetBGMLoopRange },
+        { "SetBGMTime", &Wrapper::SetBGMTime },
+        { "GetBGMTime", &Wrapper::GetBGMTime },
+        { "GetBGMTotalTime", &Wrapper::GetBGMTotalTime },
         { NULL, NULL },
     };
 

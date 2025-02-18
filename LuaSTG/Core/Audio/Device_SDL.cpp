@@ -4,6 +4,8 @@
 #include "Core/Audio/Device.hpp"
 
 #include <algorithm>
+#include <cassert>
+#include <cstdint>
 #include <string>
 
 #include "SDL.h"
@@ -11,7 +13,7 @@
 
 // because windows headers get included in miniaudio implementation
 #define NOMINMAX
-#define MINIAUDIO_IMPLEMENTATION
+#define MA_IMPLEMENTATION
 #include "miniaudio.h"
 #include "minivorbis.h"
 
@@ -402,7 +404,10 @@ namespace Core::Audio
     double AudioPlayer_SDL::getTotalTime() { assert(false); return 0.0; }
     double AudioPlayer_SDL::getTime() { assert(false); return 0.0; }
     bool AudioPlayer_SDL::setTime(double) { assert(false); return true; }
-    bool AudioPlayer_SDL::setLoop(bool, double, double) { assert(false); return true; }
+    bool AudioPlayer_SDL::getLoop() { assert(false); return true; }
+    void AudioPlayer_SDL::getLoopRange(double&, double&) { assert(false); }
+    bool AudioPlayer_SDL::setLoop(bool) { assert(false); return true; }
+    bool AudioPlayer_SDL::setLoopRange(double, double) { assert(false); return true; }
 
     float AudioPlayer_SDL::getVolume()
     {
@@ -537,8 +542,12 @@ namespace Core::Audio
         return m_is_playing;
     }
 
-    double LoopAudioPlayer_SDL::getTotalTime() { assert(false); return 0.0; }
-    double LoopAudioPlayer_SDL::getTime() { assert(false); return 0.0; }
+    double LoopAudioPlayer_SDL::getTotalTime() {
+        return (double)m_total_frame / (double)m_sample_rate;
+    }
+    double LoopAudioPlayer_SDL::getTime() {
+        return ma_sound_get_time_in_pcm_frames(&m_sound) / (double)m_sample_rate;
+    }
     bool LoopAudioPlayer_SDL::setTime(double t)
     {
         uint32_t const start_sample = (uint32_t)((double)m_sample_rate * t);
@@ -549,18 +558,38 @@ namespace Core::Audio
         m_start_time = t;
         return MA_SUCCESS == ma_sound_seek_to_pcm_frame(&m_sound, start_sample);
     }
-    bool LoopAudioPlayer_SDL::setLoop(bool enable, double start_pos, double length)
+    bool LoopAudioPlayer_SDL::getLoop()
+    {
+        return m_is_loop;
+    }
+    void LoopAudioPlayer_SDL::getLoopRange(double& start_pos, double& length)
+    {
+        start_pos = m_start_time;
+        length = m_loop_length;
+    }
+    bool LoopAudioPlayer_SDL::setLoop(bool enable)
     {
         m_is_loop = enable;
+        ma_sound_set_looping(&m_sound, enable);
+        return true;
+    }
+    bool LoopAudioPlayer_SDL::setLoopRange(double start_pos, double length)
+    {
         m_loop_start = start_pos;
         m_loop_length = length;
         uint32_t const loop_start_sample = (uint32_t)((double)m_sample_rate * m_loop_start);
         uint32_t const loop_range_sample_count = (uint32_t)((double)m_sample_rate * m_loop_length);
-        ma_sound_set_looping(&m_sound, enable);
         assert((loop_start_sample + loop_range_sample_count) <= m_total_frame);
-        ma_result res = ma_data_source_set_loop_point_in_pcm_frames(m_sound.pDataSource, loop_start_sample, loop_start_sample + loop_range_sample_count);
-        if (res != MA_SUCCESS)
-            spdlog::error("[core] setLoop failed: {}", res);
+        ma_result res = ma_data_source_set_loop_point_in_pcm_frames(
+            m_sound.pDataSource,
+            loop_start_sample,
+            loop_start_sample + loop_range_sample_count
+        );
+        if (res != MA_SUCCESS) {
+            assert(false);
+            spdlog::error("[core] setLoop failed: {} (ma_result)", (int)res);
+            return false;
+        }
         return (loop_start_sample + loop_range_sample_count) <= m_total_frame;
     }
 
@@ -714,8 +743,12 @@ namespace Core::Audio
         return m_is_playing;
     }
 
-    double StreamAudioPlayer_SDL::getTotalTime() { assert(false); return 0.0; }
-    double StreamAudioPlayer_SDL::getTime() { assert(false); return 0.0; }
+    double StreamAudioPlayer_SDL::getTotalTime() {
+        return (double)m_total_frame / (double)m_sample_rate;
+    }
+    double StreamAudioPlayer_SDL::getTime() {
+        return ma_sound_get_time_in_pcm_frames(&m_sound) / (double)m_sample_rate;
+    }
     bool StreamAudioPlayer_SDL::setTime(double t)
     {
         uint32_t const start_sample = (uint32_t)((double)m_sample_rate * t);
@@ -726,18 +759,38 @@ namespace Core::Audio
         m_start_time = t;
         return MA_SUCCESS == ma_sound_seek_to_pcm_frame(&m_sound, start_sample);
     }
-    bool StreamAudioPlayer_SDL::setLoop(bool enable, double start_pos, double length)
+    bool StreamAudioPlayer_SDL::getLoop()
+    {
+        return m_is_loop;
+    }
+    void StreamAudioPlayer_SDL::getLoopRange(double& start_pos, double& length)
+    {
+        start_pos = m_start_time;
+        length = m_loop_length;
+    }
+    bool StreamAudioPlayer_SDL::setLoop(bool enable)
     {
         m_is_loop = enable;
+        ma_sound_set_looping(&m_sound, enable);
+        return true;
+    }
+    bool StreamAudioPlayer_SDL::setLoopRange(double start_pos, double length)
+    {
         m_loop_start = start_pos;
         m_loop_length = length;
         uint32_t const loop_start_sample = (uint32_t)((double)m_sample_rate * m_loop_start);
         uint32_t const loop_range_sample_count = (uint32_t)((double)m_sample_rate * m_loop_length);
-        ma_sound_set_looping(&m_sound, enable);
         assert((loop_start_sample + loop_range_sample_count) <= m_total_frame);
-        ma_result res = ma_data_source_set_loop_point_in_pcm_frames(m_sound.pDataSource, loop_start_sample, loop_start_sample + loop_range_sample_count);
-        if (res != MA_SUCCESS)
-            spdlog::error("[core] setLoop failed: {}", res);
+        ma_result res = ma_data_source_set_loop_point_in_pcm_frames(
+            m_sound.pDataSource,
+            loop_start_sample,
+            loop_start_sample + loop_range_sample_count
+        );
+        if (res != MA_SUCCESS) {
+            assert(false);
+            spdlog::error("[core] setLoop failed: {} (ma_result)", (int)res);
+            return false;
+        }
         return (loop_start_sample + loop_range_sample_count) <= m_total_frame;
     }
 
@@ -819,13 +872,16 @@ namespace Core::Audio
             ma_result r = ma_node_attach_output_bus(&m_node, 0, &m_shared->grp_bgm, 0);
             if (MA_SUCCESS != r)
             {
-                spdlog::info("[core] (StreamAudioPlayer_SDL) Could not attach AudioPeekNode ({})", r);
+                spdlog::warn("[core] (StreamAudioPlayer_SDL) Could not attach AudioPeekNode: {} (ma_result)", (int)r);
+                spdlog::warn("[core] (StreamAudioPlayer_SDL) FFT disabled.");
+                m_fft_enable = false;
             }
-            m_node.raw_buffer.resize(2048);
+            else
+                m_node.raw_buffer.resize(2048);
         }
         else
         {
-            spdlog::info("[core] (StreamAudioPlayer_SDL) Could not create AudioPeekNode. FFT disabled");
+            spdlog::warn("[core] (StreamAudioPlayer_SDL) Could not create AudioPeekNode. FFT disabled");
             m_fft_enable = false;
         }
 
