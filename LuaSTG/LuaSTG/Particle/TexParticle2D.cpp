@@ -26,11 +26,15 @@ namespace LuaSTGPlus::Particle
             float const w_2 = p.uv.width()  / 2.f;
             float const h_2 = p.uv.height() / 2.f;
 
+            Core::Vector2U const size = tex->GetTexture()->getSize();
+            float const uscale = 1.0f / (float)size.x;
+            float const vscale = 1.0f / (float)size.y;
+
             Core::RectF const rect = Core::RectF(
-                (p.uv.a.x - w_2) * p.scale.x,
-                (p.uv.a.y - h_2) * p.scale.y,
-                (p.uv.b.x - w_2) * p.scale.x,
-                (p.uv.b.y - h_2) * p.scale.y
+                (p.uv.a.x - w_2) * p.scale.x * uscale,
+                (p.uv.a.y - h_2) * p.scale.y * vscale,
+                (p.uv.b.x - w_2) * p.scale.x * uscale,
+                (p.uv.b.y - h_2) * p.scale.y * vscale
             );
 
             Core::Graphics::IRenderer::DrawVertex vert[4] = {
