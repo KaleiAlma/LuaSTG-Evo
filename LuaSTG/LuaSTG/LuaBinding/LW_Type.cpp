@@ -333,6 +333,7 @@ namespace LuaSTGPlus::LuaWrapper // Vector2
         {
         #define GETUDATA(p, i) Core::Vector2F* (p) = Cast(L, i);
         #define GETMATDATA(p, i) Core::Matrix2F* (p) = Matrix2Wrapper::Cast(L, i);
+        #define GETMAT3DATA(p, i) Core::Matrix3F* (p) = Matrix3Wrapper::Cast(L, i);
 
             static int Angle(lua_State* L)
             {

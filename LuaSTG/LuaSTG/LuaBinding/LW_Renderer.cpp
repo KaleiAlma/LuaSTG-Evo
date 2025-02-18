@@ -667,6 +667,90 @@ static int lib_drawTexture(lua_State* L)
 
     return 0;
 }
+/*
+RenderSimpleTexture(tex, blend, pos, rect, rot, scale,color)
+*/
+static int lib_drawSimpleTexture(lua_State* L) 
+{
+    validate_render_scope();
+
+    const char* name = luaL_checkstring(L, 1);
+    LuaSTGPlus::BlendMode blend = LuaSTGPlus::TranslateBlendMode(L, 2);
+    Core::Vector2F* const pos = LuaSTGPlus::LuaWrapper::Vector2Wrapper::Cast(L, 3);
+    Core::RectF* const uvrect = LuaSTGPlus::LuaWrapper::RectWrapper::Cast(L, 4);
+    const float rot = (float)luaL_optnumber(L, 5, 0.0f) * L_DEG_TO_RAD;
+    Core::Vector2F* const scale = LuaSTGPlus::LuaWrapper::Vector2Wrapper::Cast(L, 6);
+    Core::Color4B* tColors[4];
+    if (lua_gettop(L) == 10){
+        tColors[0] = LuaSTGPlus::LuaWrapper::ColorWrapper::Cast(L, 7);
+        tColors[1] = LuaSTGPlus::LuaWrapper::ColorWrapper::Cast(L, 8);
+        tColors[2] = LuaSTGPlus::LuaWrapper::ColorWrapper::Cast(L, 9);
+        tColors[3] = LuaSTGPlus::LuaWrapper::ColorWrapper::Cast(L, 10);
+    }
+    else{
+        
+        tColors[0] = LuaSTGPlus::LuaWrapper::ColorWrapper::Cast(L, 7);
+        tColors[1] = LuaSTGPlus::LuaWrapper::ColorWrapper::Cast(L, 7);
+        tColors[2] = LuaSTGPlus::LuaWrapper::ColorWrapper::Cast(L, 7);
+        tColors[3] = LuaSTGPlus::LuaWrapper::ColorWrapper::Cast(L, 7);
+    }
+    
+
+    Core::ScopeObject<LuaSTGPlus::IResourceTexture> ptex2dres = LRESMGR().FindTexture(name);
+    auto* ctx = LR2D();
+    translate_blend(ctx, blend);
+    check_rendertarget_usage(ptex2dres);
+    Core::Graphics::ITexture2D* ptex2d = ptex2dres->GetTexture();
+
+    float const w_2 = uvrect->width()  / 2.f;
+    float const h_2 = uvrect->height() / 2.f;
+
+    Core::Vector2U const size = ptex2d->getSize();
+    float const uscale = 1.0f / (float)size.x;
+    float const vscale = 1.0f / (float)size.y;
+    Core::RectF const rect = Core::RectF(
+        (-w_2) * scale->x,
+        (-h_2) * scale->y,
+        (w_2) * scale->x,
+        (h_2) * scale->y
+    );
+
+    Core::Graphics::IRenderer::DrawVertex vert[4] = {
+        Core::Graphics::IRenderer::DrawVertex(rect.a.x, rect.a.y, 0.0f, uvrect->a.x*uscale, uvrect->b.y*vscale, tColors[0]->color()),
+        Core::Graphics::IRenderer::DrawVertex(rect.b.x, rect.a.y, 0.0f, uvrect->b.x*uscale, uvrect->b.y*vscale, tColors[1]->color()),
+        Core::Graphics::IRenderer::DrawVertex(rect.b.x, rect.b.y, 0.0f, uvrect->b.x*uscale, uvrect->a.y*vscale, tColors[2]->color()),
+        Core::Graphics::IRenderer::DrawVertex(rect.a.x, rect.b.y, 0.0f, uvrect->a.x*uscale, uvrect->a.y*vscale, tColors[3]->color()),
+    };
+
+
+    float const sinv = sinf(rot);
+    float const cosv = cosf(rot);
+
+#define rotate_xy(UNIT) \
+    {\
+        float const tx = vert[UNIT].x * cosv - vert[UNIT].y * sinv;\
+        float const ty = vert[UNIT].x * sinv + vert[UNIT].y * cosv;\
+        vert[UNIT].x = tx;\
+        vert[UNIT].y = ty;\
+    }
+
+    rotate_xy(0);
+    rotate_xy(1);
+    rotate_xy(2);
+    rotate_xy(3);
+#undef rotate_xy
+
+    vert[0].x += pos->x; vert[0].y += pos->y;
+    vert[1].x += pos->x; vert[1].y += pos->y;
+    vert[2].x += pos->x; vert[2].y += pos->y;
+    vert[3].x += pos->x; vert[3].y += pos->y;
+
+    ctx->setTexture(ptex2d);
+
+    ctx->drawQuad(vert[0], vert[1], vert[2], vert[3]);
+
+    return 0;
+}
 static int lib_drawMesh(lua_State* L) 
 {
     validate_render_scope();
@@ -1028,6 +1112,7 @@ static luaL_Reg const lib_compat[] = {
     { "Render3D", &lib_drawSprite3D },
     { "RenderAnimation", &lib_drawSpriteSequence },
     { "RenderTexture", &lib_drawTexture },
+    { "RenderSimpleTexture", &lib_drawSimpleTexture },
     { "RenderMesh", &lib_drawMesh },
     { "RenderModel", &lib_drawModel },
     { "SetFog", &compat_SetFog },
