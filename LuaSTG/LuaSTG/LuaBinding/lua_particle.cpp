@@ -731,7 +731,7 @@ int lua_texpool2d_AddParticle(lua_State* L)
     }
 
     TexParticlePool2D::Particle** ud = static_cast<TexParticlePool2D::Particle**>(lua_newuserdata(L, sizeof(**ud)));
-    luaL_setmetatable(L, ID_Particle2D.data());
+    luaL_setmetatable(L, ID_TexParticle2D.data());
     new (ud) TexParticlePool2D::Particle* { (*self)->AddParticle(std::move(p)) };
 
     return 1;
@@ -1059,7 +1059,7 @@ int lua_texpool3d_AddParticle(lua_State* L)
     };
 
     TexParticlePool3D::Particle** ud = static_cast<TexParticlePool3D::Particle**>(lua_newuserdata(L, sizeof(**ud)));
-    luaL_setmetatable(L, ID_Particle3D.data());
+    luaL_setmetatable(L, ID_TexParticle3D.data());
     new (ud) TexParticlePool3D::Particle* { (*self)->AddParticle(std::move(p)) };
 
     return 1;
