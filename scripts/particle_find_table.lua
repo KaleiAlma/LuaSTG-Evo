@@ -27,6 +27,12 @@ local lstg_Particle2D = {
         E("extra1"    , "extra1"    ),
         E("extra2"    , "extra2"    ),
         E("extra3"    , "extra3"    ),
+        E("angle", "angle"  ),
+        E("speed", "speed"  ),
+        E("pos", "pos"  ),
+        E("vel", "vel"  ),
+        E("accel", "accel"  ),
+        E("scale", "scale"  ),
     },
 }
 
@@ -63,6 +69,12 @@ local lstg_Particle3D = {
         E("extra2"    , "extra2"    ),
         E("extra3"    , "extra3"    ),
         E("extra4"    , "extra4"    ),
+        E("angle", "angle"  ),
+        E("speed", "speed"  ),
+        E("pos", "pos"  ),
+        E("vel", "vel"  ),
+        E("accel", "accel"  ),
+        E("scale", "scale"  ),
     },
 }
 
@@ -95,6 +107,12 @@ local lstg_TexParticle2D = {
         E("v"         , "v"         ),
         E("w"         , "w"         ),
         E("h"         , "h"         ),
+        E("angle", "angle"  ),
+        E("speed", "speed"  ),
+        E("pos", "pos"  ),
+        E("vel", "vel"  ),
+        E("accel", "accel"  ),
+        E("scale", "scale"  ),
     },
 }
 
@@ -135,6 +153,11 @@ local lstg_TexParticle3D = {
         E("v"         , "v"         ),
         E("w"         , "w"         ),
         E("h"         , "h"         ),
+        E("speed", "speed"  ),
+        E("pos", "pos"  ),
+        E("vel", "vel"  ),
+        E("accel", "accel"  ),
+        E("scale", "scale"  ),
     },
 }
 

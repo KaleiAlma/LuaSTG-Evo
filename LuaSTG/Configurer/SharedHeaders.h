@@ -6,7 +6,6 @@
 #ifdef NTDDI_VERSION
 #undef NTDDI_VERSION
 #endif
-#include <sdkddkver.h>
 
 #include <vector>
 #include <string>
@@ -21,10 +20,11 @@
 #include "nlohmann/json.hpp"
 
 #define NOMINMAX
-#include <Windows.h>
+/* #include <Windows.h>
 #include <wrl/client.h>
 #include <wrl/wrappers/corewrappers.h>
 #include <dxgi1_6.h>
 #include <d3d11_4.h>
 
 #include "utf8.hpp"
+ */

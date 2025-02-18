@@ -55,6 +55,10 @@ local lstg_GameObject = {
         -- TODO: fuck ex+
         E("_angle", "VANGLE"  ),
         E("_speed", "VSPEED"  ),
+        E("_pos", "VPOS"  ),
+        E("_vel", "VVEL"  ),
+        E("_accel", "VACCEL"  ),
+        E("_scale", "VVSCALE"  ),
         E("pause" , "PAUSE"  ),
         E("nopause", "IGNORESUPERPAUSE"  ),
         E("rmove" , "RESOLVEMOVE"  ),

@@ -1,0 +1,29 @@
+[2025-02-18 03:10:21] [I] LuaSTG Evo v0.3.0
+[2025-02-18 03:10:21] [I] [luastg] Initializing Engine
+[2025-02-18 03:10:21] [I] [luastg] Initializing LuaJIT
+[2025-02-18 03:10:21] [I] [luajit] LuaJIT 2.1.1739853759
+[2025-02-18 03:10:21] [I] [luajit] Registering libraries and packages
+[2025-02-18 03:10:21] [I] [luajit] Storing command line arguments
+[2025-02-18 03:10:21] [I] [luajit] [0] /home/zino_lath/Gamedev/LuaSTG-Evo/build/bin/LuaSTG
+[2025-02-18 03:10:21] [I] [luastg] Loading launch script
+[2025-02-18 03:10:21] [E] [luastg] Can't find launch script ('./launch')
+[2025-02-18 03:10:21] [I] [core] OpenGL 4.1
+[2025-02-18 03:10:21] [I] [core] 4.1.0 NVIDIA 570.86.16
+[2025-02-18 03:10:21] [I] [core] max texture size: 32768
+[2025-02-18 03:10:21] [I] [core] created OpenGL Dummy Device
+[2025-02-18 03:10:21] [I] [core] Starting Renderer Initialization
+[2025-02-18 03:10:21] [I] [core] Renderer Initialized
+[2025-02-18 03:10:21] [I] [luastg] Initializing object pool with capacity: 32768
+[2025-02-18 03:10:21] [I] [luastg] Display mode switched: Windowed -> Windowed
+[2025-02-18 03:10:21] [I] [luastg] Load main script
+[2025-02-18 03:10:21] [E] [luastg] No main script found (searched: 'core.lua', 'main.lua', 'src/main.lua')
+[2025-02-18 03:10:21] [I] [luastg] Initialization Complete
+[2025-02-18 03:10:21] [I] [luastg] Start Update/Render Loop
+[2025-02-18 03:10:23] [I] [luastg] Exiting Update & Render Loop
+[2025-02-18 03:10:23] [I] [luastg] Object pool destroyed
+[2025-02-18 03:10:23] [I] [luastg] LuaJIT shutdown
+[2025-02-18 03:10:23] [I] [luastg] 'global' pools cleared
+[2025-02-18 03:10:23] [I] [luastg] 'stage' pools cleared
+[2025-02-18 03:10:23] [I] [luastg] Resources freed
+[2025-02-18 03:10:23] [I] [luastg] Freed packages
+[2025-02-18 03:10:24] [I] [luastg] Engine shutdown.
