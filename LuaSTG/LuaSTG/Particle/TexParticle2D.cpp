@@ -31,17 +31,17 @@ namespace LuaSTGPlus::Particle
             float const vscale = 1.0f / (float)size.y;
 
             Core::RectF const rect = Core::RectF(
-                (p.uv.a.x - w_2) * p.scale.x,
-                (p.uv.a.y - h_2) * p.scale.y,
-                (p.uv.b.x - w_2) * p.scale.x,
-                (p.uv.b.y - h_2) * p.scale.y
+                (-w_2) * p.scale.x,
+                (-h_2) * p.scale.y,
+                (w_2) * p.scale.x,
+                (h_2) * p.scale.y
             );
 
             Core::Graphics::IRenderer::DrawVertex vert[4] = {
-                Core::Graphics::IRenderer::DrawVertex(rect.a.x, rect.a.y, 0.0f, p.uv.a.x, p.uv.a.y, p.color.color()),
-                Core::Graphics::IRenderer::DrawVertex(rect.b.x, rect.a.y, 0.0f, p.uv.b.x, p.uv.a.y, p.color.color()),
-                Core::Graphics::IRenderer::DrawVertex(rect.b.x, rect.b.y, 0.0f, p.uv.b.x, p.uv.b.y, p.color.color()),
-                Core::Graphics::IRenderer::DrawVertex(rect.a.x, rect.b.y, 0.0f, p.uv.a.x, p.uv.b.y, p.color.color()),
+                Core::Graphics::IRenderer::DrawVertex(rect.a.x, rect.a.y, 0.0f, p.uv.a.x*uscale, p.uv.b.y*vscale, p.color.color()),
+                Core::Graphics::IRenderer::DrawVertex(rect.b.x, rect.a.y, 0.0f, p.uv.b.x*uscale, p.uv.b.y*vscale, p.color.color()),
+                Core::Graphics::IRenderer::DrawVertex(rect.b.x, rect.b.y, 0.0f, p.uv.b.x*uscale, p.uv.a.y*vscale, p.color.color()),
+                Core::Graphics::IRenderer::DrawVertex(rect.a.x, rect.b.y, 0.0f, p.uv.a.x*uscale, p.uv.a.y*vscale, p.color.color()),
             };
 
             float const sinv = sinf(p.rot);
