@@ -31,10 +31,10 @@ namespace LuaSTGPlus::Particle
             float const vscale = 1.0f / (float)size.y;
 
             Core::RectF const rect = Core::RectF(
-                (p.uv.a.x - w_2) * p.scale.x * uscale,
-                (p.uv.a.y - h_2) * p.scale.y * vscale,
-                (p.uv.b.x - w_2) * p.scale.x * uscale,
-                (p.uv.b.y - h_2) * p.scale.y * vscale
+                (p.uv.a.x) * p.scale.x * uscale,
+                (p.uv.a.y) * p.scale.y * vscale,
+                (p.uv.b.x) * p.scale.x * uscale,
+                (p.uv.b.y) * p.scale.y * vscale
             );
 
             Core::Graphics::IRenderer::DrawVertex vert[4] = {
