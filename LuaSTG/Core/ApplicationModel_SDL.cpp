@@ -353,7 +353,7 @@ namespace Core
 		// 	m_p_frame_rate_controller = &m_frame_rate_controller;
 		// }
 		// get_system_memory_status();
-		SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_JOYSTICK);
+		SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO);
 		if (!Graphics::Window_SDL::create(~m_window))
 			throw std::runtime_error("Graphics::Window_SDL::create");
 		m_window->implSetApplicationModel(this);
