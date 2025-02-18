@@ -3,7 +3,6 @@
 # add_subdirectory(Shader)
 include(Platform.cmake)
 include(Core.cmake)
-add_subdirectory(Configurer)
 
 # LuaSTG Engine
 
@@ -202,6 +201,7 @@ target_link_libraries(LuaSTG PRIVATE
     imgui_impl_opengl3
     lua_steam_api
     tracy
+    libqoi
     pcg_cpp
     pugixml
     xxhash

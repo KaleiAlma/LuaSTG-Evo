@@ -55,6 +55,10 @@ local lstg_GameObject = {
         -- TODO: fuck ex+
         E("_angle", "VANGLE"  ),
         E("_speed", "VSPEED"  ),
+        E("_pos", "VPOS"  ),
+        E("_vel", "VVEL"  ),
+        E("_accel", "VACCEL"  ),
+        E("_scale", "VVSCALE"  ),
         E("pause" , "PAUSE"  ),
         E("nopause", "IGNORESUPERPAUSE"  ),
         E("rmove" , "RESOLVEMOVE"  ),
@@ -89,6 +93,15 @@ local lstg_BlendMode = {
         E("add+mul"   , "AddMutiply", 16),
         E("add+screen", "AddScreen" , 17),
         E("one"       , "One"       , 18),
+        -- faggot
+        E("hue+alpha" , "HueAlpha"  , 19),
+        E("hue+add"   , "HueAdd"    , 20),
+        E("hue+rev"   , "HueRev"    , 21),
+        E("hue+sub"   , "HueSub"    , 22),
+        E("hue+min"   , "HueMin"    , 23),
+        E("hue+max"   , "HueMax"    , 24),
+        E("hue+mul"   , "HueMul"    , 25),
+        E("hue+screen", "HueScreen" , 26),
     },
 }
 

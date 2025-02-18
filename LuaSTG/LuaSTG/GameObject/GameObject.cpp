@@ -593,6 +593,18 @@ namespace LuaSTGPlus
             else
                 lua_pushnumber(L, rot * L_RAD_TO_DEG);
             return 1;
+        case LuaSTG::GameObjectMember::VPOS:
+            LuaWrapper::Vector2Wrapper::CreateAndPush(L, Core::Vector2(x, y));
+            return 1;
+        case LuaSTG::GameObjectMember::VVEL:
+            LuaWrapper::Vector2Wrapper::CreateAndPush(L, Core::Vector2(vx, vy));
+            return 1;
+        case LuaSTG::GameObjectMember::VACCEL:
+            LuaWrapper::Vector2Wrapper::CreateAndPush(L, Core::Vector2(ax, vy));
+            return 1;
+        case LuaSTG::GameObjectMember::VVSCALE:
+            LuaWrapper::Vector2Wrapper::CreateAndPush(L, Core::Vector2(hscale, vscale));
+            return 1;
 
             // 碰撞体
 
@@ -837,9 +849,31 @@ namespace LuaSTGPlus
                     vy = cur_speed_ * std::sin(new_angle_);
                 }
             } while (false);
-            return 0;
-
-            // 碰撞体
+            return 0;  
+        case LuaSTG::GameObjectMember::VPOS:
+            {
+                Core::Vector2F* const pos = LuaWrapper::Vector2Wrapper::Cast(L, 3);
+                x = pos->x;
+                y = pos->y;
+            } return 0;
+        case LuaSTG::GameObjectMember::VVEL:
+            {
+                Core::Vector2F* const vel = LuaWrapper::Vector2Wrapper::Cast(L, 3);
+                vx = vel->x;
+                vy = vel->y;
+            } return 0;
+        case LuaSTG::GameObjectMember::VACCEL:
+            {
+                Core::Vector2F* const accel = LuaWrapper::Vector2Wrapper::Cast(L, 3);
+                ax = accel->x;
+                ay = accel->y;
+            } return 0;
+        case LuaSTG::GameObjectMember::VVSCALE:
+            {
+                Core::Vector2F* const scale = LuaWrapper::Vector2Wrapper::Cast(L, 3);
+                hscale = scale->x;
+                vscale = scale->y;
+            } return 0;
 
         case LuaSTG::GameObjectMember::GROUP:
             do {

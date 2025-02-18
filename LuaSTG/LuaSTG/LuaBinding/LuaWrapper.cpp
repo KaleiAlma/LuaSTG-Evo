@@ -35,6 +35,7 @@ namespace LuaSTGPlus
 		luaL_register(L, LUASTG_LUA_LIBNAME, tMethod);	// ? t
 		WindowWrapper::Register(L);
 		ColorWrapper::Register(L);
+		RectWrapper::Register(L);
 		Vector2Wrapper::Register(L);
 		Vector3Wrapper::Register(L);
 		Vector4Wrapper::Register(L);

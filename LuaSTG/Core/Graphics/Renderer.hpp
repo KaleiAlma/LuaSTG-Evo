@@ -36,6 +36,7 @@ namespace Core::Graphics
 			Zero = MIN_INDEX,
 			One,
 			Add,
+			Hue,
 			Mul,
 
 			MAX_INDEX = Mul,
@@ -75,6 +76,7 @@ namespace Core::Graphics
 			Mul,
 			Screen,
 			Add,
+			Hue,
 			Sub,
 			RevSub,
 			Inv,

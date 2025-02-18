@@ -45,6 +45,16 @@ namespace LuaSTGPlus
 
 		One = 18,           //无混合，直接覆盖
 
+		HueAlpha = 19,
+		HueAdd = 20,
+		HueRev = 21,
+		HueSub = 22,
+		HueMin = 23,
+		HueMax = 24,
+		HueMul = 25,
+		HueScreen = 26,
+		
+
 		_KEY_NOT_FOUND = -1,
 	};
 

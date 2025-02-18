@@ -211,6 +211,24 @@ int lua_particle2d_mtIndex(lua_State* L)
     case Particle2DMember::extra3:
         lua_pushnumber(L, (*self)->extra3);
         break;
+    case Particle2DMember::pos:
+        LuaWrapper::Vector2Wrapper::CreateAndPush(L, (*self)->pos);
+        break;
+    case Particle2DMember::vel:
+        LuaWrapper::Vector2Wrapper::CreateAndPush(L, (*self)->vel);
+        break;
+    case Particle2DMember::accel:
+        LuaWrapper::Vector2Wrapper::CreateAndPush(L, (*self)->accel);
+        break;
+    case Particle2DMember::scale:
+        LuaWrapper::Vector2Wrapper::CreateAndPush(L, (*self)->scale);
+        break;
+    case Particle2DMember::speed:
+        lua_pushnumber(L, (*self)->vel.length());
+        break;
+    case Particle2DMember::angle:
+        lua_pushnumber(L, (*self)->vel.angle());
+        break;
     default:
         lua_pushnil(L);
         break;
@@ -282,6 +300,25 @@ int lua_particle2d_mtNewIndex(lua_State* L)
         break;
     case Particle2DMember::extra3:
         (*self)->extra3 = luaL_checknumber(L, 3);
+        break;
+    case Particle2DMember::pos:
+        (*self)->pos = *LuaWrapper::Vector2Wrapper::Cast(L, 3);
+        break;
+    case Particle2DMember::vel:
+        (*self)->vel = *LuaWrapper::Vector2Wrapper::Cast(L, 3);
+        break;
+    case Particle2DMember::accel:
+        (*self)->accel = *LuaWrapper::Vector2Wrapper::Cast(L, 3);
+        break;
+    case Particle2DMember::scale:
+        (*self)->scale = *LuaWrapper::Vector2Wrapper::Cast(L, 3);
+        break;
+    case Particle2DMember::speed:
+        (*self)->vel = (*self)->vel.normalize() * luaL_checknumber(L, 3);
+        break;
+    case Particle2DMember::angle:
+        (*self)->vel = Core::Vector2F(std::cos(luaL_checknumber(L, 3)), std::sin(luaL_checknumber(L, 3))) 
+                       * (*self)->vel.normalize();
         break;
     default:
         return luaL_error(L, "Attempted to set an invalid particle index.");
@@ -501,6 +538,21 @@ int lua_particle3d_mtIndex(lua_State* L)
     case Particle3DMember::extra4:
         lua_pushnumber(L, (*self)->extra4);
         break;
+    case Particle3DMember::pos:
+        LuaWrapper::Vector3Wrapper::CreateAndPush(L, (*self)->pos);
+        break;
+    case Particle3DMember::vel:
+        LuaWrapper::Vector3Wrapper::CreateAndPush(L, (*self)->vel);
+        break;
+    case Particle3DMember::accel:
+        LuaWrapper::Vector3Wrapper::CreateAndPush(L, (*self)->accel);
+        break;
+    case Particle3DMember::scale:
+        LuaWrapper::Vector2Wrapper::CreateAndPush(L, (*self)->scale);
+        break;
+    case Particle3DMember::speed:
+        lua_pushnumber(L, (*self)->vel.length());
+        break;
     default:
         lua_pushnil(L);
         break;
@@ -597,6 +649,21 @@ int lua_particle3d_mtNewIndex(lua_State* L)
     case Particle3DMember::extra4:
         (*self)->extra4 = luaL_checknumber(L, 3);
         break;
+    case Particle3DMember::pos:
+        (*self)->pos = *LuaWrapper::Vector3Wrapper::Cast(L, 3);
+        break;
+    case Particle3DMember::vel:
+        (*self)->vel = *LuaWrapper::Vector3Wrapper::Cast(L, 3);
+        break;
+    case Particle3DMember::accel:
+        (*self)->accel = *LuaWrapper::Vector3Wrapper::Cast(L, 3);
+        break;
+    case Particle3DMember::scale:
+        (*self)->scale = *LuaWrapper::Vector2Wrapper::Cast(L, 3);
+        break;
+    case Particle3DMember::speed:
+        (*self)->vel = (*self)->vel.normalize() * luaL_checknumber(L, 3);
+        break;
     default:
         return luaL_error(L, "Attempted to set an invalid particle index.");
     }
@@ -664,7 +731,7 @@ int lua_texpool2d_AddParticle(lua_State* L)
     }
 
     TexParticlePool2D::Particle** ud = static_cast<TexParticlePool2D::Particle**>(lua_newuserdata(L, sizeof(**ud)));
-    luaL_setmetatable(L, ID_Particle2D.data());
+    luaL_setmetatable(L, ID_TexParticle2D.data());
     new (ud) TexParticlePool2D::Particle* { (*self)->AddParticle(std::move(p)) };
 
     return 1;
@@ -695,7 +762,7 @@ int lua_texpool2d_Apply(lua_State* L)
 
         TexParticlePool2D::Particle** ud = static_cast<TexParticlePool2D::Particle**>(lua_newuserdata(L, sizeof(**ud)));
         *ud = p;
-        luaL_getmetatable(L, ID_Particle2D.data());
+        luaL_getmetatable(L, ID_TexParticle2D.data());
         lua_setmetatable(L, -2);
 
 
@@ -812,6 +879,24 @@ int lua_texparticle2d_mtIndex(lua_State* L)
     case TexParticle2DMember::h:
         lua_pushinteger(L, (*self)->uv.height());
         break;
+    case TexParticle2DMember::pos:
+        LuaWrapper::Vector2Wrapper::CreateAndPush(L, (*self)->pos);
+        break;
+    case TexParticle2DMember::vel:
+        LuaWrapper::Vector2Wrapper::CreateAndPush(L, (*self)->vel);
+        break;
+    case TexParticle2DMember::accel:
+        LuaWrapper::Vector2Wrapper::CreateAndPush(L, (*self)->accel);
+        break;
+    case TexParticle2DMember::scale:
+        LuaWrapper::Vector2Wrapper::CreateAndPush(L, (*self)->scale);
+        break;
+    case TexParticle2DMember::speed:
+        lua_pushnumber(L, (*self)->vel.length());
+        break;
+    case TexParticle2DMember::angle:
+        lua_pushnumber(L, (*self)->vel.angle());
+        break;
     default:
         lua_pushnil(L);
         break;
@@ -896,6 +981,25 @@ int lua_texparticle2d_mtNewIndex(lua_State* L)
     case TexParticle2DMember::h:
         (*self)->uv.b.y = (*self)->uv.a.y + luaL_checkinteger(L, 3);
         break;
+    case TexParticle2DMember::pos:
+        (*self)->pos = *LuaWrapper::Vector2Wrapper::Cast(L, 3);
+        break;
+    case TexParticle2DMember::vel:
+        (*self)->vel = *LuaWrapper::Vector2Wrapper::Cast(L, 3);
+        break;
+    case TexParticle2DMember::accel:
+        (*self)->accel = *LuaWrapper::Vector2Wrapper::Cast(L, 3);
+        break;
+    case TexParticle2DMember::scale:
+        (*self)->scale = *LuaWrapper::Vector2Wrapper::Cast(L, 3);
+        break;
+    case TexParticle2DMember::speed:
+        (*self)->vel = (*self)->vel.normalize() * luaL_checknumber(L, 3);
+        break;
+    case TexParticle2DMember::angle:
+        (*self)->vel = Core::Vector2F(std::cos(luaL_checknumber(L, 3)), std::sin(luaL_checknumber(L, 3))) 
+                       * (*self)->vel.normalize();
+        break;
     default:
         return luaL_error(L, "Attempted to set an invalid particle index.");
         break;
@@ -954,7 +1058,7 @@ int lua_texpool3d_AddParticle(lua_State* L)
     };
 
     TexParticlePool3D::Particle** ud = static_cast<TexParticlePool3D::Particle**>(lua_newuserdata(L, sizeof(**ud)));
-    luaL_setmetatable(L, ID_Particle3D.data());
+    luaL_setmetatable(L, ID_TexParticle3D.data());
     new (ud) TexParticlePool3D::Particle* { (*self)->AddParticle(std::move(p)) };
 
     return 1;
@@ -985,7 +1089,7 @@ int lua_texpool3d_Apply(lua_State* L)
 
         TexParticlePool3D::Particle** ud = static_cast<TexParticlePool3D::Particle**>(lua_newuserdata(L, sizeof(**ud)));
         *ud = p;
-        luaL_getmetatable(L, ID_Particle3D.data());
+        luaL_getmetatable(L, ID_TexParticle3D.data());
         lua_setmetatable(L, -2);
 
 
@@ -1126,6 +1230,21 @@ int lua_texparticle3d_mtIndex(lua_State* L)
     case TexParticle3DMember::h:
         lua_pushinteger(L, (*self)->uv.height());
         break;
+    case TexParticle3DMember::pos:
+        LuaWrapper::Vector3Wrapper::CreateAndPush(L, (*self)->pos);
+        return 1;
+    case TexParticle3DMember::vel:
+        LuaWrapper::Vector3Wrapper::CreateAndPush(L, (*self)->vel);
+        return 1;
+    case TexParticle3DMember::accel:
+        LuaWrapper::Vector3Wrapper::CreateAndPush(L, (*self)->accel);
+        return 1;
+    case TexParticle3DMember::scale:
+        LuaWrapper::Vector2Wrapper::CreateAndPush(L, (*self)->scale);
+        return 1;
+    case TexParticle3DMember::speed:
+        lua_pushnumber(L, (*self)->vel.length());
+        break;
     default:
         lua_pushnil(L);
         break;
@@ -1233,6 +1352,21 @@ int lua_texparticle3d_mtNewIndex(lua_State* L)
         break;
     case TexParticle3DMember::h:
         (*self)->uv.b.y = (*self)->uv.a.y + luaL_checkinteger(L, 3);
+        break;
+    case TexParticle3DMember::pos:
+        (*self)->pos = *LuaWrapper::Vector3Wrapper::Cast(L, 3);
+        break;
+    case TexParticle3DMember::vel:
+        (*self)->vel = *LuaWrapper::Vector3Wrapper::Cast(L, 3);
+        break;
+    case TexParticle3DMember::accel:
+        (*self)->accel = *LuaWrapper::Vector3Wrapper::Cast(L, 3);
+        break;
+    case TexParticle3DMember::scale:
+        (*self)->scale = *LuaWrapper::Vector2Wrapper::Cast(L, 3);
+        break;
+    case TexParticle3DMember::speed:
+        (*self)->vel = (*self)->vel.normalize() * luaL_checknumber(L, 3);
         break;
     default:
         return luaL_error(L, "Attempted to set an invalid particle index.");

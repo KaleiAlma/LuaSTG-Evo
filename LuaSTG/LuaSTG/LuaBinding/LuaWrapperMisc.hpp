@@ -100,6 +100,8 @@ namespace LuaSTGPlus
 			"mul+min","mul+max","mul+mul","mul+screen",
 			"add+min","add+max","add+mul","add+screen",
 			"one",
+			"hue+alpha", "hue+add", "hue+rev", "hue+sub",
+			"hue+min", "hue+max", "hue+mul", "hue+screen"
 		};
 		lua_pushstring(L, sc_sblendmodes[(int)blendmode]);
 		return 1;
