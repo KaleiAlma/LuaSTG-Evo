@@ -170,23 +170,24 @@ set_target_properties(tracy PROPERTIES FOLDER external)
 
 # ==================== image qoi ====================
 
-# add_library(libqoi STATIC)
-# target_compile_definitions(libqoi PRIVATE
-#     QOI_NO_STDIO
-#     QOI_IMPLEMENTATION
-# )
-# target_include_directories(libqoi PUBLIC
-#     image.qoi
-#     image.qoi-patch
-# )
-# target_sources(libqoi PRIVATE
-#     image.qoi/qoi.h
-#     image.qoi-patch/qoi.c
-#     image.qoi-patch/QOITextureLoader11.h
-#     image.qoi-patch/QOITextureLoader11.cpp
-# )
+add_library(libqoi STATIC)
+luastg_target_common_options(libqoi)
+target_compile_definitions(libqoi PRIVATE
+    QOI_NO_STDIO
+    QOI_IMPLEMENTATION
+)
+target_include_directories(libqoi PUBLIC
+    image.qoi
+    #image.qoi-patch
+)
+target_sources(libqoi PRIVATE
+    image.qoi/qoi.h
+    #image.qoi-patch/qoi.c
+    #image.qoi-patch/QOITextureLoader11.h
+    #image.qoi-patch/QOITextureLoader11.cpp
+)
 
-# set_target_properties(libqoi PROPERTIES FOLDER external)
+set_target_properties(libqoi PROPERTIES FOLDER external LINKER_LANGUAGE CXX)
 
 # ==================== steam api ====================
 

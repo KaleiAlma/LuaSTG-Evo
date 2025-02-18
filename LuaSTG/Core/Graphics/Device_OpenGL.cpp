@@ -18,6 +18,9 @@
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "stb_image_write.h"
 
+#define QOI_IMPLEMENTATION
+#include "qoi.h"
+
 namespace Core::Graphics
 {
 	Device_OpenGL::Device_OpenGL()
@@ -287,7 +290,20 @@ namespace Core::Graphics
 
 			// Load pictures
 			Vector2I size;
-			uint8_t* data = stbi_load_from_memory(src.data(), src.size(), &size.x, &size.y, NULL, 4);
+			uint8_t* data;
+			if(src[0] ==  'q' && src[1] == 'o' && src[2] == 'i' && src[3] == 'f')
+			{
+				qoi_desc desc;
+				data = (uint8_t*)qoi_decode(src.data(), src.size(), &desc, 4);
+				size.x = desc.width;
+				size.y = desc.height;
+				spdlog::info("[core] Loaded QOI file '{}'", source_path);
+			}
+			else
+			{
+				data = stbi_load_from_memory(src.data(), src.size(), &size.x, &size.y, NULL, 4);
+			}
+
 			if (data == NULL)
 			{
 				spdlog::error("[core] Unable to parse file '{}'", source_path);

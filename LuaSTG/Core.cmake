@@ -85,7 +85,7 @@ target_link_libraries(Core PUBLIC
     # utility
     PlatformAPI
     # gfx
-    # libqoi
+    libqoi
     SDL2-static
     nothings_stb
     glad

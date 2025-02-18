@@ -19,8 +19,8 @@ function M:onCreate()
 
     -- load_texture("sRGB.png")
     -- load_texture("linear.png")
-    load_texture("block.png")
-    -- load_texture("block.qoi")
+    --load_texture("block.png")
+    load_texture("block.qoi")
 
     lstg.SetResourceStatus(old_pool)
 end
@@ -28,8 +28,8 @@ end
 function M:onDestroy()
     -- unload_texture("sRGB.png")
     -- unload_texture("linear.png")
-    unload_texture("block.png")
-    -- unload_texture("block.qoi")
+    -- unload_texture("block.png")
+    unload_texture("block.qoi")
 end
 
 function M:onUpdate()
@@ -41,8 +41,8 @@ function M:onRender()
     -- lstg.Render("img:sRGB.png", window.width / 4 * 1, window.height / 2, 0, scale)
     -- lstg.Render("img:linear.png", window.width / 4 * 3, window.height / 2, 0, scale)
     scale = 0.5
-    lstg.Render("img:block.png", window.width / 4 * 2, window.height / 4 * 1, 0, scale)
-    -- lstg.Render("img:block.qoi", window.width / 4 * 2, window.height / 4 * 3, 0, scale)
+    -- lstg.Render("img:block.png", window.width / 4 * 2, window.height / 4 * 1, 0, scale)
+    lstg.Render("img:block.qoi", window.width / 4 * 2, window.height / 4 * 3, 0, scale)
 end
 
 test.registerTest("test.Module.Texture", M)
