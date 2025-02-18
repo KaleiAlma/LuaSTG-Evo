@@ -172,7 +172,7 @@ set_target_properties(tracy PROPERTIES FOLDER external)
 
 add_library(libqoi STATIC)
 luastg_target_common_options(libqoi)
-target_compile_definitions(libqoi PRIVATE
+target_compile_definitions(libqoi PUBLIC
     QOI_NO_STDIO
     QOI_IMPLEMENTATION
 )
