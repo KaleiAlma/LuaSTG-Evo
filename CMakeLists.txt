@@ -3,7 +3,7 @@ project(LuaSTGEvo LANGUAGES C CXX)
 
 if(APPLE)
     set(CMAKE_XCODE_GENERATE_TOP_LEVEL_PROJECT_ONLY TRUE)
-    set(CMAKE_OSX_DEPLOYMENT_TARGET 10.15)
+    set(CMAKE_OSX_DEPLOYMENT_TARGET 10.14)
     set(CMAKE_EXE_LINKER_FLAGS "-L/usr/local/opt/llvm@18/lib/c++ -Wl,-rpath,/usr/local/opt/llvm@18/lib/c++")
 endif()
 
