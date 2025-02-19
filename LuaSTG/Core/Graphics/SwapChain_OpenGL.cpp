@@ -4,6 +4,7 @@
 #include "Core/Graphics/Window_SDL.hpp"
 #include "Core/Type.hpp"
 #include "Core/i18n.hpp"
+#include "SDL_video.h"
 #include "glad/gl.h"
 #include "SDL.h"
 #include "spdlog/spdlog.h"
@@ -367,7 +368,9 @@ namespace Core::Graphics
 	}
 	bool SwapChain_OpenGL::present()
 	{
-		Vector2U wsize = m_window->getSize();
+		// Vector2U wsize = m_window->getSize();
+		Vector2I wsize{};
+		SDL_GL_GetDrawableSize(m_window->GetWindow(), &wsize.x, &wsize.y);
 		Vector2F scale_dim = Vector2F((float) wsize.x / m_canvas_size.x, (float) wsize.y / m_canvas_size.y);
 		float scale = std::min(scale_dim.x, scale_dim.y);
 		Vector2F d;
