@@ -67,13 +67,13 @@ BEGIN
         BLOCK "000004b0"
         BEGIN
             VALUE "CompanyName", "KaleiAlma"
-            VALUE "FileDescription", "LuaSTG Evo"
-            VALUE "FileVersion", "0.3.2.0"
-            VALUE "InternalName", "LuaSTG Evo"
-            VALUE "LegalCopyright", "Copyright 2020-2023 KaleiAlma"
+            VALUE "FileDescription", "東方泡台風　～ Karmical Prophecy of Krausenhaüer"
+            VALUE "FileVersion", "0.1.0.0"
+            VALUE "InternalName", "東方泡台風　～ Karmical Prophecy of Krausenhaüer"
+            VALUE "LegalCopyright", "Copyright 2025 Ryann Thierry"
             VALUE "OriginalFilename", "LuaSTG.exe"
-            VALUE "ProductName", "LuaSTG Evo"
-            VALUE "ProductVersion", "0.3.2.0"
+            VALUE "ProductName", "東方泡台風　～ Karmical Prophecy of Krausenhaüer"
+            VALUE "ProductVersion", "0.1.0.0"
         END
     END
     BLOCK "VarFileInfo"
