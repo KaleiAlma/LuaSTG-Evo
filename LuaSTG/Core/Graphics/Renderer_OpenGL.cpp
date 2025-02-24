@@ -839,7 +839,7 @@ namespace Core::Graphics
                 break;
             case BlendState::Mul:
                 glEnable(GL_BLEND);
-                glBlendFuncSeparate(GL_DST_COLOR, GL_ZERO, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+                glBlendFuncSeparate(GL_DST_COLOR, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
                 glBlendEquationSeparate(GL_FUNC_ADD, GL_FUNC_ADD);
                 break;
             case BlendState::Screen:
@@ -854,7 +854,7 @@ namespace Core::Graphics
                 break;
             case BlendState::Sub:
                 glEnable(GL_BLEND);
-                glBlendFuncSeparate(GL_ONE, GL_ONE, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+                glBlendFuncSeparate(GL_ONE, GL_ONE, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
                 glBlendEquationSeparate(GL_FUNC_SUBTRACT, GL_FUNC_ADD);
                 break;
             case BlendState::RevSub:
