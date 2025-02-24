@@ -6,7 +6,7 @@ namespace LuaSTGPlus::Particle
 {
     void ParticlePool3D::Update()
     {
-        for (ParticlePool3D::Particle& p : plist)
+        for (Particle& p : plist)
         {
             p.vel += p.accel;
             p.pos += p.vel;
@@ -17,21 +17,17 @@ namespace LuaSTGPlus::Particle
 
     void ParticlePool3D::Render()
     {
-        Core::Color4B color[4] = { 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF };
+        Core::Color4B color[4];
         img->GetSprite()->getColor(color);
 
         LAPP.updateGraph2DBlendMode(blend);
 
-        for (ParticlePool3D::Particle& p : plist)
+        for (Particle& p : plist)
         {
-            img->GetSprite()->setColor(Core::Color4B(p.color));
+            img->GetSprite()->setColor(p.color);
             img->GetSprite()->draw(p.pos, p.rot, p.scale);
         }
-        img->GetSprite()->setColor(color);
-    }
 
-    void ParticlePool3D::Apply(std::function<bool(ParticlePool3D::Particle* const)> fn)
-    {
-        plist.foreach(fn);
+        img->GetSprite()->setColor(color);
     }
 }

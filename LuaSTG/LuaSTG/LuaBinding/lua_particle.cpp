@@ -121,6 +121,13 @@ int lua_pool2d_Apply(lua_State* L)
     return 0;
 }
 
+int lua_pool2d_Clear(lua_State* L)
+{
+    ParticlePool2D** self = static_cast<ParticlePool2D**>(luaL_checkudata(L, 1, ID_Pool2D.data()));
+    (*self)->Clear();
+    return 0;
+}
+
 int lua_pool2d_GetSize(lua_State* L)
 {
     ParticlePool2D** self = static_cast<ParticlePool2D**>(luaL_checkudata(L, 1, ID_Pool2D.data()));
@@ -421,6 +428,13 @@ int lua_pool3d_Apply(lua_State* L)
     });
 
     luaL_unref(L, LUA_REGISTRYINDEX, r_fn);
+    return 0;
+}
+
+int lua_pool3d_Clear(lua_State* L)
+{
+    ParticlePool3D** self = static_cast<ParticlePool3D**>(luaL_checkudata(L, 1, ID_Pool3D.data()));
+    (*self)->Clear();
     return 0;
 }
 
@@ -777,6 +791,13 @@ int lua_texpool2d_Apply(lua_State* L)
     return 0;
 }
 
+int lua_texpool2d_Clear(lua_State* L)
+{
+    TexParticlePool2D** self = static_cast<TexParticlePool2D**>(luaL_checkudata(L, 1, ID_TexPool2D.data()));
+    (*self)->Clear();
+    return 0;
+}
+
 int lua_texpool2d_GetSize(lua_State* L)
 {
     TexParticlePool2D** self = static_cast<TexParticlePool2D**>(luaL_checkudata(L, 1, ID_TexPool2D.data()));
@@ -1104,6 +1125,13 @@ int lua_texpool3d_Apply(lua_State* L)
     return 0;
 }
 
+int lua_texpool3d_Clear(lua_State* L)
+{
+    TexParticlePool3D** self = static_cast<TexParticlePool3D**>(luaL_checkudata(L, 1, ID_TexPool3D.data()));
+    (*self)->Clear();
+    return 0;
+}
+
 int lua_texpool3d_GetSize(lua_State* L)
 {
     TexParticlePool3D** self = static_cast<TexParticlePool3D**>(luaL_checkudata(L, 1, ID_TexPool3D.data()));
@@ -1390,6 +1418,7 @@ luaL_Reg const pool2d_methods[] = {
     { "Update", &lua_pool2d_Update },
     { "Render", &lua_pool2d_Render },
     { "Apply", &lua_pool2d_Apply },
+    { "Clear", &lua_pool2d_Clear },
     { "GetSize", &lua_pool2d_GetSize },
 
     { NULL, NULL }
@@ -1415,6 +1444,7 @@ luaL_Reg const pool3d_methods[] = {
     { "Update", &lua_pool3d_Update },
     { "Render", &lua_pool3d_Render },
     { "Apply", &lua_pool3d_Apply },
+    { "Clear", &lua_pool3d_Clear },
     { "GetSize", &lua_pool3d_GetSize },
 
     { NULL, NULL }
@@ -1440,6 +1470,7 @@ luaL_Reg const texpool2d_methods[] = {
     { "Update", &lua_texpool2d_Update },
     { "Render", &lua_texpool2d_Render },
     { "Apply", &lua_texpool2d_Apply },
+    { "Clear", &lua_texpool2d_Clear },
     { "GetSize", &lua_texpool2d_GetSize },
 
     { NULL, NULL }
@@ -1465,6 +1496,7 @@ luaL_Reg const texpool3d_methods[] = {
     { "Update", &lua_texpool3d_Update },
     { "Render", &lua_texpool3d_Render },
     { "Apply", &lua_texpool3d_Apply },
+    { "Clear", &lua_texpool3d_Clear },
     { "GetSize", &lua_texpool3d_GetSize },
 
     { NULL, NULL }

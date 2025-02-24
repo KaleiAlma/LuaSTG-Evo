@@ -24,6 +24,8 @@ function M:onDestroy()
 
 end
 
+local choose = { 'r', 'g', 'b' }
+
 local timer = 0
 local x, y = 800, 400
 function M:onUpdate()
@@ -40,7 +42,11 @@ function M:onUpdate()
         p.omiga = rnd:number(-1, 1)
         -- p.color = lstg.Color(0xFF0A22CC)
         -- p.color = lstg.HSVColor(100, rnd:integer(100), 100, 88)
-        p.color = lstg.Color(0xFF000000 + bit.lshift(0x77, rnd:integer(2) * 8))
+        -- p.color = lstg.Color(0xFF000000 + bit.lshift(0x77, rnd:integer(2) * 8))
+        p.r = 0
+        p.g = 0
+        p.b = 0
+        p[choose[rnd:integer(1, 3)]] = 255
     end
     particle_pool:Update()
     -- local amt = 0
@@ -49,7 +55,7 @@ function M:onUpdate()
         -- if p.timer > 25 and r == 0 then
         --     return true
         -- end
-        p.color = p.color * (0.999 * (1 - p.timer * 0.00045))
+        p.a = p.a * (0.999999 * (1 - p.timer * 0.00000045))
         if p.timer % 4 ~= 0 then return end
         local r = rnd:integer(13)
         if r == 6 --[[or math.abs(p.x - x) > 84 * scale]] then

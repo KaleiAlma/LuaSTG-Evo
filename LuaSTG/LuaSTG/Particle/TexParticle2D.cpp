@@ -7,7 +7,7 @@ namespace LuaSTGPlus::Particle
 {
     void TexParticlePool2D::Update()
     {
-        for (TexParticlePool2D::Particle& p : plist)
+        for (Particle& p : plist)
         {
             p.vel += p.accel;
             p.pos += p.vel;
@@ -21,7 +21,7 @@ namespace LuaSTGPlus::Particle
         LAPP.updateGraph2DBlendMode(blend);
         LRDR->setTexture(tex->GetTexture());
 
-        for (TexParticlePool2D::Particle& p : plist)
+        for (Particle& p : plist)
         {
             float const w_2 = p.uv.width()  / 2.f;
             float const h_2 = p.uv.height() / 2.f;
@@ -68,11 +68,6 @@ namespace LuaSTGPlus::Particle
             
             LRDR->drawQuad(vert);
         }
-    }
-
-    void TexParticlePool2D::Apply(std::function<bool(TexParticlePool2D::Particle* const)> fn)
-    {
-        plist.foreach(fn);
     }
 }
 
