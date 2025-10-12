@@ -3,7 +3,7 @@
 
 CPMAddPackage(
     NAME nlohmann_json
-    VERSION 3.11.2
+    VERSION 3.12.0
     GITHUB_REPOSITORY nlohmann/json
     OPTIONS
     "JSON_BuildTests OFF"
