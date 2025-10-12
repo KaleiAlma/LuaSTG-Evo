@@ -1,18 +1,18 @@
 # libogg
 # libvorbis 基础库
 
-# CPMAddPackage(
-#     NAME libogg
-#     VERSION 1.3.5
-#     GITHUB_REPOSITORY xiph/ogg
-#     GIT_TAG db5c7a49ce7ebda47b15b78471e78fb7f2483e22
-#     OPTIONS
-#     "BUILD_TESTING OFF"
-# )
+CPMAddPackage(
+    NAME libogg
+    VERSION 1.3.6
+    GITHUB_REPOSITORY xiph/ogg
+    # GIT_TAG db5c7a49ce7ebda47b15b78471e78fb7f2483e22
+    OPTIONS
+    "BUILD_TESTING OFF"
+)
 
-# if(libogg_ADDED)
-#     set_target_properties(ogg PROPERTIES FOLDER external)
-# endif()
+if(libogg_ADDED)
+    set_target_properties(ogg PROPERTIES FOLDER external)
+endif()
 
 # libvorbis
 # vorbis ogg 音频文件解码
