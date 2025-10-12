@@ -101,11 +101,11 @@ target_link_libraries(Core PUBLIC
     # model
     tinygltf
     # audio
-    dr_libs
-    Ogg::ogg
+    # dr_libs
+    # Ogg::ogg
     Vorbis::vorbis
     Vorbis::vorbisfile
-    FLAC::FLAC
+    # FLAC::FLAC
     # database
     nlohmann_json
 )
