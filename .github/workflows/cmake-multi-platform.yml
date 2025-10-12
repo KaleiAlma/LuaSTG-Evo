@@ -24,9 +24,9 @@ jobs:
       #
       # To add more build types (Release, Debug, RelWithDebInfo, etc.) customize the build_type list.
       matrix:
-        os: [ubuntu-24.04, windows-latest, macos-13]
-        # build_type: [Release, RelWithDebInfo, Debug]
-        build_type: [Release]
+        os: [ubuntu-22.04, windows-latest, macos-13]
+        build_type: [RelWithDebInfo, Debug]
+        # build_type: [Release]
         # c_compiler: [gcc, clang, cl]
         # c_compiler: [clang, MSVC]
         # include:
@@ -55,7 +55,7 @@ jobs:
     - if: ${{ runner.os == 'Windows' }}
       run: choco install ninja
     - if: ${{ runner.os == 'macOS' }}
-      run: brew install ninja llvm@18 dylibbundler
+      run: brew install ninja llvm@20 dylibbundler
 
     # - if: ${{ runner.os == 'Windows' }}
     
@@ -84,8 +84,8 @@ jobs:
     - name: Configure and Build with CMake (Linux)
       run: >
         cmake -B ${{ steps.strings.outputs.build-output-dir }}
-        -DCMAKE_CXX_COMPILER=clang++-18
-        -DCMAKE_C_COMPILER=clang-18
+        -DCMAKE_CXX_COMPILER=clang++-20
+        -DCMAKE_C_COMPILER=clang-20
         -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
         -S ${{ github.workspace }}
         -DCPM_SOURCE_CACHE=${{ github.workspace }}/build/cpm-cache
@@ -112,8 +112,8 @@ jobs:
     - name: Configure and Build with CMake (macOS)
       run: >
         cmake -B ${{ steps.strings.outputs.build-output-dir }}
-        -DCMAKE_CXX_COMPILER=$(brew --prefix llvm@18)/bin/clang++
-        -DCMAKE_C_COMPILER=$(brew --prefix llvm@18)/bin/clang
+        -DCMAKE_CXX_COMPILER=$(brew --prefix llvm@20)/bin/clang++
+        -DCMAKE_C_COMPILER=$(brew --prefix llvm@20)/bin/clang
         -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
         -S ${{ github.workspace }}
         -DCPM_SOURCE_CACHE=${{ github.workspace }}/build/cpm-cache
