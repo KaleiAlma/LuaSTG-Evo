@@ -257,6 +257,9 @@ namespace Core::Graphics
         }
         m_monitor_idx = SDL_GetWindowDisplayIndex(sdl_window);
 
+        if (SDL_GL_LoadLibrary(NULL) < 0) {
+            spdlog::error("[core] Load OpenGL Library Failed! {}", SDL_GetError());
+        }
         SDL_GLContext context = SDL_GL_CreateContext(sdl_window);
 
         int version = gladLoadGL((GLADloadfunc) SDL_GL_GetProcAddress);
