@@ -260,6 +260,9 @@ namespace Core::Graphics
         SDL_GLContext context = SDL_GL_CreateContext(sdl_window);
 
         int version = gladLoadGL((GLADloadfunc) SDL_GL_GetProcAddress);
+        if (!version) {
+            spdlog::error("[core] Load OpenGL Failed! {}", SDL_GetError());
+        }
         spdlog::info("[core] OpenGL {}.{}", GLAD_VERSION_MAJOR(version), GLAD_VERSION_MINOR(version));
         spdlog::info("[core] {}", (const char*)glGetString(GL_VERSION));
         GLint s;
