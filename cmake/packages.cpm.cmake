@@ -214,10 +214,10 @@ endif()
 
 CPMAddPackage(
     NAME freetype
-    VERSION 2.13.1
+    VERSION 2.14.1
     #GITHUB_REPOSITORY freetype/freetype
     #GIT_TAG VER-2-13-1
-    URL https://gitlab.freedesktop.org/freetype/freetype/-/archive/VER-2-13-1/freetype-VER-2-13-1.zip
+    URL https://gitlab.freedesktop.org/freetype/freetype/-/archive/VER-2-14-1/freetype-VER-2-14-1.zip
     OPTIONS
     "FT_DISABLE_ZLIB ON"
     "FT_DISABLE_BZIP2 ON"
