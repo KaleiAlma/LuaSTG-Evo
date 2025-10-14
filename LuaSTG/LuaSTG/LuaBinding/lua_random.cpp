@@ -546,7 +546,7 @@ namespace UtilRandom {
 		std::string serialize() {
 			std::ostringstream ss;
 			ss << name()
-#ifdef WIN32
+#ifdef _WIN32
 				<< "-" << multiplier()
 				<< "-" << increment()
 				<< "-" << state_;
@@ -603,7 +603,7 @@ namespace UtilRandom {
 		std::string serialize() {
 			std::ostringstream ss;
 			ss << name()
-#ifdef WIN32
+#ifdef _WIN32
 				<< "-" << multiplier()
 				<< "-" << increment()
 				<< "-" << state_;
