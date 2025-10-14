@@ -65,7 +65,7 @@ jobs:
         sudo apt update
         sudo apt install \
           libssl-dev:arm64 gcc-14-aarch64-linux-gnu libstdc++-14-dev-arm64-cross binutils-aarch64-linux-gnu \
-          libx11-dev:arm64 libwayland-dev:arm64 liblzma-dev:arm64 libzstd-dev:arm64
+          libx11-dev:arm64 libwayland-dev:arm64
     - name: Configure Linux
       if: ${{ runner.os == 'Linux' }}
       run: |
@@ -75,9 +75,8 @@ jobs:
         sudo apt update
         sudo apt install cmake llvm-20 clang-20 lld-20 clang-tools-20 \
           ninja-build mesa-utils mesa-common-dev libxext-dev libasound2-dev \
-          libpipewire-0.3-dev libaudio-dev libjack-dev libsndio-dev \
-          libasound2-dev libpulse-dev libpulse-mainloop-glib0 libglib2.0-dev libxkbcommon-dev \
-          libssl-dev libzstd-dev liblzma-dev
+          libpipewire-0.3-dev libaudio-dev libjack-dev libsndio-dev libssl-dev \
+          libasound2-dev libpulse-dev libpulse-mainloop-glib0 libglib2.0-dev libxkbcommon-dev
     - name: Configure Windows
       if: ${{ runner.os == 'Windows' }}
       run: |
