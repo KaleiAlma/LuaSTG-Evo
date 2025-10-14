@@ -3,12 +3,9 @@
 
 #define LRDR LAPP.GetRenderer2D()
 
-namespace LuaSTGPlus::Particle
-{
-    void TexParticlePool2D::Update()
-    {
-        for (Particle& p : plist)
-        {
+namespace LuaSTGPlus::Particle {
+    void TexParticlePool2D::Update() {
+        for (Particle& p : plist) {
             p.vel += p.accel;
             p.pos += p.vel;
             p.rot += p.omiga;
@@ -16,13 +13,11 @@ namespace LuaSTGPlus::Particle
         }
     }
 
-    void TexParticlePool2D::Render()
-    {
+    void TexParticlePool2D::Render() {
         LAPP.updateGraph2DBlendMode(blend);
         LRDR->setTexture(tex->GetTexture());
 
-        for (Particle& p : plist)
-        {
+        for (Particle& p : plist) {
             float const w_2 = p.uv.width()  / 2.f;
             float const h_2 = p.uv.height() / 2.f;
 
@@ -47,8 +42,7 @@ namespace LuaSTGPlus::Particle
             float const sinv = sinf(p.rot);
             float const cosv = cosf(p.rot);
 
-#define rotate_xy(UNIT) \
-            {\
+#define rotate_xy(UNIT) {\
                 float const tx = vert[UNIT].x * cosv - vert[UNIT].y * sinv;\
                 float const ty = vert[UNIT].x * sinv + vert[UNIT].y * cosv;\
                 vert[UNIT].x = tx;\

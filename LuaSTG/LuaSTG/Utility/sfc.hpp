@@ -44,8 +44,7 @@ protected:
     static constexpr unsigned int ITYPE_BITS = 8*sizeof(itype);
     static constexpr unsigned int RTYPE_BITS = 8*sizeof(rtype);
 
-    static itype rotate(itype x, unsigned int k)
-    {
+    static itype rotate(itype x, unsigned int k) {
         return (x << k) | (x >> (ITYPE_BITS - k));
     }
 
@@ -57,25 +56,21 @@ public:
     static constexpr result_type max() { return ~ result_type(0); }
 
     sfc(itype seed = itype(0xcafef00dbeef5eedULL))
-        : sfc(seed, seed, seed)
-    {
+        : sfc(seed, seed, seed) {
         // Nothing (else) to do
     }
     
     sfc(itype seed1, itype seed2, itype seed3)
-        : a_(seed3), b_(seed2), c_(seed1), d_(itype(1))
-    {
+        : a_(seed3), b_(seed2), c_(seed1), d_(itype(1)) {
         for (unsigned int i=0; i < 12; ++i)
             advance();
     }
 
-    void advance()
-    {
+    void advance() {
         (void)operator()();
     }
 
-    rtype operator()()
-    {
+    rtype operator()() {
         itype tmp = a_ + b_ + d_++;
         a_ = b_ ^ (b_ >> q);
         b_ = c_ + (c_ << r);
@@ -83,14 +78,12 @@ public:
         return rtype(tmp);
     }
 
-    bool operator==(const sfc& rhs)
-    {
+    bool operator==(const sfc& rhs) {
         return (a_ == rhs.a_) && (b_ == rhs.b_) 
             && (c_ == rhs.c_) && (d_ == rhs.d_);
     }
 
-    bool operator!=(const sfc& rhs)
-    {
+    bool operator!=(const sfc& rhs) {
         return !operator==(rhs);
     }
 

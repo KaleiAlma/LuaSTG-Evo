@@ -2,10 +2,8 @@
 #include "Core/Type.hpp"
 #include "Core/Audio/Decoder.hpp"
 
-namespace Core::Audio
-{
-	enum class MixChannel
-	{
+namespace Core::Audio {
+	enum class MixChannel {
 		Direct,      // Output directly to the device, cannot be used for IDevice::setMixChannelVolume
 		SoundEffect, // Belongs to the SFX channel
 		Music,       // Belongs to the BGM channel
@@ -14,8 +12,7 @@ namespace Core::Audio
 		_COUNT,
 	};
 
-	struct IAudioPlayer : public IObject
-	{
+	struct IAudioPlayer : public IObject {
 		virtual bool start() = 0;
 		virtual bool stop() = 0;
 		virtual bool reset() = 0;
@@ -44,8 +41,7 @@ namespace Core::Audio
 		// virtual IDecoder* getDecoder() = 0;
 	};
 
-	struct IAudioDevice : public IObject
-	{
+	struct IAudioDevice : public IObject {
 		virtual uint32_t getAudioDeviceCount(bool refresh) = 0;
 		virtual std::string_view getAudioDeviceName(uint32_t index) const noexcept = 0;
 		virtual bool setTargetAudioDevice(std::string_view const audio_device_name) = 0;

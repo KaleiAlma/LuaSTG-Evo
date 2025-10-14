@@ -6,30 +6,23 @@
 #include <vector>
 
 
-namespace LuaSTGPlus::Particle
-{
+namespace LuaSTGPlus::Particle {
     using Index = uint16_t;
     template<typename P>
-    class ParticleList
-    {
+    class ParticleList {
     private:
         static constexpr Index INVALID_INDEX = (uint16_t)-1;
     public:
-        void insert(P val)
-        {
-            if (free == INVALID_INDEX)
-            {
-                if (maxn >= arr.size())
-                {
+        void insert(P val) {
+            if (free == INVALID_INDEX) {
+                if (maxn >= arr.size()) {
                     Index temp = arr[back].next;
                     arr[back] = Node(std::move(val));
                     if (front != INVALID_INDEX)
                         arr[front].next = back;
                     front = back;
                     back = temp;
-                }
-                else
-                {
+                } else {
                     arr[maxn] = Node(std::move(val));
                     //arr[maxn].next = front;
                     if (front != INVALID_INDEX)
@@ -39,9 +32,7 @@ namespace LuaSTGPlus::Particle
                         back = front;
                     maxn++;
                 }
-            }
-            else
-            {
+            } else {
                 Index temp = arr[free].next;
                 arr[free] = Node(std::move(val));
                 if (front != INVALID_INDEX)
@@ -53,39 +44,32 @@ namespace LuaSTGPlus::Particle
             }
         }
 
-        void foreach(std::function<bool(P* const)> fn)
-        {
+        void foreach(std::function<bool(P* const)> fn) {
             if (back == INVALID_INDEX)
                 return;
 
             Index current = back;
             Index last = INVALID_INDEX;
-            while (current != INVALID_INDEX)
-            {
+            while (current != INVALID_INDEX) {
                 Index temp = arr[current].next;
-                if (fn(&arr[current].val))
-                {
-                    if (current == back)
-                    {
+                if (fn(&arr[current].val)) {
+                    if (current == back) {
                         if (back == front)
                             front = arr[current].next;
                         back = arr[current].next;
-                    }
-                    else
+                    } else
                         arr[last].next = arr[current].next;
 
                     arr[current].next = free;
                     free = current;
-                }
-                else
+                } else
                     last = current;
 
                 current = temp;
             }
         }
 
-        void clear()
-        {
+        void clear() {
             maxn = 0;
             front = INVALID_INDEX;
             back = INVALID_INDEX;
@@ -94,8 +78,7 @@ namespace LuaSTGPlus::Particle
                 n.next = INVALID_INDEX;
         }
     public:
-        ParticleList(Index size) : arr(size)
-        {
+        ParticleList(Index size) : arr(size) {
             //spdlog::debug("[particle] sizeof Node: {}", sizeof(Node));
             //spdlog::debug("[particle] Address of arr: {}", fmt::ptr(arr));
         }
@@ -104,8 +87,7 @@ namespace LuaSTGPlus::Particle
         Index GetSize() { return arr.size(); }
         P* GetFront() { return &arr[front].val; }
     public:
-        struct Iterator
-        {
+        struct Iterator {
         public:
             using iterator_category = std::forward_iterator_tag;
             using diffrence_type = std::ptrdiff_t;
@@ -119,8 +101,7 @@ namespace LuaSTGPlus::Particle
             Iterator& operator++() { node_idx = pl->arr[node_idx].next; return *this; }
             Iterator operator++(int) { Iterator temp = *this; ++(*this); return temp; }
 
-            friend bool operator== (const Iterator& a, const Iterator& b)
-            { return a.pl == b.pl && a.node_idx == b.node_idx; }
+            friend bool operator== (const Iterator& a, const Iterator& b) { return a.pl == b.pl && a.node_idx == b.node_idx; }
         private:
             Index node_idx;
             ParticleList* pl;

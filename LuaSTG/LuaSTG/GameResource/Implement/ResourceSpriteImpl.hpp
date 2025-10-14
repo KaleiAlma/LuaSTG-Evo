@@ -2,10 +2,8 @@
 #include "GameResource/ResourceSprite.hpp"
 #include "GameResource/Implement/ResourceBaseImpl.hpp"
 
-namespace LuaSTGPlus
-{
-	class ResourceSpriteImpl : public ResourceBaseImpl<IResourceSprite>
-	{
+namespace LuaSTGPlus {
+	class ResourceSpriteImpl : public ResourceBaseImpl<IResourceSprite> {
 	private:
 		Core::ScopeObject<Core::Graphics::ISprite> m_sprite;
 		BlendMode m_BlendMode = BlendMode::MulAlpha;

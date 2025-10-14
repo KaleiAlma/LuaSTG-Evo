@@ -2,12 +2,9 @@
 #include "Core/Object.hpp"
 #include "Core/Audio/Decoder.hpp"
 #include "miniaudio.h"
-#include "minivorbis.h"
 
-namespace Core::Audio
-{
-    class Decoder_ma : public Object<IDecoder>
-    {
+namespace Core::Audio {
+    class Decoder_ma : public Object<IDecoder> {
     private:
         std::vector<uint8_t> m_data;
         ma_decoder m_decoder;

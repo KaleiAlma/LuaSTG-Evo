@@ -1,7 +1,6 @@
 ﻿#pragma once
 
-namespace imgui
-{
+namespace imgui {
     void loadConfig();
     void saveConfig();
     

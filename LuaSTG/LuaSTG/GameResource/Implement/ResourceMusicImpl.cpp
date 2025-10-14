@@ -1,9 +1,7 @@
 #include "GameResource/Implement/ResourceMusicImpl.hpp"
 
-namespace LuaSTGPlus
-{
-    void ResourceMusicImpl::Play(float vol, double position)
-    {
+namespace LuaSTGPlus {
+    void ResourceMusicImpl::Play(float vol, double position) {
         m_player->reset();
 
         m_player->setVolume(vol);
@@ -12,18 +10,15 @@ namespace LuaSTGPlus
         m_player->start();
         m_status = 2;
     }
-    void ResourceMusicImpl::Stop()
-    {
+    void ResourceMusicImpl::Stop() {
         m_player->reset();
         m_status = 0;
     }
-    void ResourceMusicImpl::Pause()
-    {
+    void ResourceMusicImpl::Pause() {
         m_player->stop();
         m_status = 1;
     }
-    void ResourceMusicImpl::Resume()
-    {
+    void ResourceMusicImpl::Resume() {
         m_player->start();
         m_status = 2;
     }
@@ -46,7 +41,6 @@ namespace LuaSTGPlus
         : ResourceBaseImpl(ResourceType::Music, name)
         , m_player(p_player)
         , m_start(start)
-        , m_end(end)
-    {
+        , m_end(end) {
     }
 }

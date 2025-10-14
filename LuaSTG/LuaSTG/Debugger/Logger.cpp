@@ -8,8 +8,7 @@
 #include "Core/InitializeConfigure.hpp"
 // #include "utf8.hpp"
 
-namespace LuaSTG::Debugger
-{
+namespace LuaSTG::Debugger {
     static bool enable_console = false;
     static bool open_console = false;
     static bool wait_console = false;
@@ -17,8 +16,7 @@ namespace LuaSTG::Debugger
     static void closeWin32Console();
     static std::string make_time_path();
 
-    void Logger::create()
-    {
+    void Logger::create() {
         Core::InitializeConfigure config;
         config.loadFromFile("config.json");
 
@@ -30,8 +28,7 @@ namespace LuaSTG::Debugger
 
         std::vector<spdlog::sink_ptr> sinks;
 
-        if (config.log_file_enable)
-        {
+        if (config.log_file_enable) {
             std::string parser_path;
             // if (config.log_file_path.empty())
             // {
@@ -90,20 +87,16 @@ namespace LuaSTG::Debugger
 
         spdlog::set_default_logger(logger);
 
-        struct HResultCheckerCallback
-        {
-            static void WriteError(std::string_view const message)
-            {
+        struct HResultCheckerCallback {
+            static void WriteError(std::string_view const message) {
                 spdlog::error("[luastg] {}", message);
             }
         };
 
         // Platform::HResultChecker::SetPrintCallback(&HResultCheckerCallback::WriteError);
     }
-    void Logger::destroy()
-    {
-        if (auto logger = spdlog::get("luastg"))
-        {
+    void Logger::destroy() {
+        if (auto logger = spdlog::get("luastg")) {
             logger->flush();
         }
         
@@ -121,16 +114,12 @@ namespace LuaSTG::Debugger
         Core::InitializeConfigure config;
         config.loadFromFile("config.json");
 
-        if (config.persistent_log_file_enable)
-        {
+        if (config.persistent_log_file_enable) {
             std::filesystem::path path;
-            if (config.persistent_log_file_directory.empty())
-            {
+            if (config.persistent_log_file_directory.empty()) {
                 std::filesystem::path directory("logs/"); // TODO: Write here.
                 path = directory;
-            }
-            else
-            {
+            } else {
                 std::string parser_path;
                 Core::InitializeConfigure::parserDirectory(config.persistent_log_file_directory, parser_path, false);
                 std::filesystem::path directory(parser_path);
@@ -145,8 +134,7 @@ namespace LuaSTG::Debugger
                 }
             }
             if (logs.size() > static_cast<size_t>(config.persistent_log_file_max_count)) {
-                std::sort(logs.begin(), logs.end(), [](std::filesystem::path const& a, std::filesystem::path const& b) -> bool
-                    {
+                std::sort(logs.begin(), logs.end(), [](std::filesystem::path const& a, std::filesystem::path const& b) -> bool {
                         return a.filename().generic_wstring() < b.filename().generic_wstring();
                     });
                 size_t const remove_count = logs.size() - static_cast<size_t>(config.persistent_log_file_max_count);

@@ -2,70 +2,52 @@
 #include "AppFrame.h"
 #include "utf8.hpp"
 
-namespace LuaSTGPlus
-{
+namespace LuaSTGPlus {
     namespace LuaWrapper {
-        void DInputWrapper::Register(lua_State* L)noexcept
-        {
+        void DInputWrapper::Register(lua_State* L)noexcept {
             #define LDI() Platform::DirectInput* self = LuaSTGPlus::AppFrame::GetInstance().GetDInput()
             
-            struct Wrapper
-            {
-                static int count(lua_State* L)
-                {
+            struct Wrapper {
+                static int count(lua_State* L) {
                     LDI();
-                    if (self)
-                    {
+                    if (self) {
                         uint32_t cnt = self->count();
                         lua_pushinteger(L, (lua_Integer)cnt);
-                    }
-                    else
-                    {
+                    } else {
                         lua_pushinteger(L, 0);
                     }
                     return 1;
                 };
-                static int refresh(lua_State* L)
-                {
+                static int refresh(lua_State* L) {
                     LDI();
-                    if (self)
-                    {
+                    if (self) {
                         uint32_t cnt = self->refresh();
                         lua_pushinteger(L, (lua_Integer)cnt);
-                    }
-                    else
-                    {
+                    } else {
                         lua_pushinteger(L, 0);
                     }
                     return 1;
                 };
-                static int update(lua_State*)
-                {
+                static int update(lua_State*) {
                     LDI();
-                    if (self)
-                    {
+                    if (self) {
                         self->update();
                     }
                     return 0;
                 };
-                static int reset(lua_State*)
-                {
+                static int reset(lua_State*) {
                     LDI();
-                    if (self)
-                    {
+                    if (self) {
                         self->reset();
                     }
                     return 0;
                 };
-                static int getAxisRange(lua_State* L)
-                {
+                static int getAxisRange(lua_State* L) {
                     LDI();
-                    if (self)
-                    {
+                    if (self) {
                         uint32_t index = (uint32_t)(luaL_checkinteger(L, 1) - 1);
                         Platform::DirectInput::AxisRange range;
-                        if (self->getAxisRange(index, &range))
-                        {
+                        if (self->getAxisRange(index, &range)) {
                             lua_createtable(L, 0, 12);
                             
                             #define setint(_K) lua_pushstring(L, #_K); lua_pushinteger(L, (lua_Integer)range._K); lua_settable(L, -3);
@@ -80,15 +62,12 @@ namespace LuaSTGPlus
                     }
                     return 0;
                 };
-                static int getRawState(lua_State* L)
-                {
+                static int getRawState(lua_State* L) {
                     LDI();
-                    if (self)
-                    {
+                    if (self) {
                         uint32_t index = (uint32_t)(luaL_checkinteger(L, 1) - 1);
                         Platform::DirectInput::RawState state;
-                        if (self->getRawState(index, &state))
-                        {
+                        if (self->getRawState(index, &state)) {
                             lua_createtable(L, 0, 9);
                             #define setint(_K) lua_pushstring(L, #_K); lua_pushinteger(L, (lua_Integer)state._K); lua_settable(L, -3);
                             setint(lX);
@@ -101,8 +80,7 @@ namespace LuaSTGPlus
                             
                             lua_pushstring(L, "rglSlider");
                             lua_createtable(L, 2, 0);
-                            for (int i = 0; i < 2; i += 1)
-                            {
+                            for (int i = 0; i < 2; i += 1) {
                                 lua_pushinteger(L, i + 1);
                                 lua_pushinteger(L, (lua_Integer)state.rglSlider[i]);
                                 lua_settable(L, -3);
@@ -111,8 +89,7 @@ namespace LuaSTGPlus
                             
                             lua_pushstring(L, "rgdwPOV");
                             lua_createtable(L, 4, 0);
-                            for (int i = 0; i < 4; i += 1)
-                            {
+                            for (int i = 0; i < 4; i += 1) {
                                 lua_pushinteger(L, i + 1);
                                 lua_pushinteger(L, (lua_Integer)(state.rgdwPOV[i] & 0xFFFF));
                                 lua_settable(L, -3);
@@ -121,8 +98,7 @@ namespace LuaSTGPlus
                             
                             lua_pushstring(L, "rgbButtons");
                             lua_createtable(L, 32, 0);
-                            for (int i = 0; i < 32; i += 1)
-                            {
+                            for (int i = 0; i < 32; i += 1) {
                                 lua_pushinteger(L, i + 1);
                                 lua_pushboolean(L, state.rgbButtons[i] != 0);
                                 lua_settable(L, -3);
@@ -134,15 +110,12 @@ namespace LuaSTGPlus
                     }
                     return 0;
                 };
-                static int getState(lua_State* L)
-                {
+                static int getState(lua_State* L) {
                     LDI();
-                    if (self)
-                    {
+                    if (self) {
                         uint32_t index = (uint32_t)(luaL_checkinteger(L, 1) - 1);
                         Platform::DirectInput::State state;
-                        if (self->getState(index, &state))
-                        {
+                        if (self->getState(index, &state)) {
                             lua_createtable(L, 0, 7);
                             
                             #define setint(_K) lua_pushstring(L, #_K); lua_pushinteger(L, (lua_Integer)state._K); lua_settable(L, -3);
@@ -160,17 +133,13 @@ namespace LuaSTGPlus
                     }
                     return 0;
                 };
-                static int getDeviceName(lua_State* L)
-                {
+                static int getDeviceName(lua_State* L) {
                     LDI();
-                    if (self)
-                    {
+                    if (self) {
                         uint32_t index = (uint32_t)(luaL_checkinteger(L, 1) - 1);
                         const wchar_t* name = self->getDeviceName(index);
-                        if (name)
-                        {
-                            try
-                            {
+                        if (name) {
+                            try {
                                 std::string utf8name(utf8::to_string(name));
                                 lua_pushstring(L, utf8name.c_str());
                                 return 1;
@@ -180,17 +149,13 @@ namespace LuaSTGPlus
                     }
                     return 0;
                 };
-                static int getProductName(lua_State* L)
-                {
+                static int getProductName(lua_State* L) {
                     LDI();
-                    if (self)
-                    {
+                    if (self) {
                         uint32_t index = (uint32_t)(luaL_checkinteger(L, 1) - 1);
                         const wchar_t* name = self->getProductName(index);
-                        if (name)
-                        {
-                            try
-                            {
+                        if (name) {
+                            try {
                                 std::string utf8name(utf8::to_string(name));
                                 lua_pushstring(L, utf8name.c_str());
                                 return 1;
@@ -200,11 +165,9 @@ namespace LuaSTGPlus
                     }
                     return 0;
                 };
-                static int isXInputDevice(lua_State* L)
-                {
+                static int isXInputDevice(lua_State* L) {
                     LDI();
-                    if (self)
-                    {
+                    if (self) {
                         uint32_t index = (uint32_t)(luaL_checkinteger(L, 1) - 1);
                         lua_pushboolean(L, self->isXInputDevice(index));
                         return 1;

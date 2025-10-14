@@ -39,15 +39,12 @@ namespace Platform {
 		return false;
 	}
 
-	CommandLineArguments::CommandLineArguments()
-	{
+	CommandLineArguments::CommandLineArguments() {
 	}
-	CommandLineArguments::~CommandLineArguments()
-	{
+	CommandLineArguments::~CommandLineArguments() {
 	}
 
-	CommandLineArguments& CommandLineArguments::Get()
-	{
+	CommandLineArguments& CommandLineArguments::Get() {
 		static CommandLineArguments instace;
 		return instace;
 	}

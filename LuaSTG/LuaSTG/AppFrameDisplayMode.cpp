@@ -1,49 +1,40 @@
 ﻿#include "AppFrame.h"
 #include "resource.h"
 
-namespace LuaSTGPlus
-{
+namespace LuaSTGPlus {
     static std::string const MODE_NAME_WINDOW("Windowed");
     static std::string const MODE_NAME_FULLSCREEN("Fullscreen");
 
-    inline bool isRationalEmpty(Core::Rational const& rational)
-    {
+    inline bool isRationalEmpty(Core::Rational const& rational) {
         return rational.numerator == 0 || rational.denominator == 0;
     }
 
-    inline bool isRectEmpty(Core::RectI const& rect)
-    {
+    inline bool isRectEmpty(Core::RectI const& rect) {
         return (rect.b.x - rect.a.x) > 0
             && (rect.b.y - rect.a.y) > 0
             ;
     }
 
-    inline bool isRectSameSize(Core::RectI const& rect1, Core::RectI const& rect2)
-    {
+    inline bool isRectSameSize(Core::RectI const& rect1, Core::RectI const& rect2) {
         return (rect1.b.x - rect1.a.x) == (rect2.b.x - rect2.a.x)
             && (rect1.b.y - rect1.a.y) == (rect2.b.y - rect2.a.y)
             ;
     }
 
-    inline uint32_t matchMonitorIndex(Core::Graphics::IWindow* window, Core::RectI const& monitor_rect, bool& find)
-    {
+    inline uint32_t matchMonitorIndex(Core::Graphics::IWindow* window, Core::RectI const& monitor_rect, bool& find) {
         uint32_t const count = window->getMonitorCount();
         // Stage 1: Match Same Rect
-        for (uint32_t i = 0; i < count; i += 1)
-        {
+        for (uint32_t i = 0; i < count; i += 1) {
             Core::RectI const rect = window->getMonitorRect(i);
-            if (rect == monitor_rect)
-            {
+            if (rect == monitor_rect) {
                 find = true;
                 return i;
             }
         }
         // Stage 2: Match Same Size
-        for (uint32_t i = 0; i < count; i += 1)
-        {
+        for (uint32_t i = 0; i < count; i += 1) {
             Core::RectI const rect = window->getMonitorRect(i);
-            if (isRectSameSize(rect, monitor_rect))
-            {
+            if (isRectSameSize(rect, monitor_rect)) {
                 find = true;
                 return i;
             }
@@ -53,30 +44,26 @@ namespace LuaSTGPlus
         return 0;
     }
 
-    inline Core::Vector2I getMonitorSize(Core::Graphics::IWindow* window, uint32_t index)
-    {
+    inline Core::Vector2I getMonitorSize(Core::Graphics::IWindow* window, uint32_t index) {
         Core::RectI const rect = window->getMonitorRect(index);
         return Core::Vector2I(rect.b.x - rect.a.x, rect.b.y - rect.a.y);
     }
 
-    inline std::string_view getFullscreenTypeString(ApplicationSetting const& setting)
-    {
+    inline std::string_view getFullscreenTypeString(ApplicationSetting const& setting) {
         if (setting.fullscreen)
             return MODE_NAME_FULLSCREEN;
         else
             return MODE_NAME_WINDOW;
     }
 
-    inline void logResult(bool ok, ApplicationSetting const& from_mode, std::string_view to_mode)
-    {
+    inline void logResult(bool ok, ApplicationSetting const& from_mode, std::string_view to_mode) {
         if (ok)
             spdlog::info("[luastg] Display mode switched: {} -> {}", getFullscreenTypeString(from_mode), to_mode);
         else
             spdlog::error("[luastg] Display mode switch failed: {} -> {}", getFullscreenTypeString(from_mode), to_mode);
     }
 
-    bool AppFrame::SetDisplayModeWindow(Core::Vector2U window_size, bool vsync, uint32_t monitor_idx, bool borderless)
-    {
+    bool AppFrame::SetDisplayModeWindow(Core::Vector2U window_size, bool vsync, uint32_t monitor_idx, bool borderless) {
         auto* window = GetAppModel()->getWindow();
         auto* swapchain = GetAppModel()->getSwapChain();
 
@@ -95,8 +82,7 @@ namespace LuaSTGPlus
         return result;
     }
 
-    bool AppFrame::SetDisplayModeBorderlessFullscreen(Core::Vector2U window_size, uint32_t monitor_idx, bool vsync)
-    {
+    bool AppFrame::SetDisplayModeBorderlessFullscreen(Core::Vector2U window_size, uint32_t monitor_idx, bool vsync) {
         auto* window = GetAppModel()->getWindow();
         auto* swapchain = GetAppModel()->getSwapChain();
 
@@ -117,8 +103,7 @@ namespace LuaSTGPlus
         return result;
     }
 
-    bool AppFrame::SetDisplayModeExclusiveFullscreen(Core::Vector2U window_size, bool vsync, Core::Rational)
-    {
+    bool AppFrame::SetDisplayModeExclusiveFullscreen(Core::Vector2U window_size, bool vsync, Core::Rational) {
         auto* window = GetAppModel()->getWindow();
         auto* swapchain = GetAppModel()->getSwapChain();
 
@@ -137,8 +122,7 @@ namespace LuaSTGPlus
         return result;
     }
 
-    bool AppFrame::UpdateDisplayMode()
-    {
+    bool AppFrame::UpdateDisplayMode() {
         if (m_Setting.fullscreen)
             return SetDisplayModeExclusiveFullscreen(
                 m_Setting.canvas_size,
@@ -152,8 +136,7 @@ namespace LuaSTGPlus
                 false);
     }
 
-    bool AppFrame::InitializationApplySettingStage1()
-    {
+    bool AppFrame::InitializationApplySettingStage1() {
         // Configure window
         {
             using namespace Core::Graphics;
@@ -172,8 +155,7 @@ namespace LuaSTGPlus
         return true;
     }
 
-    bool AppFrame::InitializationApplySettingStage2()
-    {
+    bool AppFrame::InitializationApplySettingStage2() {
         auto* p_swapchain = GetAppModel()->getSwapChain();
         // Init swapchain first
         bool const result = p_swapchain->setWindowMode(m_Setting.canvas_size);
@@ -186,37 +168,26 @@ namespace LuaSTGPlus
         return true;
     }
 
-    void AppFrame::SetWindowed(bool v)
-    {
-        if (m_iStatus == AppStatus::Initializing)
-        {
+    void AppFrame::SetWindowed(bool v) {
+        if (m_iStatus == AppStatus::Initializing) {
             m_Setting.fullscreen = !v;
-        }
-        else if (m_iStatus == AppStatus::Running)
-        {
+        } else if (m_iStatus == AppStatus::Running) {
             spdlog::warn("[luastg] SetWindowed: launch-only function called at runtime");
         }
     }
 
-    void AppFrame::SetVsync(bool v)
-    {
-        if (m_iStatus == AppStatus::Initializing)
-        {
+    void AppFrame::SetVsync(bool v) {
+        if (m_iStatus == AppStatus::Initializing) {
             m_Setting.vsync = v;
-        }
-        else if (m_iStatus == AppStatus::Running)
-        {
+        } else if (m_iStatus == AppStatus::Running) {
             spdlog::warn("[luastg] SetVsync: launch-only function called at runtime");
         }
     }
 
-    void AppFrame::SetResolution(uint32_t width, uint32_t height)
-    {
-        if (m_iStatus == AppStatus::Initializing)
-        {
+    void AppFrame::SetResolution(uint32_t width, uint32_t height) {
+        if (m_iStatus == AppStatus::Initializing) {
             m_Setting.canvas_size = Core::Vector2U(width, height);
-        }
-        else if (m_iStatus == AppStatus::Running)
+        } else if (m_iStatus == AppStatus::Running)
             spdlog::warn("[luastg] SetResolution: launch-only function called at runtime");
     }
 }

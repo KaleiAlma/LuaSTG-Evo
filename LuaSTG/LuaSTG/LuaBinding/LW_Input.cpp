@@ -1,16 +1,13 @@
 ﻿#include "LuaBinding/LuaWrapper.hpp"
 #include "AppFrame.h"
-#include "SDL.h"
+#include <SDL3/SDL.h>
 // #include "Platform/Keyboard.hpp"
 // #include "Platform/Mouse.hpp"
 
 
-static int register_keyboard(lua_State* L)
-{
-	struct Wrapper
-	{
-		static int GetKeyState(lua_State* L)
-		{
+static int register_keyboard(lua_State* L) {
+	struct Wrapper {
+		static int GetKeyState(lua_State* L) {
 			lua_pushboolean(L, LAPP.GetKeyState(luaL_checkinteger(L, -1)));
 			return 1;
 		}
@@ -27,7 +24,7 @@ static int register_keyboard(lua_State* L)
 	luaL_register(L, LUASTG_LUA_LIBNAME ".Input", lib_empty);             // ??? lstg.Input
 	luaL_register(L, LUASTG_LUA_LIBNAME ".Input.Keyboard", lib_keyboard); // ??? lstg.Input lstg.Input.Keyboard
 
-	struct { char const* id; char const* name; lua_Integer value; } kcode[] = {
+	struct { const char* id; const char* name; lua_Integer value; } kcode[] = {
 		{"None", "None", SDLK_UNKNOWN},
 
 		{"Back", "Back", SDLK_BACKSPACE},
@@ -83,32 +80,32 @@ static int register_keyboard(lua_State* L)
 		{"D8", "D8", SDLK_8},
 		{"D9", "D9", SDLK_9},
 
-		{"A", "A", SDLK_a},
-		{"B", "B", SDLK_b},
-		{"C", "C", SDLK_c},
-		{"D", "D", SDLK_d},
-		{"E", "E", SDLK_e},
-		{"F", "F", SDLK_f},
-		{"G", "G", SDLK_g},
-		{"H", "H", SDLK_h},
-		{"I", "I", SDLK_i},
-		{"J", "J", SDLK_j},
-		{"K", "K", SDLK_k},
-		{"L", "L", SDLK_l},
-		{"M", "M", SDLK_m},
-		{"N", "N", SDLK_n},
-		{"O", "O", SDLK_o},
-		{"P", "P", SDLK_p},
-		{"Q", "Q", SDLK_q},
-		{"R", "R", SDLK_r},
-		{"S", "S", SDLK_s},
-		{"T", "T", SDLK_t},
-		{"U", "U", SDLK_u},
-		{"V", "V", SDLK_v},
-		{"W", "W", SDLK_w},
-		{"X", "X", SDLK_x},
-		{"Y", "Y", SDLK_y},
-		{"Z", "Z", SDLK_z},
+		{"A", "A", SDLK_A},
+		{"B", "B", SDLK_B},
+		{"C", "C", SDLK_C},
+		{"D", "D", SDLK_D},
+		{"E", "E", SDLK_E},
+		{"F", "F", SDLK_F},
+		{"G", "G", SDLK_G},
+		{"H", "H", SDLK_H},
+		{"I", "I", SDLK_I},
+		{"J", "J", SDLK_J},
+		{"K", "K", SDLK_K},
+		{"L", "L", SDLK_L},
+		{"M", "M", SDLK_M},
+		{"N", "N", SDLK_N},
+		{"O", "O", SDLK_O},
+		{"P", "P", SDLK_P},
+		{"Q", "Q", SDLK_Q},
+		{"R", "R", SDLK_R},
+		{"S", "S", SDLK_S},
+		{"T", "T", SDLK_T},
+		{"U", "U", SDLK_U},
+		{"V", "V", SDLK_V},
+		{"W", "W", SDLK_W},
+		{"X", "X", SDLK_X},
+		{"Y", "Y", SDLK_Y},
+		{"Z", "Z", SDLK_Z},
 		{"LeftWindows", "LeftWindows", SDLK_LGUI},
 		{"RightWindows", "RightWindows", SDLK_RGUI},
 		{"Apps", "Apps", SDLK_APPLICATION},
@@ -175,14 +172,14 @@ static int register_keyboard(lua_State* L)
 		{"VolumeMute", "VolumeMute", SDLK_MUTE},
 		{"VolumeDown", "VolumeDown", SDLK_VOLUMEDOWN},
 		{"VolumeUp", "VolumeUp", SDLK_VOLUMEUP},
-		{"MediaNextTrack", "MediaNextTrack", SDLK_AUDIONEXT},
-		{"MediaPreviousTrack", "MediaPreviousTrack", SDLK_AUDIOPREV},
-		{"MediaStop", "MediaStop", SDLK_AUDIOSTOP},
-		{"MediaPlayPause", "MediaPlayPause", SDLK_AUDIOPLAY},
-		{"LaunchMail", "LaunchMail", SDLK_MAIL},
-		{"SelectMedia", "SelectMedia", SDLK_MEDIASELECT},
-		{"LaunchApplication1", "LaunchApplication1", SDLK_APP1},
-		{"LaunchApplication2", "LaunchApplication2", SDLK_APP2},
+		{"MediaNextTrack", "MediaNextTrack", SDLK_MEDIA_NEXT_TRACK},
+		{"MediaPreviousTrack", "MediaPreviousTrack", SDLK_MEDIA_PREVIOUS_TRACK},
+		{"MediaStop", "MediaStop", SDLK_MEDIA_STOP},
+		{"MediaPlayPause", "MediaPlayPause", SDLK_MEDIA_PLAY},
+		// {"LaunchMail", "LaunchMail", SDLK_MAIL},
+		{"SelectMedia", "SelectMedia", SDLK_MEDIA_SELECT},
+		// {"LaunchApplication1", "LaunchApplication1", SDLK_APP1},
+		// {"LaunchApplication2", "LaunchApplication2", SDLK_APP2},
 
 		{"Semicolon", "Semicolon", SDLK_SEMICOLON},
 		{"Plus", "Plus", SDLK_PLUS},
@@ -190,12 +187,12 @@ static int register_keyboard(lua_State* L)
 		{"Minus", "Minus", SDLK_MINUS},
 		{"Period", "Period", SDLK_PERIOD},
 		{"Question", "Question", SDLK_QUESTION},
-		{"Tilde", "Tilde", SDLK_BACKQUOTE},
+		{"Tilde", "Tilde", SDLK_GRAVE},
 
 		{"OpenBrackets", "OpenBrackets", SDLK_LEFTBRACKET},
 		{"Pipe", "Pipe", SDLK_BACKSLASH},
 		{"CloseBrackets", "CloseBrackets", SDLK_RIGHTBRACKET},
-		{"Quotes", "Quotes", SDLK_QUOTE},
+		{"Quotes", "Quotes", SDLK_APOSTROPHE},
 		// {"Oem8", "Oem8", SDLK_},
 
 		// KNV("Oem102", OemBackslash),
@@ -219,8 +216,7 @@ static int register_keyboard(lua_State* L)
 		// {"Pa1", "Pa1", SDLK_},
 		// {"OemClear", "OemClear", SDLK_},
 	};
-	for (auto const& v : kcode)
-	{
+	for (auto const& v : kcode) {
 		lua_pushstring(L, v.id);     // ??? lstg.Input lstg.Keyboard "name"
 		lua_pushinteger(L, v.value); // ??? lstg.Input lstg.Keyboard "name" code
 		lua_settable(L, -3);         // ??? lstg.Input lstg.Keyboard
@@ -231,24 +227,19 @@ static int register_keyboard(lua_State* L)
 	
 	return 0;
 }
-static int register_mouse(lua_State* L)
-{
-	struct Wrapper
-	{
-		static int GetKeyState(lua_State* L)
-		{
+static int register_mouse(lua_State* L) {
+	struct Wrapper {
+		static int GetKeyState(lua_State* L) {
 			lua_pushboolean(L, LAPP.GetMouseState(luaL_checkinteger(L, 1)));
 			return 1;
 		}
-		static int GetPosition(lua_State* L) noexcept
-		{
+		static int GetPosition(lua_State* L) noexcept {
 			Core::Vector2F tPos = LAPP.GetMousePosition(lua_toboolean(L, 1));
 			lua_pushnumber(L, tPos.x);
 			lua_pushnumber(L, tPos.y);
 			return 2;
 		}
-		static int GetWheelDelta(lua_State* L) noexcept
-		{
+		static int GetWheelDelta(lua_State* L) noexcept {
 			lua_pushnumber(L, (lua_Number)LAPP.GetMouseWheelDelta() / /* WHEEL_DELTA */ 120.0);
 			return 1;
 		}
@@ -281,8 +272,7 @@ static int register_mouse(lua_State* L)
 		{ "X2", /* VK_XBUTTON2 */ SDL_BUTTON_X2 },
 		{ "XButton2", /* VK_XBUTTON2 */ SDL_BUTTON_X2 },
 	};
-	for (auto const& v : mcode)
-	{
+	for (auto const& v : mcode) {
 		lua_pushstring(L, v.id);     // ??? lstg.Input lstg.Input.Mouse "name"
 		lua_pushinteger(L, v.value); // ??? lstg.Input lstg.Input.Mouse "name" code
 		lua_settable(L, -3);         // ??? lstg.Input lstg.Input.Mouse
@@ -294,35 +284,28 @@ static int register_mouse(lua_State* L)
 	return 0;
 }
 
-void LuaSTGPlus::LuaWrapper::InputWrapper::Register(lua_State* L) noexcept
-{
-	struct Wrapper
-	{
-		static int GetKeyState(lua_State* L)
-		{
+void LuaSTGPlus::LuaWrapper::InputWrapper::Register(lua_State* L) noexcept {
+	struct Wrapper {
+		static int GetKeyState(lua_State* L) {
 			lua_pushboolean(L, LAPP.GetKeyState(luaL_checkinteger(L, -1)));
 			return 1;
 		}
-		static int GetMouseState(lua_State* L)
-		{
+		static int GetMouseState(lua_State* L) {
 			lua_pushboolean(L, LAPP.GetMouseState(luaL_checkinteger(L, 1) + 1));
 			return 1;
 		}
-		static int GetMousePosition(lua_State* L) noexcept
-		{
+		static int GetMousePosition(lua_State* L) noexcept {
 			Core::Vector2F tPos = LAPP.GetMousePosition(lua_toboolean(L, 1));
 			lua_pushnumber(L, tPos.x);
 			lua_pushnumber(L, tPos.y);
 			return 2;
 		}
-		static int GetMouseWheelDelta(lua_State* L) noexcept
-		{
+		static int GetMouseWheelDelta(lua_State* L) noexcept {
 			lua_pushinteger(L, (lua_Integer)LAPP.GetMouseWheelDelta());
 			return 1;
 		}
 		// 应该废弃的方法
-		static int GetLastKey(lua_State* L) noexcept
-		{
+		static int GetLastKey(lua_State* L) noexcept {
 			lua_pushinteger(L, LAPP.GetLastKey());
 			return 1;
 		}

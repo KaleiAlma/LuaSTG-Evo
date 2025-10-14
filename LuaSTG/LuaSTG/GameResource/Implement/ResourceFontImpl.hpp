@@ -2,10 +2,8 @@
 #include "GameResource/ResourceFont.hpp"
 #include "GameResource/Implement/ResourceBaseImpl.hpp"
 
-namespace LuaSTGPlus
-{
-	class ResourceFontImpl : public ResourceBaseImpl<IResourceFont>
-	{
+namespace LuaSTGPlus {
+	class ResourceFontImpl : public ResourceBaseImpl<IResourceFont> {
 	private:
 		Core::ScopeObject<Core::Graphics::IGlyphManager> m_glyphmgr;
 		BlendMode m_BlendMode;

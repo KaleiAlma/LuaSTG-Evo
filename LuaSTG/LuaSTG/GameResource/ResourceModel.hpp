@@ -1,16 +1,13 @@
 ﻿#pragma once
 #include "GameResource/ResourceBase.hpp"
-#include "Core/Graphics/Renderer.hpp"
+#include "Core/Graphics/Interface/Renderer.hpp"
 
-namespace LuaSTGPlus
-{
-	struct IResourceModel : public IResourceBase
-	{
+namespace LuaSTGPlus {
+	struct IResourceModel : public IResourceBase {
 		virtual Core::Graphics::IModel* GetModel() = 0;
 	};
 	
-	class Mesh
-	{
+	class Mesh {
 	private:
 		std::vector<Core::Graphics::IRenderer::DrawVertex> vertex_;
 		std::vector<Core::Graphics::IRenderer::DrawIndex> index_;

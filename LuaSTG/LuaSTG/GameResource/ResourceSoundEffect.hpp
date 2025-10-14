@@ -1,10 +1,8 @@
 #pragma once
 #include "GameResource/ResourceBase.hpp"
 
-namespace LuaSTGPlus
-{
-	struct IResourceSoundEffect : public IResourceBase
-	{
+namespace LuaSTGPlus {
+	struct IResourceSoundEffect : public IResourceBase {
 		virtual void FlushCommand() = 0;
 		virtual void Play(float vol, float pan) = 0;
 		virtual void Resume() = 0;

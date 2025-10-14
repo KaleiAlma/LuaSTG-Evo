@@ -1,6 +1,5 @@
 #pragma once
 
-namespace LuaSTG
-{
+namespace LuaSTG {
     bool CheckUserRuntime();
 }

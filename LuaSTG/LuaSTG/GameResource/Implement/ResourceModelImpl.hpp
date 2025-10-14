@@ -2,10 +2,8 @@
 #include "GameResource/ResourceModel.hpp"
 #include "GameResource/Implement/ResourceBaseImpl.hpp"
 
-namespace LuaSTGPlus
-{
-	class ResourceModelImpl : public ResourceBaseImpl<IResourceModel>
-	{
+namespace LuaSTGPlus {
+	class ResourceModelImpl : public ResourceBaseImpl<IResourceModel> {
 	private:
 		Core::ScopeObject<Core::Graphics::IModel> model_;
 	public:

@@ -9,16 +9,13 @@ using namespace LuaSTGPlus;
 /// AppFrame
 ////////////////////////////////////////////////////////////////////////////////
 
-AppFrame& AppFrame::GetInstance()
-{
+AppFrame& AppFrame::GetInstance() {
     static AppFrame s_Instance;
     return s_Instance;
 }
 AppFrame::AppFrame() noexcept = default;
-AppFrame::~AppFrame() noexcept
-{
-    if (m_iStatus != AppStatus::NotInitialized && m_iStatus != AppStatus::Destroyed)
-    {
+AppFrame::~AppFrame() noexcept {
+    if (m_iStatus != AppStatus::NotInitialized && m_iStatus != AppStatus::Destroyed) {
         // If the framework has not been destroyed, destroy it
         Shutdown();
     }
@@ -26,46 +23,37 @@ AppFrame::~AppFrame() noexcept
 
 #pragma region 脚本接口
 
-void AppFrame::SetFPS(uint32_t v)noexcept
-{
+void AppFrame::SetFPS(uint32_t v)noexcept {
     m_Setting.target_fps = (v > 1u) ? v : 1u; // It has to be at least 1 fps
 }
-void AppFrame::SetSEVolume(float v)
-{
+void AppFrame::SetSEVolume(float v) {
     m_Setting.volume_sound_effect = v;
     if (GetAppModel())
         GetAppModel()->getAudioDevice()->setMixChannelVolume(Core::Audio::MixChannel::SoundEffect, v);
 }
-void AppFrame::SetBGMVolume(float v)
-{
+void AppFrame::SetBGMVolume(float v) {
     m_Setting.volume_music = v;
     if (GetAppModel())
         GetAppModel()->getAudioDevice()->setMixChannelVolume(Core::Audio::MixChannel::Music, v);
 }
-void AppFrame::SetTitle(const char* v)noexcept
-{
-    try
-    {
+void AppFrame::SetTitle(const char* v)noexcept {
+    try {
         m_Setting.window_title = v;
         if (m_pAppModel)
             m_pAppModel->getWindow()->setTitleText(v);
     }
-    catch (const std::bad_alloc&)
-    {
+    catch (const std::bad_alloc&) {
         spdlog::error("[luastg] SetTitle: Out of memory");
     }
 }
-void AppFrame::SetSplash(bool v)noexcept
-{
+void AppFrame::SetSplash(bool v)noexcept {
     m_Setting.show_cursor = v;
-    if (m_pAppModel)
-    {
+    if (m_pAppModel) {
         m_pAppModel->getWindow()->setCursor(m_Setting.show_cursor ? Core::Graphics::WindowCursor::Arrow : Core::Graphics::WindowCursor::None);
     }
 }
 
-int AppFrame::LoadTextFile(lua_State* L_, const char* path, const char *packname)noexcept
-{
+int AppFrame::LoadTextFile(lua_State* L_, const char* path, const char *packname)noexcept {
     if (ResourceMgr::GetResourceLoadingLog()) {
         if (packname)
             spdlog::info("[luastg] Reading text file '{}' in package '{}'", packname, path);
@@ -74,16 +62,12 @@ int AppFrame::LoadTextFile(lua_State* L_, const char* path, const char *packname
     }
     bool loaded = false;
     std::vector<uint8_t> src;
-    if (packname)
-    {
+    if (packname) {
         auto& arc = GFileManager().getFileArchive(packname);
-        if (!arc.empty())
-        {
+        if (!arc.empty()) {
             loaded = arc.load(path, src);
         }
-    }
-    else
-    {
+    } else {
         loaded = GFileManager().loadEx(path, src);
     }
     if (!loaded) {
@@ -98,8 +82,7 @@ int AppFrame::LoadTextFile(lua_State* L_, const char* path, const char *packname
 
 #pragma region 框架函数
 
-bool AppFrame::Init()noexcept
-{
+bool AppFrame::Init()noexcept {
     assert(m_iStatus == AppStatus::NotInitialized);
     
     spdlog::info(LUASTG_INFO);
@@ -111,15 +94,13 @@ bool AppFrame::Init()noexcept
     spdlog::info("[luastg] Initializing LuaJIT");
     
     // Initialize Lua VM
-    if (!OnOpenLuaEngine())
-    {
+    if (!OnOpenLuaEngine()) {
         spdlog::info("[luastg] Failed to initialize LuaJIT");
         return false;
     }
     
     // Load launch script (optional)
-    if (!OnLoadLaunchScriptAndFiles())
-    {
+    if (!OnLoadLaunchScriptAndFiles()) {
         return false;
     }
     
@@ -134,12 +115,10 @@ bool AppFrame::Init()noexcept
 
         // Allocate space for object pools
         spdlog::info("[luastg] Initializing object pool with capacity: {}", LOBJPOOL_SIZE);
-        try
-        {
+        try {
             m_GameObjectPool = std::make_unique<GameObjectPool>(L);
         }
-        catch (const std::bad_alloc&)
-        {
+        catch (const std::bad_alloc&) {
             spdlog::error("[luastg] Unable to allocate memory for object pool");
             return false;
         }
@@ -159,8 +138,7 @@ bool AppFrame::Init()noexcept
     }
 
     // Load main script
-    if (!OnLoadMainScriptAndFiles())
-    {
+    if (!OnLoadMainScriptAndFiles()) {
         return false;
     }
 
@@ -175,8 +153,7 @@ bool AppFrame::Init()noexcept
     
     return true;
 }
-void AppFrame::Shutdown()noexcept
-{
+void AppFrame::Shutdown()noexcept {
     if (L) {
         SafeCallGlobalFunction(LuaSTG::LuaEngine::G_CALLBACK_EngineStop);
     }
@@ -184,8 +161,7 @@ void AppFrame::Shutdown()noexcept
     m_GameObjectPool = nullptr;
     spdlog::info("[luastg] Object pool destroyed");
 
-    if (L)
-    {
+    if (L) {
         lua_close(L);
         L = nullptr;
         spdlog::info("[luastg] LuaJIT shutdown");
@@ -210,8 +186,7 @@ void AppFrame::Shutdown()noexcept
     m_iStatus = AppStatus::Destroyed;
     spdlog::info("[luastg] Engine shutdown.");
 }
-void AppFrame::Run()noexcept
-{
+void AppFrame::Run()noexcept {
     assert(m_iStatus == AppStatus::Initialized);
     spdlog::info("[luastg] Start Update/Render Loop");
     
@@ -231,63 +206,50 @@ void AppFrame::Run()noexcept
 
 #pragma region 游戏循环
 
-void AppFrame::onWindowCreate()
-{
+void AppFrame::onWindowCreate() {
     OpenInput();
 }
-void AppFrame::onWindowDestroy()
-{
+void AppFrame::onWindowDestroy() {
     CloseInput();
 }
-void AppFrame::onWindowActive()
-{
+void AppFrame::onWindowActive() {
     m_window_active_changed.fetch_or(0x1);
 }
-void AppFrame::onWindowInactive()
-{
+void AppFrame::onWindowInactive() {
     m_window_active_changed.fetch_or(0x2);
 }
-void AppFrame::onWindowSize(Core::Vector2I size)
-{
+void AppFrame::onWindowSize(Core::Vector2I size) {
     m_sdl_window_size = size;
 }
-void AppFrame::onDeviceChange()
-{
+void AppFrame::onDeviceChange() {
     m_window_active_changed.fetch_or(0x4);
 }
 
-bool AppFrame::onUpdate()
-{
+bool AppFrame::onUpdate() {
     m_fFPS = m_pAppModel->getFrameRateController()->getFPS();
     m_fAvgFPS = m_pAppModel->getFrameRateController()->getAvgFPS();
     m_pAppModel->getFrameRateController()->setTargetFPS(m_Setting.target_fps);
 
-    bool result = true;
-
-    {
-        ZoneScopedN("OnUpdate-Event");
+    bool result = true; {
+        // ZoneScopedN("OnUpdate-Event");
 
         int window_active_changed = m_window_active_changed.exchange(0);
-        if (window_active_changed & 0x2)
-        {
+        if (window_active_changed & 0x2) {
             lua_pushinteger(L, (lua_Integer)LuaSTG::LuaEngine::EngineEvent::WindowActive);
             lua_pushboolean(L, false);
             SafeCallGlobalFunctionB(LuaSTG::LuaEngine::G_CALLBACK_EngineEvent, 2, 0);
 
-            if (!SafeCallGlobalFunction(LuaSTG::LuaEngine::G_CALLBACK_FocusLoseFunc))
-            {
+            if (!SafeCallGlobalFunction(LuaSTG::LuaEngine::G_CALLBACK_FocusLoseFunc)) {
                 result = false;
                 m_pAppModel->requestExit();
             }
         }
-        if (window_active_changed & 0x1)
-        {
+        if (window_active_changed & 0x1) {
             lua_pushinteger(L, (lua_Integer)LuaSTG::LuaEngine::EngineEvent::WindowActive);
             lua_pushboolean(L, true);
             SafeCallGlobalFunctionB(LuaSTG::LuaEngine::G_CALLBACK_EngineEvent, 2, 0);
 
-            if (!SafeCallGlobalFunction(LuaSTG::LuaEngine::G_CALLBACK_FocusGainFunc))
-            {
+            if (!SafeCallGlobalFunction(LuaSTG::LuaEngine::G_CALLBACK_FocusGainFunc)) {
                 result = false;
                 m_pAppModel->requestExit();
             }
@@ -302,14 +264,12 @@ bool AppFrame::onUpdate()
     _frame_count += 1;
 #endif
 
-    if (result)
-    {
-        ZoneScopedN("OnUpdate-LuaCallback");
+    if (result) {
+        // ZoneScopedN("OnUpdate-LuaCallback");
         // Run frame function
         imgui::cancelSetCursor();
         m_GameObjectPool->DebugNextFrame();
-        if (!SafeCallGlobalFunction(LuaSTG::LuaEngine::G_CALLBACK_EngineUpdate, 1))
-        {
+        if (!SafeCallGlobalFunction(LuaSTG::LuaEngine::G_CALLBACK_EngineUpdate, 1)) {
             result = false;
             m_pAppModel->requestExit();
         }
@@ -324,8 +284,7 @@ bool AppFrame::onUpdate()
 
     return result;
 }
-bool AppFrame::onRender()
-{
+bool AppFrame::onRender() {
     m_bRenderStarted = true;
 
     GetRenderTargetManager()->BeginRenderTargetStack();

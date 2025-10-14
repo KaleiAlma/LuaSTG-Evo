@@ -4,11 +4,9 @@
 #include "GameObject/GameObjectClass.hpp"
 #include "lua.hpp"
 
-namespace LuaSTGPlus
-{
+namespace LuaSTGPlus {
 	// 游戏对象状态
-	enum class GameObjectStatus : uint32_t
-	{
+	enum class GameObjectStatus : uint32_t {
 		Free   = 0, // 空闲可用状态
 		Active = 1, // 正常活跃状态
 		Dead   = 2, // 生命周期结束
@@ -19,8 +17,7 @@ namespace LuaSTGPlus
 #pragma warning(disable:26495)
 
 	// 游戏对象
-	struct GameObject
-	{
+	struct GameObject {
 
 		// 链表部分
 		GameObject* pUpdatePrev;		// [P] [不可见]
@@ -102,10 +99,8 @@ namespace LuaSTGPlus
 		// uint8_t ignore_superpause;		// [1] 是否无视超级暂停。 超级暂停时，timer不会增加，frame不会调用，但render会调用。
 		// uint8_t touch_lastx_lasty;		// [1] 是否已经更新过 lastx 和 lasty 值，如果未更新过，表明对象刚生成，获取 dx 和 dy 时应当返回 0
 
-		union
-		{
-			struct
-			{
+		union {
+			struct {
 				uint8_t bound : 1;
 				uint8_t colli : 1;
 				uint8_t rect : 1;
@@ -139,8 +134,7 @@ namespace LuaSTGPlus
 		int GetAttr(lua_State* L);
 		int SetAttr(lua_State* L);
 
-		inline bool IsInRect(lua_Number l, lua_Number r, lua_Number b_, lua_Number t) const noexcept
-		{
+		inline bool IsInRect(lua_Number l, lua_Number r, lua_Number b_, lua_Number t) const noexcept {
 			assert(r >= l && t >= b_);
 			return x >= l && x <= r && y >= b_ && y <= t;
 		}

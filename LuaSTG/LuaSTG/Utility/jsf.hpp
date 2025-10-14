@@ -42,8 +42,7 @@ protected:
     static constexpr unsigned int ITYPE_BITS = 8*sizeof(itype);
     static constexpr unsigned int RTYPE_BITS = 8*sizeof(rtype);
 
-    static itype rotate(itype x, unsigned int k)
-    {
+    static itype rotate(itype x, unsigned int k) {
         return (x << k) | (x >> (ITYPE_BITS - k));
     }
 
@@ -55,14 +54,12 @@ public:
     static constexpr result_type max() { return ~ result_type(0); }
 
     jsf(itype seed = itype(0xcafe5eed00000001ULL))
-        : a_(0xf1ea5eed), b_(seed), c_(seed), d_(seed)
-    {
+        : a_(0xf1ea5eed), b_(seed), c_(seed), d_(seed) {
         for (unsigned int i=0; i<20; ++i)
             advance();
     }
 
-    void advance()
-    {
+    void advance() {
         itype e = a_ - rotate(b_, p);
         a_ = b_ ^ rotate(c_, q);
         b_ = c_ + (r ? rotate(d_, r) : d_);
@@ -71,20 +68,17 @@ public:
     }
         
 
-    rtype operator()()
-    {
+    rtype operator()() {
         advance();
         return rtype(d_);
     }
 
-    bool operator==(const jsf& rhs)
-    {
+    bool operator==(const jsf& rhs) {
         return (a_ == rhs.a_) && (b_ == rhs.b_) 
             && (c_ == rhs.c_) && (d_ == rhs.d_);
     }
 
-    bool operator!=(const jsf& rhs)
-    {
+    bool operator!=(const jsf& rhs) {
         return !operator==(rhs);
     }
 

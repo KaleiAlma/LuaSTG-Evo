@@ -1,11 +1,10 @@
 ﻿#pragma once
 #include "GameResource/ResourceBase.hpp"
-#include "Core/Graphics/Device.hpp"
+#include "Core/Graphics/Interface/Texture2D.hpp"
+#include "Core/Graphics/Interface/RenderTarget.hpp"
 
-namespace LuaSTGPlus
-{
-	struct IResourceTexture : public IResourceBase
-	{
+namespace LuaSTGPlus {
+	struct IResourceTexture : public IResourceBase {
 		virtual bool ResizeRenderTarget(Core::Vector2U size) = 0;
 
 		virtual Core::Graphics::ITexture2D* GetTexture() = 0;

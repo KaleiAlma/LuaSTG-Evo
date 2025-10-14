@@ -45,13 +45,11 @@ static const char* findfile(lua_State* L, const char* name, const char* pname) {
         lua_getfield(L, -1, "path");                                           // ??? t s
         if (lua_isstring(L, -1)) {
             path = lua_tostring(L, -1);
-        }
-        else {
+        } else {
             luaL_error(L, LUA_QL("package.%s") " must be a string", pname);
         }
         lua_pop(L, 1);                                                         // ??? t
-    }
-    else {
+    } else {
         luaL_error(L, LUA_QL("package") " must be a table");
     }
     lua_pop(L, 1);                                                             // ???
@@ -83,8 +81,7 @@ static int package_loader_luastg(lua_State* L) {
     return 1;  /* library loaded successfully */
 }
 
-namespace LuaSTGPlus
-{
+namespace LuaSTGPlus {
 	void lua_register_custom_loader(lua_State* L) {
         lua_getglobal(L, "package");                         // ??? t
         if (lua_istable(L, -1)) {

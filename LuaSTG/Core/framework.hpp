@@ -12,8 +12,8 @@
 
 #include "spdlog/spdlog.h"
 
-#include "Tracy.hpp"
-#include "TracyOpenGL.hpp"
+// #include "Tracy.hpp"
+// #include "TracyOpenGL.hpp"
 
 // #include "Platform/HResultChecker.hpp"
 

@@ -1,16 +1,13 @@
 #pragma once
-#include "Core/Graphics/Sprite.hpp"
+// #include "Core/Graphics/Sprite.hpp"
 #include "GameResource/ResourceBase.hpp"
 #include "GameResource/ResourceSprite.hpp"
 #include "Particle/ParticleList.h"
 
-namespace LuaSTGPlus::Particle
-{
-    class ParticlePool3D
-    {
+namespace LuaSTGPlus::Particle {
+    class ParticlePool3D {
     public:
-        struct Particle
-        {
+        struct Particle {
             Core::Vector3F pos;
             Core::Vector3F vel;
             Core::Vector3F accel;

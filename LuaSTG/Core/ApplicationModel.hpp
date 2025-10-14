@@ -1,15 +1,13 @@
 ﻿#pragma once
 #include "Core/Type.hpp"
-#include "Core/Graphics/Window.hpp"
-#include "Core/Graphics/Device.hpp"
-#include "Core/Graphics/SwapChain.hpp"
-#include "Core/Graphics/Renderer.hpp"
+#include "Core/Window.hpp"
+#include "Core/Graphics/Interface/Device.hpp"
+#include "Core/Graphics/Interface/SwapChain.hpp"
+#include "Core/Graphics/Interface/Renderer.hpp"
 #include "Core/Audio/Device.hpp"
 
-namespace Core
-{
-    struct IFrameRateController
-    {
+namespace Core {
+    struct IFrameRateController {
         virtual double update() = 0;
         virtual uint32_t getTargetFPS() = 0;
         virtual void setTargetFPS(uint32_t target_FPS) = 0;
@@ -21,16 +19,14 @@ namespace Core
         virtual double getMaxFPS() = 0;
     };
 
-    struct IApplicationEventListener
-    {
+    struct IApplicationEventListener {
         // [Work Thread]
         virtual bool onUpdate() { return true; }
         // [Work Thread]
         virtual bool onRender() { return true; }
     };
 
-    struct FrameStatistics
-    {
+    struct FrameStatistics {
         double total_time{};
         double wait_time{};
         double update_time{};
@@ -38,13 +34,11 @@ namespace Core
         double present_time{};
     };
 
-    struct FrameRenderStatistics
-    {
+    struct FrameRenderStatistics {
         double render_time{};
     };
 
-    struct IApplicationModel : public IObject
-    {
+    struct IApplicationModel : public IObject {
         // [Work Thread]
         virtual IFrameRateController* getFrameRateController() = 0;
         // [Main thread | Work Thread]

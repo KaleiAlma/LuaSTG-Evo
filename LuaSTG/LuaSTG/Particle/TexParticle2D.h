@@ -4,13 +4,10 @@
 #include "GameResource/ResourceTexture.hpp"
 #include "Particle/ParticleList.h"
 
-namespace LuaSTGPlus::Particle
-{
-    class TexParticlePool2D
-    {
+namespace LuaSTGPlus::Particle {
+    class TexParticlePool2D {
     public:
-        struct Particle
-        {
+        struct Particle {
             Core::Vector2F pos;
             Core::Vector2F vel;
             Core::Vector2F accel;

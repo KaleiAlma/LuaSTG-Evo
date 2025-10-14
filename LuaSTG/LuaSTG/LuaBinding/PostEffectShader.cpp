@@ -3,23 +3,17 @@
 #include "AppFrame.h"
 #include "LuaBinding/LuaWrapperMisc.hpp"
 
-namespace LuaSTG::LuaBinding
-{
-	namespace
-	{
+namespace LuaSTG::LuaBinding {
+	namespace {
 		constexpr std::string_view const ClassID("lstg.PostEffectShader");
-		struct Wrapper
-		{
+		struct Wrapper {
 			Core::Graphics::IPostEffectShader* shader;
 		};
 	}
 
-	void PostEffectShader::Register(lua_State* L)
-	{
-		struct Class
-		{
-			static int setFloat(lua_State* L)
-			{
+	void PostEffectShader::Register(lua_State* L) {
+		struct Class {
+			static int setFloat(lua_State* L) {
 				lua::stack_t S(L);
 				auto* self = Cast(L, 1);
 				auto const name = S.get_value<std::string_view>(2);
@@ -28,8 +22,7 @@ namespace LuaSTG::LuaBinding
 				S.push_value<bool>(result);
 				return 1;
 			}
-			static int setFloat2(lua_State* L)
-			{
+			static int setFloat2(lua_State* L) {
 				lua::stack_t S(L);
 				auto* self = Cast(L, 1);
 				auto const name = S.get_value<std::string_view>(2);
@@ -39,8 +32,7 @@ namespace LuaSTG::LuaBinding
 				S.push_value<bool>(result);
 				return 1;
 			}
-			static int setFloat3(lua_State* L)
-			{
+			static int setFloat3(lua_State* L) {
 				lua::stack_t S(L);
 				auto* self = Cast(L, 1);
 				auto const name = S.get_value<std::string_view>(2);
@@ -51,8 +43,7 @@ namespace LuaSTG::LuaBinding
 				S.push_value<bool>(result);
 				return 1;
 			}
-			static int setFloat4(lua_State* L)
-			{
+			static int setFloat4(lua_State* L) {
 				lua::stack_t S(L);
 				auto* self = Cast(L, 1);
 				auto const name = S.get_value<std::string_view>(2);
@@ -64,16 +55,14 @@ namespace LuaSTG::LuaBinding
 				S.push_value<bool>(result);
 				return 1;
 			}
-			static int setTexture(lua_State* L)
-			{
+			static int setTexture(lua_State* L) {
 				lua::stack_t S(L);
 				auto* self = Cast(L, 1);
 				auto const name = S.get_value<std::string_view>(2);
 				auto const resource_name = S.get_value<std::string_view>(3);
 				
 				Core::ScopeObject<LuaSTGPlus::IResourceTexture> p = LRES.FindTexture(resource_name.data());
-				if (!p)
-				{
+				if (!p) {
 					return luaL_error(L, "can't find texture '%s'", resource_name.data());
 				}
 
@@ -82,32 +71,27 @@ namespace LuaSTG::LuaBinding
 				return 1;
 			}
 
-			static int __tostring(lua_State* L)
-			{
+			static int __tostring(lua_State* L) {
 				lua::stack_t S(L);
 				auto* self = Cast(L, 1);
 				std::ignore = self;
 				S.push_value<std::string_view>(ClassID);
 				return 1;
 			}
-			static int __gc(lua_State* L)
-			{
+			static int __gc(lua_State* L) {
 				Wrapper* self = (Wrapper*)luaL_checkudata(L, 1, ClassID.data());
-				if (self->shader)
-				{
+				if (self->shader) {
 					self->shader->release();
 					self->shader = nullptr;
 				}
 				return 0;
 			}
 
-			static int CreatePostEffectShader(lua_State* L)
-			{
+			static int CreatePostEffectShader(lua_State* L) {
 				lua::stack_t S(L);
 				auto const file_path = S.get_value<std::string_view>(1);
 				Core::ScopeObject<Core::Graphics::IPostEffectShader> shader;
-				if (!LAPP.GetRenderer2D()->createPostEffectShader(file_path, ~shader))
-				{
+				if (!LAPP.GetRenderer2D()->createPostEffectShader(file_path, ~shader)) {
 					return luaL_error(L, "lstg.CreatePostEffectShader failed, see 'engine.log' for more detail");
 				}
 				Create(L, shader.get());
@@ -139,20 +123,17 @@ namespace LuaSTG::LuaBinding
 		LuaSTGPlus::RegisterClassIntoTable(L, ".PostEffectShader", lib, ClassID.data(), mt);
 		lua_pop(L, 1);
 	}
-	void PostEffectShader::Create(lua_State* L, Core::Graphics::IPostEffectShader* p_shader)
-	{
+	void PostEffectShader::Create(lua_State* L, Core::Graphics::IPostEffectShader* p_shader) {
 		assert(p_shader);
 		Wrapper* self = (Wrapper*)lua_newuserdata(L, sizeof(Wrapper));
 		self->shader = p_shader;
-		if (self->shader)
-		{
+		if (self->shader) {
 			self->shader->retain();
 		}
 		luaL_getmetatable(L, ClassID.data());
 		lua_setmetatable(L, -2);
 	}
-	Core::Graphics::IPostEffectShader* PostEffectShader::Cast(lua_State* L, int idx)
-	{
+	Core::Graphics::IPostEffectShader* PostEffectShader::Cast(lua_State* L, int idx) {
 		Wrapper* self = (Wrapper*)luaL_checkudata(L, idx, ClassID.data());
 		return self->shader;
 	}

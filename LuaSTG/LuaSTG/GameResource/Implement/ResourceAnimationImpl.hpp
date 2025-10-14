@@ -4,10 +4,8 @@
 #include "GameResource/ResourceAnimation.hpp"
 #include "GameResource/Implement/ResourceBaseImpl.hpp"
 
-namespace LuaSTGPlus
-{
-	class ResourceAnimationImpl : public ResourceBaseImpl<IResourceAnimation>
-	{
+namespace LuaSTGPlus {
+	class ResourceAnimationImpl : public ResourceBaseImpl<IResourceAnimation> {
 	private:
 		std::vector<Core::ScopeObject<IResourceSprite>> m_sprites;
 		uint32_t m_Interval = 1;
@@ -25,15 +23,13 @@ namespace LuaSTGPlus
 		IResourceSprite* GetSpriteByTimer(int ani_timer);
 		uint32_t GetInterval() { return m_Interval; }
 		void SetVertexColor(Core::Color4B color) { m_vertex_color[0] = m_vertex_color[1] = m_vertex_color[2]= m_vertex_color[3] = color; }
-		void SetVertexColor(Core::Color4B color[4])
-		{
+		void SetVertexColor(Core::Color4B color[4]) {
 			m_vertex_color[0] = color[0];
 			m_vertex_color[1] = color[1];
 			m_vertex_color[2] = color[2];
 			m_vertex_color[3] = color[3];
 		}
-		void GetVertexColor(Core::Color4B color[4])
-		{
+		void GetVertexColor(Core::Color4B color[4]) {
 			color[0] = m_vertex_color[0];
 			color[1] = m_vertex_color[1];
 			color[2] = m_vertex_color[2];

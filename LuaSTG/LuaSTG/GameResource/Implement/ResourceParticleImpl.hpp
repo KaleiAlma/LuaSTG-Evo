@@ -1,17 +1,15 @@
 #pragma once
 #include "GameResource/ResourceParticle.hpp"
 #include "GameResource/Implement/ResourceBaseImpl.hpp"
-#include "Core/Graphics/Sprite.hpp"
+#include "Core/Graphics/Interface/Sprite.hpp"
 #include "Utility/xorshift.hpp"
 
 #define LPARTICLE_MAXCNT 500  // 单个粒子池最多有500个粒子，这是HGE粒子特效的实现，不应该修改
 
-namespace LuaSTGPlus
-{
+namespace LuaSTGPlus {
 	// https://github.com/kvakvs/hge/blob/hge1.9/include/hgeparticle.h
 	// HGE 粒子实例
-	struct hgeParticle
-	{
+	struct hgeParticle {
 		Core::Vector2F vecLocation; // 位置
 		Core::Vector2F vecVelocity; // 速度
 
@@ -33,8 +31,7 @@ namespace LuaSTGPlus
 	};
 
 	// 粒子效果资源定义
-	struct ParticleSystemResourceInfo
-	{
+	struct ParticleSystemResourceInfo {
 		hgeParticleSystemInfo tParticleSystemInfo = {};
 		Core::ScopeObject<Core::Graphics::ISprite> pSprite;
 		BlendMode eBlendMode = BlendMode::MulAlpha;
@@ -44,12 +41,10 @@ namespace LuaSTGPlus
 		bool LoadFromInfo();
 	};
 
-	class ParticlePoolImpl : public IParticlePool
-	{
+	class ParticlePoolImpl : public IParticlePool {
 		//friend class ResParticle;
 	private:
-		enum class Status
-		{
+		enum class Status {
 			Alive,
 			Sleep
 		};
@@ -93,8 +88,7 @@ namespace LuaSTGPlus
 		ParticlePoolImpl(Core::ScopeObject<IResourceParticle> ps_ref);
 	};
 
-	class ResourceParticleImpl : public ResourceBaseImpl<IResourceParticle>
-	{
+	class ResourceParticleImpl : public ResourceBaseImpl<IResourceParticle> {
 	private:
 		ParticleSystemResourceInfo m_Info;
 		double m_HalfSizeX = 0.;

@@ -2,10 +2,8 @@
 #include "GameResource/ResourceBase.hpp"
 #include "Core/Audio/Device.hpp"
 
-namespace LuaSTGPlus
-{
-    struct IResourceMusic : public IResourceBase
-    {
+namespace LuaSTGPlus {
+    struct IResourceMusic : public IResourceBase {
         virtual Core::Audio::IAudioPlayer* GetAudioPlayer() = 0;
 
         virtual void Play(float vol, double position) = 0;

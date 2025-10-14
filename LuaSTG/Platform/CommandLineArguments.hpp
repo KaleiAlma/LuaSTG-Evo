@@ -3,10 +3,8 @@
 #include <string>
 #include <string_view>
 
-namespace Platform
-{
-    class CommandLineArguments
-    {
+namespace Platform {
+    class CommandLineArguments {
     private:
         std::vector<std::string> m_args;
     public:

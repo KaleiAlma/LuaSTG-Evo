@@ -1,12 +1,10 @@
 ﻿#pragma once
 #include "GameResource/ResourceBase.hpp"
 
-namespace LuaSTGPlus
-{
+namespace LuaSTGPlus {
 	// https://github.com/kvakvs/hge/blob/hge1.9/include/hgeparticle.h
 	// HGE 粒子效果定义
-	struct hgeParticleSystemInfo
-	{
+	struct hgeParticleSystemInfo {
 		uint32_t iBlendInfo;
 
 		int nEmission;   // 每秒发射个数
@@ -45,8 +43,7 @@ namespace LuaSTGPlus
 		float fAlphaVar;        // alpha抖动值
 	};
 
-	struct IParticlePool
-	{
+	struct IParticlePool {
 		virtual hgeParticleSystemInfo& GetParticleSystemInfo() = 0;
 		virtual size_t GetAliveCount() = 0;
 		virtual BlendMode GetBlendMode() = 0;
@@ -68,8 +65,7 @@ namespace LuaSTGPlus
 		virtual void SetOldBehavior(bool b) = 0;
 	};
 
-	struct IResourceParticle : public IResourceBase
-	{
+	struct IResourceParticle : public IResourceBase {
 		virtual hgeParticleSystemInfo const& GetParticleInfo() = 0;
 		virtual double GetHalfSizeX() = 0;
 		virtual double GetHalfSizeY() = 0;

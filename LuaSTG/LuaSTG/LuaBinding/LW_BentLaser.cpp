@@ -2,28 +2,21 @@
 #include "GameObject/GameObjectBentLaser.hpp"
 #include "AppFrame.h"
 
-namespace LuaSTGPlus
-{
-    namespace LuaWrapper
-    {
-        struct BentLaserWrapper::Wrapper
-        {
+namespace LuaSTGPlus {
+    namespace LuaWrapper {
+        struct BentLaserWrapper::Wrapper {
             GameObjectBentLaser* handle;
         };
 
-        void BentLaserWrapper::Register(lua_State* L)noexcept
-        {
-            struct Function
-            {
+        void BentLaserWrapper::Register(lua_State* L)noexcept {
+            struct Function {
             #define GETUDATA(p, i) Wrapper* (p) = static_cast<Wrapper*>(luaL_checkudata(L, (i), LUASTG_LUA_TYPENAME_BENTLASER));
             #define CHECKUDATA(p) if (!(p)->handle) return luaL_error(L, "%s was released.", LUASTG_LUA_TYPENAME_BENTLASER);
 
-                static int Update(lua_State* L)
-                {
+                static int Update(lua_State* L) {
                     GETUDATA(p, 1);
                     CHECKUDATA(p);
-                    if (lua_isnumber(L, 2))
-                    {
+                    if (lua_isnumber(L, 2)) {
                         float const x = (float)luaL_checknumber(L, 2);
                         float const y = (float)luaL_checknumber(L, 3);
                         float const rot = (float)luaL_checknumber(L, 4);
@@ -31,9 +24,7 @@ namespace LuaSTGPlus
                         float const width = (float)luaL_checknumber(L, 6);
                         if (!p->handle->Update(x, y, rot, node_count, width, true))
                             return luaL_error(L, "'Update' failed.");
-                    }
-                    else
-                    {
+                    } else {
                         if (!lua_istable(L, 2))
                             return luaL_error(L, "invalid lstg object for 'Update'.");
                         lua_rawgeti(L, 2, 2);  // self t(object) ??? id
@@ -44,16 +35,12 @@ namespace LuaSTGPlus
                     }
                     return 0;
                 }
-                static int UpdateNode(lua_State* L)
-                {
+                static int UpdateNode(lua_State* L) {
                     GETUDATA(p, 1);
                     CHECKUDATA(p);
-                    if (LUA_TNUMBER == lua_type(L, 2))
-                    {
+                    if (LUA_TNUMBER == lua_type(L, 2)) {
                         return p->handle->api_UpdateSingleNode(L);
-                    }
-                    else
-                    {
+                    } else {
                         if (!lua_istable(L, 2))
                             return luaL_error(L, "invalid lstg object for 'UpdateNode'.");
                         lua_rawgeti(L, 2, 2);  // self t(object) ??? id
@@ -79,14 +66,12 @@ namespace LuaSTGPlus
                         return luaL_error(L, "Update laser data failed.");
                     return 0;
                 }
-                static int UpdateAllNodeByList(lua_State* L)
-                {
+                static int UpdateAllNodeByList(lua_State* L) {
                     GETUDATA(p, 1);
                     CHECKUDATA(p);
                     return p->handle->api_UpdateAllNodeByList(L);
                 }
-                static int SampleByLength(lua_State* L) // t(self) <length>
-                {
+                static int SampleByLength(lua_State* L) { // t(self) <length>
                     GETUDATA(p, 1);
                     CHECKUDATA(p);
                     float length = (float)luaL_checknumber(L, 2);
@@ -94,8 +79,7 @@ namespace LuaSTGPlus
                     p->handle->SampleL(L, length); // t(list)
                     return 1;
                 }
-                static int SampleByTime(lua_State* L) // t(self) <length>
-                {
+                static int SampleByTime(lua_State* L) { // t(self) <length>
                     GETUDATA(p, 1);
                     CHECKUDATA(p);
                     float time = (float)luaL_checknumber(L, 2);
@@ -103,12 +87,10 @@ namespace LuaSTGPlus
                     p->handle->SampleT(L, time / 60.0f); // t(list)
                     return 1;
                 }
-                static int Release(lua_State*)noexcept
-                {
+                static int Release(lua_State*)noexcept {
                     return 0;
                 }
-                static int Render(lua_State* L)
-                {
+                static int Render(lua_State* L) {
                     GETUDATA(p, 1);
                     CHECKUDATA(p);
                     if (!p->handle->Render(
@@ -124,14 +106,12 @@ namespace LuaSTGPlus
 #else
                         (float)luaL_optnumber(L, 9, 1.)
 #endif // GLOBAL_SCALE_COLLI_SHAPE
-                    ))
-                    {
+                    )) {
                         return luaL_error(L, "can't render object with texture '%s'.", luaL_checkstring(L, 2));
                     }
                     return 0;
                 }
-                static int CollisionCheck(lua_State* L)
-                {
+                static int CollisionCheck(lua_State* L) {
                     GETUDATA(p, 1);
                     CHECKUDATA(p);
                     bool r = p->handle->CollisionCheck(
@@ -151,8 +131,7 @@ namespace LuaSTGPlus
                     p->handle->RenderCollider(*LuaWrapper::ColorWrapper::Cast(L, 2));
                     return 0;
                 }
-                static int CollisionCheckWidth(lua_State* L)
-                {
+                static int CollisionCheckWidth(lua_State* L) {
                     GETUDATA(p, 1);
                     CHECKUDATA(p);
                     bool r = p->handle->CollisionCheckW(
@@ -167,8 +146,7 @@ namespace LuaSTGPlus
                     lua_pushboolean(L, r);
                     return 1;
                 }
-                static int CollisionCheckWithWidth(lua_State* L)
-                {
+                static int CollisionCheckWithWidth(lua_State* L) {
                     GETUDATA(p, 1);
                     CHECKUDATA(p);
                     if (lua_istable(L, 3)) {
@@ -183,8 +161,7 @@ namespace LuaSTGPlus
                             (float)luaL_checknumber(L, 2)
                         );
                         lua_pushboolean(L, r);
-                    }
-                    else {
+                    } else {
                         bool const r = p->handle->CollisionCheckW(
                             (float)luaL_checknumber(L, 3),
                             (float)luaL_checknumber(L, 4),
@@ -198,22 +175,19 @@ namespace LuaSTGPlus
                     }
                     return 1;
                 }
-                static int BoundCheck(lua_State* L)
-                {
+                static int BoundCheck(lua_State* L) {
                     GETUDATA(p, 1);
                     CHECKUDATA(p);
                     ::lua_pushboolean(L, p->handle->BoundCheck());
                     return 1;
                 }
-                static int SetAllWidth(lua_State* L)
-                {
+                static int SetAllWidth(lua_State* L) {
                     GETUDATA(p, 1);
                     CHECKUDATA(p);
                     p->handle->SetAllWidth((float)luaL_checknumber(L, 2));
                     return 0;
                 }
-                static int SetEnvelope(lua_State* L)
-                {
+                static int SetEnvelope(lua_State* L) {
                     GETUDATA(p, 1);
                     CHECKUDATA(p);
                     p->handle->SetEnvelope(
@@ -223,8 +197,7 @@ namespace LuaSTGPlus
                         (float)luaL_checknumber(L, 5));
                     return 0;
                 }
-                static int GetEnvelope(lua_State* L)
-                {
+                static int GetEnvelope(lua_State* L) {
                     GETUDATA(p, 1);
                     CHECKUDATA(p);
                     float a, b, c, d;
@@ -236,20 +209,17 @@ namespace LuaSTGPlus
                     return 4;
                 }
 
-                static int Meta_Len(lua_State* L)
-                {
+                static int Meta_Len(lua_State* L) {
                     GETUDATA(p, 1);
                     CHECKUDATA(p);
                     lua_pushinteger(L, (lua_Integer)p->handle->GetSize());
                     return 1;
                 }
-                static int Meta_ToString(lua_State* L)noexcept
-                {
+                static int Meta_ToString(lua_State* L)noexcept {
                     lua_pushfstring(L, LUASTG_LUA_TYPENAME_BENTLASER);
                     return 1;
                 }
-                static int Meta_GC(lua_State* L)
-                {
+                static int Meta_GC(lua_State* L) {
                     GETUDATA(p, 1);
                     if (p->handle) {
                         GameObjectBentLaser::FreeInstance(p->handle);
@@ -262,8 +232,7 @@ namespace LuaSTGPlus
             #undef GETUDATA
             };
 
-            luaL_Reg tMethods[] =
-            {
+            luaL_Reg tMethods[] = {
                 { "Update", &Function::Update },
                 { "UpdateNode", &Function::UpdateNode },
                 { "Release", &Function::Release },
@@ -283,8 +252,7 @@ namespace LuaSTGPlus
                 { NULL, NULL }
             };
 
-            luaL_Reg tMetaTable[] =
-            {
+            luaL_Reg tMetaTable[] = {
                 { "__len", &Function::Meta_Len },
                 { "__tostring", &Function::Meta_ToString },
                 { "__gc", &Function::Meta_GC },
@@ -294,8 +262,7 @@ namespace LuaSTGPlus
             RegisterClassIntoTable(L, ".CurveLaser", tMethods, LUASTG_LUA_TYPENAME_BENTLASER, tMetaTable);
         }
 
-        void BentLaserWrapper::CreateAndPush(lua_State* L)
-        {
+        void BentLaserWrapper::CreateAndPush(lua_State* L) {
             Wrapper* p = static_cast<Wrapper*>(lua_newuserdata(L, sizeof(Wrapper))); // udata
             try {
                 p->handle = GameObjectBentLaser::AllocInstance();//可能有alloc失败的风险

@@ -4,11 +4,9 @@
 // #include <Windows.h>
 // #include <combaseapi.h>
 
-namespace LuaSTGPlus
-{
+namespace LuaSTGPlus {
     // 离开作用域自动执行委托的函数
-    class Scope
-    {
+    class Scope {
     private:
         std::function<void()> m_WhatToDo;
     public:

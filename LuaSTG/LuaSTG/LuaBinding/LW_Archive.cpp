@@ -6,27 +6,22 @@
 using namespace std;
 using namespace LuaSTGPlus;
 
-struct ArchiveWrapper::Wrapper
-{
+struct ArchiveWrapper::Wrapper {
 	uint64_t uuid;
 };
 
 #define getself ArchiveWrapper::Wrapper* self = static_cast<ArchiveWrapper::Wrapper*>(luaL_checkudata(L, 1, LUASTG_LUA_TYPENAME_ARCHIVE));
 #define getthis (GFileManager().getFileArchiveByUUID(self->uuid))
 
-void ArchiveWrapper::Register(lua_State* L)noexcept
-{
-	struct Function
-	{
-		static int IsValid(lua_State* L)
-		{
+void ArchiveWrapper::Register(lua_State* L)noexcept {
+	struct Function {
+		static int IsValid(lua_State* L) {
 			// self
 			getself;
 			::lua_pushboolean(L, !getthis.empty());
 			return 1;
 		}
-		static int EnumFiles(lua_State* L)
-		{
+		static int EnumFiles(lua_State* L) {
 			// ??? self searchpath
 			getself;
 			auto& zip = getthis;
@@ -35,8 +30,7 @@ void ArchiveWrapper::Register(lua_State* L)noexcept
 				// utility::path::to_slash(frompathattr);//转换为'/'分隔符
 				if ((frompathattr.size() == 1) && (frompathattr.back() == '/')) {
 					frompathattr.pop_back();//根目录不需要分隔符
-				}
-				else if ((frompathattr.size() > 0) && (frompathattr.back() != '/')) {
+				} else if ((frompathattr.size() > 0) && (frompathattr.back() != '/')) {
 					frompathattr.push_back('/');//补充一个分隔符
 				}
 				string_view frompath = frompathattr; //目标路径
@@ -46,8 +40,7 @@ void ArchiveWrapper::Register(lua_State* L)noexcept
 					string topath(zip.getName(index)); //要比较的路径
 					if (frompath.size() >= topath.size()) {
 						continue; // 短的直接pass
-					}
-					else {
+					} else {
 						string_view path(&topath[0], frompath.size()); //前导部分
 						if (path == frompath) {
 							string_view path2(&topath[frompath.size()], topath.size() - frompath.size());//剩余部分
@@ -60,8 +53,7 @@ void ArchiveWrapper::Register(lua_State* L)noexcept
 							bool flag = false;
 							if (count <= 0) {
 								flag = true;//没有别的分割符，是查找路径下的文件
-							}
-							else if ((count == 1) && (path2.back() == '/')) {
+							} else if ((count == 1) && (path2.back() == '/')) {
 								flag = true;//有一个分割符，是查找路径下一级的文件夹
 							}
 							if (flag) {
@@ -80,14 +72,12 @@ void ArchiveWrapper::Register(lua_State* L)noexcept
 						}
 					}
 				}
-			}
-			else {
+			} else {
 				lua_newtable(L); // ??? self searchpath t 
 			}
 			return 1;
 		}
-		static int ListFiles(lua_State* L)
-		{
+		static int ListFiles(lua_State* L) {
 			// self
 			getself;
 			auto& zip = getthis;
@@ -109,25 +99,20 @@ void ArchiveWrapper::Register(lua_State* L)noexcept
 
 					i++;
 				}
-			}
-			else {
+			} else {
 				lua_newtable(L); // ??? self t 
 			}
 			return 1;
 		}
-		static int FileExist(lua_State* L)
-		{
+		static int FileExist(lua_State* L) {
 			// self path
 			getself;
 			auto& zip = getthis;
-			if (!zip.empty())
-			{
+			if (!zip.empty()) {
 				string frompath = luaL_checkstring(L, -1);
 				// utility::path::to_slash(frompath);
 				lua_pushboolean(L, zip.contain(frompath));
-			}
-			else
-			{
+			} else {
 				lua_pushboolean(L, false);
 			}
 			return 1;
@@ -135,44 +120,34 @@ void ArchiveWrapper::Register(lua_State* L)noexcept
 		static int GetName(lua_State* L) {
 			getself;
 			auto& zip = getthis;
-			if (!zip.empty())
-			{
+			if (!zip.empty()) {
 				lua_pushstring(L, zip.getFileArchiveName().data());
-			}
-			else
-			{
+			} else {
 				lua_pushnil(L);
 			}
 			return 1;
 		}
-		static int GetPriority(lua_State* L)
-		{
+		static int GetPriority(lua_State* L) {
 			lua_pushinteger(L, 0);
 			return 1;
 		}
-		static int SetPriority(lua_State*)
-		{
+		static int SetPriority(lua_State*) {
 			return 0;
 		}
 
-		static int Meta_ToString(lua_State* L)noexcept
-		{
+		static int Meta_ToString(lua_State* L)noexcept {
 			getself;
 			auto& zip = getthis;
-			if (!zip.empty())
-			{
+			if (!zip.empty()) {
 				lua_pushfstring(L, "lstg.Archive(%llu, \"%s\")", self->uuid, zip.getFileArchiveName().data());
-			}
-			else
-			{
+			} else {
 				lua_pushfstring(L, "lstg.Archive(%llu)", self->uuid);
 			}
 			return 1;
 		}
 	};
 	
-	luaL_Reg tMethods[] =
-	{
+	luaL_Reg tMethods[] = {
 		{ "IsValid", &Function::IsValid },
 		{ "EnumFiles", &Function::EnumFiles },
 		{ "ListFiles", &Function::ListFiles },
@@ -183,8 +158,7 @@ void ArchiveWrapper::Register(lua_State* L)noexcept
 		{ NULL, NULL }
 	};
 
-	luaL_Reg tMetaTable[] =
-	{
+	luaL_Reg tMetaTable[] = {
 		{ "__tostring", &Function::Meta_ToString },
 		{ NULL, NULL }
 	};

@@ -17,16 +17,13 @@
 #include <string_view>
 #include <exception>
 
-namespace UtilRandom
-{
-    class base
-    {
+namespace UtilRandom {
+    class base {
     protected:
         virtual std::string_view name() = 0;
     };
 
-    class splitmix64 : public base
-    {
+    class splitmix64 : public base {
     public:
         using result_type = uint64_t;
 
@@ -37,20 +34,16 @@ namespace UtilRandom
         std::string_view name() override { return "splitmix64"; }
 
     public:
-        static constexpr uint64_t min()
-        {
+        static constexpr uint64_t min() {
             return UINT64_C(0);
         }
-        static constexpr uint64_t max()
-        {
+        static constexpr uint64_t max() {
             return UINT64_MAX;
         }
-        void seed(uint64_t seedv)
-        {
+        void seed(uint64_t seedv) {
             x = seedv;
         }
-        uint64_t next()
-        {
+        uint64_t next() {
             // original implementation
             // uint64_t z = (x += 0x9e3779b97f4a7c15);
 
@@ -62,19 +55,16 @@ namespace UtilRandom
             z = (z ^ (z >> 27)) * 0x94d049bb133111eb;
             return z ^ (z >> 31);
         }
-        inline uint64_t operator()()
-        {
+        inline uint64_t operator()() {
             return next();
         }
 
-        std::string serialize()
-        {
+        std::string serialize() {
             std::ostringstream ss;
             ss << name() << "-" << x;
             return ss.str();
         }
-        bool deserialize(std::string const& data)
-        {
+        bool deserialize(std::string const& data) {
             if (!data.starts_with(name())) {
                 return false;
             }
@@ -102,58 +92,47 @@ namespace UtilRandom
         explicit splitmix64(uint64_t s) : x(s) {}
     };
 
-    inline uint32_t rotl(const uint32_t x, const int k)
-    {
+    inline uint32_t rotl(const uint32_t x, const int k) {
         return (x << k) | (x >> (32 - k));
     }
 
-    inline uint64_t rotl(const uint64_t x, const int k)
-    {
+    inline uint64_t rotl(const uint64_t x, const int k) {
         return (x << k) | (x >> (64 - k));
     }
 
     // https://github.com/imneme/pcg-cpp/blob/428802d1a5634f96bcd0705fab379ff0113bcf13/include/pcg_extras.hpp#L540
     template <typename RNG>
-    inline uint64_t bounded_rand(RNG &rng, uint64_t upper_bound)
-    {
+    inline uint64_t bounded_rand(RNG &rng, uint64_t upper_bound) {
         uint64_t const threshold = (RNG::max() - RNG::min() + uint64_t(1) - upper_bound) % upper_bound;
-        for (;;)
-        {
+        for (;;) {
             uint64_t const r = rng() - RNG::min();
             if (r >= threshold)
                 return r % upper_bound;
         }
     }
 
-    inline float to_float(const uint32_t x) noexcept
-    {
+    inline float to_float(const uint32_t x) noexcept {
         return (x >> 8) * 0x1.0p-24f;
     }
 
-    inline double to_double(const uint64_t x) noexcept
-    {
+    inline double to_double(const uint64_t x) noexcept {
         return (x >> 11) * 0x1.0p-53;
     }
 
-    class xoshiro128_family : public base
-    {
+    class xoshiro128_family : public base {
     public:
         using result_type = uint32_t;
 
     protected:
         uint32_t s[4] = {};
-        inline void jump_by_table(uint32_t const JUMP_TABLE[4])
-        {
+        inline void jump_by_table(uint32_t const JUMP_TABLE[4]) {
             uint32_t s0 = 0;
             uint32_t s1 = 0;
             uint32_t s2 = 0;
             uint32_t s3 = 0;
-            for (int i = 0; i < 4; i++)
-            {
-                for (int b = 0; b < 32; b++)
-                {
-                    if (JUMP_TABLE[i] & UINT32_C(1) << b)
-                    {
+            for (int i = 0; i < 4; i++) {
+                for (int b = 0; b < 32; b++) {
+                    if (JUMP_TABLE[i] & UINT32_C(1) << b) {
                         s0 ^= s[0];
                         s1 ^= s[1];
                         s2 ^= s[2];
@@ -171,32 +150,26 @@ namespace UtilRandom
         virtual std::string_view name() { return "xoshiro128"; }
 
     public:
-        static constexpr uint32_t min()
-        {
+        static constexpr uint32_t min() {
             return UINT32_C(0);
         }
-        static constexpr uint32_t max()
-        {
+        static constexpr uint32_t max() {
             return UINT32_MAX;
         }
-        void seed(uint64_t seedv)
-        {
+        void seed(uint64_t seedv) {
             splitmix64 gn(seedv);
             s[0] = static_cast<uint32_t>(gn.next());
             s[1] = static_cast<uint32_t>(gn.next());
             s[2] = static_cast<uint32_t>(gn.next());
             s[3] = static_cast<uint32_t>(gn.next());
         }
-        virtual uint32_t next()
-        {
+        virtual uint32_t next() {
             return 0;
         }
-        inline uint32_t operator()()
-        {
+        inline uint32_t operator()() {
             return next();
         }
-        void jump()
-        {
+        void jump() {
             constexpr uint32_t const JUMP[4] = {
                 0x8764000b,
                 0xf542d2d3,
@@ -205,8 +178,7 @@ namespace UtilRandom
             };
             jump_by_table(JUMP);
         }
-        void long_jump()
-        {
+        void long_jump() {
             constexpr uint32_t const LONG_JUMP[4] = {
                 0xb523952e,
                 0x0b6f099f,
@@ -216,8 +188,7 @@ namespace UtilRandom
             jump_by_table(LONG_JUMP);
         }
 
-        std::string serialize()
-        {
+        std::string serialize() {
 			std::ostringstream ss;
 			ss << name()
 				<< "-" << s[0]
@@ -226,8 +197,7 @@ namespace UtilRandom
 				<< "-" << s[3];
 			return ss.str();
         }
-        bool deserialize(std::string const& data)
-        {
+        bool deserialize(std::string const& data) {
             if (!data.starts_with(name())) {
                 return false;
             }
@@ -252,14 +222,12 @@ namespace UtilRandom
         }
     };
 
-    class xoshiro128p : public xoshiro128_family
-    {
+    class xoshiro128p : public xoshiro128_family {
     protected:
         std::string_view name() override { return "xoshiro128p"; }
 
     public:
-        uint32_t next() override
-        {
+        uint32_t next() override {
             const uint32_t result = s[0] + s[3];
 
             const uint32_t t = s[1] << 9;
@@ -277,25 +245,21 @@ namespace UtilRandom
         }
 
     public:
-        xoshiro128p()
-        {
+        xoshiro128p() {
             seed(uint64_t(this));
         }
-        explicit xoshiro128p(uint64_t seedv)
-        {
+        explicit xoshiro128p(uint64_t seedv) {
             seed(seedv);
         }
         ~xoshiro128p() {}
     };
 
-    class xoshiro128pp : public xoshiro128_family
-    {
+    class xoshiro128pp : public xoshiro128_family {
     protected:
         std::string_view name() override { return "xoshiro128pp"; }
 
     public:
-        uint32_t next() override
-        {
+        uint32_t next() override {
             const uint32_t result = rotl(s[0] + s[3], 7) + s[0];
 
             const uint32_t t = s[1] << 9;
@@ -313,25 +277,21 @@ namespace UtilRandom
         }
 
     public:
-        xoshiro128pp()
-        {
+        xoshiro128pp() {
             seed(uint64_t(this));
         }
-        explicit xoshiro128pp(uint64_t seedv)
-        {
+        explicit xoshiro128pp(uint64_t seedv) {
             seed(seedv);
         }
         ~xoshiro128pp() {}
     };
 
-    class xoshiro128ss : public xoshiro128_family
-    {
+    class xoshiro128ss : public xoshiro128_family {
     protected:
         std::string_view name() override { return "xoshiro128ss"; }
 
     public:
-        uint32_t next() override
-        {
+        uint32_t next() override {
             const uint32_t result = rotl(s[1] * 5, 7) * 9;
 
             const uint32_t t = s[1] << 9;
@@ -349,34 +309,27 @@ namespace UtilRandom
         }
 
     public:
-        xoshiro128ss()
-        {
+        xoshiro128ss() {
             seed(uint64_t(this));
         }
-        explicit xoshiro128ss(uint64_t seedv)
-        {
+        explicit xoshiro128ss(uint64_t seedv) {
             seed(seedv);
         }
         ~xoshiro128ss() {}
     };
 
-    class xoroshiro128_family : public base
-    {
+    class xoroshiro128_family : public base {
     public:
         using result_type = uint64_t;
 
     protected:
         uint64_t s[2] = {};
-        inline void jump_by_table(uint64_t const JUMP_TABLE[2])
-        {
+        inline void jump_by_table(uint64_t const JUMP_TABLE[2]) {
             uint64_t s0 = 0;
             uint64_t s1 = 0;
-            for (int i = 0; i < 2; i++)
-            {
-                for (int b = 0; b < 64; b++)
-                {
-                    if (JUMP_TABLE[i] & UINT64_C(1) << b)
-                    {
+            for (int i = 0; i < 2; i++) {
+                for (int b = 0; b < 64; b++) {
+                    if (JUMP_TABLE[i] & UINT64_C(1) << b) {
                         s0 ^= s[0];
                         s1 ^= s[1];
                     }
@@ -389,39 +342,32 @@ namespace UtilRandom
         virtual std::string_view name() { return "xoroshiro128"; }
 
     public:
-        static constexpr uint64_t min()
-        {
+        static constexpr uint64_t min() {
             return UINT64_C(0);
         }
-        static constexpr uint64_t max()
-        {
+        static constexpr uint64_t max() {
             return UINT64_MAX;
         }
-        void seed(uint64_t seedv)
-        {
+        void seed(uint64_t seedv) {
             splitmix64 gn(seedv);
             s[0] = gn.next();
             s[1] = gn.next();
         }
-        virtual uint64_t next()
-        {
+        virtual uint64_t next() {
             return 0;
         }
-        inline uint64_t operator()()
-        {
+        inline uint64_t operator()() {
             return next();
         }
 
-        std::string serialize()
-        {
+        std::string serialize() {
             std::ostringstream ss;
             ss << name()
                 << "-" << s[0]
                 << "-" << s[1];
             return ss.str();
         }
-        bool deserialize(std::string const& data)
-        {
+        bool deserialize(std::string const& data) {
             if (!data.starts_with(name())) {
                 return false;
             }
@@ -446,14 +392,12 @@ namespace UtilRandom
         }
     };
 
-    class xoroshiro128p : public xoroshiro128_family
-    {
+    class xoroshiro128p : public xoroshiro128_family {
     protected:
         std::string_view name() override { return "xoroshiro128p"; }
 
     public:
-        uint64_t next() override
-        {
+        uint64_t next() override {
             const uint64_t s0 = s[0];
             uint64_t s1 = s[1];
             const uint64_t result = s0 + s1;
@@ -464,16 +408,14 @@ namespace UtilRandom
 
             return result;
         }
-        void jump()
-        {
+        void jump() {
             constexpr uint64_t const JUMP[2] = {
                 0xdf900294d8f554a5,
                 0x170865df4b3201fc,
             };
             jump_by_table(JUMP);
         }
-        void long_jump()
-        {
+        void long_jump() {
             constexpr uint64_t const LONG_JUMP[2] = {
                 0xd2a98b26625eee7b,
                 0xdddf9b1090aa7ac1,
@@ -482,25 +424,21 @@ namespace UtilRandom
         }
 
     public:
-        xoroshiro128p()
-        {
+        xoroshiro128p() {
             seed(uint64_t(this));
         }
-        explicit xoroshiro128p(uint64_t seedv)
-        {
+        explicit xoroshiro128p(uint64_t seedv) {
             seed(seedv);
         }
         ~xoroshiro128p() {}
     };
 
-    class xoroshiro128pp : public xoroshiro128_family
-    {
+    class xoroshiro128pp : public xoroshiro128_family {
     protected:
         std::string_view name() override { return "xoroshiro128pp"; }
 
     public:
-        uint64_t next() override
-        {
+        uint64_t next() override {
             const uint64_t s0 = s[0];
             uint64_t s1 = s[1];
             const uint64_t result = rotl(s0 + s1, 17) + s0;
@@ -511,16 +449,14 @@ namespace UtilRandom
 
             return result;
         }
-        void jump()
-        {
+        void jump() {
             constexpr uint64_t const JUMP[2] = {
                 0x2bd7a6a6e99c2ddc,
                 0x0992ccaf6a6fca05,
             };
             jump_by_table(JUMP);
         }
-        void long_jump()
-        {
+        void long_jump() {
             constexpr uint64_t const LONG_JUMP[2] = {
                 0x360fd5f2cf8d5d99,
                 0x9c6e6877736c46e3,
@@ -529,25 +465,21 @@ namespace UtilRandom
         }
 
     public:
-        xoroshiro128pp()
-        {
+        xoroshiro128pp() {
             seed(uint64_t(this));
         }
-        explicit xoroshiro128pp(uint64_t seedv)
-        {
+        explicit xoroshiro128pp(uint64_t seedv) {
             seed(seedv);
         }
         ~xoroshiro128pp() {}
     };
 
-    class xoroshiro128ss : public xoroshiro128_family
-    {
+    class xoroshiro128ss : public xoroshiro128_family {
     protected:
         std::string_view name() override { return "xoroshiro128ss"; }
 
     public:
-        uint64_t next() override
-        {
+        uint64_t next() override {
             const uint64_t s0 = s[0];
             uint64_t s1 = s[1];
             const uint64_t result = rotl(s0 * 5, 7) * 9;
@@ -558,16 +490,14 @@ namespace UtilRandom
 
             return result;
         }
-        void jump()
-        {
+        void jump() {
             constexpr uint64_t const JUMP[2] = {
                 0xdf900294d8f554a5,
                 0x170865df4b3201fc,
             };
             jump_by_table(JUMP);
         }
-        void long_jump()
-        {
+        void long_jump() {
             constexpr uint64_t const LONG_JUMP[2] = {
                 0xd2a98b26625eee7b,
                 0xdddf9b1090aa7ac1,
@@ -576,36 +506,29 @@ namespace UtilRandom
         }
 
     public:
-        xoroshiro128ss()
-        {
+        xoroshiro128ss() {
             seed(uint64_t(this));
         }
-        explicit xoroshiro128ss(uint64_t seedv)
-        {
+        explicit xoroshiro128ss(uint64_t seedv) {
             seed(seedv);
         }
         ~xoroshiro128ss() {}
     };
 
-    class xoshiro256_family : public base
-    {
+    class xoshiro256_family : public base {
     public:
         using result_type = uint64_t;
 
     protected:
         uint64_t s[4] = {};
-        inline void jump_by_table(uint64_t const JUMP_TABLE[4])
-        {
+        inline void jump_by_table(uint64_t const JUMP_TABLE[4]) {
             uint64_t s0 = 0;
             uint64_t s1 = 0;
             uint64_t s2 = 0;
             uint64_t s3 = 0;
-            for (int i = 0; i < 4; i++)
-            {
-                for (int b = 0; b < 64; b++)
-                {
-                    if (JUMP_TABLE[i] & UINT64_C(1) << b)
-                    {
+            for (int i = 0; i < 4; i++) {
+                for (int b = 0; b < 64; b++) {
+                    if (JUMP_TABLE[i] & UINT64_C(1) << b) {
                         s0 ^= s[0];
                         s1 ^= s[1];
                         s2 ^= s[2];
@@ -622,32 +545,26 @@ namespace UtilRandom
         virtual std::string_view name() { return "xoshiro256"; }
 
     public:
-        static constexpr uint64_t min()
-        {
+        static constexpr uint64_t min() {
             return UINT64_C(0);
         }
-        static constexpr uint64_t max()
-        {
+        static constexpr uint64_t max() {
             return UINT64_MAX;
         }
-        void seed(uint64_t seedv)
-        {
+        void seed(uint64_t seedv) {
             splitmix64 gn(seedv);
             s[0] = gn.next();
             s[1] = gn.next();
             s[2] = gn.next();
             s[3] = gn.next();
         }
-        virtual uint64_t next()
-        {
+        virtual uint64_t next() {
             return 0;
         }
-        inline uint64_t operator()()
-        {
+        inline uint64_t operator()() {
             return next();
         }
-        void jump()
-        {
+        void jump() {
             constexpr uint64_t const JUMP[4] = {
                 0x180ec6d33cfd0aba,
                 0xd5a61266f0c9392c,
@@ -656,8 +573,7 @@ namespace UtilRandom
             };
             jump_by_table(JUMP);
         }
-        void long_jump()
-        {
+        void long_jump() {
             constexpr uint64_t const LONG_JUMP[4] = {
                 0x76e15d3efefdcbbf,
                 0xc5004e441c522fb3,
@@ -667,8 +583,7 @@ namespace UtilRandom
             jump_by_table(LONG_JUMP);
         }
 
-        std::string serialize()
-        {
+        std::string serialize() {
             std::ostringstream ss;
             ss << name()
                 << "-" << s[0]
@@ -677,8 +592,7 @@ namespace UtilRandom
                 << "-" << s[3];
             return ss.str();
         }
-        bool deserialize(std::string const& data)
-        {
+        bool deserialize(std::string const& data) {
             if (!data.starts_with(name())) {
                 return false;
             }
@@ -703,14 +617,12 @@ namespace UtilRandom
         }
     };
 
-    class xoshiro256p : public xoshiro256_family
-    {
+    class xoshiro256p : public xoshiro256_family {
     protected:
         std::string_view name() override { return "xoshiro256p"; }
 
     public:
-        uint64_t next() override
-        {
+        uint64_t next() override {
             const uint64_t result = s[0] + s[3];
 
             const uint64_t t = s[1] << 17;
@@ -728,25 +640,21 @@ namespace UtilRandom
         }
 
     public:
-        xoshiro256p()
-        {
+        xoshiro256p() {
             seed(uint64_t(this));
         }
-        explicit xoshiro256p(uint64_t seedv)
-        {
+        explicit xoshiro256p(uint64_t seedv) {
             seed(seedv);
         }
         ~xoshiro256p() {}
     };
 
-    class xoshiro256pp : public xoshiro256_family
-    {
+    class xoshiro256pp : public xoshiro256_family {
     protected:
         std::string_view name() override { return "xoshiro256pp"; }
 
     public:
-        uint64_t next() override
-        {
+        uint64_t next() override {
             const uint64_t result = rotl(s[0] + s[3], 23) + s[0];
 
             const uint64_t t = s[1] << 17;
@@ -764,25 +672,21 @@ namespace UtilRandom
         }
 
     public:
-        xoshiro256pp()
-        {
+        xoshiro256pp() {
             seed(uint64_t(this));
         }
-        explicit xoshiro256pp(uint64_t seedv)
-        {
+        explicit xoshiro256pp(uint64_t seedv) {
             seed(seedv);
         }
         ~xoshiro256pp() {}
     };
 
-    class xoshiro256ss : public xoshiro256_family
-    {
+    class xoshiro256ss : public xoshiro256_family {
     protected:
         std::string_view name() override { return "xoshiro256ss"; }
 
     public:
-        uint64_t next() override
-        {
+        uint64_t next() override {
             const uint64_t result = rotl(s[1] * 5, 7) * 9;
 
             const uint64_t t = s[1] << 17;
@@ -800,33 +704,26 @@ namespace UtilRandom
         }
 
     public:
-        xoshiro256ss()
-        {
+        xoshiro256ss() {
             seed(uint64_t(this));
         }
-        explicit xoshiro256ss(uint64_t seedv)
-        {
+        explicit xoshiro256ss(uint64_t seedv) {
             seed(seedv);
         }
         ~xoshiro256ss() {}
     };
 
-    class xoshiro512_family : public base
-    {
+    class xoshiro512_family : public base {
     public:
         using result_type = uint64_t;
 
     protected:
         uint64_t s[8] = {};
-        inline void jump_by_table(uint64_t const JUMP_TABLE[8])
-        {
+        inline void jump_by_table(uint64_t const JUMP_TABLE[8]) {
             uint64_t t[8] = {};
-            for (int i = 0; i < 8; i++)
-            {
-                for (int b = 0; b < 64; b++)
-                {
-                    if (JUMP_TABLE[i] & UINT64_C(1) << b)
-                    {
+            for (int i = 0; i < 8; i++) {
+                for (int b = 0; b < 64; b++) {
+                    if (JUMP_TABLE[i] & UINT64_C(1) << b) {
                         for (int w = 0; w < 8; w++)
                             t[w] ^= s[w];
                     }
@@ -840,30 +737,24 @@ namespace UtilRandom
         virtual std::string_view name() { return "xoshiro512"; }
 
     public:
-        static constexpr uint64_t min()
-        {
+        static constexpr uint64_t min() {
             return UINT64_C(0);
         }
-        static constexpr uint64_t max()
-        {
+        static constexpr uint64_t max() {
             return UINT64_MAX;
         }
-        void seed(uint64_t seedv)
-        {
+        void seed(uint64_t seedv) {
             splitmix64 gn(seedv);
             for (int i = 0; i < 8; i++)
                 s[i] = gn.next();
         }
-        virtual uint64_t next()
-        {
+        virtual uint64_t next() {
             return 0;
         }
-        inline uint64_t operator()()
-        {
+        inline uint64_t operator()() {
             return next();
         }
-        void jump()
-        {
+        void jump() {
             constexpr uint64_t const JUMP[] = {
                 0x33ed89b6e7a353f9,
                 0x760083d7955323be,
@@ -876,8 +767,7 @@ namespace UtilRandom
             };
             jump_by_table(JUMP);
         }
-        void long_jump()
-        {
+        void long_jump() {
             constexpr uint64_t const LONG_JUMP[] = {
                 0x11467fef8f921d28,
                 0xa2a819f2e79c8ea8,
@@ -891,8 +781,7 @@ namespace UtilRandom
             jump_by_table(LONG_JUMP);
         }
 
-        std::string serialize()
-        {
+        std::string serialize() {
             std::ostringstream ss;
             ss << name()
                 << "-" << s[0]
@@ -905,8 +794,7 @@ namespace UtilRandom
                 << "-" << s[7];
             return ss.str();
         }
-        bool deserialize(std::string const& data)
-        {
+        bool deserialize(std::string const& data) {
             if (!data.starts_with(name())) {
                 return false;
             }
@@ -931,14 +819,12 @@ namespace UtilRandom
         }
     };
 
-    class xoshiro512p : public xoshiro512_family
-    {
+    class xoshiro512p : public xoshiro512_family {
     protected:
         std::string_view name() override { return "xoshiro512p"; }
 
     public:
-        uint64_t next() override
-        {
+        uint64_t next() override {
             const uint64_t result = s[0] + s[2];
 
             const uint64_t t = s[1] << 11;
@@ -960,25 +846,21 @@ namespace UtilRandom
         }
 
     public:
-        xoshiro512p()
-        {
+        xoshiro512p() {
             seed(uint64_t(this));
         }
-        xoshiro512p(uint64_t seedv)
-        {
+        xoshiro512p(uint64_t seedv) {
             seed(seedv);
         }
         ~xoshiro512p() {}
     };
 
-    class xoshiro512pp : public xoshiro512_family
-    {
+    class xoshiro512pp : public xoshiro512_family {
     protected:
         std::string_view name() override { return "xoshiro512pp"; }
 
     public:
-        uint64_t next() override
-        {
+        uint64_t next() override {
             const uint64_t result = rotl(s[0] + s[2], 17) + s[2];
 
             const uint64_t t = s[1] << 11;
@@ -1000,25 +882,21 @@ namespace UtilRandom
         }
 
     public:
-        xoshiro512pp()
-        {
+        xoshiro512pp() {
             seed(uint64_t(this));
         }
-        xoshiro512pp(uint64_t seedv)
-        {
+        xoshiro512pp(uint64_t seedv) {
             seed(seedv);
         }
         ~xoshiro512pp() {}
     };
 
-    class xoshiro512ss : public xoshiro512_family
-    {
+    class xoshiro512ss : public xoshiro512_family {
     protected:
         std::string_view name() override { return "xoshiro512ss"; }
 
     public:
-        uint64_t next() override
-        {
+        uint64_t next() override {
             const uint64_t result = rotl(s[1] * 5, 7) * 9;
 
             const uint64_t t = s[1] << 11;
@@ -1040,34 +918,27 @@ namespace UtilRandom
         }
 
     public:
-        xoshiro512ss()
-        {
+        xoshiro512ss() {
             seed(uint64_t(this));
         }
-        xoshiro512ss(uint64_t seedv)
-        {
+        xoshiro512ss(uint64_t seedv) {
             seed(seedv);
         }
         ~xoshiro512ss() {}
     };
 
-    class xoroshiro1024_family : public base
-    {
+    class xoroshiro1024_family : public base {
     public:
         using result_type = uint64_t;
 
     protected:
         uint64_t s[16] = {};
         int p = 0; // TODO: WTF? How should I init it?
-        inline void jump_by_table(uint64_t const JUMP_TABLE[16])
-        {
+        inline void jump_by_table(uint64_t const JUMP_TABLE[16]) {
             uint64_t t[16] = {};
-            for (int i = 0; i < 16; i++)
-            {
-                for (int b = 0; b < 64; b++)
-                {
-                    if (JUMP_TABLE[i] & UINT64_C(1) << b)
-                    {
+            for (int i = 0; i < 16; i++) {
+                for (int b = 0; b < 64; b++) {
+                    if (JUMP_TABLE[i] & UINT64_C(1) << b) {
                         for (int j = 0; j < 16; j++)
                             t[j] ^= s[(j + p) & 16 - 1];
                     }
@@ -1075,39 +946,32 @@ namespace UtilRandom
                 }
             }
 
-            for (int i = 0; i < 16; i++)
-            {
+            for (int i = 0; i < 16; i++) {
                 s[(i + p) & 16 - 1] = t[i];
             }
         }
         virtual std::string_view name() { return "xoroshiro1024"; }
 
     public:
-        static constexpr uint64_t min()
-        {
+        static constexpr uint64_t min() {
             return UINT64_C(0);
         }
-        static constexpr uint64_t max()
-        {
+        static constexpr uint64_t max() {
             return UINT64_MAX;
         }
-        void seed(uint64_t seedv)
-        {
+        void seed(uint64_t seedv) {
             splitmix64 gn(seedv);
             for (int i = 0; i < 16; i++)
                 s[i] = gn.next();
             p = 0; // TODO: WTF? How should I init it?
         }
-        virtual uint64_t next()
-        {
+        virtual uint64_t next() {
             return 0;
         }
-        inline uint64_t operator()()
-        {
+        inline uint64_t operator()() {
             return next();
         }
-        void jump()
-        {
+        void jump() {
             constexpr uint64_t const JUMP[] = {
                 0x931197d8e3177f17,
                 0xb59422e0b9138c5f,
@@ -1128,8 +992,7 @@ namespace UtilRandom
             };
             jump_by_table(JUMP);
         }
-        void long_jump()
-        {
+        void long_jump() {
             constexpr uint64_t const LONG_JUMP[] = {
                 0x7374156360bbf00f,
                 0x4630c2efa3b3c1f6,
@@ -1151,8 +1014,7 @@ namespace UtilRandom
             jump_by_table(LONG_JUMP);
         }
 
-        std::string serialize()
-        {
+        std::string serialize() {
             std::ostringstream ss;
             ss << name() << "-" << p
                 << "-" << s[0] << "-" << s[1] << "-" << s[2] << "-" << s[3]
@@ -1161,8 +1023,7 @@ namespace UtilRandom
                 << "-" << s[12] << "-" << s[13] << "-" << s[14] << "-" << s[15];
             return ss.str();
         }
-        bool deserialize(std::string const& data)
-        {
+        bool deserialize(std::string const& data) {
             if (!data.starts_with(name())) {
                 return false;
             }
@@ -1193,14 +1054,12 @@ namespace UtilRandom
         }
     };
 
-    class xoroshiro1024s : public xoroshiro1024_family
-    {
+    class xoroshiro1024s : public xoroshiro1024_family {
     protected:
         std::string_view name() override { return "xoroshiro1024s"; }
 
     public:
-        uint64_t next() override
-        {
+        uint64_t next() override {
             const int q = p;
             const uint64_t s0 = s[p = (p + 1) & 15];
             uint64_t s15 = s[q];
@@ -1214,25 +1073,21 @@ namespace UtilRandom
         }
 
     public:
-        xoroshiro1024s()
-        {
+        xoroshiro1024s() {
             seed(uint64_t(this));
         }
-        xoroshiro1024s(uint64_t seedv)
-        {
+        xoroshiro1024s(uint64_t seedv) {
             seed(seedv);
         }
         ~xoroshiro1024s() {}
     };
 
-    class xoroshiro1024pp : public xoroshiro1024_family
-    {
+    class xoroshiro1024pp : public xoroshiro1024_family {
     protected:
         std::string_view name() override { return "xoroshiro1024pp"; }
 
     public:
-        uint64_t next() override
-        {
+        uint64_t next() override {
             const int q = p;
             const uint64_t s0 = s[p = (p + 1) & 15];
             uint64_t s15 = s[q];
@@ -1246,25 +1101,21 @@ namespace UtilRandom
         }
 
     public:
-        xoroshiro1024pp()
-        {
+        xoroshiro1024pp() {
             seed(uint64_t(this));
         }
-        xoroshiro1024pp(uint64_t seedv)
-        {
+        xoroshiro1024pp(uint64_t seedv) {
             seed(seedv);
         }
         ~xoroshiro1024pp() {}
     };
 
-    class xoroshiro1024ss : public xoroshiro1024_family
-    {
+    class xoroshiro1024ss : public xoroshiro1024_family {
     protected:
         std::string_view name() override { return "xoroshiro1024ss"; }
 
     public:
-        uint64_t next() override
-        {
+        uint64_t next() override {
             const int q = p;
             const uint64_t s0 = s[p = (p + 1) & 15];
             uint64_t s15 = s[q];
@@ -1278,12 +1129,10 @@ namespace UtilRandom
         }
 
     public:
-        xoroshiro1024ss()
-        {
+        xoroshiro1024ss() {
             seed(uint64_t(this));
         }
-        xoroshiro1024ss(uint64_t seedv)
-        {
+        xoroshiro1024ss(uint64_t seedv) {
             seed(seedv);
         }
         ~xoroshiro1024ss() {}

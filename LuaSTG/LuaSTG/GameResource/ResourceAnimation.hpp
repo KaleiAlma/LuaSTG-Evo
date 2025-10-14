@@ -1,12 +1,10 @@
 ﻿#pragma once
 #include "GameResource/ResourceBase.hpp"
 #include "GameResource/ResourceSprite.hpp"
-#include "Core/Graphics/Sprite.hpp"
+// #include "Core/Graphics/Sprite.hpp"
 
-namespace LuaSTGPlus
-{
-	struct IResourceAnimation : public IResourceBase
-	{
+namespace LuaSTGPlus {
+	struct IResourceAnimation : public IResourceBase {
 		virtual size_t GetCount() = 0;
 		virtual IResourceSprite* GetSprite(uint32_t index) = 0;
 		virtual uint32_t GetSpriteIndexByTimer(int ani_timer) = 0;

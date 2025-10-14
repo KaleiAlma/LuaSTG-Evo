@@ -5,23 +5,19 @@
 #include <string_view>
 #include <memory>
 
-namespace Core
-{
-    enum class FileType
-    {
+namespace Core {
+    enum class FileType {
         Unknown = 0,
         File = 0x1,
         Directory = 0x2,
     };
     
-    struct FileNode
-    {
+    struct FileNode {
         FileType type = FileType::Unknown;
         std::string name;
     };
     
-    class FileNodeTree
-    {
+    class FileNodeTree {
     public:
         virtual size_t findIndex(std::string_view const& name) = 0;
         virtual size_t getCount() = 0;
@@ -33,8 +29,7 @@ namespace Core
         virtual bool load(std::string_view const& name, IData** pp_data) = 0;
     };
     
-    class FileArchive : public FileNodeTree
-    {
+    class FileArchive : public FileNodeTree {
     private:
         std::vector<FileNode> list;
         std::string name_;
@@ -64,8 +59,7 @@ namespace Core
         ~FileArchive();
     };
     
-    class FileManager : public FileNodeTree
-    {
+    class FileManager : public FileNodeTree {
     private:
         std::vector<FileNode> list;
         std::vector<std::string> search_list;
@@ -109,7 +103,6 @@ namespace Core
     };
 }
 
-inline Core::FileManager& GFileManager()
-{
+inline Core::FileManager& GFileManager() {
     return Core::FileManager::get();
 }

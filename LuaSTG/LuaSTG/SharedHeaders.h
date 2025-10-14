@@ -31,7 +31,7 @@
 
 // 调试工具
 #include "spdlog/spdlog.h"
-#include "Tracy.hpp"
+// #include "Tracy.hpp"
 
 // 引擎公共头文件
 #include "Config.h"          // 自定义编译配置

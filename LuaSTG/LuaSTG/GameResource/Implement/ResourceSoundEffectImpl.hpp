@@ -3,21 +3,17 @@
 #include "GameResource/Implement/ResourceBaseImpl.hpp"
 #include "Core/Audio/Device.hpp"
 
-namespace LuaSTGPlus
-{
-	class ResourceSoundEffectImpl : public ResourceBaseImpl<IResourceSoundEffect>
-	{
+namespace LuaSTGPlus {
+	class ResourceSoundEffectImpl : public ResourceBaseImpl<IResourceSoundEffect> {
 	private:
-		enum class CommandType : uint32_t
-		{
+		enum class CommandType : uint32_t {
 			None,
 			Play,
 			Stop,
 			Reset,
 			ResetAndStop,
 		};
-		struct Command
-		{
+		struct Command {
 			CommandType type = CommandType::None;
 			float vol = 0.0f;
 			float pan = 0.0f;

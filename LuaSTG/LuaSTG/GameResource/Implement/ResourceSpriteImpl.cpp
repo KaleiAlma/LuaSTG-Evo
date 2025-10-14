@@ -1,19 +1,16 @@
 #include "GameResource/Implement/ResourceSpriteImpl.hpp"
 #include "AppFrame.h"
 
-namespace LuaSTGPlus
-{
+namespace LuaSTGPlus {
 	ResourceSpriteImpl::ResourceSpriteImpl(const char* name, Core::Graphics::ISprite* sprite, double hx, double hy, bool rect)
 		: ResourceBaseImpl(ResourceType::Sprite, name)
 		, m_sprite(sprite)
 		, m_HalfSizeX(hx)
 		, m_HalfSizeY(hy)
-		, m_bRectangle(rect)
-	{
+		, m_bRectangle(rect) {
 	}
 
-	void ResourceSpriteImpl::RenderRect(float l, float r, float b, float t, float z)
-	{
+	void ResourceSpriteImpl::RenderRect(float l, float r, float b, float t, float z) {
 		Core::Graphics::ISprite* pSprite = GetSprite();
 		// 备份状态
 		float const z_backup = pSprite->getZ();
@@ -25,8 +22,7 @@ namespace LuaSTGPlus
 		// 恢复状态
 		pSprite->setZ(z_backup);
 	}
-	void ResourceSpriteImpl::Render(float x, float y, float rot, float hscale, float vscale, float z)
-	{
+	void ResourceSpriteImpl::Render(float x, float y, float rot, float hscale, float vscale, float z) {
 		Core::Graphics::ISprite* pSprite = GetSprite();
 		// 备份状态
 		float const z_backup = pSprite->getZ();
@@ -38,8 +34,7 @@ namespace LuaSTGPlus
 		// 恢复状态
 		pSprite->setZ(z_backup);
 	}
-	void ResourceSpriteImpl::Render(float x, float y, float rot, float hscale, float vscale, BlendMode blend, Core::Color4B color, float z)
-	{
+	void ResourceSpriteImpl::Render(float x, float y, float rot, float hscale, float vscale, BlendMode blend, Core::Color4B color, float z) {
 		Core::Graphics::ISprite* pSprite = GetSprite();
 		// 备份状态
 		BlendMode blend_backup = GetBlendMode();
@@ -54,16 +49,14 @@ namespace LuaSTGPlus
 		SetBlendMode(blend_backup);
 		pSprite->setColor(color_backup);
 	}
-	void ResourceSpriteImpl::Render4V(float x1, float y1, float z1, float x2, float y2, float z2, float x3, float y3, float z3, float x4, float y4, float z4)
-	{
+	void ResourceSpriteImpl::Render4V(float x1, float y1, float z1, float x2, float y2, float z2, float x3, float y3, float z3, float x4, float y4, float z4) {
 		LAPP.updateGraph2DBlendMode(GetBlendMode());
 		GetSprite()->draw(Core::Vector3F(x1, y1, z1),
 			Core::Vector3F(x2, y2, z2),
 			Core::Vector3F(x3, y3, z3),
 			Core::Vector3F(x4, y4, z4));
 	}
-	void ResourceSpriteImpl::Render3D(float x, float y, float z, float rot_x, float rot_y, float rot_z, float hscale, float vscale)
-	{
+	void ResourceSpriteImpl::Render3D(float x, float y, float z, float rot_x, float rot_y, float rot_z, float hscale, float vscale) {
 		LAPP.updateGraph2DBlendMode(GetBlendMode());
 		GetSprite()->draw(Core::Vector3F(x, y, z),
 			Core::Vector3F(rot_x, rot_y, rot_z),

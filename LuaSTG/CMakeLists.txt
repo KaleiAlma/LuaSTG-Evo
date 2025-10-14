@@ -184,27 +184,28 @@ target_link_libraries(LuaSTG PRIVATE
     spdlog
     # utility
     PlatformAPI
-    SDL2-static
-    SDL2main
+    SDL3
+    # SDL2main
     Core
-    xmath
+    # xmath
     # fmt
-    libluajit
-    imgui
-    implot
-    lua_cjson
-    toml.lua
-    lua_filesystem
-    luasocket
-    lua_imgui
-    imgui_impl_sdl2
-    imgui_impl_opengl3
+    luajit
+    # imgui
+    # implot
+    lstgext
+    # lua_cjson
+    # toml.lua
+    # lua_filesystem
+    # luasocket
+    # lua_imgui
+    # imgui_impl_sdl2
+    # imgui_impl_opengl3
     lua_steam_api
-    tracy
-    libqoi
-    pcg_cpp
+    # tracy
+    # libqoi
+    # pcg_cpp
     pugixml
-    xxhash
+    # xxhash
 )
 
 set(LUASTG_BUILD_OUTPUT_DIR ${CMAKE_BINARY_DIR}/bin)

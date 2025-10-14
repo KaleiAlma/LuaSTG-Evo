@@ -1,9 +1,7 @@
 ﻿#include "LuaBinding/LuaTableToOption.hpp"
 
-namespace LuaSTGPlus
-{
-	game_option read_game_option_from_index(lua_State* L, int index)
-	{
+namespace LuaSTGPlus {
+	game_option read_game_option_from_index(lua_State* L, int index) {
 		// ?
 		game_option op;
 		if (lua_type(L, index) == LUA_TTABLE) {
@@ -78,8 +76,7 @@ namespace LuaSTGPlus
 		return op;
 	}
 
-	game_option read_game_option_from_string(lua_State* L, const std::string& src)
-	{
+	game_option read_game_option_from_string(lua_State* L, const std::string& src) {
 		int ret = 0;
 		game_option op;
 		// load
@@ -98,8 +95,7 @@ namespace LuaSTGPlus
 			op.error_status = true;
 			op.error_message = luaL_optstring(L, 1, "Failed to parse config.");
 			lua_pop(L, 1);											//
-		}
-		else {
+		} else {
 			lua_getglobal(L, "config");								// t
 			op = read_game_option_from_index(L, 1);
 			lua_pop(L, 1);											//

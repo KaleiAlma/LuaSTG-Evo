@@ -1,18 +1,16 @@
 ﻿#pragma once
 #include "Core/Object.hpp"
 #include "Core/ApplicationModel.hpp"
-#include "Core/Graphics/Window_SDL.hpp"
-#include "Core/Graphics/Device_OpenGL.hpp"
-#include "Core/Graphics/SwapChain_OpenGL.hpp"
-#include "Core/Graphics/Renderer_OpenGL.hpp"
+#include "Core/Window_SDL.hpp"
+#include "Core/Graphics/OpenGL/Device.hpp"
+#include "Core/Graphics/OpenGL/SwapChain.hpp"
+#include "Core/Graphics/OpenGL/Renderer.hpp"
 #include "Core/Audio/Device_SDL.hpp"
 #include <chrono>
 
-namespace Core
-{
+namespace Core {
 
-	class FrameRateController : public IFrameRateController
-	{
+	class FrameRateController : public IFrameRateController {
 	private:
 		using Duration = std::chrono::duration<double>;
 		using Clock = std::chrono::high_resolution_clock;
@@ -50,8 +48,7 @@ namespace Core
 		~FrameRateController();
 	};
 
-	class ApplicationModel_SDL : public Object<IApplicationModel>
-	{
+	class ApplicationModel_SDL : public Object<IApplicationModel> {
 	private:
 		// Shared between threads
 
@@ -61,9 +58,9 @@ namespace Core
 
 		// Work thread exclusive
 
-		ScopeObject<Graphics::Device_OpenGL> m_device;
-		ScopeObject<Graphics::SwapChain_OpenGL> m_swapchain;
-		ScopeObject<Graphics::Renderer_OpenGL> m_renderer;
+		ScopeObject<Graphics::IDevice> m_device;
+		ScopeObject<Graphics::ISwapChain> m_swapchain;
+		ScopeObject<Graphics::IRenderer> m_renderer;
 		ScopeObject<Audio::Device_SDL> m_audiosys;
 		FrameRateController m_frame_rate_controller;
 		IApplicationEventListener* m_listener{ nullptr };

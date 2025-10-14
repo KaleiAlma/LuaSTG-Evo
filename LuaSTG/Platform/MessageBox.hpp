@@ -1,6 +1,6 @@
 #pragma once
 #include <string_view>
-#include "SDL.h"
+#include <SDL3/SDL.h>
 
 // FUCK MICROSOFT
 
@@ -8,10 +8,8 @@
 #undef MessageBox
 #endif
 
-namespace Platform
-{
-    class MessageBox
-    {
+namespace Platform {
+    class MessageBox {
     public:
         static bool Warning(std::string_view title, std::string_view message);
         static void Error(std::string_view title, std::string_view message);

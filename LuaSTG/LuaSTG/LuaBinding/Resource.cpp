@@ -1,32 +1,27 @@
 #include "lua_utility.hpp"
 #include "AppFrame.h"
 
-namespace LuaSTG::Sub::LuaBinding
-{
+namespace LuaSTG::Sub::LuaBinding {
 	static constexpr std::string_view const ModuleID{ "LuaSTG.Sub" };
 
-	struct ResourceTexture
-	{
+	struct ResourceTexture {
 		static constexpr std::string_view const ClassID{ "LuaSTG.Sub.ResourceTexture" };
 
 		LuaSTGPlus::IResourceTexture* data;
 
-		static int api_getResourceType(lua_State* L)
-		{
+		static int api_getResourceType(lua_State* L) {
 			lua::stack_t S(L);
 			auto* self = cast(L, 1);
 			S.push_value(static_cast<int32_t>(self->data->GetType()));
 			return 1;
 		}
-		static int api_getResourceName(lua_State* L)
-		{
+		static int api_getResourceName(lua_State* L) {
 			lua::stack_t S(L);
 			auto* self = cast(L, 1);
 			S.push_value(self->data->GetResName());
 			return 1;
 		}
-		static int api_getSize(lua_State* L)
-		{
+		static int api_getSize(lua_State* L) {
 			lua::stack_t S(L);
 			auto* self = cast(L, 1);
 			auto const result = self->data->GetTexture()->getSize();
@@ -34,16 +29,14 @@ namespace LuaSTG::Sub::LuaBinding
 			S.push_value(result.y);
 			return 2;
 		}
-		static int api_getWidth(lua_State* L)
-		{
+		static int api_getWidth(lua_State* L) {
 			lua::stack_t S(L);
 			auto* self = cast(L, 1);
 			auto const result = self->data->GetTexture()->getSize();
 			S.push_value(result.x);
 			return 1;
 		}
-		static int api_getHeight(lua_State* L)
-		{
+		static int api_getHeight(lua_State* L) {
 			lua::stack_t S(L);
 			auto* self = cast(L, 1);
 			auto const result = self->data->GetTexture()->getSize();
@@ -51,39 +44,33 @@ namespace LuaSTG::Sub::LuaBinding
 			return 1;
 		}
 
-		static int api___gc(lua_State* L)
-		{
+		static int api___gc(lua_State* L) {
 			auto* self = cast(L, 1);
-			if (self->data)
-			{
+			if (self->data) {
 				self->data->release();
 				self->data = nullptr;
 			}
 			return 0;
 		}
-		static int api___tostring(lua_State* L)
-		{
+		static int api___tostring(lua_State* L) {
 			lua::stack_t S(L);
 			std::ignore = cast(L, 1);
 			S.push_value<std::string_view>(ClassID);
 			return 1;
 		}
-		static int api___eq(lua_State* L)
-		{
+		static int api___eq(lua_State* L) {
 			lua::stack_t S(L);
 			auto* self = cast(L, 1);
 			if (test(L, 2)) {
 				auto* other = cast(L, 2);
 				S.push_value(self->data == other->data);
-			}
-			else {
+			} else {
 				S.push_value(false);
 			}
 			return 1;
 		}
 
-		static ResourceTexture* create(lua_State* L)
-		{
+		static ResourceTexture* create(lua_State* L) {
 			lua::stack_t S(L);
 
 			auto* self = S.create_userdata<ResourceTexture>();
@@ -93,16 +80,13 @@ namespace LuaSTG::Sub::LuaBinding
 			self->data = nullptr;
 			return self;
 		}
-		static ResourceTexture* cast(lua_State* L, int idx)
-		{
+		static ResourceTexture* cast(lua_State* L, int idx) {
 			return static_cast<ResourceTexture*>(luaL_checkudata(L, idx, ClassID.data()));
 		}
-		static bool test(lua_State* L, int idx)
-		{
+		static bool test(lua_State* L, int idx) {
 			return nullptr != luaL_testudata(L, idx, ClassID.data());
 		}
-		static void registerClass(lua_State* L)
-		{
+		static void registerClass(lua_State* L) {
 			[[maybe_unused]] lua::stack_balancer_t SB(L);
 			lua::stack_t S(L);
 
@@ -137,30 +121,26 @@ namespace LuaSTG::Sub::LuaBinding
 		}
 	};
 
-	struct ResourceSprite
-	{
+	struct ResourceSprite {
 		static constexpr std::string_view const ClassID{ "LuaSTG.Sub.ResourceSprite" };
 
 		LuaSTGPlus::IResourceSprite* data;
 
 		// IResource
-		static int api_getResourceType(lua_State* L)
-		{
+		static int api_getResourceType(lua_State* L) {
 			lua::stack_t S(L);
 			auto* self = cast(L, 1);
 			S.push_value(static_cast<int32_t>(self->data->GetType()));
 			return 1;
 		}
-		static int api_getResourceName(lua_State* L)
-		{
+		static int api_getResourceName(lua_State* L) {
 			lua::stack_t S(L);
 			auto* self = cast(L, 1);
 			S.push_value(self->data->GetResName());
 			return 1;
 		}
 		// IResourceSprite
-		static int api_setCenter(lua_State* L)
-		{
+		static int api_setCenter(lua_State* L) {
 			lua::stack_t S(L);
 			auto* self = cast(L, 1);
 			auto const x = S.get_value<float>(2);
@@ -168,8 +148,7 @@ namespace LuaSTG::Sub::LuaBinding
 			self->data->GetSprite()->setTextureCenter(Core::Vector2F(x, y));
 			return 0;
 		}
-		static int api_setUnitsPerPixel(lua_State* L)
-		{
+		static int api_setUnitsPerPixel(lua_State* L) {
 			lua::stack_t S(L);
 			auto* self = cast(L, 1);
 			auto const v = S.get_value<float>(2);
@@ -177,39 +156,33 @@ namespace LuaSTG::Sub::LuaBinding
 			return 0;
 		}
 
-		static int api___gc(lua_State* L)
-		{
+		static int api___gc(lua_State* L) {
 			auto* self = cast(L, 1);
-			if (self->data)
-			{
+			if (self->data) {
 				self->data->release();
 				self->data = nullptr;
 			}
 			return 0;
 		}
-		static int api___tostring(lua_State* L)
-		{
+		static int api___tostring(lua_State* L) {
 			lua::stack_t S(L);
 			std::ignore = cast(L, 1);
 			S.push_value<std::string_view>(ClassID);
 			return 1;
 		}
-		static int api___eq(lua_State* L)
-		{
+		static int api___eq(lua_State* L) {
 			lua::stack_t S(L);
 			auto* self = cast(L, 1);
 			if (test(L, 2)) {
 				auto* other = cast(L, 2);
 				S.push_value(self->data == other->data);
-			}
-			else {
+			} else {
 				S.push_value(false);
 			}
 			return 1;
 		}
 
-		static ResourceSprite* create(lua_State* L)
-		{
+		static ResourceSprite* create(lua_State* L) {
 			lua::stack_t S(L);
 
 			auto* self = S.create_userdata<ResourceSprite>();
@@ -219,16 +192,13 @@ namespace LuaSTG::Sub::LuaBinding
 			self->data = nullptr;
 			return self;
 		}
-		static ResourceSprite* cast(lua_State* L, int idx)
-		{
+		static ResourceSprite* cast(lua_State* L, int idx) {
 			return static_cast<ResourceSprite*>(luaL_checkudata(L, idx, ClassID.data()));
 		}
-		static bool test(lua_State* L, int idx)
-		{
+		static bool test(lua_State* L, int idx) {
 			return nullptr != luaL_testudata(L, idx, ClassID.data());
 		}
-		static void registerClass(lua_State* L)
-		{
+		static void registerClass(lua_State* L) {
 			[[maybe_unused]] lua::stack_balancer_t SB(L);
 			lua::stack_t S(L);
 
@@ -262,60 +232,51 @@ namespace LuaSTG::Sub::LuaBinding
 		}
 	};
 	
-	struct ResourceSpriteSequence
-	{
+	struct ResourceSpriteSequence {
 		static constexpr std::string_view const ClassID{ "LuaSTG.Sub.ResourceSpriteSequence" };
 
 		LuaSTGPlus::IResourceAnimation* data;
 
-		static int api_getResourceType(lua_State* L)
-		{
+		static int api_getResourceType(lua_State* L) {
 			lua::stack_t S(L);
 			auto* self = cast(L, 1);
 			S.push_value(static_cast<int32_t>(self->data->GetType()));
 			return 1;
 		}
-		static int api_getResourceName(lua_State* L)
-		{
+		static int api_getResourceName(lua_State* L) {
 			lua::stack_t S(L);
 			auto* self = cast(L, 1);
 			S.push_value(self->data->GetResName());
 			return 1;
 		}
 
-		static int api___gc(lua_State* L)
-		{
+		static int api___gc(lua_State* L) {
 			auto* self = cast(L, 1);
-			if (self->data)
-			{
+			if (self->data) {
 				self->data->release();
 				self->data = nullptr;
 			}
 			return 0;
 		}
-		static int api___tostring(lua_State* L)
-		{
+		static int api___tostring(lua_State* L) {
 			lua::stack_t S(L);
 			std::ignore = cast(L, 1);
 			S.push_value<std::string_view>(ClassID);
 			return 1;
 		}
-		static int api___eq(lua_State* L)
-		{
+		static int api___eq(lua_State* L) {
 			lua::stack_t S(L);
 			auto* self = cast(L, 1);
 			if (test(L, 2)) {
 				auto* other = cast(L, 2);
 				S.push_value(self->data == other->data);
-			}
-			else {
+			} else {
 				S.push_value(false);
 			}
 			return 1;
 		}
 
-		static ResourceSpriteSequence* create(lua_State* L)
-		{
+		static ResourceSpriteSequence* create(lua_State* L) {
 			lua::stack_t S(L);
 
 			auto* self = S.create_userdata<ResourceSpriteSequence>();
@@ -325,16 +286,13 @@ namespace LuaSTG::Sub::LuaBinding
 			self->data = nullptr;
 			return self;
 		}
-		static ResourceSpriteSequence* cast(lua_State* L, int idx)
-		{
+		static ResourceSpriteSequence* cast(lua_State* L, int idx) {
 			return static_cast<ResourceSpriteSequence*>(luaL_checkudata(L, idx, ClassID.data()));
 		}
-		static bool test(lua_State* L, int idx)
-		{
+		static bool test(lua_State* L, int idx) {
 			return nullptr != luaL_testudata(L, idx, ClassID.data());
 		}
-		static void registerClass(lua_State* L)
-		{
+		static void registerClass(lua_State* L) {
 			[[maybe_unused]] lua::stack_balancer_t SB(L);
 			lua::stack_t S(L);
 
@@ -366,14 +324,12 @@ namespace LuaSTG::Sub::LuaBinding
 		}
 	};
 
-	struct ResourceCollection
-	{
+	struct ResourceCollection {
 		static constexpr std::string_view const ClassID{ "LuaSTG.Sub.ResourceCollection" };
 
 		LuaSTGPlus::ResourcePool* data;
 
-		static int api_createTextureFromFile(lua_State* L)
-		{
+		static int api_createTextureFromFile(lua_State* L) {
 			lua::stack_t S(L);
 			auto* self = cast(L, 1);
 			auto const name = S.get_value<std::string_view>(2);
@@ -387,8 +343,7 @@ namespace LuaSTG::Sub::LuaBinding
 			tex->data = res.detach(); // 转移所有权
 			return 1;
 		}
-		static int api_createSprite(lua_State* L)
-		{
+		static int api_createSprite(lua_State* L) {
 			lua::stack_t S(L);
 			auto* self = cast(L, 1);
 			auto const sprite_name = S.get_value<std::string_view>(2);
@@ -399,8 +354,7 @@ namespace LuaSTG::Sub::LuaBinding
 				if (!texture) {
 					return luaL_error(L, "can't find texture '%s'.", texture_name.data());
 				}
-			}
-			else {
+			} else {
 				auto* p_tex = ResourceTexture::cast(L, 3);
 				texture = p_tex->data;
 			}
@@ -412,8 +366,7 @@ namespace LuaSTG::Sub::LuaBinding
 			auto const a = S.get_value<float>(8, 0.0f);
 			auto const b = S.get_value<float>(9, 0.0f);
 			auto const rect = S.get_value<bool>(10, false);
-			if (!self->data->CreateSprite(sprite_name.data(), texture->GetResName().data(), x, y, width, height, a, b, rect))
-			{
+			if (!self->data->CreateSprite(sprite_name.data(), texture->GetResName().data(), x, y, width, height, a, b, rect)) {
 				return luaL_error(L, "load image failed (name='%s', tex='%s').", sprite_name.data(), texture->GetResName().data());
 			}
 			auto res = self->data->GetSprite(sprite_name);
@@ -421,8 +374,7 @@ namespace LuaSTG::Sub::LuaBinding
 			sprite->data = res.detach(); // 转移所有权
 			return 1;
 		}
-		static int api_createSpriteSequence(lua_State* L)
-		{
+		static int api_createSpriteSequence(lua_State* L) {
 			lua::stack_t S(L);
 			auto* self = cast(L, 1);
 
@@ -435,8 +387,7 @@ namespace LuaSTG::Sub::LuaBinding
 					if (!texture) {
 						return luaL_error(L, "can't find texture '%s'.", texture_name.data());
 					}
-				}
-				else {
+				} else {
 					auto* p_tex = ResourceTexture::cast(L, 3);
 					texture = p_tex->data;
 				}
@@ -455,16 +406,13 @@ namespace LuaSTG::Sub::LuaBinding
 					x, y, width, height,
 					columns, rows,
 					interval,
-					a, b, rect))
-				{
+					a, b, rect)) {
 					return luaL_error(L, "load animation failed (name='%s', tex='%s').", sprite_sequence_name.data(), texture->GetResName());
 				}
-			}
-			else /* (S.is_table(3)) */ {
+			} else /* (S.is_table(3)) */ {
 				size_t const sprite_count = S.get_array_size(3);
 				std::vector<Core::ScopeObject<LuaSTGPlus::IResourceSprite>> sprite_list;
-				for (size_t index = 0; index < sprite_count; index += 1)
-				{
+				for (size_t index = 0; index < sprite_count; index += 1) {
 					S.push_array_value_zero_base(3, index);
 					auto* p_sprite = ResourceSprite::cast(L, -1);
 					S.pop_value();
@@ -474,8 +422,7 @@ namespace LuaSTG::Sub::LuaBinding
 				auto const a = S.get_value<float>(5, 0.0f);
 				auto const b = S.get_value<float>(6, 0.0f);
 				auto const rect = S.get_value<bool>(7, false);
-				if (!self->data->CreateAnimation(sprite_sequence_name.data(), sprite_list, interval, a, b, rect))
-				{
+				if (!self->data->CreateAnimation(sprite_sequence_name.data(), sprite_list, interval, a, b, rect)) {
 					return luaL_error(L, "load animation failed (name='%s').", sprite_sequence_name.data());
 				}
 			}
@@ -484,16 +431,14 @@ namespace LuaSTG::Sub::LuaBinding
 			sprite_sequence->data = res.detach(); // 转移所有权
 			return 1;
 		}
-		static int api_removeTexture(lua_State* L)
-		{
+		static int api_removeTexture(lua_State* L) {
 			lua::stack_t S(L);
 			auto* self = cast(L, 1);
 			Core::ScopeObject<LuaSTGPlus::IResourceTexture> texture;
 			if (S.is_string(2)) {
 				auto const texture_name = S.get_value<std::string_view>(2);
 				texture = self->data->GetTexture(texture_name);
-			}
-			else {
+			} else {
 				auto* p_texture = ResourceTexture::cast(L, 2);
 				texture = p_texture->data;
 			}
@@ -502,16 +447,14 @@ namespace LuaSTG::Sub::LuaBinding
 			}
 			return 0;
 		}
-		static int api_removeSprite(lua_State* L)
-		{
+		static int api_removeSprite(lua_State* L) {
 			lua::stack_t S(L);
 			auto* self = cast(L, 1);
 			Core::ScopeObject<LuaSTGPlus::IResourceSprite> sprite;
 			if (S.is_string(2)) {
 				auto const sprite_name = S.get_value<std::string_view>(2);
 				sprite = self->data->GetSprite(sprite_name);
-			}
-			else {
+			} else {
 				auto* p_sprite = ResourceSprite::cast(L, 2);
 				sprite = p_sprite->data;
 			}
@@ -520,16 +463,14 @@ namespace LuaSTG::Sub::LuaBinding
 			}
 			return 0;
 		}
-		static int api_removeSpriteSequence(lua_State* L)
-		{
+		static int api_removeSpriteSequence(lua_State* L) {
 			lua::stack_t S(L);
 			auto* self = cast(L, 1);
 			Core::ScopeObject<LuaSTGPlus::IResourceAnimation> sprite_sequence;
 			if (S.is_string(2)) {
 				auto const sprite_sequence_name = S.get_value<std::string_view>(2);
 				sprite_sequence = self->data->GetAnimation(sprite_sequence_name);
-			}
-			else {
+			} else {
 				auto* p_sprite_seq = ResourceSpriteSequence::cast(L, 2);
 				sprite_sequence = p_sprite_seq->data;
 			}
@@ -538,8 +479,7 @@ namespace LuaSTG::Sub::LuaBinding
 			}
 			return 0;
 		}
-		static int api_getTexture(lua_State* L)
-		{
+		static int api_getTexture(lua_State* L) {
 			lua::stack_t S(L);
 			auto* self = cast(L, 1);
 			auto const texture_name = S.get_value<std::string_view>(2);
@@ -551,8 +491,7 @@ namespace LuaSTG::Sub::LuaBinding
 			tex->data = res.detach(); // 转移所有权
 			return 1;
 		}
-		static int api_getSprite(lua_State* L)
-		{
+		static int api_getSprite(lua_State* L) {
 			lua::stack_t S(L);
 			auto* self = cast(L, 1);
 			auto const sprite_name = S.get_value<std::string_view>(2);
@@ -564,8 +503,7 @@ namespace LuaSTG::Sub::LuaBinding
 			sprite->data = res.detach(); // 转移所有权
 			return 1;
 		}
-		static int api_getSpriteSequence(lua_State* L)
-		{
+		static int api_getSpriteSequence(lua_State* L) {
 			lua::stack_t S(L);
 			auto* self = cast(L, 1);
 			auto const sprite_sequence_name = S.get_value<std::string_view>(2);
@@ -577,8 +515,7 @@ namespace LuaSTG::Sub::LuaBinding
 			sprite_sequence->data = res.detach(); // 转移所有权
 			return 1;
 		}
-		static int api_isTextureExist(lua_State* L)
-		{
+		static int api_isTextureExist(lua_State* L) {
 			lua::stack_t S(L);
 			auto* self = cast(L, 1);
 			auto const texture_name = S.get_value<std::string_view>(2);
@@ -586,8 +523,7 @@ namespace LuaSTG::Sub::LuaBinding
 			S.push_value<bool>(res);
 			return 1;
 		}
-		static int api_isSpriteExist(lua_State* L)
-		{
+		static int api_isSpriteExist(lua_State* L) {
 			lua::stack_t S(L);
 			auto* self = cast(L, 1);
 			auto const sprite_name = S.get_value<std::string_view>(2);
@@ -595,8 +531,7 @@ namespace LuaSTG::Sub::LuaBinding
 			S.push_value<bool>(res);
 			return 1;
 		}
-		static int api_isSpriteSequenceExist(lua_State* L)
-		{
+		static int api_isSpriteSequenceExist(lua_State* L) {
 			lua::stack_t S(L);
 			auto* self = cast(L, 1);
 			auto const sprite_sequence_name = S.get_value<std::string_view>(2);
@@ -605,35 +540,30 @@ namespace LuaSTG::Sub::LuaBinding
 			return 1;
 		}
 
-		static int api___gc(lua_State* L)
-		{
+		static int api___gc(lua_State* L) {
 			// 目前 ResourcePool 都是静态对象，不需要释放
 			std::ignore = cast(L, 1);
 			return 0;
 		}
-		static int api___tostring(lua_State* L)
-		{
+		static int api___tostring(lua_State* L) {
 			lua::stack_t S(L);
 			std::ignore = cast(L, 1);
 			S.push_value<std::string_view>(ClassID);
 			return 1;
 		}
-		static int api___eq(lua_State* L)
-		{
+		static int api___eq(lua_State* L) {
 			lua::stack_t S(L);
 			auto* self = cast(L, 1);
 			if (test(L, 2)) {
 				auto* other = cast(L, 2);
 				S.push_value(self->data == other->data);
-			}
-			else {
+			} else {
 				S.push_value(false);
 			}
 			return 1;
 		}
 
-		static ResourceCollection* create(lua_State* L)
-		{
+		static ResourceCollection* create(lua_State* L) {
 			lua::stack_t S(L);
 
 			auto* self = S.create_userdata<ResourceCollection>();
@@ -643,16 +573,13 @@ namespace LuaSTG::Sub::LuaBinding
 			self->data = nullptr;
 			return self;
 		}
-		static ResourceCollection* cast(lua_State* L, int idx)
-		{
+		static ResourceCollection* cast(lua_State* L, int idx) {
 			return static_cast<ResourceCollection*>(luaL_checkudata(L, idx, ClassID.data()));
 		}
-		static bool test(lua_State* L, int idx)
-		{
+		static bool test(lua_State* L, int idx) {
 			return nullptr != luaL_testudata(L, idx, ClassID.data());
 		}
-		static void registerClass(lua_State* L)
-		{
+		static void registerClass(lua_State* L) {
 			[[maybe_unused]] lua::stack_balancer_t SB(L);
 			lua::stack_t S(L);
 
@@ -688,59 +615,48 @@ namespace LuaSTG::Sub::LuaBinding
 		}
 	};
 
-	struct ResourceManager
-	{
+	struct ResourceManager {
 		static constexpr std::string_view const ClassID{ "LuaSTG.Sub.ResourceManager" };
 
-		static int api_getResourceCollection(lua_State* L)
-		{
+		static int api_getResourceCollection(lua_State* L) {
 			lua::stack_t S(L);
 			auto const name = S.get_value<std::string_view>(1);
 			auto* set = ResourceCollection::create(L);
 			if (name == "global") {
 				set->data = LRES.GetResourcePool(LuaSTGPlus::ResourcePoolType::Global);
-			}
-			else if (name == "stage") {
+			} else if (name == "stage") {
 				set->data = LRES.GetResourcePool(LuaSTGPlus::ResourcePoolType::Stage);
-			}
-			else {
+			} else {
 				return luaL_error(L, "resource set '%s' not found", name.data());
 			}
 			return 1;
 		}
-		static int api_setCurrentResourceCollection(lua_State* L)
-		{
+		static int api_setCurrentResourceCollection(lua_State* L) {
 			lua::stack_t S(L);
 			auto const name = S.get_value<std::string_view>(1);
 			if (name == "global") {
 				LRES.SetActivedPoolType(LuaSTGPlus::ResourcePoolType::Global);
-			}
-			else if (name == "stage") {
+			} else if (name == "stage") {
 				LRES.SetActivedPoolType(LuaSTGPlus::ResourcePoolType::Stage);
-			}
-			else {
+			} else {
 				return luaL_error(L, "resource set '%s' not found", name.data());
 			}
 			return 0;
 		}
-		static int api_getCurrentResourceCollection(lua_State* L)
-		{
+		static int api_getCurrentResourceCollection(lua_State* L) {
 			lua::stack_t S(L);
 			auto const type = LRES.GetActivedPoolType();
 			if (LuaSTGPlus::ResourcePoolType::Global == type) {
 				S.push_value<std::string_view>("global");
-			}
-			else if (LuaSTGPlus::ResourcePoolType::Stage == type) {
+			} else if (LuaSTGPlus::ResourcePoolType::Stage == type) {
 				S.push_value<std::string_view>("stage");
-			}
-			else if (LuaSTGPlus::ResourcePoolType::None == type) {
+			} else if (LuaSTGPlus::ResourcePoolType::None == type) {
 				S.push_value<std::string_view>("none");
 			}
 			return 1;
 		}
 
-		static void registerClass(lua_State* L)
-		{
+		static void registerClass(lua_State* L) {
 			[[maybe_unused]] lua::stack_balancer_t SB(L);
 			lua::stack_t S(L);
 
@@ -759,8 +675,7 @@ namespace LuaSTG::Sub::LuaBinding
 	};
 }
 
-int luaopen_LuaSTG_Sub(lua_State* L)
-{
+int luaopen_LuaSTG_Sub(lua_State* L) {
 	LuaSTG::Sub::LuaBinding::ResourceTexture::registerClass(L);
 	LuaSTG::Sub::LuaBinding::ResourceSprite::registerClass(L);
 	LuaSTG::Sub::LuaBinding::ResourceSpriteSequence::registerClass(L);

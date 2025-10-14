@@ -2,21 +2,18 @@
 #include "Core/Audio/Decoder.hpp"
 #include "Core/Object.hpp"
 #include "Core/Audio/Device.hpp"
-#include "SDL.h"
+#include <SDL3/SDL.h>
 #include "miniaudio.h"
 #include <cstdint>
 #include <vector>
 
-namespace Core::Audio
-{
-    struct IAudioDeviceEventListener
-    {
+namespace Core::Audio {
+    struct IAudioDeviceEventListener {
         virtual void onAudioDeviceCreate() = 0;
         virtual void onAudioDeviceDestroy() = 0;
     };
 
-    class Shared_SDL : public Object<IObject>
-    {
+    class Shared_SDL : public Object<IObject> {
     public:
         ma_engine engine;
         ma_sound_group grp_sfx;
@@ -26,8 +23,7 @@ namespace Core::Audio
         ~Shared_SDL();
     };
 
-    class Device_SDL : public Object<IAudioDevice>
-    {
+    class Device_SDL : public Object<IAudioDevice> {
     private:
         std::unordered_set<IAudioDeviceEventListener*> m_listener;
         bool m_dispatch_event{};
@@ -38,7 +34,8 @@ namespace Core::Audio
         void removeEventListener(IAudioDeviceEventListener* p_m_listener);
 
     private:
-        std::vector<std::string> m_audio_device_list;
+        std::vector<std::string_view> m_audio_device_list;
+        std::unordered_map<std::string_view, SDL_AudioDeviceID> m_audio_device_map;
         std::string m_target_audio_device_name;
         std::string m_current_audio_device_name;
         bool refreshAudioDeviceList();
@@ -51,6 +48,7 @@ namespace Core::Audio
     private:
         ScopeObject<Shared_SDL> m_shared;
         SDL_AudioDeviceID m_dev = 0;
+        SDL_AudioStream* m_stream = nullptr;
         float m_volume_direct = 1.0f;
         float m_volume_sound_effect = 1.0f;
         float m_volume_music = 1.0f;
@@ -80,8 +78,7 @@ namespace Core::Audio
 
     class AudioPlayer_SDL
         : public Object<IAudioPlayer>
-        , public IAudioDeviceEventListener
-    {
+        , public IAudioDeviceEventListener {
     private:
         ScopeObject<Device_SDL> m_device;
         ScopeObject<Shared_SDL> m_shared;
@@ -134,8 +131,7 @@ namespace Core::Audio
 
     class LoopAudioPlayer_SDL
         : public Object<IAudioPlayer>
-        , public IAudioDeviceEventListener
-    {
+        , public IAudioDeviceEventListener {
     private:
         ScopeObject<Device_SDL> m_device;
         ScopeObject<Shared_SDL> m_shared;
@@ -195,15 +191,13 @@ namespace Core::Audio
 
     class StreamAudioPlayer_SDL
         : public Object<IAudioPlayer>
-        , public IAudioDeviceEventListener
-    {
+        , public IAudioDeviceEventListener {
     private:
         using Duration = std::chrono::duration<double>;
         using Clock = std::chrono::high_resolution_clock;
         using TimePoint = std::chrono::time_point<Clock>;
     private:
-        struct AudioPeekNode
-        {
+        struct AudioPeekNode {
             ma_node_base base;
             std::vector<float> raw_buffer;
             uint16_t frame_offset = 0;
@@ -212,8 +206,7 @@ namespace Core::Audio
             int16_t frame_offset_old_old = -1;
 
             static void processPcmFrames(ma_node* pNode, const float** ppFramesIn, ma_uint32* pFrameCountIn, float** ppFramesOut, ma_uint32* pFrameCountOut);
-            static constexpr ma_node_vtable vtable =
-            {
+            static constexpr ma_node_vtable vtable = {
                 processPcmFrames,
                 NULL,
                 1,

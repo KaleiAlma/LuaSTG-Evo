@@ -2,56 +2,45 @@
 #include <string_view>
 #include "lua.hpp"
 
-inline std::string_view luaL_check_string_view(lua_State* L, int idx)
-{
+inline std::string_view luaL_check_string_view(lua_State* L, int idx) {
 	size_t len = 0;
 	char const* str = luaL_checklstring(L, idx, &len);
 	return std::string_view(str, len);
 }
-inline void lua_push_string_view(lua_State* L, std::string_view const& str)
-{
+inline void lua_push_string_view(lua_State* L, std::string_view const& str) {
 	lua_pushlstring(L, str.data(), str.length());
 }
 
-inline uint8_t lua_to_uint8_boolean(lua_State* L, int idx)
-{
+inline uint8_t lua_to_uint8_boolean(lua_State* L, int idx) {
 	return lua_toboolean(L, idx) != 0;
 }
 
-inline uint32_t luaL_checki_uint32(lua_State* L, int idx)
-{
+inline uint32_t luaL_checki_uint32(lua_State* L, int idx) {
 	return (uint32_t)luaL_checkinteger(L, idx);
 }
-inline uint32_t luaL_checkf_uint32(lua_State* L, int idx)
-{
+inline uint32_t luaL_checkf_uint32(lua_State* L, int idx) {
 	return (uint32_t)luaL_checknumber(L, idx);
 }
-inline void lua_pushi_uint32(lua_State* L, uint32_t v)
-{
+inline void lua_pushi_uint32(lua_State* L, uint32_t v) {
 	lua_pushinteger(L, (lua_Integer)v);
 }
-inline void lua_pushf_uint32(lua_State* L, uint32_t v)
-{
+inline void lua_pushf_uint32(lua_State* L, uint32_t v) {
 	lua_pushnumber(L, (lua_Number)v);
 }
 
-inline float luaL_check_float(lua_State* L, int idx)
-{
+inline float luaL_check_float(lua_State* L, int idx) {
 	return (float)luaL_checknumber(L, idx);
 }
 
-namespace lua
-{
-	struct stack_index_t
-	{
+namespace lua {
+	struct stack_index_t {
 		int32_t value{};
 
 		stack_index_t() = default;
 		stack_index_t(int32_t index) : value(index) {};
 	};
 
-	struct stack_balancer_t
-	{
+	struct stack_balancer_t {
 		lua_State*& L;
 		int N;
 
@@ -59,8 +48,7 @@ namespace lua
 		inline ~stack_balancer_t() { lua_settop(L, N); }
 	};
 
-	struct stack_t
-	{
+	struct stack_t {
 		lua_State*& L;
 
 		inline stack_t(lua_State*& state) : L(state) {}
@@ -86,21 +74,15 @@ namespace lua
 		inline void push_value(int32_t value) { lua_pushinteger(L, value); }
 
 		template<>
-		inline void push_value(uint32_t value)
-		{
+		inline void push_value(uint32_t value) {
 			constexpr uint32_t const int32_max = static_cast<uint32_t>(std::numeric_limits<int32_t>::max());
 			bool const value_condition = value <= int32_max;
 			constexpr bool const size_condition = sizeof(lua_Integer) > sizeof(uint32_t);
-			if (size_condition || value_condition)
-			{
+			if (size_condition || value_condition) {
 				lua_pushinteger(L, static_cast<lua_Integer>(value));
-			}
-			else if constexpr (sizeof(lua_Number) >= sizeof(double))
-			{
+			} else if constexpr (sizeof(lua_Number) >= sizeof(double)) {
 				lua_pushnumber(L, (lua_Number)value);
-			}
-			else
-			{
+			} else {
 				assert(false);
 				lua_pushnumber(L, (lua_Number)value);
 			}
@@ -110,14 +92,10 @@ namespace lua
 		inline void push_value(float value) { lua_pushnumber(L, value); }
 
 		template<>
-		inline void push_value(double value)
-		{
-			if constexpr (sizeof(lua_Number) >= sizeof(double))
-			{
+		inline void push_value(double value) {
+			if constexpr (sizeof(lua_Number) >= sizeof(double)) {
 				lua_pushnumber(L, value);
-			}
-			else
-			{
+			} else {
 				assert(false);
 				lua_pushnumber(L, (lua_Number)value);
 			}
@@ -132,16 +110,14 @@ namespace lua
 		// C -> lua, struct
 
 		template<typename T>
-		inline void push_vector2(T x, T y)
-		{
+		inline void push_vector2(T x, T y) {
 			auto const idx = create_map(2);
 			set_map_value(idx, "x", x);
 			set_map_value(idx, "y", y);
 		}
 
 		template<typename T>
-		inline void push_vector2(T vec2)
-		{
+		inline void push_vector2(T vec2) {
 			auto const idx = create_map(2);
 			set_map_value(idx, "x", vec2.x);
 			set_map_value(idx, "y", vec2.y);
@@ -175,48 +151,42 @@ namespace lua
 		inline void set_map_value(stack_index_t index, std::string_view key, T value) { typename T::__invalid_type__ _{}; }
 
 		template<>
-		inline void set_map_value(stack_index_t index, std::string_view key, int32_t value)
-		{
+		inline void set_map_value(stack_index_t index, std::string_view key, int32_t value) {
 			push_value(key);
 			push_value(value);
 			lua_settable(L, index.value);
 		}
 
 		template<>
-		inline void set_map_value(stack_index_t index, std::string_view key, uint32_t value)
-		{
+		inline void set_map_value(stack_index_t index, std::string_view key, uint32_t value) {
 			push_value(key);
 			push_value(value);
 			lua_settable(L, index.value);
 		}
 
 		template<>
-		inline void set_map_value(stack_index_t index, std::string_view key, float value)
-		{
+		inline void set_map_value(stack_index_t index, std::string_view key, float value) {
 			push_value(key);
 			push_value(value);
 			lua_settable(L, index.value);
 		}
 
 		template<>
-		inline void set_map_value(stack_index_t index, std::string_view key, double value)
-		{
+		inline void set_map_value(stack_index_t index, std::string_view key, double value) {
 			push_value(key);
 			push_value(value);
 			lua_settable(L, index.value);
 		}
 
 		template<>
-		inline void set_map_value(stack_index_t index, std::string_view key, stack_index_t value)
-		{
+		inline void set_map_value(stack_index_t index, std::string_view key, stack_index_t value) {
 			push_value(key);
 			push_value(value);
 			lua_settable(L, index.value);
 		}
 
 		template<>
-		inline void set_map_value(stack_index_t index, std::string_view key, lua_CFunction value)
-		{
+		inline void set_map_value(stack_index_t index, std::string_view key, lua_CFunction value) {
 			push_value(key);
 			push_value(value);
 			lua_settable(L, index.value);
@@ -258,8 +228,7 @@ namespace lua
 		// userdata
 
 		template<typename T>
-		inline T* create_userdata()
-		{
+		inline T* create_userdata() {
 			return static_cast<T*>(lua_newuserdata(L, sizeof(T)));
 		}
 
@@ -277,30 +246,26 @@ namespace lua
 
 		// package system
 
-		inline stack_index_t push_module(std::string_view name)
-		{
+		inline stack_index_t push_module(std::string_view name) {
 			std::string const name_copy(name);
 			luaL_Reg const list[] = { {NULL, NULL} };
 			luaL_register(L, name_copy.c_str(), list);
 			return index_of_top();
 		}
 
-		inline stack_index_t create_metatable(std::string_view name)
-		{
+		inline stack_index_t create_metatable(std::string_view name) {
 			std::string const name_copy(name);
 			luaL_newmetatable(L, name_copy.c_str());
 			return index_of_top();
 		}
 
-		inline stack_index_t push_metatable(std::string_view name)
-		{
+		inline stack_index_t push_metatable(std::string_view name) {
 			std::string const name_copy(name);
 			luaL_getmetatable(L, name_copy.c_str());
 			return index_of_top();
 		}
 
-		inline void set_metatable(stack_index_t index, std::string_view name)
-		{
+		inline void set_metatable(stack_index_t index, std::string_view name) {
 			std::string const name_copy(name);
 			luaL_getmetatable(L, name_copy.c_str());
 			lua_setmetatable(L, index.value);

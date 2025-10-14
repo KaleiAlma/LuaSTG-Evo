@@ -6,7 +6,7 @@
 #include "Particle/Particle3D.h"
 #include "Particle/TexParticle2D.h"
 #include "Particle/TexParticle3D.h"
-#include "Core/Graphics/Sprite.hpp"
+// #include "Core/Graphics/Sprite.hpp"
 #include "AppFrame.h"
 #include "LuaWrapper.hpp"
 #include "LuaWrapperMisc.hpp"
@@ -25,8 +25,7 @@ std::string_view const ID_TexParticle2D("particle.TexParticle2D");
 std::string_view const ID_TexPool3D("particle.TexParticlePool3D");
 std::string_view const ID_TexParticle3D("particle.TexParticle3D");
 
-int lua_NewPool2D(lua_State* L)
-{
+int lua_NewPool2D(lua_State* L) {
     int const argc = lua_gettop(L);
     int32_t poolsize = 512;
     BlendMode blend = BlendMode::MulAlpha;
@@ -51,8 +50,7 @@ int lua_NewPool2D(lua_State* L)
     return 1;
 }
 
-int lua_pool2d_AddParticle(lua_State* L)
-{
+int lua_pool2d_AddParticle(lua_State* L) {
     ParticlePool2D** self = static_cast<ParticlePool2D**>(luaL_checkudata(L, 1, ID_Pool2D.data()));
     int const argc = lua_gettop(L);
 
@@ -64,13 +62,10 @@ int lua_pool2d_AddParticle(lua_State* L)
         .color = Core::Color4B(0xFFFFFFFF),
     };
 
-    if (argc == 7)
-    {
+    if (argc == 7) {
         float s = luaL_checknumber(L, 7);
         p.scale = Core::Vector2F(s, s);
-    }
-    else if (argc > 7)
-    {
+    } else if (argc > 7) {
         p.scale = Core::Vector2F(luaL_checknumber(L, 7), luaL_checknumber(L, 8));
     }
 
@@ -81,22 +76,19 @@ int lua_pool2d_AddParticle(lua_State* L)
     return 1;
 }
 
-int lua_pool2d_Update(lua_State* L)
-{
+int lua_pool2d_Update(lua_State* L) {
     ParticlePool2D** self = static_cast<ParticlePool2D**>(luaL_checkudata(L, 1, ID_Pool2D.data()));
     (*self)->Update();
     return 0;
 }
 
-int lua_pool2d_Render(lua_State* L)
-{
+int lua_pool2d_Render(lua_State* L) {
     ParticlePool2D** self = static_cast<ParticlePool2D**>(luaL_checkudata(L, 1, ID_Pool2D.data()));
     (*self)->Render();
     return 0;
 }
 
-int lua_pool2d_Apply(lua_State* L)
-{
+int lua_pool2d_Apply(lua_State* L) {
     ParticlePool2D** self = static_cast<ParticlePool2D**>(luaL_checkudata(L, 1, ID_Pool2D.data()));
 
     int r_fn = luaL_ref(L, LUA_REGISTRYINDEX);
@@ -121,15 +113,13 @@ int lua_pool2d_Apply(lua_State* L)
     return 0;
 }
 
-int lua_pool2d_Clear(lua_State* L)
-{
+int lua_pool2d_Clear(lua_State* L) {
     ParticlePool2D** self = static_cast<ParticlePool2D**>(luaL_checkudata(L, 1, ID_Pool2D.data()));
     (*self)->Clear();
     return 0;
 }
 
-int lua_pool2d_GetSize(lua_State* L)
-{
+int lua_pool2d_GetSize(lua_State* L) {
     ParticlePool2D** self = static_cast<ParticlePool2D**>(luaL_checkudata(L, 1, ID_Pool2D.data()));
 
     lua_pushnumber(L, (*self)->GetSize());
@@ -137,8 +127,7 @@ int lua_pool2d_GetSize(lua_State* L)
     return 1;
 }
 
-int lua_pool2d_mtToString(lua_State* L)
-{
+int lua_pool2d_mtToString(lua_State* L) {
     ParticlePool2D** self = static_cast<ParticlePool2D**>(luaL_checkudata(L, 1, ID_Pool2D.data()));
 
     lua_pushfstring(L, "ParticlePool2D(size = %d)", (*self)->GetSize());
@@ -146,8 +135,7 @@ int lua_pool2d_mtToString(lua_State* L)
     return 1;
 }
 
-int lua_pool2d_mtGC(lua_State* L)
-{
+int lua_pool2d_mtGC(lua_State* L) {
     ParticlePool2D** self = static_cast<ParticlePool2D**>(luaL_checkudata(L, 1, ID_Pool2D.data()));
 
     delete *self;
@@ -155,8 +143,7 @@ int lua_pool2d_mtGC(lua_State* L)
     return 0;
 }
 
-int lua_particle2d_mtIndex(lua_State* L)
-{
+int lua_particle2d_mtIndex(lua_State* L) {
     ParticlePool2D::Particle** self = static_cast<ParticlePool2D::Particle**>(luaL_checkudata(L, 1, ID_Particle2D.data()));
     const char* k = luaL_checkstring(L, 2);
 
@@ -244,8 +231,7 @@ int lua_particle2d_mtIndex(lua_State* L)
     return 1;
 }
 
-int lua_particle2d_mtNewIndex(lua_State* L)
-{
+int lua_particle2d_mtNewIndex(lua_State* L) {
     ParticlePool2D::Particle** self = static_cast<ParticlePool2D::Particle**>(luaL_checkudata(L, 1, ID_Particle2D.data()));
     const char* k = luaL_checkstring(L, 2);
 
@@ -335,8 +321,7 @@ int lua_particle2d_mtNewIndex(lua_State* L)
     return 0;
 }
 
-int lua_particle2d_mtToString(lua_State* L)
-{
+int lua_particle2d_mtToString(lua_State* L) {
     ParticlePool2D::Particle** self = static_cast<ParticlePool2D::Particle**>(luaL_checkudata(L, 1, ID_Particle2D.data()));
 
     lua_pushfstring(L, "Particle2D(pos = %d, %d)", (*self)->pos.x, (*self)->pos.y);
@@ -344,8 +329,7 @@ int lua_particle2d_mtToString(lua_State* L)
     return 1;
 }
 
-int lua_NewPool3D(lua_State* L)
-{
+int lua_NewPool3D(lua_State* L) {
     int const argc = lua_gettop(L);
     int32_t poolsize = 512;
     BlendMode blend = BlendMode::MulAlpha;
@@ -371,8 +355,7 @@ int lua_NewPool3D(lua_State* L)
     return 1;
 }
 
-int lua_pool3d_AddParticle(lua_State* L)
-{
+int lua_pool3d_AddParticle(lua_State* L) {
     ParticlePool3D** self = static_cast<ParticlePool3D**>(luaL_checkudata(L, 1, ID_Pool3D.data()));
     int const argc = lua_gettop(L);
 
@@ -391,22 +374,19 @@ int lua_pool3d_AddParticle(lua_State* L)
     return 1;
 }
 
-int lua_pool3d_Update(lua_State* L)
-{
+int lua_pool3d_Update(lua_State* L) {
     ParticlePool3D** self = static_cast<ParticlePool3D**>(luaL_checkudata(L, 1, ID_Pool3D.data()));
     (*self)->Update();
     return 0;
 }
 
-int lua_pool3d_Render(lua_State* L)
-{
+int lua_pool3d_Render(lua_State* L) {
     ParticlePool3D** self = static_cast<ParticlePool3D**>(luaL_checkudata(L, 1, ID_Pool3D.data()));
     (*self)->Render();
     return 0;
 }
 
-int lua_pool3d_Apply(lua_State* L)
-{
+int lua_pool3d_Apply(lua_State* L) {
     ParticlePool3D** self = static_cast<ParticlePool3D**>(luaL_checkudata(L, 1, ID_Pool3D.data()));
 
     int r_fn = luaL_ref(L, LUA_REGISTRYINDEX);
@@ -431,15 +411,13 @@ int lua_pool3d_Apply(lua_State* L)
     return 0;
 }
 
-int lua_pool3d_Clear(lua_State* L)
-{
+int lua_pool3d_Clear(lua_State* L) {
     ParticlePool3D** self = static_cast<ParticlePool3D**>(luaL_checkudata(L, 1, ID_Pool3D.data()));
     (*self)->Clear();
     return 0;
 }
 
-int lua_pool3d_GetSize(lua_State* L)
-{
+int lua_pool3d_GetSize(lua_State* L) {
     ParticlePool3D** self = static_cast<ParticlePool3D**>(luaL_checkudata(L, 1, ID_Pool3D.data()));
 
     lua_pushnumber(L, (*self)->GetSize());
@@ -447,8 +425,7 @@ int lua_pool3d_GetSize(lua_State* L)
     return 1;
 }
 
-int lua_pool3d_mtToString(lua_State* L)
-{
+int lua_pool3d_mtToString(lua_State* L) {
     ParticlePool3D** self = static_cast<ParticlePool3D**>(luaL_checkudata(L, 1, ID_Pool3D.data()));
 
     lua_pushfstring(L, "ParticlePool3D(size = %d)", (*self)->GetSize());
@@ -456,8 +433,7 @@ int lua_pool3d_mtToString(lua_State* L)
     return 1;
 }
 
-int lua_pool3d_mtGC(lua_State* L)
-{
+int lua_pool3d_mtGC(lua_State* L) {
     ParticlePool3D** self = static_cast<ParticlePool3D**>(luaL_checkudata(L, 1, ID_Pool3D.data()));
 
     delete *self;
@@ -465,8 +441,7 @@ int lua_pool3d_mtGC(lua_State* L)
     return 0;
 }
 
-int lua_particle3d_mtIndex(lua_State* L)
-{
+int lua_particle3d_mtIndex(lua_State* L) {
     ParticlePool3D::Particle** self = static_cast<ParticlePool3D::Particle**>(luaL_checkudata(L, 1, ID_Particle3D.data()));
     const char* k = luaL_checkstring(L, 2);
 
@@ -575,8 +550,7 @@ int lua_particle3d_mtIndex(lua_State* L)
     return 1;
 }
 
-int lua_particle3d_mtNewIndex(lua_State* L)
-{
+int lua_particle3d_mtNewIndex(lua_State* L) {
     ParticlePool3D::Particle** self = static_cast<ParticlePool3D::Particle**>(luaL_checkudata(L, 1, ID_Particle3D.data()));
     const char* k = luaL_checkstring(L, 2);
 
@@ -685,8 +659,7 @@ int lua_particle3d_mtNewIndex(lua_State* L)
     return 0;
 }
 
-int lua_particle3d_mtToString(lua_State* L)
-{
+int lua_particle3d_mtToString(lua_State* L) {
     ParticlePool3D::Particle** self = static_cast<ParticlePool3D::Particle**>(luaL_checkudata(L, 1, ID_Particle3D.data()));
 
     lua_pushfstring(L, "Particle3D(pos = %d, %d, %d)", (*self)->pos.x, (*self)->pos.y, (*self)->pos.z);
@@ -694,8 +667,7 @@ int lua_particle3d_mtToString(lua_State* L)
     return 1;
 }
 
-int lua_NewTexPool2D(lua_State* L)
-{
+int lua_NewTexPool2D(lua_State* L) {
     int const argc = lua_gettop(L);
     int32_t poolsize = 512;
     BlendMode blend = BlendMode::MulAlpha;
@@ -720,8 +692,7 @@ int lua_NewTexPool2D(lua_State* L)
     return 1;
 }
 
-int lua_texpool2d_AddParticle(lua_State* L)
-{
+int lua_texpool2d_AddParticle(lua_State* L) {
     TexParticlePool2D** self = static_cast<TexParticlePool2D**>(luaL_checkudata(L, 1, ID_TexPool2D.data()));
     int const argc = lua_gettop(L);
 
@@ -734,13 +705,10 @@ int lua_texpool2d_AddParticle(lua_State* L)
         .uv = Core::RectI(luaL_checknumber(L, 2), luaL_checknumber(L, 3), luaL_checknumber(L, 4), luaL_checknumber(L, 5)),
     };
 
-    if (argc == 7)
-    {
+    if (argc == 7) {
         float s = luaL_checknumber(L, 7);
         p.scale = Core::Vector2F(s, s);
-    }
-    else if (argc > 7)
-    {
+    } else if (argc > 7) {
         p.scale = Core::Vector2F(luaL_checknumber(L, 7), luaL_checknumber(L, 8));
     }
 
@@ -751,22 +719,19 @@ int lua_texpool2d_AddParticle(lua_State* L)
     return 1;
 }
 
-int lua_texpool2d_Update(lua_State* L)
-{
+int lua_texpool2d_Update(lua_State* L) {
     TexParticlePool2D** self = static_cast<TexParticlePool2D**>(luaL_checkudata(L, 1, ID_TexPool2D.data()));
     (*self)->Update();
     return 0;
 }
 
-int lua_texpool2d_Render(lua_State* L)
-{
+int lua_texpool2d_Render(lua_State* L) {
     TexParticlePool2D** self = static_cast<TexParticlePool2D**>(luaL_checkudata(L, 1, ID_TexPool2D.data()));
     (*self)->Render();
     return 0;
 }
 
-int lua_texpool2d_Apply(lua_State* L)
-{
+int lua_texpool2d_Apply(lua_State* L) {
     TexParticlePool2D** self = static_cast<TexParticlePool2D**>(luaL_checkudata(L, 1, ID_TexPool2D.data()));
 
     int r_fn = luaL_ref(L, LUA_REGISTRYINDEX);
@@ -791,15 +756,13 @@ int lua_texpool2d_Apply(lua_State* L)
     return 0;
 }
 
-int lua_texpool2d_Clear(lua_State* L)
-{
+int lua_texpool2d_Clear(lua_State* L) {
     TexParticlePool2D** self = static_cast<TexParticlePool2D**>(luaL_checkudata(L, 1, ID_TexPool2D.data()));
     (*self)->Clear();
     return 0;
 }
 
-int lua_texpool2d_GetSize(lua_State* L)
-{
+int lua_texpool2d_GetSize(lua_State* L) {
     TexParticlePool2D** self = static_cast<TexParticlePool2D**>(luaL_checkudata(L, 1, ID_TexPool2D.data()));
 
     lua_pushnumber(L, (*self)->GetSize());
@@ -807,8 +770,7 @@ int lua_texpool2d_GetSize(lua_State* L)
     return 1;
 }
 
-int lua_texpool2d_mtToString(lua_State* L)
-{
+int lua_texpool2d_mtToString(lua_State* L) {
     TexParticlePool2D** self = static_cast<TexParticlePool2D**>(luaL_checkudata(L, 1, ID_TexPool2D.data()));
 
     lua_pushfstring(L, "TexParticlePool2D(size = %d)", (*self)->GetSize());
@@ -816,8 +778,7 @@ int lua_texpool2d_mtToString(lua_State* L)
     return 1;
 }
 
-int lua_texpool2d_mtGC(lua_State* L)
-{
+int lua_texpool2d_mtGC(lua_State* L) {
     TexParticlePool2D** self = static_cast<TexParticlePool2D**>(luaL_checkudata(L, 1, ID_TexPool2D.data()));
 
     delete *self;
@@ -825,8 +786,7 @@ int lua_texpool2d_mtGC(lua_State* L)
     return 0;
 }
 
-int lua_texparticle2d_mtIndex(lua_State* L)
-{
+int lua_texparticle2d_mtIndex(lua_State* L) {
     TexParticlePool2D::Particle** self = static_cast<TexParticlePool2D::Particle**>(luaL_checkudata(L, 1, ID_TexParticle2D.data()));
     const char* k = luaL_checkstring(L, 2);
 
@@ -926,8 +886,7 @@ int lua_texparticle2d_mtIndex(lua_State* L)
     return 1;
 }
 
-int lua_texparticle2d_mtNewIndex(lua_State* L)
-{
+int lua_texparticle2d_mtNewIndex(lua_State* L) {
     TexParticlePool2D::Particle** self = static_cast<TexParticlePool2D::Particle**>(luaL_checkudata(L, 1, ID_TexParticle2D.data()));
     const char* k = luaL_checkstring(L, 2);
 
@@ -1029,8 +988,7 @@ int lua_texparticle2d_mtNewIndex(lua_State* L)
     return 0;
 }
 
-int lua_texparticle2d_mtToString(lua_State* L)
-{
+int lua_texparticle2d_mtToString(lua_State* L) {
     TexParticlePool2D::Particle** self = static_cast<TexParticlePool2D::Particle**>(luaL_checkudata(L, 1, ID_TexParticle2D.data()));
 
     lua_pushfstring(L, "TexParticle2D(pos = %d, %d)", (*self)->pos.x, (*self)->pos.y);
@@ -1038,8 +996,7 @@ int lua_texparticle2d_mtToString(lua_State* L)
     return 1;
 }
 
-int lua_NewTexPool3D(lua_State* L)
-{
+int lua_NewTexPool3D(lua_State* L) {
     int const argc = lua_gettop(L);
     int32_t poolsize = 512;
     BlendMode blend = BlendMode::MulAlpha;
@@ -1064,8 +1021,7 @@ int lua_NewTexPool3D(lua_State* L)
     return 1;
 }
 
-int lua_texpool3d_AddParticle(lua_State* L)
-{
+int lua_texpool3d_AddParticle(lua_State* L) {
     TexParticlePool3D** self = static_cast<TexParticlePool3D**>(luaL_checkudata(L, 1, ID_TexPool3D.data()));
     int const argc = lua_gettop(L);
 
@@ -1085,22 +1041,19 @@ int lua_texpool3d_AddParticle(lua_State* L)
     return 1;
 }
 
-int lua_texpool3d_Update(lua_State* L)
-{
+int lua_texpool3d_Update(lua_State* L) {
     TexParticlePool3D** self = static_cast<TexParticlePool3D**>(luaL_checkudata(L, 1, ID_TexPool3D.data()));
     (*self)->Update();
     return 0;
 }
 
-int lua_texpool3d_Render(lua_State* L)
-{
+int lua_texpool3d_Render(lua_State* L) {
     TexParticlePool3D** self = static_cast<TexParticlePool3D**>(luaL_checkudata(L, 1, ID_TexPool3D.data()));
     (*self)->Render();
     return 0;
 }
 
-int lua_texpool3d_Apply(lua_State* L)
-{
+int lua_texpool3d_Apply(lua_State* L) {
     TexParticlePool3D** self = static_cast<TexParticlePool3D**>(luaL_checkudata(L, 1, ID_TexPool3D.data()));
 
     int r_fn = luaL_ref(L, LUA_REGISTRYINDEX);
@@ -1125,15 +1078,13 @@ int lua_texpool3d_Apply(lua_State* L)
     return 0;
 }
 
-int lua_texpool3d_Clear(lua_State* L)
-{
+int lua_texpool3d_Clear(lua_State* L) {
     TexParticlePool3D** self = static_cast<TexParticlePool3D**>(luaL_checkudata(L, 1, ID_TexPool3D.data()));
     (*self)->Clear();
     return 0;
 }
 
-int lua_texpool3d_GetSize(lua_State* L)
-{
+int lua_texpool3d_GetSize(lua_State* L) {
     TexParticlePool3D** self = static_cast<TexParticlePool3D**>(luaL_checkudata(L, 1, ID_TexPool3D.data()));
 
     lua_pushnumber(L, (*self)->GetSize());
@@ -1141,8 +1092,7 @@ int lua_texpool3d_GetSize(lua_State* L)
     return 1;
 }
 
-int lua_texpool3d_mtToString(lua_State* L)
-{
+int lua_texpool3d_mtToString(lua_State* L) {
     TexParticlePool3D** self = static_cast<TexParticlePool3D**>(luaL_checkudata(L, 1, ID_TexPool3D.data()));
 
     lua_pushfstring(L, "TexParticlePool3D(size = %d)", (*self)->GetSize());
@@ -1150,8 +1100,7 @@ int lua_texpool3d_mtToString(lua_State* L)
     return 1;
 }
 
-int lua_texpool3d_mtGC(lua_State* L)
-{
+int lua_texpool3d_mtGC(lua_State* L) {
     TexParticlePool3D** self = static_cast<TexParticlePool3D**>(luaL_checkudata(L, 1, ID_TexPool3D.data()));
 
     delete *self;
@@ -1159,8 +1108,7 @@ int lua_texpool3d_mtGC(lua_State* L)
     return 0;
 }
 
-int lua_texparticle3d_mtIndex(lua_State* L)
-{
+int lua_texparticle3d_mtIndex(lua_State* L) {
     TexParticlePool3D::Particle** self = static_cast<TexParticlePool3D::Particle**>(luaL_checkudata(L, 1, ID_TexParticle3D.data()));
     const char* k = luaL_checkstring(L, 2);
 
@@ -1281,8 +1229,7 @@ int lua_texparticle3d_mtIndex(lua_State* L)
     return 1;
 }
 
-int lua_texparticle3d_mtNewIndex(lua_State* L)
-{
+int lua_texparticle3d_mtNewIndex(lua_State* L) {
     TexParticlePool3D::Particle** self = static_cast<TexParticlePool3D::Particle**>(luaL_checkudata(L, 1, ID_TexParticle3D.data()));
     const char* k = luaL_checkstring(L, 2);
 
@@ -1403,8 +1350,7 @@ int lua_texparticle3d_mtNewIndex(lua_State* L)
     return 0;
 }
 
-int lua_texparticle3d_mtToString(lua_State* L)
-{
+int lua_texparticle3d_mtToString(lua_State* L) {
     TexParticlePool3D::Particle** self = static_cast<TexParticlePool3D::Particle**>(luaL_checkudata(L, 1, ID_TexParticle3D.data()));
 
     lua_pushfstring(L, "TexParticle3D(pos = %d, %d, %d)", (*self)->pos.x, (*self)->pos.y, (*self)->pos.z);
@@ -1530,8 +1476,7 @@ luaL_Reg nofuncs[] = {
     { NULL, NULL }
 };
 
-int luaopen_particle(lua_State* L)
-{
+int luaopen_particle(lua_State* L) {
     luaL_register(L, "particle", funcs);
     RegisterClassIntoTable2(L, ".Particle2D", nofuncs, ID_Particle2D.data(), particle2d_mt);
     RegisterClassIntoTable(L, ".ParticlePool2D", pool2d_methods, ID_Pool2D.data(), pool2d_mt);

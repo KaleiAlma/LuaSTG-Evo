@@ -41,8 +41,7 @@
 namespace splitmix_detail {
 
 template <typename IntRep>
-IntRep fast_exp(IntRep x, IntRep power)
-{
+IntRep fast_exp(IntRep x, IntRep power) {
     IntRep result = IntRep(1);
     IntRep multiplier = x;
     while (power != IntRep(0)) {
@@ -55,8 +54,7 @@ IntRep fast_exp(IntRep x, IntRep power)
 }
 
 template <typename IntRep>
-inline IntRep modular_inverse(IntRep x)
-{
+inline IntRep modular_inverse(IntRep x) {
     return fast_exp(x, IntRep(-1));
 }
 
@@ -137,8 +135,7 @@ protected:
 public:
     splitmix64_base(uint64_t seed  = 0xbad0ff1ced15ea5e,
                     uint64_t gamma = 0x9e3779b97f4a7c15)
-        : seed_(seed), gamma_(gamma | 1)
-    {
+        : seed_(seed), gamma_(gamma | 1) {
         // Nothing (else) to do.
     }
 

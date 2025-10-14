@@ -1,10 +1,8 @@
 ﻿#pragma once
 #include "lua.hpp"
 
-namespace LuaSTGPlus
-{
-	struct game_option
-	{
+namespace LuaSTGPlus {
+	struct game_option {
 		std::string main_script = "src/main.lua";	// main
 		std::string window_name = "LuaSTG";			// title
 		uint32_t window_width = 640u;				// width

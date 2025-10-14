@@ -1,7 +1,7 @@
 ﻿#include "ImGuiExtension.h"
-#include "Core/Graphics/SwapChain_OpenGL.hpp"
+#include "Core/Graphics/OpenGL/SwapChain.hpp"
 #include "Core/Type.hpp"
-#include "SDL.h"
+#include <SDL3/SDL.h>
 // #include "backends/imgui_impl_sdl2.h"
 // #include "imgui_impl_opengl3_loader.h"
 
@@ -14,7 +14,7 @@
 #include "imgui.h"
 #include "imgui_stdlib.h"
 #include "imgui_freetype.h"
-#include "backends/imgui_impl_sdl2.h"
+#include "backends/imgui_impl_sdl3.h"
 #include "backends/imgui_impl_opengl3.h"
 #include "implot.h"
 
@@ -54,10 +54,8 @@
 //     return std::string(buffer, count);
 // }
 
-static void showParticleSystemEditor(bool* p_open, LuaSTGPlus::IParticlePool* sys)
-{
-    struct EditorData
-    {
+static void showParticleSystemEditor(bool* p_open, LuaSTGPlus::IParticlePool* sys) {
+    struct EditorData {
         bool bContinuous = false;
         bool bSyncParticleLife = false;
         bool bSyncSpeed = false;
@@ -70,13 +68,10 @@ static void showParticleSystemEditor(bool* p_open, LuaSTGPlus::IParticlePool* sy
         int nBlendMode = 0;
     };
     static std::unordered_map<void*, EditorData> g_EditorData;
-    if (ImGui::Begin("Particle System Editor", p_open))
-    {
-        if (sys)
-        {
+    if (ImGui::Begin("Particle System Editor", p_open)) {
+        if (sys) {
             auto& info = sys->GetParticleSystemInfo();
-            if (g_EditorData.find(&info) == g_EditorData.end())
-            {
+            if (g_EditorData.find(&info) == g_EditorData.end()) {
                 g_EditorData.emplace(&info, EditorData{
                     .bContinuous = (info.fLifetime - (-1.0f)) < std::numeric_limits<float>::min(),
                     .bSyncParticleLife = false,
@@ -99,26 +94,19 @@ static void showParticleSystemEditor(bool* p_open, LuaSTGPlus::IParticlePool* sy
                 ImGui::AlignTextToFramePadding();
                 ImGui::Text(name.data());
                 ImGui::SameLine();
-                if (ImGui::Checkbox(checkbox_text.data(), &sync))
-                {
-                    if (sync)
-                    {
+                if (ImGui::Checkbox(checkbox_text.data(), &sync)) {
+                    if (sync) {
                         maxv = minv;
                     }
                 }
-                if (sync)
-                {
-                    if (ImGui::SliderFloat(min_text.data(), &minv, a, b))
-                    {
+                if (sync) {
+                    if (ImGui::SliderFloat(min_text.data(), &minv, a, b)) {
                         maxv = minv;
                     }
-                    if (ImGui::SliderFloat(max_text.data(), &maxv, a, b))
-                    {
+                    if (ImGui::SliderFloat(max_text.data(), &maxv, a, b)) {
                         minv = maxv;
                     }
-                }
-                else
-                {
+                } else {
                     ImGui::SliderFloat(min_text.data(), &minv, a, b);
                     ImGui::SliderFloat(max_text.data(), &maxv, a, b);
                 }
@@ -132,56 +120,42 @@ static void showParticleSystemEditor(bool* p_open, LuaSTGPlus::IParticlePool* sy
                 ImGui::AlignTextToFramePadding();
                 ImGui::Text(name.data());
                 ImGui::SameLine();
-                if (ImGui::Checkbox(checkbox_text.data(), &sync))
-                {
-                    if (sync)
-                    {
+                if (ImGui::Checkbox(checkbox_text.data(), &sync)) {
+                    if (sync) {
                         endv = begv;
                     }
                 }
-                if (sync)
-                {
-                    if (ImGui::SliderFloat(beg_text.data(), &begv, a, b))
-                    {
+                if (sync) {
+                    if (ImGui::SliderFloat(beg_text.data(), &begv, a, b)) {
                         endv = begv;
                     }
-                    if (ImGui::SliderFloat(end_text.data(), &endv, a, b))
-                    {
+                    if (ImGui::SliderFloat(end_text.data(), &endv, a, b)) {
                         begv = endv;
                     }
-                }
-                else
-                {
+                } else {
                     ImGui::SliderFloat(beg_text.data(), &begv, a, b);
                     ImGui::SliderFloat(end_text.data(), &endv, a, b);
                 }
                 ImGui::SliderFloat(var_text.data(), &varv, 0.0f, 1.0f);
             };
 
-            if (ImGui::CollapsingHeader("System Information"))
-            {
+            if (ImGui::CollapsingHeader("System Information")) {
                 ImGui::LabelText("Particle Alive", "%u", (uint32_t)sys->GetAliveCount());
                 ImGui::LabelText("FPS", "%.2f", LAPP.GetFPS());
             }
 
-            if (ImGui::CollapsingHeader("System Parameter"))
-            {
-                if (!data.bContinuous)
-                {
-                    if (info.fLifetime < 0.0f)
-                    {
+            if (ImGui::CollapsingHeader("System Parameter")) {
+                if (!data.bContinuous) {
+                    if (info.fLifetime < 0.0f) {
                         info.fLifetime = 5.0f;
                     }
                     ImGui::SliderFloat("System Lifetime", &info.fLifetime, 0.0f, 10.0f);
-                }
-                else
-                {
+                } else {
                     float fFake = 5.0f;
                     ImGui::SliderFloat("System Lifetime", &fFake, 0.0f, 10.0f);
                 }
                 ImGui::Checkbox("Continuous", &data.bContinuous);
-                if (data.bContinuous)
-                {
+                if (data.bContinuous) {
                     info.fLifetime = -1.0f;
                 }
                 ImGui::Separator();
@@ -196,21 +170,16 @@ static void showParticleSystemEditor(bool* p_open, LuaSTGPlus::IParticlePool* sy
                     "Add",
                     "Alpha",
                 };
-                if (ImGui::Combo("Blend Mode", &data.nBlendMode, chBlendMode, 2))
-                {
+                if (ImGui::Combo("Blend Mode", &data.nBlendMode, chBlendMode, 2)) {
                     sys->SetBlendMode(data.nBlendMode == 0 ? LuaSTGPlus::BlendMode::MulAdd : LuaSTGPlus::BlendMode::MulAlpha);
                 }
             }
 
-            if (ImGui::CollapsingHeader("Particle Movement"))
-            {
-                if (info.bRelative)
-                {
+            if (ImGui::CollapsingHeader("Particle Movement")) {
+                if (info.bRelative) {
                     float fDir = info.fDirection;
                     ImGui::SliderAngle("Direction", &fDir, 0.0f, 360.0f);
-                }
-                else
-                {
+                } else {
                     ImGui::SliderAngle("Direction", &info.fDirection, 0.0f, 360.0f);
                 }
                 ImGui::Checkbox("Relative", &info.bRelative);
@@ -231,8 +200,7 @@ static void showParticleSystemEditor(bool* p_open, LuaSTGPlus::IParticlePool* sy
                 widgetSyncMinMax("Tangential Acceleration", info.fTangentialAccelMin, info.fTangentialAccelMax, -900.0f, 900.0f, data.bSyncGravity);
             }
             
-            if (ImGui::CollapsingHeader("Particle Appearance"))
-            {
+            if (ImGui::CollapsingHeader("Particle Appearance")) {
                 widgetSyncStartEndVar("Particle Size", info.fSizeStart, info.fSizeEnd, info.fSizeVar, 1.0f / 32.0f, 100.0f / 32.0f, data.bSyncSize);
                 ImGui::Separator();
 
@@ -253,20 +221,17 @@ static void showParticleSystemEditor(bool* p_open, LuaSTGPlus::IParticlePool* sy
     ImGui::End();
 }
 
-static int lib_NewFrame(lua_State* L)
-{
+static int lib_NewFrame(lua_State* L) {
     bool const allow_set_cursor = lua_toboolean(L, 1);
     imgui::updateEngine(allow_set_cursor);
     return 0;
 }
-static int lib_RenderDrawData(lua_State* L)
-{
+static int lib_RenderDrawData(lua_State* L) {
     std::ignore = L;
     imgui::drawEngine();
     return 0;
 }
-static int lib_CacheGlyphFromString(lua_State* L)
-{
+static int lib_CacheGlyphFromString(lua_State* L) {
     size_t len = 0;
     char const* str = luaL_checklstring(L, 1, &len);
     imgui::cacheGlyphFromString(std::string_view(str, len));
@@ -354,8 +319,7 @@ static int lib_CacheGlyphFromString(lua_State* L)
 //     lua_pushboolean(L, v);
 //     return 1;
 // }
-static int lib_ShowFrameStatistics(lua_State* L)
-{
+static int lib_ShowFrameStatistics(lua_State* L) {
     constexpr size_t arr_size = 3600;
     static bool is_init = false;
     static std::vector<double> arr_x;
@@ -385,19 +349,15 @@ static int lib_ShowFrameStatistics(lua_State* L)
     static bool auto_fit_2 = true;
     
     bool v = (lua_gettop(L) >= 1) ? lua_toboolean(L, 1) : true;
-    if (v)
-    {
-        if (ImGui::Begin("Frame Statistics", &v))
-        {
+    if (v) {
+        if (ImGui::Begin("Frame Statistics", &v)) {
             // data buffer
 
-            if (!is_init)
-            {
+            if (!is_init) {
                 is_init = true;
 
                 arr_x.resize(arr_size);
-                for (size_t x = 0; x < arr_size; x += 1)
-                {
+                for (size_t x = 0; x < arr_size; x += 1) {
                     arr_x[x] = (double)x;
                 }
 
@@ -425,8 +385,7 @@ static int lib_ShowFrameStatistics(lua_State* L)
 
             // frame time
 
-            if (ImGui::CollapsingHeader("Frame Time"))
-            {
+            if (ImGui::CollapsingHeader("Frame Time")) {
                 auto info = LAPP.GetAppModel()->getFrameStatistics();
             
                 ImGui::Text("Wait   : %.3fms", info.wait_time    * 1000.0);
@@ -444,8 +403,7 @@ static int lib_ShowFrameStatistics(lua_State* L)
                 arr_wait_time[arr_index] = 1000.0 * (info.update_time + info.render_time + info.present_time + info.wait_time);
                 arr_total_time[arr_index] = 1000.0 * (info.total_time);
            
-                if (ImPlot::BeginPlot("##Frame Statistics", ImVec2(-1, height), 0))
-                {
+                if (ImPlot::BeginPlot("##Frame Statistics", ImVec2(-1, height), 0)) {
                     //ImPlot::SetupAxes("Frame", "Time", flags, flags);
                     ImPlot::SetupAxisLimits(ImAxis_X1, 0.0, (double)(record_range - 1), ImGuiCond_Always);
                     //ImPlot::SetupAxisLimits(ImAxis_Y1, 0.0, 1000.0 / 18.0, ImGuiCond_Always);
@@ -493,8 +451,7 @@ static int lib_ShowFrameStatistics(lua_State* L)
 
             // gpu time
 
-            if (ImGui::CollapsingHeader("GPU Time"))
-            {
+            if (ImGui::CollapsingHeader("GPU Time")) {
                 auto info = LAPP.GetAppModel()->getFrameRenderStatistics();
 
                 ImGui::Text("Render : %.3fms", info.render_time * 1000.0);
@@ -505,8 +462,7 @@ static int lib_ShowFrameStatistics(lua_State* L)
                 // 还得再往前一帧
                 arr_gpu_render_time[(arr_index + record_range - 1) % record_range] = 1000.0 * (info.render_time);
 
-                if (ImPlot::BeginPlot("##Frame Render Statistics", ImVec2(-1, height_gpu), 0))
-                {
+                if (ImPlot::BeginPlot("##Frame Render Statistics", ImVec2(-1, height_gpu), 0)) {
                     //ImPlot::SetupAxes("Frame", "Time", flags, flags);
                     ImPlot::SetupAxisLimits(ImAxis_X1, 0.0, (double)(record_range - 1), ImGuiCond_Always);
                     //ImPlot::SetupAxisLimits(ImAxis_Y1, 0.0, 1000.0 / 18.0, ImGuiCond_Always);
@@ -595,8 +551,7 @@ static int lib_ShowFrameStatistics(lua_State* L)
 
             // object
 
-            if (ImGui::CollapsingHeader("GameObject"))
-            {
+            if (ImGui::CollapsingHeader("GameObject")) {
                 auto obj_info = LAPP.GetGameObjectPool().DebugGetFrameStatistics();
 
                 ImGui::Text("Create : %llu", obj_info.object_alloc);
@@ -614,8 +569,7 @@ static int lib_ShowFrameStatistics(lua_State* L)
                 arr_obj_colli[arr_index] = (double)obj_info.object_colli_check;
                 arr_obj_colli_cb[arr_index] = (double)obj_info.object_colli_callback;
 
-                if (ImPlot::BeginPlot("##GameObject Statistics", ImVec2(-1, height_2), 0))
-                {
+                if (ImPlot::BeginPlot("##GameObject Statistics", ImVec2(-1, height_2), 0)) {
                     //ImPlot::SetupAxes("Frame", "Time", flags, flags);
                     ImPlot::SetupAxisLimits(ImAxis_X1, 0.0, (double)(record_range - 1), ImGuiCond_Always);
                     //ImPlot::SetupAxisLimits(ImAxis_Y1, 0.0, 1000.0 / 18.0, ImGuiCond_Always);
@@ -661,41 +615,32 @@ static int lib_ShowFrameStatistics(lua_State* L)
     lua_pushboolean(L, v);
     return 1;
 }
-static int lib_ShowResourceManagerDebugWindow(lua_State* L)
-{
-    if (lua_gettop(L) >= 1)
-    {
+static int lib_ShowResourceManagerDebugWindow(lua_State* L) {
+    if (lua_gettop(L) >= 1) {
         bool v = lua_toboolean(L, 1);
         LRES.ShowResourceManagerDebugWindow(&v);
         lua_pushboolean(L, v);
         return 1;
-    }
-    else
-    {
+    } else {
         LRES.ShowResourceManagerDebugWindow();
         return 0;
     }
 }
-static int lib_ShowParticleSystemEditor(lua_State* L)
-{
-    if (lua_gettop(L) >= 2)
-    {
+static int lib_ShowParticleSystemEditor(lua_State* L) {
+    if (lua_gettop(L) >= 2) {
         bool v = lua_toboolean(L, 1);
         auto p = LuaSTGPlus::LuaWrapper::ParticleSystemWrapper::Cast(L, 2);
         showParticleSystemEditor(&v, p->ptr);
         lua_pushboolean(L, v);
         return 1;
-    }
-    else
-    {
+    } else {
         auto p = LuaSTGPlus::LuaWrapper::ParticleSystemWrapper::Cast(L, 1);
         showParticleSystemEditor(nullptr, p->ptr);
         return 0;
     }
 }
 
-void imgui_binding_lua_register_backend(lua_State* L)
-{
+void imgui_binding_lua_register_backend(lua_State* L) {
     const luaL_Reg lib_fun[] = {
         {"NewFrame", &lib_NewFrame},
         {"RenderDrawData", &lib_RenderDrawData},
@@ -720,8 +665,7 @@ void imgui_binding_lua_register_backend(lua_State* L)
 
 #define APP LuaSTGPlus::AppFrame::GetInstance()
 
-namespace imgui
-{
+namespace imgui {
     static bool g_ImGuiBindEngine = false;
     static bool g_ImGuiTexIDValid = false;
     static GLuint g_GLFramebuffer = 0;
@@ -729,42 +673,35 @@ namespace imgui
     
     class ImGuiBackendEventListener
         : public Core::Graphics::IDeviceEventListener
-        , public Core::Graphics::IWindowEventListener
-    {
+        , public Core::Graphics::IWindowEventListener {
     public:
         std::atomic_int messageFlags;
-        void onWindowCreate()
-        {
+        void onWindowCreate() {
             SDL_Window* w = (SDL_Window*)APP.GetAppModel()->getWindow()->getNativeHandle();
-            bool r = ImGui_ImplSDL2_InitForOpenGL(w, SDL_GL_GetCurrentContext());
+            bool r = ImGui_ImplSDL3_InitForOpenGL(w, SDL_GL_GetCurrentContext());
             assert(r);
-            if (!r)
-            {
+            if (!r) {
                 spdlog::error("[imgui] Couldn't init ImGui!!");
             }
         }
-        void onWindowDestroy()
-        {
-            ImGui_ImplSDL2_Shutdown();
+        void onWindowDestroy() {
+            ImGui_ImplSDL3_Shutdown();
         }
-        void onDeviceDestroy()
-        {
+        void onDeviceDestroy() {
             g_ImGuiTexIDValid = false;
             ImGui_ImplOpenGL3_Shutdown();
         }
-        void onDeviceCreate()
-        {
+        void onDeviceCreate() {
             g_ImGuiTexIDValid = false;
             // ID3D11Device* device = (ID3D11Device*)APP.GetAppModel()->getDevice()->getNativeHandle();
             // ID3D11DeviceContext* context = NULL;
             // device->GetImmediateContext(&context);
             // context->Release();
             ImGui_ImplOpenGL3_Init();
-            if (!((Core::Graphics::SwapChain_OpenGL*)LAPP.GetAppModel()->getSwapChain())->addFramebuffer(g_GLFramebuffer, g_GLTex))
+            if (!((Core::Graphics::OpenGL::SwapChain*)LAPP.GetAppModel()->getSwapChain())->addFramebuffer(g_GLFramebuffer, g_GLTex))
                 spdlog::error("ImGui Framebuffer Failed");
         }
-        void onWindowDpiChange()
-        {
+        void onWindowDpiChange() {
             messageFlags.fetch_or(0x1);
         }
         // NativeWindowMessageResult onNativeWindowMessage(void* hwnd, uint32_t msg, uintptr_t wparam, intptr_t lparam)
@@ -775,45 +712,39 @@ namespace imgui
         //     else
         //         return {};
         // }
-        NativeWindowMessageResult onNativeWindowMessage(void* ev)
-        {
-            if (ImGui::GetIO().BackendPlatformUserData == nullptr)
-            {
+        NativeWindowMessageResult onNativeWindowMessage(void* ev) {
+            if (ImGui::GetIO().BackendPlatformUserData == nullptr) {
                 spdlog::warn("[imgui] Not initialized yet!!");
                 return {};
             }
 
             SDL_Event* e = (SDL_Event*)ev;
 
-            ImGui_ImplSDL2_ProcessEvent((SDL_Event*)ev);
+            ImGui_ImplSDL3_ProcessEvent((SDL_Event*)ev);
             return {};
         }
     };
     static ImGuiBackendEventListener g_ImGuiRenderDeviceEventListener;
 
-    class ImGuiGlyphManager
-    {
+    class ImGuiGlyphManager {
     public:
         ImFontGlyphRangesBuilder glyphRangesBuilder;
         ImVector<ImWchar> glyphRanges;
         size_t lastCount{};
         bool isDirty{};
     private:
-        inline size_t calGlyphCount(ImVector<ImWchar> const& ranges)
-        {
+        inline size_t calGlyphCount(ImVector<ImWchar> const& ranges) {
             if (ranges.Size == 0) return 0;
             size_t total = 0;
             ImWchar* ptr = ranges.Data;
-            while (*ptr)
-            {
+            while (*ptr) {
                 total += (1 + (int)ptr[1] - (int)ptr[0]);
                 ptr += 2;
             }
             return total;
         }
     public:
-        bool updateRanges()
-        {
+        bool updateRanges() {
             if (!isDirty) return false;
             isDirty = false;
             glyphRanges.resize(0);
@@ -823,14 +754,12 @@ namespace imgui
             lastCount = newCount;
             return true;
         }
-        void addText(std::string_view str)
-        {
+        void addText(std::string_view str) {
             isDirty = true;
             glyphRangesBuilder.AddText(str.data(), str.data() + str.size());
         }
     public:
-        ImGuiGlyphManager()
-        {
+        ImGuiGlyphManager() {
             glyphRangesBuilder.Clear();
             glyphRanges.clear();
             ImWchar const default_ranges[] = { 0x20, 0x7F, 0, }; // ASCII
@@ -846,21 +775,16 @@ namespace imgui
 
     static bool g_init_path_init = false;
     static std::string g_ini_path;
-    static std::string const& getIniPath()
-    {
-        if (!g_init_path_init)
-        {
+    static std::string const& getIniPath() {
+        if (!g_init_path_init) {
             g_init_path_init = true;
 
             Core::InitializeConfigure config;
             config.loadFromFile("config.json");
             
-            if (config.engine_cache_directory.empty())
-            {
+            if (config.engine_cache_directory.empty()) {
                 g_ini_path = "imgui.ini";
-            }
-            else
-            {
+            } else {
                 std::string parser_path;
                 Core::InitializeConfigure::parserDirectory(config.engine_cache_directory, parser_path, true);
                 std::filesystem::path directory(parser_path);
@@ -871,16 +795,13 @@ namespace imgui
         return g_ini_path;
     }
 
-    void loadConfig()
-    {
-        if (ImGui::GetCurrentContext())
-        {
+    void loadConfig() {
+        if (ImGui::GetCurrentContext()) {
             ImGuiIO& io = ImGui::GetIO();
             // handle imgui config data
             io.IniFilename = NULL;
             std::ifstream file(getIniPath(), std::ios::in | std::ios::binary);
-            if (file.is_open())
-            {
+            if (file.is_open()) {
                 file.seekg(0, std::ios::end);
                 auto p2 = file.tellg();
                 file.seekg(0, std::ios::beg);
@@ -894,13 +815,10 @@ namespace imgui
             }
         }
     }
-    void saveConfig()
-    {
-        if (ImGui::GetCurrentContext())
-        {
+    void saveConfig() {
+        if (ImGui::GetCurrentContext()) {
             std::ofstream file(getIniPath(), std::ios::out | std::ios::binary | std::ios::trunc);
-            if (file.is_open())
-            {
+            if (file.is_open()) {
                 size_t length = 0;
                 const char* buffer = ImGui::SaveIniSettingsToMemory(&length);
                 file.write(buffer, (std::streamsize)length);
@@ -909,8 +827,7 @@ namespace imgui
         }
     }
     
-    void setConfig()
-    {
+    void setConfig() {
         ImGuiIO& io = ImGui::GetIO();
         
         //io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
@@ -937,18 +854,15 @@ namespace imgui
 
         ImGui::GetStyle() = style;
 
-        if constexpr (true)
-        {
+        if constexpr (true) {
             ImFontConfig cfg;
             cfg.FontBuilderFlags = ImGuiFreeTypeBuilderFlags_NoHinting;
             std::string fontpath = "C:\\Windows\\Fonts\\msyh.ttc";
-            if (!std::filesystem::is_regular_file(fontpath))
-            {
+            if (!std::filesystem::is_regular_file(fontpath)) {
                 fontpath = "C:\\Windows\\Fonts\\msyh.ttf"; // Windows 7
             }
             //std::string fontpath = "C:\\Windows\\Fonts\\consola.ttf";
-            if (std::filesystem::is_regular_file(fontpath))
-            {
+            if (std::filesystem::is_regular_file(fontpath)) {
                 io.Fonts->AddFontFromFileTTF(
                     fontpath.c_str(),
                     16.0f,
@@ -959,8 +873,7 @@ namespace imgui
         }
     }
     
-    void bindEngine()
-    {
+    void bindEngine() {
         auto* window = APP.GetAppModel()->getWindow();
         auto* device = APP.GetAppModel()->getDevice();
         auto* L = APP.GetLuaEngine();
@@ -984,13 +897,10 @@ namespace imgui
         
         g_ImGuiBindEngine = true;
     }
-    void unbindEngine()
-    {
-        if (g_ImGuiBindEngine)
-        {
+    void unbindEngine() {
+        if (g_ImGuiBindEngine) {
             auto& io = ImGui::GetIO();
-            if (io.WantSaveIniSettings)
-            {
+            if (io.WantSaveIniSettings) {
                 io.WantSaveIniSettings = false;
                 saveConfig();
             }
@@ -1012,27 +922,21 @@ namespace imgui
         ImGui::DestroyContext();
     }
 
-    void cacheGlyphFromString(std::string_view str)
-    {
+    void cacheGlyphFromString(std::string_view str) {
         g_ImGuiGlyphManager.addText(str);
     }
-    void cancelSetCursor()
-    {
-        if (g_ImGuiBindEngine)
-        {
+    void cancelSetCursor() {
+        if (g_ImGuiBindEngine) {
             auto& io = ImGui::GetIO();
             io.ConfigFlags |= ImGuiConfigFlags_NoMouseCursorChange;
         }
     }
-    void updateEngine(bool allow_set_cursor)
-    {
-        ZoneScopedN("imgui.backend.NewFrame");
-        if (g_ImGuiBindEngine)
-        {
+    void updateEngine(bool allow_set_cursor) {
+        // ZoneScopedN("imgui.backend.NewFrame");
+        if (g_ImGuiBindEngine) {
             int const msg_flags = g_ImGuiRenderDeviceEventListener.messageFlags.exchange(0);
             bool const ranges_flag = g_ImGuiGlyphManager.updateRanges();
-            if ((msg_flags & 0x1) || ranges_flag)
-            {
+            if ((msg_flags & 0x1) || ranges_flag) {
                 // Add new glyphs
                 auto& io = ImGui::GetIO();
                 io.Fonts->Clear();
@@ -1042,13 +946,11 @@ namespace imgui
             constexpr int const mask = (~((int)ImGuiConfigFlags_NoMouseCursorChange));
             auto& io = ImGui::GetIO();
             if (allow_set_cursor)
-                io.ConfigFlags &= mask;
-            {
-                ZoneScopedN("imgui.backend.NewFrame-OpenGL3");
+                io.ConfigFlags &= mask; {
+                // ZoneScopedN("imgui.backend.NewFrame-OpenGL3");
                 ImGui_ImplOpenGL3_NewFrame();
-            }
-            {
-                ZoneScopedN("imgui.backend.NewFrame-SDL2");
+            } {
+                // ZoneScopedN("imgui.backend.NewFrame-SDL2");
                 auto const ws = LAPP.GetAppModel()->getSwapChain()->getCanvasSize();
                 auto const mt = LAPP.GetMousePositionTransformF();
                 // ImGui_ImplSDL2_FrameData dt;
@@ -1064,7 +966,7 @@ namespace imgui
 
                 glBindTexture(GL_TEXTURE_2D, g_GLTex);
                 glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, LAPP.GetAppModel()->getWindow()->getSize().x, LAPP.GetAppModel()->getWindow()->getSize().y, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
-                ImGui_ImplSDL2_NewFrame();
+                ImGui_ImplSDL3_NewFrame();
             }
             g_ImGuiTexIDValid = true;
             if (io.WantCaptureKeyboard)
@@ -1073,10 +975,8 @@ namespace imgui
                 LAPP.ResetMouseInput();
         }
     }
-    void drawEngine()
-    {
-        if (g_ImGuiBindEngine && g_ImGuiTexIDValid)
-        {
+    void drawEngine() {
+        if (g_ImGuiBindEngine && g_ImGuiTexIDValid) {
             auto& engine = APP;
             
             // 终止渲染过程

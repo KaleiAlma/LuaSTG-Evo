@@ -2,10 +2,8 @@
 #include "GameResource/ResourceMusic.hpp"
 #include "GameResource/Implement/ResourceBaseImpl.hpp"
 
-namespace LuaSTGPlus
-{
-    class ResourceMusicImpl : public ResourceBaseImpl<IResourceMusic>
-    {
+namespace LuaSTGPlus {
+    class ResourceMusicImpl : public ResourceBaseImpl<IResourceMusic> {
     public:
         // class LoopDecoder : public Core::Object<Core::Audio::IDecoder>
         // {

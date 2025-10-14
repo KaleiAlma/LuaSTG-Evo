@@ -11,25 +11,21 @@
 #include "lua.hpp"
 #include "xxhash.h"
 
-namespace LuaSTGPlus
-{
+namespace LuaSTGPlus {
     class ResourceMgr;
     
     // 资源池类型
-    enum class ResourcePoolType
-    {
+    enum class ResourcePoolType {
         None = 0,
         Global,
         Stage
     };
     
     // 资源池
-    class ResourcePool
-    {
+    class ResourcePool {
         friend class ResourceMgr;
     public:
-        struct dictionary_key_t
-        {
+        struct dictionary_key_t {
         #if (SIZE_MAX == UINT32_MAX)
             XXH32_hash_t const hash{};
             XXH32_hash_t const check{};
@@ -48,11 +44,9 @@ namespace LuaSTGPlus
             #else
                 : __invalid_member()
             #endif
-            {
-            }
+            {}
 
-            inline bool operator==(dictionary_key_t const& right) const noexcept
-            {
+            inline bool operator==(dictionary_key_t const& right) const noexcept {
             #if (SIZE_MAX == UINT32_MAX)
                 return hash == right.hash && check == right.check;
             #elif (SIZE_MAX == UINT64_MAX)
@@ -62,10 +56,8 @@ namespace LuaSTGPlus
             #endif
             }
         };
-        struct dictionary_key_hash_t
-        {
-            inline size_t operator()(dictionary_key_t const& key) const noexcept
-            {
+        struct dictionary_key_hash_t {
+            inline size_t operator()(dictionary_key_t const& key) const noexcept {
                 static_assert(sizeof(size_t) == sizeof(decltype(dictionary_key_t::hash)));
                 return key.hash;
             }
@@ -150,8 +142,7 @@ namespace LuaSTGPlus
     };
     
     // 资源管理器
-    class ResourceMgr
-    {
+    class ResourceMgr {
     private:
         ResourcePoolType m_ActivedPool = ResourcePoolType::Global;
         ResourcePool m_GlobalResourcePool;

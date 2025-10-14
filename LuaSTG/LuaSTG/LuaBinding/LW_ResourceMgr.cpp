@@ -6,16 +6,13 @@
 #include <string_view>
 #include <vector>
 
-void LuaSTGPlus::LuaWrapper::ResourceMgrWrapper::Register(lua_State* L) noexcept
-{
-    struct Wrapper
-    {
+void LuaSTGPlus::LuaWrapper::ResourceMgrWrapper::Register(lua_State* L) noexcept {
+    struct Wrapper {
         static int SetResLoadInfo(lua_State* L) noexcept {
             ResourceMgr::SetResourceLoadingLog((bool)lua_toboolean(L, 1));
             return 0;
         }
-        static int SetResourceStatus(lua_State* L)
-        {
+        static int SetResourceStatus(lua_State* L) {
             const char* s = luaL_checkstring(L, 1);
             if (strcmp(s, "global") == 0)
                 LRES.SetActivedPoolType(ResourcePoolType::Global);
@@ -27,8 +24,7 @@ void LuaSTGPlus::LuaWrapper::ResourceMgrWrapper::Register(lua_State* L) noexcept
                 return luaL_error(L, "invalid argument #1 for 'SetResourceStatus', requires 'stage', 'global' or 'none'.");
             return 0;
         }
-        static int GetResourceStatus(lua_State* L)
-        {
+        static int GetResourceStatus(lua_State* L) {
             switch (LRES.GetActivedPoolType()) {
             case ResourcePoolType::Global:
                 lua_pushstring(L, "global");
@@ -44,8 +40,7 @@ void LuaSTGPlus::LuaWrapper::ResourceMgrWrapper::Register(lua_State* L) noexcept
             }
             return 1;
         }
-        static int LoadTexture(lua_State* L)
-        {
+        static int LoadTexture(lua_State* L) {
             const char* name = luaL_checkstring(L, 1);
             const char* path = luaL_checkstring(L, 2);
 
@@ -56,8 +51,7 @@ void LuaSTGPlus::LuaWrapper::ResourceMgrWrapper::Register(lua_State* L) noexcept
                 return luaL_error(L, "can't load texture from file '%s'.", path);
             return 0;
         }
-        static int LoadTextureBin(lua_State* L)
-        {
+        static int LoadTextureBin(lua_State* L) {
             const char* name = luaL_checkstring(L, 1);
             // const char* path = luaL_checkstring(L, 2);
             std::string_view bin_init = luaL_check_string_view(L, 2);
@@ -70,8 +64,7 @@ void LuaSTGPlus::LuaWrapper::ResourceMgrWrapper::Register(lua_State* L) noexcept
                 return luaL_error(L, "can't load texture '%s' from binary data.", name);
             return 0;
         }
-        static int LoadSprite(lua_State* L)
-        {
+        static int LoadSprite(lua_State* L) {
             const char* name = luaL_checkstring(L, 1);
             const char* texname = luaL_checkstring(L, 2);
 
@@ -89,14 +82,12 @@ void LuaSTGPlus::LuaWrapper::ResourceMgrWrapper::Register(lua_State* L) noexcept
                 luaL_optnumber(L, 7, 0.),
                 luaL_optnumber(L, 8, 0.),
                 lua_toboolean(L, 9) == 0 ? false : true
-            ))
-            {
+            )) {
                 return luaL_error(L, "load image failed (name='%s', tex='%s').", name, texname);
             }
             return 0;
         }
-        static int LoadAnimation(lua_State* L)
-        {
+        static int LoadAnimation(lua_State* L) {
             const char* name = luaL_checkstring(L, 1);
             const char* texname = luaL_checkstring(L, 2);
 
@@ -117,15 +108,13 @@ void LuaSTGPlus::LuaWrapper::ResourceMgrWrapper::Register(lua_State* L) noexcept
                 luaL_optnumber(L, 10, 0.0f),
                 luaL_optnumber(L, 11, 0.0f),
                 lua_toboolean(L, 12) == 0 ? false : true
-            ))
-            {
+            )) {
                 return luaL_error(L, "load animation failed (name='%s', tex='%s').", name, texname);
             }
 
             return 0;
         }
-        static int LoadPS(lua_State* L)
-        {
+        static int LoadPS(lua_State* L) {
             ResourcePool* pActivedPool = LRES.GetActivedPool();
             if (!pActivedPool)
                 return luaL_error(L, "can't load resource at this time.");
@@ -143,13 +132,11 @@ void LuaSTGPlus::LuaWrapper::ResourceMgrWrapper::Register(lua_State* L) noexcept
                     luaL_optnumber(L, 4, 0.0f),
                     luaL_optnumber(L, 5, 0.0f),
                     lua_toboolean(L, 6) == 0 ? false : true
-                ))
-                {
+                )) {
                     return luaL_error(L, "load particle failed (name='%s', define=table, img='%s').", name, img_name);
                 }
                 return 0;
-            }
-            else {
+            } else {
                 const char* path = luaL_checkstring(L, 2);
 
                 if (!pActivedPool->LoadParticle(
@@ -159,15 +146,13 @@ void LuaSTGPlus::LuaWrapper::ResourceMgrWrapper::Register(lua_State* L) noexcept
                     luaL_optnumber(L, 4, 0.0f),
                     luaL_optnumber(L, 5, 0.0f),
                     lua_toboolean(L, 6) == 0 ? false : true
-                ))
-                {
+                )) {
                     return luaL_error(L, "load particle failed (name='%s', file='%s', img='%s').", name, path, img_name);
                 }
                 return 0;
             }
         }
-        static int LoadSound(lua_State* L)
-        {
+        static int LoadSound(lua_State* L) {
             const char* name = luaL_checkstring(L, 1);
             const char* path = luaL_checkstring(L, 2);
 
@@ -179,8 +164,7 @@ void LuaSTGPlus::LuaWrapper::ResourceMgrWrapper::Register(lua_State* L) noexcept
                 return luaL_error(L, "load sound failed (name=%s, path=%s)", name, path);
             return 0;
         }
-        static int LoadMusic(lua_State* L)
-        {
+        static int LoadMusic(lua_State* L) {
             const char* name = luaL_checkstring(L, 1);
             const char* path = luaL_checkstring(L, 2);
 
@@ -198,14 +182,12 @@ void LuaSTGPlus::LuaWrapper::ResourceMgrWrapper::Register(lua_State* L) noexcept
                 loop_start,
                 loop_end,
                 (lua_gettop(L) >= 5) ? lua_toboolean(L, 5) : false
-                ))
-            {
+                )) {
                 return luaL_error(L, "load music failed (name=%s, path=%s, loop=%f~%f)", name, path, loop_start, loop_end);
             }
             return 0;
         }
-        static int LoadFont(lua_State* L)
-        {
+        static int LoadFont(lua_State* L) {
             bool bSucceed = false;
             const char* name = luaL_checkstring(L, 1);
             const char* path = luaL_checkstring(L, 2);
@@ -214,20 +196,14 @@ void LuaSTGPlus::LuaWrapper::ResourceMgrWrapper::Register(lua_State* L) noexcept
             if (!pActivedPool)
                 return luaL_error(L, "can't load resource at this time.");
 
-            if (lua_gettop(L) == 2)
-            {
+            if (lua_gettop(L) == 2) {
                 // HGE字体 mipmap=true
                 bSucceed = pActivedPool->LoadSpriteFont(name, path);
-            }
-            else
-            {
-                if (lua_isboolean(L, 3))
-                {
+            } else {
+                if (lua_isboolean(L, 3)) {
                     // HGE字体 mipmap=user_defined
                     bSucceed = pActivedPool->LoadSpriteFont(name, path, lua_toboolean(L, 3) == 0 ? false : true);
-                }
-                else
-                {
+                } else {
                     // fancy2d字体
                     const char* texpath = luaL_checkstring(L, 3);
                     if (lua_gettop(L) == 4)
@@ -241,8 +217,7 @@ void LuaSTGPlus::LuaWrapper::ResourceMgrWrapper::Register(lua_State* L) noexcept
                 return luaL_error(L, "can't load font from file '%s'.", path);
             return 0;
         }
-        static int LoadTTF(lua_State* L)
-        {
+        static int LoadTTF(lua_State* L) {
             ResourcePool* pActivedPool = LRES.GetActivedPool();
             if (!pActivedPool) {
                 return luaL_error(L, "can't load resource at this time.");
@@ -253,12 +228,10 @@ void LuaSTGPlus::LuaWrapper::ResourceMgrWrapper::Register(lua_State* L) noexcept
             lua_pushboolean(L, result);
             return 1;
         }
-        static int LoadTrueTypeFont(lua_State* L)
-        {
+        static int LoadTrueTypeFont(lua_State* L) {
             // 先检查有没有资源池
             ResourcePool* pActivedPool = LRES.GetActivedPool();
-            if (!pActivedPool)
-            {
+            if (!pActivedPool) {
                 return luaL_error(L, "can't load resource at this time.");
             }
             
@@ -266,14 +239,12 @@ void LuaSTGPlus::LuaWrapper::ResourceMgrWrapper::Register(lua_State* L) noexcept
             std::string_view const name = luaL_check_string_view(L, 1);
             
             // 第二个参数，字体组
-            if (!lua_istable(L, 2))
-            {
+            if (!lua_istable(L, 2)) {
                 return luaL_error(L, "invalid parameter #2, required table");
             }
             int const cnt = (int)lua_objlen(L, 2);
             std::vector<Core::Graphics::TrueTypeFontInfo> fonts(cnt);
-            for (int i = 1; i <= cnt; i += 1)
-            {
+            for (int i = 1; i <= cnt; i += 1) {
                 auto& font = fonts[i];
                 font.source = "";
                 font.font_face = 0;
@@ -283,35 +254,30 @@ void LuaSTGPlus::LuaWrapper::ResourceMgrWrapper::Register(lua_State* L) noexcept
 
                 lua_pushinteger(L, i);		// name param fonts i
                 lua_gettable(L, 2);			// name param fonts font
-                if (!lua_istable(L, -1))
-                {
+                if (!lua_istable(L, -1)) {
                     return luaL_error(L, "invalid value #%d in parameter #2, required table", i);
                 }
 
                 lua_getfield(L, -1, "source"); // name param fonts font ?
-                if (lua_type(L, -1) == LUA_TSTRING) // name param fonts font v
-                {
+                if (lua_type(L, -1) == LUA_TSTRING) { // name param fonts font v
                     font.source = luaL_check_string_view(L, -1);
                 }
                 lua_pop(L, 1);				// name param fonts font
 
                 lua_getfield(L, -1, "font_face"); // name param fonts font ?
-                if (lua_type(L, -1) == LUA_TNUMBER) // name param fonts font v
-                {
+                if (lua_type(L, -1) == LUA_TNUMBER) { // name param fonts font v
                     font.font_face = (uint32_t)luaL_checkinteger(L, -1);
                 }
                 lua_pop(L, 1);				// name param fonts font
 
                 lua_getfield(L, -1, "width"); // name param fonts font ?
-                if (lua_type(L, -1) == LUA_TNUMBER) // name param fonts font v
-                {
+                if (lua_type(L, -1) == LUA_TNUMBER) { // name param fonts font v
                     font.font_size.x = (float)luaL_checknumber(L, -1);
                 }
                 lua_pop(L, 1);				// name param fonts font
 
                 lua_getfield(L, -1, "height"); // name param fonts font ?
-                if (lua_type(L, -1) == LUA_TNUMBER) // name param fonts font v
-                {
+                if (lua_type(L, -1) == LUA_TNUMBER) { // name param fonts font v
                     font.font_size.y = (float)luaL_checknumber(L, -1);
                 }
                 lua_pop(L, 1);				// name param fonts font
@@ -324,8 +290,7 @@ void LuaSTGPlus::LuaWrapper::ResourceMgrWrapper::Register(lua_State* L) noexcept
             
             return 1;
         }
-        static int LoadFX(lua_State* L)
-        {
+        static int LoadFX(lua_State* L) {
             const char* name = luaL_checkstring(L, 1);
             const char* path = luaL_checkstring(L, 2);
 
@@ -338,8 +303,7 @@ void LuaSTGPlus::LuaWrapper::ResourceMgrWrapper::Register(lua_State* L) noexcept
 
             return 0;
         }
-        static int LoadModel(lua_State* L)
-        {
+        static int LoadModel(lua_State* L) {
             const char* name = luaL_checkstring(L, 1);
             const char* model_path = luaL_checkstring(L, 2);
             
@@ -348,22 +312,19 @@ void LuaSTGPlus::LuaWrapper::ResourceMgrWrapper::Register(lua_State* L) noexcept
                 return luaL_error(L, "can't load resource at this time.");
             if (!pActivedPool->LoadModel(
                 name,
-                model_path))
-            {
+                model_path)) {
                 return luaL_error(L, "load model failed (name='%s', model='%s').", name, model_path);
             }
             return 0;
         }
-        static int CreateRenderTarget(lua_State* L)
-        {
+        static int CreateRenderTarget(lua_State* L) {
             const char* name = luaL_checkstring(L, 1);
             
             ResourcePool* pActivedPool = LRES.GetActivedPool();
             if (!pActivedPool)
                 return luaL_error(L, "can't load resource at this time.");
             
-            if (lua_gettop(L) >= 3)
-            {
+            if (lua_gettop(L) >= 3) {
                 const int width = (int)luaL_checkinteger(L, 2);
                 const int height = (int)luaL_checkinteger(L, 3);
                 if (width < 1 || height < 1)
@@ -373,42 +334,34 @@ void LuaSTGPlus::LuaWrapper::ResourceMgrWrapper::Register(lua_State* L) noexcept
                     depth_buffer = lua_toboolean(L, 4);
                 if (!pActivedPool->CreateRenderTarget(name, width, height, depth_buffer))
                     return luaL_error(L, "can't create render target with name '%s'.", name);
-            }
-            else
-            {
+            } else {
                 if (!pActivedPool->CreateRenderTarget(name, 0, 0, true))
                     return luaL_error(L, "can't create render target with name '%s'.", name);
             }
             
             return 0;
         }
-        static int IsRenderTarget(lua_State* L)
-        {
+        static int IsRenderTarget(lua_State* L) {
             Core::ScopeObject<IResourceTexture> p = LRES.FindTexture(luaL_checkstring(L, 1));
             if (!p)
                 return luaL_error(L, "render target '%s' not found.", luaL_checkstring(L, 1));
             lua_pushboolean(L, p->IsRenderTarget());
             return 1;
         }
-        static int SetTexturePreMulAlphaState(lua_State* L)
-        {
+        static int SetTexturePreMulAlphaState(lua_State* L) {
             Core::ScopeObject<IResourceTexture> p = LRES.FindTexture(luaL_checkstring(L, 1));
-            if (p)
-            {
+            if (p) {
                 p->GetTexture()->setPremultipliedAlpha(lua_toboolean(L, 2));
                 return 0;
             }
             return luaL_error(L, "texture '%s' not found.", luaL_checkstring(L, 1));
         }
-        static int SetTextureSamplerState(lua_State* L)
-        {
+        static int SetTextureSamplerState(lua_State* L) {
             std::string_view const sampler_name = luaL_check_string_view(L, 2);
-            if (sampler_name == "" || sampler_name == "point+wrap" || sampler_name == "point+clamp" || sampler_name == "linear+wrap" || sampler_name == "linear+clamp")
-            {
+            if (sampler_name == "" || sampler_name == "point+wrap" || sampler_name == "point+clamp" || sampler_name == "linear+wrap" || sampler_name == "linear+clamp") {
                 std::string_view const tex_name = luaL_check_string_view(L, 1);
                 Core::ScopeObject<IResourceTexture> p = LRES.FindTexture(tex_name.data());
-                if (!p)
-                {
+                if (!p) {
                     spdlog::error("[luastg] lstg.SetTextureSamplerState failed: can't find texture '{}'", tex_name);
                     return luaL_error(L, "can't find texture '%s'", tex_name.data());
                 }
@@ -426,14 +379,11 @@ void LuaSTGPlus::LuaWrapper::ResourceMgrWrapper::Register(lua_State* L) noexcept
                 p->GetTexture()->setSamplerState(p_sampler);
 
                 return 0;
-            }
-            else
-            {
+            } else {
                 return luaL_error(L, "unsupported deprecated usage");
             }
         }
-        static int GetTextureSize(lua_State* L)
-        {
+        static int GetTextureSize(lua_State* L) {
             const char* name = luaL_checkstring(L, 1);
             Core::Vector2U size;
             if (!LRES.GetTextureSize(name, size))
@@ -442,8 +392,7 @@ void LuaSTGPlus::LuaWrapper::ResourceMgrWrapper::Register(lua_State* L) noexcept
             lua_pushinteger(L, (lua_Integer)size.y);
             return 2;
         }
-        static int RemoveResource(lua_State* L)
-        {
+        static int RemoveResource(lua_State* L) {
             ResourcePoolType t;
             const char* s = luaL_checkstring(L, 1);
             if (strcmp(s, "global") == 0)
@@ -455,10 +404,8 @@ void LuaSTGPlus::LuaWrapper::ResourceMgrWrapper::Register(lua_State* L) noexcept
             else
                 return luaL_error(L, "invalid argument #1 for 'RemoveResource', requires 'stage', 'global' or 'none'.");
 
-            if (lua_gettop(L) == 1)
-            {
-                switch (t)
-                {
+            if (lua_gettop(L) == 1) {
+                switch (t) {
                 case ResourcePoolType::Stage:
                     LRES.GetResourcePool(ResourcePoolType::Stage)->Clear();
                     break;
@@ -468,14 +415,11 @@ void LuaSTGPlus::LuaWrapper::ResourceMgrWrapper::Register(lua_State* L) noexcept
                 default:
                     break;
                 }
-            }
-            else
-            {
+            } else {
                 ResourceType tResourceType = static_cast<ResourceType>(luaL_checkint(L, 2));
                 const char* tResourceName = luaL_checkstring(L, 3);
 
-                switch (t)
-                {
+                switch (t) {
                 case ResourcePoolType::Stage:
                     LRES.GetResourcePool(ResourcePoolType::Stage)->RemoveResource(tResourceType, tResourceName);
                     break;
@@ -489,8 +433,7 @@ void LuaSTGPlus::LuaWrapper::ResourceMgrWrapper::Register(lua_State* L) noexcept
             
             return 0;
         }
-        static int CheckRes(lua_State* L)
-        {
+        static int CheckRes(lua_State* L) {
             ResourceType tResourceType = static_cast<ResourceType>(luaL_checkint(L, 1));
             const char* tResourceName = luaL_checkstring(L, 2);
             // 先在全局池中寻找再到关卡池中找
@@ -502,25 +445,20 @@ void LuaSTGPlus::LuaWrapper::ResourceMgrWrapper::Register(lua_State* L) noexcept
                 lua_pushnil(L);
             return 1;
         }
-        static int EnumRes(lua_State* L)
-        {
+        static int EnumRes(lua_State* L) {
             ResourceType tResourceType = static_cast<ResourceType>(luaL_checkint(L, 1));
             LRES.GetResourcePool(ResourcePoolType::Global)->ExportResourceList(L, tResourceType);
             LRES.GetResourcePool(ResourcePoolType::Stage)->ExportResourceList(L, tResourceType);
             return 2;
         }
 
-        static int SetImageScale(lua_State* L)
-        {
-            if (lua_gettop(L) <= 1)
-            {
+        static int SetImageScale(lua_State* L) {
+            if (lua_gettop(L) <= 1) {
                 float x = static_cast<float>(luaL_checknumber(L, 1));
                 if (x == 0.f)
                     return luaL_error(L, "invalid argument #1 for 'SetImageScale'.");
                 LRES.SetGlobalImageScaleFactor(x);
-            }
-            else
-            {
+            } else {
                 Core::ScopeObject<IResourceSprite> p = LRES.FindSprite(luaL_checkstring(L, 1));
                 if (!p)
                     return luaL_error(L, "image '%s' not found.", luaL_checkstring(L, 1));
@@ -529,16 +467,12 @@ void LuaSTGPlus::LuaWrapper::ResourceMgrWrapper::Register(lua_State* L) noexcept
             }
             return 0;
         }
-        static int GetImageScale(lua_State* L)
-        {
-            if (lua_gettop(L) <= 0)
-            {
+        static int GetImageScale(lua_State* L) {
+            if (lua_gettop(L) <= 0) {
                 lua_Number ret = LRES.GetGlobalImageScaleFactor();
                 lua_pushnumber(L, ret);
                 return 1;
-            }
-            else
-            {
+            } else {
                 Core::ScopeObject<IResourceSprite> p = LRES.FindSprite(luaL_checkstring(L, 1));
                 if (!p)
                     return luaL_error(L, "image '%s' not found.", luaL_checkstring(L, 1));
@@ -546,8 +480,7 @@ void LuaSTGPlus::LuaWrapper::ResourceMgrWrapper::Register(lua_State* L) noexcept
                 return 1;
             }
         }
-        static int SetImageState(lua_State* L)
-        {
+        static int SetImageState(lua_State* L) {
             Core::ScopeObject<IResourceSprite> p = LRES.FindSprite(luaL_checkstring(L, 1));
             if (!p)
                 return luaL_error(L, "image '%s' not found.", luaL_checkstring(L, 1));
@@ -555,8 +488,7 @@ void LuaSTGPlus::LuaWrapper::ResourceMgrWrapper::Register(lua_State* L) noexcept
             p->SetBlendMode(TranslateBlendMode(L, 2));
             if (lua_gettop(L) == 3)
                 p->GetSprite()->setColor(*ColorWrapper::Cast(L, 3));
-            else if (lua_gettop(L) == 6)
-            {
+            else if (lua_gettop(L) == 6) {
                 Core::Color4B tColors[] = {
                     *ColorWrapper::Cast(L, 3),
                     *ColorWrapper::Cast(L, 4),
@@ -567,8 +499,7 @@ void LuaSTGPlus::LuaWrapper::ResourceMgrWrapper::Register(lua_State* L) noexcept
             }
             return 0;
         }
-        static int SetImageCenter(lua_State* L)
-        {
+        static int SetImageCenter(lua_State* L) {
             Core::ScopeObject<IResourceSprite> p = LRES.FindSprite(luaL_checkstring(L, 1));
             if (!p)
                 return luaL_error(L, "image '%s' not found.", luaL_checkstring(L, 1));
@@ -579,8 +510,7 @@ void LuaSTGPlus::LuaWrapper::ResourceMgrWrapper::Register(lua_State* L) noexcept
             return 0;
         }
 
-        static int SetAnimationScale(lua_State* L)
-        {
+        static int SetAnimationScale(lua_State* L) {
             Core::ScopeObject<IResourceAnimation> p = LRES.FindAnimation(luaL_checkstring(L, 1));
             if (!p)
                 return luaL_error(L, "animation '%s' not found.", luaL_checkstring(L, 1));
@@ -591,8 +521,7 @@ void LuaSTGPlus::LuaWrapper::ResourceMgrWrapper::Register(lua_State* L) noexcept
                 p->GetSprite((uint32_t)i)->GetSprite()->setUnitsPerPixel(x);
             return 0;
         }
-        static int GetAnimationScale(lua_State* L)
-        {
+        static int GetAnimationScale(lua_State* L) {
             Core::ScopeObject<IResourceAnimation> p = LRES.FindAnimation(luaL_checkstring(L, 1));
             if (!p)
                 return luaL_error(L, "animation '%s' not found.", luaL_checkstring(L, 1));
@@ -601,19 +530,15 @@ void LuaSTGPlus::LuaWrapper::ResourceMgrWrapper::Register(lua_State* L) noexcept
             lua_pushnumber(L, p->GetSprite(0)->GetSprite()->getUnitsPerPixel());
             return 1;
         }
-        static int SetAnimationState(lua_State* L)
-        {
+        static int SetAnimationState(lua_State* L) {
             Core::ScopeObject<IResourceAnimation> p = LRES.FindAnimation(luaL_checkstring(L, 1));
             if (!p)
                 return luaL_error(L, "animation '%s' not found.", luaL_checkstring(L, 1));
 
             p->SetBlendMode(TranslateBlendMode(L, 2));
-            if (lua_gettop(L) == 3)
-            {
+            if (lua_gettop(L) == 3) {
                 p->SetVertexColor(*ColorWrapper::Cast(L, 3));
-            }
-            else if (lua_gettop(L) == 6)
-            {
+            } else if (lua_gettop(L) == 6) {
                 Core::Color4B tColors[] = {
                     *ColorWrapper::Cast(L, 3),
                     *ColorWrapper::Cast(L, 4),
@@ -624,15 +549,13 @@ void LuaSTGPlus::LuaWrapper::ResourceMgrWrapper::Register(lua_State* L) noexcept
             }
             return 0;
         }
-        static int SetAnimationCenter(lua_State* L)
-        {
+        static int SetAnimationCenter(lua_State* L) {
             Core::ScopeObject<IResourceAnimation> p = LRES.FindAnimation(luaL_checkstring(L, 1));
             if (!p)
                 return luaL_error(L, "animation '%s' not found.", luaL_checkstring(L, 1));
             if (!p->IsSpriteCloned())
                 return luaL_error(L, "SetAnimationCenter on animation '%s' is invalid, please set each sprite separately.");
-            for (size_t i = 0; i < p->GetCount(); ++i)
-            {
+            for (size_t i = 0; i < p->GetCount(); ++i) {
                 p->GetSprite((uint32_t)i)->GetSprite()->setTextureCenter(Core::Vector2F(
                     static_cast<float>(luaL_checknumber(L, 2) + p->GetSprite((uint32_t)i)->GetSprite()->getTextureRect().a.x),
                     static_cast<float>(luaL_checknumber(L, 3) + p->GetSprite((uint32_t)i)->GetSprite()->getTextureRect().a.y)
@@ -641,22 +564,19 @@ void LuaSTGPlus::LuaWrapper::ResourceMgrWrapper::Register(lua_State* L) noexcept
             return 0;
         }
 
-        static int SetFontState(lua_State* L)
-        {
+        static int SetFontState(lua_State* L) {
             Core::ScopeObject<IResourceFont> p = LRES.FindSpriteFont(luaL_checkstring(L, 1));
             if (!p)
                 return luaL_error(L, "sprite font '%s' not found.", luaL_checkstring(L, 1));
 
             p->SetBlendMode(TranslateBlendMode(L, 2));
-            if (lua_gettop(L) == 3)
-            {
+            if (lua_gettop(L) == 3) {
                 p->SetBlendColor(*LuaWrapper::ColorWrapper::Cast(L, 3));
             }
             return 0;
         }
 
-        static int CacheTTFString(lua_State* L)
-        {
+        static int CacheTTFString(lua_State* L) {
             size_t len = 0;
             const char* str = luaL_checklstring(L, 2, &len);
             LRES.CacheTTFFontString(luaL_checkstring(L, 1), str, len);

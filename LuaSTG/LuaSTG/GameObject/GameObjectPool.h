@@ -6,14 +6,11 @@
 #define LOBJPOOL_SIZE   32768 // 最大对象数 //32768(full) //16384(half)
 #define LOBJPOOL_GROUPN 24    // 碰撞组数
 
-namespace LuaSTGPlus
-{
+namespace LuaSTGPlus {
     //游戏对象池
-    class GameObjectPool
-    {
+    class GameObjectPool {
     public:
-        struct FrameStatistics
-        {
+        struct FrameStatistics {
             uint64_t object_alloc{ 0 };
             uint64_t object_free{ 0 };
             uint64_t object_alive{ 0 };
@@ -32,8 +29,7 @@ namespace LuaSTGPlus
             bool operator()(const GameObject* x, const GameObject* y) const {
                 if (x->layer != y->layer) {
                     return x->layer < y->layer;
-                }
-                else {
+                } else {
                     return x->uid < y->uid;
                 }
             }
@@ -78,8 +74,7 @@ namespace LuaSTGPlus
         GameObject* _ReleaseObject(GameObject* object);
         
         // 检查指定对象的坐标是否在场景边界内
-        inline bool _ObjectBoundCheck(GameObject* object) const noexcept
-        {
+        inline bool _ObjectBoundCheck(GameObject* object) const noexcept {
             if (!object->bound)
                 return true;
             return object->IsInRect(m_BoundLeft, m_BoundRight, m_BoundBottom, m_BoundTop);
@@ -119,14 +114,12 @@ namespace LuaSTGPlus
         
         // TODO: double -> float ???
         /// @brief 获取舞台边界
-        Core::RectF GetBound() noexcept
-        {
+        Core::RectF GetBound() noexcept {
             return Core::RectF((float)m_BoundLeft, (float)m_BoundTop, (float)m_BoundRight, (float)m_BoundBottom);
         }
         
         /// @brief 设置舞台边界
-        void SetBound(lua_Number l, lua_Number r, lua_Number b, lua_Number t) noexcept
-        {
+        void SetBound(lua_Number l, lua_Number r, lua_Number b, lua_Number t) noexcept {
             m_BoundLeft = l;
             m_BoundRight = r;
             m_BoundTop = t;

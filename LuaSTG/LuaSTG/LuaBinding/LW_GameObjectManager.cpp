@@ -1,44 +1,36 @@
 ﻿#include "LuaBinding/LuaWrapper.hpp"
 #include "AppFrame.h"
 
-void LuaSTGPlus::LuaWrapper::GameObjectManagerWrapper::Register(lua_State* L) noexcept
-{
-	struct Wrapper
-	{
+void LuaSTGPlus::LuaWrapper::GameObjectManagerWrapper::Register(lua_State* L) noexcept {
+	struct Wrapper {
 		// 高级方法
-		static int ObjTable(lua_State* L) noexcept
-		{
+		static int ObjTable(lua_State* L) noexcept {
 			return LPOOL.GetObjectTable(L);
 		}
 		// 对象管理器
-		static int GetnObj(lua_State* L) noexcept
-		{
+		static int GetnObj(lua_State* L) noexcept {
 			lua_pushinteger(L, (lua_Integer)LPOOL.GetObjectCount());
 			return 1;
 		}
-		static int ObjFrame(lua_State* L)
-		{
+		static int ObjFrame(lua_State* L) {
 			if (!LPOOL.CheckIsMainThread(L))
 				luaL_error(L, "ObjFrame was called in coroutine, which is disallowed");
 			LPOOL.DoFrame();
 			return 0;
 		}
-		static int ObjRender(lua_State* L)
-		{
+		static int ObjRender(lua_State* L) {
 			if (!LPOOL.CheckIsMainThread(L))
 				luaL_error(L, "ObjRender was called in coroutine, which is disallowed");
 			LPOOL.DoRender();
 			return 0;
 		}
-		static int BoundCheck(lua_State* L)
-		{
+		static int BoundCheck(lua_State* L) {
 			if (!LPOOL.CheckIsMainThread(L))
 				luaL_error(L, "BoundCheck was called in coroutine, which is disallowed");
 			LPOOL.BoundCheck();
 			return 0;
 		}
-		static int SetBound(lua_State* L)
-		{
+		static int SetBound(lua_State* L) {
 			LPOOL.SetBound(
 				luaL_checknumber(L, 1),
 				luaL_checknumber(L, 2),
@@ -47,82 +39,69 @@ void LuaSTGPlus::LuaWrapper::GameObjectManagerWrapper::Register(lua_State* L) no
 			);
 			return 0;
 		}
-		static int CollisionCheck(lua_State* L)
-		{
+		static int CollisionCheck(lua_State* L) {
 			if (!LPOOL.CheckIsMainThread(L))
 				luaL_error(L, "CollisionCheck was called in coroutine, which is disallowed");
 			LPOOL.CollisionCheck(luaL_checkinteger(L, 1), luaL_checkinteger(L, 2));
 			return 0;
 		}
-		static int UpdateXY(lua_State* L)
-		{
+		static int UpdateXY(lua_State* L) {
 			if (!LPOOL.CheckIsMainThread(L))
 				luaL_error(L, "UpdateXY was called in coroutine, which is disallowed");
 			LPOOL.UpdateXY();
 			return 0;
 		}
-		static int AfterFrame(lua_State* L)
-		{
+		static int AfterFrame(lua_State* L) {
 			if (!LPOOL.CheckIsMainThread(L))
 				luaL_error(L, "AfterFrame was called in coroutine, which is disallowed");
 			LPOOL.AfterFrame();
 			return 0;
 		}
-		static int ResetPool(lua_State* L) noexcept
-		{
+		static int ResetPool(lua_State* L) noexcept {
 			std::ignore = L;
 			LPOOL.ResetPool();
 			return 0;
 		}
 		// EX+ 对象更新相关，影响 frame callback函数以及对象更新
-		static int GetSuperPause(lua_State* L) noexcept
-		{
+		static int GetSuperPause(lua_State* L) noexcept {
 			lua_pushinteger(L, LPOOL.GetNextFrameSuperPauseTime());
 			return 1;
 		}
-		static int SetSuperPause(lua_State* L)
-		{
+		static int SetSuperPause(lua_State* L) {
 			LPOOL.SetNextFrameSuperPauseTime(luaL_checkinteger(L, 1));
 			return 0;
 		}
-		static int AddSuperPause(lua_State* L)
-		{
+		static int AddSuperPause(lua_State* L) {
 			lua_Integer a = luaL_checkinteger(L, 1);
 			LPOOL.SetNextFrameSuperPauseTime(LPOOL.GetNextFrameSuperPauseTime() + a);
 			return 0;
 		}
-		static int GetCurrentSuperPause(lua_State* L) noexcept
-		{
+		static int GetCurrentSuperPause(lua_State* L) noexcept {
 			lua_pushinteger(L, LPOOL.GetSuperPauseTime());
 			return 1;
 		}
 		// EX+ multi world  world mask
-		static int GetWorldFlag(lua_State* L) noexcept
-		{
+		static int GetWorldFlag(lua_State* L) noexcept {
 			lua_pushinteger(L, LPOOL.GetWorldFlag());
 			return 1;
 		}
-		static int SetWorldFlag(lua_State* L)
-		{
+		static int SetWorldFlag(lua_State* L) {
 			LPOOL.SetWorldFlag(luaL_checkinteger(L, 1));
 			return 1;
 		}
-		static int IsSameWorld(lua_State* L)
-		{
+		static int IsSameWorld(lua_State* L) {
 			int a = luaL_checkinteger(L, 1);
 			int b = luaL_checkinteger(L, 2);
 			lua_pushboolean(L, GameObjectPool::CheckWorld(a, b));
 			return 1;
 		}
-		static int CheckWorlds(lua_State* L)
-		{
+		static int CheckWorlds(lua_State* L) {
 			int a1 = luaL_checkinteger(L, 1);
 			int a2 = luaL_checkinteger(L, 2);
 			lua_pushboolean(L, LPOOL.CheckWorlds(a1, a2));
 			return 1;
 		}
-		static int ActiveWorlds(lua_State* L) noexcept
-		{
+		static int ActiveWorlds(lua_State* L) noexcept {
 			int a1 = luaL_optinteger(L, 1, 0);
 			int a2 = luaL_optinteger(L, 2, 0);
 			int a3 = luaL_optinteger(L, 3, 0);
@@ -131,8 +110,7 @@ void LuaSTGPlus::LuaWrapper::GameObjectManagerWrapper::Register(lua_State* L) no
 			return 0;
 		}
 		// EX+
-		static int GetCurrentObject(lua_State* L) noexcept
-		{
+		static int GetCurrentObject(lua_State* L) noexcept {
 			return LPOOL.PushCurrentObject(L);
 		}
 	};

@@ -1,12 +1,9 @@
 #include "LuaBinding/LuaWrapper.hpp"
 #include "AppFrame.h"
 
-void LuaSTGPlus::LuaWrapper::RenderWrapper::Register(lua_State* L) noexcept
-{
-    struct Wrapper
-    {
-        static int RenderText(lua_State* L)
-        {
+void LuaSTGPlus::LuaWrapper::RenderWrapper::Register(lua_State* L) noexcept {
+    struct Wrapper {
+        static int RenderText(lua_State* L) {
             FontAlignHorizontal halign = FontAlignHorizontal::Center;
             FontAlignVertical valign = FontAlignVertical::Middle;
             if (lua_gettop(L) == 6)
@@ -19,14 +16,12 @@ void LuaSTGPlus::LuaWrapper::RenderWrapper::Register(lua_State* L) noexcept
                 (float)(luaL_optnumber(L, 5, 1.0) * LRES.GetGlobalImageScaleFactor()),
                 halign,
                 valign
-                ))
-            {
+                )) {
                 return luaL_error(L, "can't draw text '%s'.", luaL_checkstring(L, 1));
             }
             return 0;
         }
-        static int RenderTTF(lua_State* L)
-        {
+        static int RenderTTF(lua_State* L) {
             if (!LAPP.RenderTTF(
                 luaL_checkstring(L, 1),
                 luaL_checkstring(L, 2),
@@ -37,35 +32,30 @@ void LuaSTGPlus::LuaWrapper::RenderWrapper::Register(lua_State* L) noexcept
                 LRES.GetGlobalImageScaleFactor() * (float)luaL_optnumber(L, 9, 1.0),
                 luaL_checkinteger(L, 7),
                 *ColorWrapper::Cast(L, 8)
-            ))
-            {
+            )) {
                 return luaL_error(L, "can't render font '%s'.", luaL_checkstring(L, 1));
             }	
             return 0;
         }
         //EX
-        static int Snapshot(lua_State* L)
-        {
+        static int Snapshot(lua_State* L) {
             const char* path = luaL_checkstring(L, 1);
             LAPP.SnapShot(path);
             return 0;
         }
-        static int SaveTexture(lua_State* L)
-        {
+        static int SaveTexture(lua_State* L) {
             const char* tex_name = luaL_checkstring(L, 1);
             const char* path = luaL_checkstring(L, 2);
             LAPP.SaveTexture(tex_name, path);
             return 0;
         }
         //EX+
-        static int DrawCollider(lua_State*)
-        {
+        static int DrawCollider(lua_State*) {
             LPOOL.DrawCollider();
             return 1;
         }
         //ETC
-        static int RenderGroupCollider(lua_State* L)
-        {
+        static int RenderGroupCollider(lua_State* L) {
             // group color
             LPOOL.DrawGroupCollider2(
                 luaL_checkinteger(L, 1),

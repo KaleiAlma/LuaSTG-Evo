@@ -1,44 +1,35 @@
 #include "GameObject/GameObjectClass.hpp"
 #include "LuaBinding/lua_utility.hpp"
 
-namespace LuaSTGPlus
-{
+namespace LuaSTGPlus {
 	constexpr char const IS_CLASS[] = "is_class";
 	constexpr char const IS_RENDER_CLASS[] = ".render";
 	constexpr char const DEFAULT_FUNCTION[] = "default_function";
 	
-	bool GameObjectClass::CheckClassClass(lua_State* L, int index)
-	{
+	bool GameObjectClass::CheckClassClass(lua_State* L, int index) {
 		Reset();
 		//													// ??? class ???
 		
 		// default function
 		lua_getfield(L, index, DEFAULT_FUNCTION);			// ??? class ??? ? 
-		if (lua_isnumber(L, -1))
-		{
+		if (lua_isnumber(L, -1)) {
 			lua_Integer const mask = lua_tointeger(L, -1);	// ??? class ??? n 
-			if (mask & (1 << LGOBJ_CC_INIT))
-			{
+			if (mask & (1 << LGOBJ_CC_INIT)) {
 				IsDefaultCreate = 1;
 			}
-			if (mask & (1 << LGOBJ_CC_DEL))
-			{
+			if (mask & (1 << LGOBJ_CC_DEL)) {
 				IsDefaultDestroy = 1;
 			}
-			if (mask & (1 << LGOBJ_CC_FRAME))
-			{
+			if (mask & (1 << LGOBJ_CC_FRAME)) {
 				IsDefaultUpdate = 1;
 			}
-			if (mask & (1 << LGOBJ_CC_RENDER))
-			{
+			if (mask & (1 << LGOBJ_CC_RENDER)) {
 				IsDefaultRender = 1;
 			}
-			if (mask & (1 << LGOBJ_CC_COLLI))
-			{
+			if (mask & (1 << LGOBJ_CC_COLLI)) {
 				IsDefaultTrigger = 1;
 			}
-			if (mask & (1 << LGOBJ_CC_KILL))
-			{
+			if (mask & (1 << LGOBJ_CC_KILL)) {
 				IsDefaultLegacyKill = 1;
 			}
 		}
@@ -52,8 +43,7 @@ namespace LuaSTGPlus
 		return true;
 	}
 	
-	bool GameObjectClass::CheckGameObjectClass(lua_State* L, int index)
-	{
+	bool GameObjectClass::CheckGameObjectClass(lua_State* L, int index) {
 		// ??? object ???
 		lua_rawgeti(L, index, 1);	// ??? object ??? class 
 		const bool ret = CheckClassClass(L, -1);
@@ -61,10 +51,8 @@ namespace LuaSTGPlus
 		return ret;
 	}
 	
-	bool GameObjectClass::CheckClassValid(lua_State* L, int index)
-	{
-		if (!lua_istable(L, index))
-		{
+	bool GameObjectClass::CheckClassValid(lua_State* L, int index) {
+		if (!lua_istable(L, index)) {
 			return false;
 		}
 		lua_getfield(L, index, IS_CLASS);

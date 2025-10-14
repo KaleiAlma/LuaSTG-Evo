@@ -1,12 +1,9 @@
 #include "GameResource/Implement/ResourceSoundEffectImpl.hpp"
 
-namespace LuaSTGPlus
-{
-	void ResourceSoundEffectImpl::FlushCommand()
-	{
+namespace LuaSTGPlus {
+	void ResourceSoundEffectImpl::FlushCommand() {
 		// 根据最后的命令对音效进行操作
-		switch (m_last_command.type)
-		{
+		switch (m_last_command.type) {
 		case CommandType::None:
 			break;
 		case CommandType::Play:
@@ -35,18 +32,15 @@ namespace LuaSTGPlus
 		m_last_command.vol = 0.0f;
 		m_last_command.pan = 0.0f;
 	}
-	void ResourceSoundEffectImpl::Play(float vol, float pan)
-	{
+	void ResourceSoundEffectImpl::Play(float vol, float pan) {
 		// 优先级最高的命令，覆盖其他一切命令
 		m_last_command.type = CommandType::Reset;
 		m_last_command.vol = std::max(m_last_command.vol, vol); // 取音量最高
 		m_last_command.pan = pan;
 		m_status = 2; // playing
 	}
-	void ResourceSoundEffectImpl::Resume()
-	{
-		switch (m_last_command.type)
-		{
+	void ResourceSoundEffectImpl::Resume() {
+		switch (m_last_command.type) {
 		case CommandType::None:
 			// 初始化命令
 			m_last_command.type = CommandType::Play;
@@ -72,10 +66,8 @@ namespace LuaSTGPlus
 		}
 		m_status = 2; // playing
 	}
-	void ResourceSoundEffectImpl::Pause()
-	{
-		switch (m_last_command.type)
-		{
+	void ResourceSoundEffectImpl::Pause() {
+		switch (m_last_command.type) {
 		case CommandType::None:
 			// 初始化命令
 			m_last_command.type = CommandType::Stop;
@@ -101,10 +93,8 @@ namespace LuaSTGPlus
 		}
 		m_status = 1; // pause
 	}
-	void ResourceSoundEffectImpl::Stop()
-	{
-		switch (m_last_command.type)
-		{
+	void ResourceSoundEffectImpl::Stop() {
+		switch (m_last_command.type) {
 		case CommandType::None:
 			// 初始化命令
 			m_last_command.type = CommandType::Stop;
@@ -137,7 +127,6 @@ namespace LuaSTGPlus
 
 	ResourceSoundEffectImpl::ResourceSoundEffectImpl(const char* name, Core::Audio::IAudioPlayer* p_player)
 		: ResourceBaseImpl(ResourceType::SoundEffect, name)
-		, m_player(p_player)
-	{
+		, m_player(p_player) {
 	}
 }

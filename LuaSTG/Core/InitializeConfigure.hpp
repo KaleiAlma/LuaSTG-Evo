@@ -2,10 +2,8 @@
 #include <string>
 #include <string_view>
 
-namespace Core
-{
-    struct InitializeConfigure
-    {
+namespace Core {
+    struct InitializeConfigure {
         std::string target_graphics_device;
 
         int canvas_width = 640;

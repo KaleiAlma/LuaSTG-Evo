@@ -25,8 +25,25 @@ jobs:
       # To add more build types (Release, Debug, RelWithDebInfo, etc.) customize the build_type list.
       matrix:
         os: [ubuntu-24.04, windows-latest, macos-13]
-        # build_type: [Release, RelWithDebInfo, Debug]
         build_type: [Release]
+        # build_type: [Release, RelWithDebInfo, Debug]
+        target_arch:
+          - main: x86_64
+            main_win: AMD64
+            rev: westmere
+            rev_win: SSE4.2
+          - main: x86_64
+            main_win: AMD64
+            rev: haswell
+            rev_win: AVX2
+          - main: arm64
+            main_win: ARM64
+            rev: armv8.2-a
+            rev_win: armv8.2
+        exclude:
+          - os: macos-14
+            target_arch:
+              rev_win: AVX2
         # c_compiler: [gcc, clang, cl]
         # c_compiler: [clang, MSVC]
         # include:
@@ -72,55 +89,34 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-cpm-
 
-    - name: Set reusable strings
-      # Turn repeated input strings (such as the build output directory) into step outputs. These step outputs can be used throughout the workflow file.
-      id: strings
-      shell: bash
+    - name: Set Windows VCVars
+      if: ${{ runner.os == 'Windows' }}
       run: |
-        echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
+        (vcvars ${{ matrix.target_arch.main_win }}).GetEnumerator()
+        | Foreach { "$($_.Key)=$($_.Value)" >> "$env:GITHUB_ENV" }
       
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
       # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
-    - name: Configure and Build with CMake (Linux)
+    - name: Configure CMake (Use Shared Libs)
       run: >
-        cmake -B ${{ steps.strings.outputs.build-output-dir }}
-        -DCMAKE_CXX_COMPILER=clang++-18
-        -DCMAKE_C_COMPILER=clang-18
-        -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
-        -S ${{ github.workspace }}
+        cmake -B ${{ github.workspace }}/build -S ${{ github.workspace }}
+        -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}/cmake/toolchain/${{ runner.os }}-${{ matrix.target_arch.main }}${{ env.LSTGEXT_MSVC }}.cmake
+        -DCMAKE_BUILD_TYPE=Release
+        -DTARGET_ARCH_REV="${{ matrix.target_arch.rev }}"
+        -DTARGET_ARCH_REV_WIN="${{ matrix.target_arch.rev_win }}"
+        -DLSTGEXT_REPO=KaleiAlma/LSTG-Evo-External
+        -DLSTGEXT_LIB
+        -DLSTG_EXTERNAL_INSTALL_SUBDIR=shared/lstgext
+        -DLSTGEXT_BUILD=${{ inputs.build }}
         -DCPM_SOURCE_CACHE=${{ github.workspace }}/build/cpm-cache
+        ${{ inputs.sdl3 && '-DLSTGEXT_SDL3_DIR=SDL3-shared' || '' }}
         -G Ninja
-        &&
-        cmake --build ${{ steps.strings.outputs.build-output-dir }} --config ${{ matrix.build_type }} --target LuaSTG
-      if: ${{ runner.os == 'Linux' }}
 
-    - name: Configure and Build with CMake (Windows)
-      shell: cmd
+    - name: Build With CMake (Use Shared Libs)
       run: >
-        call "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvars64.bat" &&
-        cmake -B ${{ steps.strings.outputs.build-output-dir }}
-        -DCMAKE_CXX_COMPILER=cl
-        -DCMAKE_C_COMPILER=cl
-        -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
-        -S ${{ github.workspace }}
-        -DCPM_SOURCE_CACHE=${{ github.workspace }}/build/cpm-cache
-        -G Ninja
+        cmake --build ${{ github.workspace }}/build --config Release --target external-build
         &&
-        cmake --build ${{ steps.strings.outputs.build-output-dir }} --config ${{ matrix.build_type }} --target LuaSTG
-      if: ${{ runner.os == 'Windows' }}
-
-    - name: Configure and Build with CMake (macOS)
-      run: >
-        cmake -B ${{ steps.strings.outputs.build-output-dir }}
-        -DCMAKE_CXX_COMPILER=$(brew --prefix llvm@18)/bin/clang++
-        -DCMAKE_C_COMPILER=$(brew --prefix llvm@18)/bin/clang
-        -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
-        -S ${{ github.workspace }}
-        -DCPM_SOURCE_CACHE=${{ github.workspace }}/build/cpm-cache
-        -G Ninja
-        &&
-        cmake --build ${{ steps.strings.outputs.build-output-dir }} --config ${{ matrix.build_type }} --target LuaSTG
-      if: ${{ runner.os == 'macOS' }}
+        cmake --install ${{ github.workspace }}/build
 
     - name: Archive artifacts
       uses: actions/upload-artifact@v4

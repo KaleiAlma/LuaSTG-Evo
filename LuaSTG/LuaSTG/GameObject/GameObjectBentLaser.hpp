@@ -6,15 +6,12 @@
 
 #define LGOBJ_MAXLASERNODE 512  // 曲线激光最大节点数
 
-namespace LuaSTGPlus
-{
-	class GameObjectBentLaser
-	{
+namespace LuaSTGPlus {
+	class GameObjectBentLaser {
 	public:
 		static GameObjectBentLaser* AllocInstance();
 		static void FreeInstance(GameObjectBentLaser* p);
-		struct LaserNode
-		{
+		struct LaserNode {
 			Core::Vector2F pos;			//节点位置
 			float half_width = 0.0f;//半宽
 			//float rot = 0.0f;		//节点朝向

@@ -20,8 +20,7 @@ namespace cpp {
                 id = _free[_free_size];
                 _used[id] = true;
                 return true;
-            }
-            else {
+            } else {
                 _break();
                 id = static_cast<size_t>(-1);
                 return false;
@@ -33,8 +32,7 @@ namespace cpp {
                 _used[id] = false;
                 _free[_free_size] = id;
                 _free_size++;
-            }
-            else {
+            } else {
                 _break();
             }
         };
@@ -42,8 +40,7 @@ namespace cpp {
         T* object(size_t id) noexcept {
             if (id < N && _used[id]) {
                 return &_data[id];
-            }
-            else {
+            } else {
                 return nullptr;
             }
         };

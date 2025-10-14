@@ -12,31 +12,25 @@
 #include "Utility/jsf.hpp"
 
 #ifndef WIN32
-std::istream& operator>>(std::istream& src, __uint128_t& value)
-{
+std::istream& operator>>(std::istream& src, __uint128_t& value) {
 	std::string input;
 	src >> input;
 
 	value = 0;
 	
-	for(char c : input)
-	{
+	for(char c : input) {
 		value *= 10;
 		value += c - '0';
 	}
 	return src;
 }
-static std::string u128_tostring(__uint128_t u128)
-{
+static std::string u128_tostring(__uint128_t u128) {
 	std::string ret;
-	if (u128 > UINT64_MAX)
-	{
+	if (u128 > UINT64_MAX) {
 		__uint128_t leading  = u128 / 10000000000000000000ULL;
 		uint64_t  trailing = u128 % 10000000000000000000ULL;
 		return u128_tostring(leading) + std::to_string(trailing);
-	}
-	else
-	{
+	} else {
 		uint64_t u64 = u128;
 		return std::to_string(u64);
 	}
@@ -46,11 +40,9 @@ static std::string u128_tostring(__uint128_t u128)
 static std::string_view const LibraryID("random");
 
 template<typename RNG>
-class RandomBase
-{
+class RandomBase {
 public:
-	struct Data
-	{
+	struct Data {
 		RNG rng;
 		std::uniform_int_distribution<lua_Integer> int_gn;
 		std::uniform_real_distribution<lua_Number> num_gn;
@@ -64,96 +56,72 @@ public:
 private:
 	static std::string_view const CreateID;
 
-	static int seed(lua_State* L)
-	{
+	static int seed(lua_State* L) {
 		Data* self = Cast(L, 1);
 		int const argc = lua_gettop(L);
-		if (argc == 1)
-		{
+		if (argc == 1) {
 			lua_pushinteger(L, self->seed);
 			return 1;
-		}
-		else if (argc == 2)
-		{
+		} else if (argc == 2) {
 			self->seed = luaL_checkinteger(L, 2);
 			self->rng.seed(static_cast<uint64_t>(self->seed));
 			return 0;
-		}
-		else
-		{
+		} else {
 			return luaL_error(L, "invalid parameter");
 		}
 	}
-	static int integer(lua_State* L)
-	{
+	static int integer(lua_State* L) {
 		Data* self = Cast(L, 1);
 		int const argc = lua_gettop(L);
-		if (argc == 1)
-		{
+		if (argc == 1) {
 			lua_pushinteger(L, self->int_gn(self->rng, std::uniform_int_distribution<lua_Integer>::param_type(
 				0, std::numeric_limits<lua_Integer>::max())));
 			return 1;
-		}
-		else if (argc == 2)
-		{
+		} else if (argc == 2) {
 			lua_Integer b = luaL_checkinteger(L, 2);
 			if (b < 0) b = -b;
 			lua_pushinteger(L, self->int_gn(self->rng, std::uniform_int_distribution<lua_Integer>::param_type(0, b)));
 			return 1;
-		}
-		else if (argc == 3)
-		{
+		} else if (argc == 3) {
 			lua_Integer a = luaL_checkinteger(L, 2);
 			lua_Integer b = luaL_checkinteger(L, 3);
 			if (a > b) std::swap(a, b);
 			lua_pushinteger(L, self->int_gn(self->rng, std::uniform_int_distribution<lua_Integer>::param_type(a, b)));
 			return 1;
-		}
-		else
-		{
+		} else {
 			return luaL_error(L, "invalid parameter");
 		}
 	}
-	static int number(lua_State* L)
-	{
+	static int number(lua_State* L) {
 		Data* self = Cast(L, 1);
 		int const argc = lua_gettop(L);
-		if (argc == 1)
-		{
+		if (argc == 1) {
 			lua_pushnumber(L, self->num_gn(self->rng, std::uniform_real_distribution<lua_Number>::param_type(
 				0.0, std::nextafter(1.0, std::numeric_limits<lua_Number>::max()))));
 			return 1;
-		}
-		else if (argc == 2)
-		{
+		} else if (argc == 2) {
 			lua_Number b = luaL_checknumber(L, 2);
 			if (b < 0.0) b = -b;
 			lua_pushnumber(L, self->num_gn(self->rng, std::uniform_real_distribution<lua_Number>::param_type(
 				0.0, std::nextafter(b, std::numeric_limits<lua_Number>::max()))));
 			return 1;
-		}
-		else if (argc == 3)
-		{
+		} else if (argc == 3) {
 			lua_Number a = luaL_checknumber(L, 2);
 			lua_Number b = luaL_checknumber(L, 3);
 			if (a > b) std::swap(a, b);
 			lua_pushnumber(L, self->num_gn(self->rng, std::uniform_real_distribution<lua_Number>::param_type(
 				a, std::nextafter(b, std::numeric_limits<lua_Number>::max()))));
 			return 1;
-		}
-		else
-		{
+		} else {
 			return luaL_error(L, "invalid parameter");
 		}
 	}
-	static int sign(lua_State* L)
-	{
+	static int sign(lua_State* L) {
 		Data* self = Cast(L, 1);
 		lua_pushinteger(L, self->int_gn(self->rng, std::uniform_int_distribution<lua_Integer>::param_type(0, 1)) * 2 - 1);
 		return 1;
 	}
-	static int clone(lua_State* L)
-	{
+	static int clone(lua_State* L) {
 		auto* self = Cast(L, 1);
 		auto* other = Create(L);
 		other->rng = self->rng;
@@ -162,53 +130,45 @@ private:
 		other->seed = self->seed;
 		return 1;
 	}
-	static int serialize(lua_State* L)
-	{
+	static int serialize(lua_State* L) {
 		Data* self = Cast(L, 1);
 		lua_pushstring(L, self->rng.serialize().c_str());
 		return 1;
 	}
-	static int deserialize(lua_State* L)
-	{
+	static int deserialize(lua_State* L) {
 		Data* self = Cast(L, 1);
 		lua_pushboolean(L, self->rng.deserialize(luaL_checkstring(L, 2)));
 		return 1;
 	}
 
-	static int __gc(lua_State* L)
-	{
+	static int __gc(lua_State* L) {
 		Data* self = Cast(L, 1);
 		self->~Data();
 		return 1;
 	}
-	static int __tostring(lua_State* L)
-	{
+	static int __tostring(lua_State* L) {
 		std::ignore = Cast(L, 1);
 		lua_push_string_view(L, ClassID);
 		return 1;
 	}
 
-	static int create(lua_State* L)
-	{
+	static int create(lua_State* L) {
 		std::ignore = Create(L);
 		return 1;
 	}
 
 public:
-	static Data* Cast(lua_State* L, int idx)
-	{
+	static Data* Cast(lua_State* L, int idx) {
 		return static_cast<Data*>(luaL_checkudata(L, idx, ClassID.data()));
 	}
-	static Data* Create(lua_State* L)
-	{
+	static Data* Create(lua_State* L) {
 		Data* self = static_cast<Data*>(lua_newuserdata(L, sizeof(Data)));
 		new(self) Data();
 		luaL_getmetatable(L, ClassID.data());
 		lua_setmetatable(L, -2);
 		return self;
 	}
-	static void Register(lua_State* L)
-	{
+	static void Register(lua_State* L) {
 		luaL_Reg const lib[] = {
 			{ "seed", &seed },
 			{ "integer", &integer },
@@ -294,11 +254,9 @@ MAKE_TYPE(xoroshiro1024ss);
 #undef MAKE_TYPE
 
 template<typename RNG>
-class RandomBasePCG
-{
+class RandomBasePCG {
 public:
-	struct Data
-	{
+	struct Data {
 		RNG rng;
 		std::uniform_int_distribution<lua_Integer> int_gn;
 		std::uniform_real_distribution<lua_Number> num_gn;
@@ -306,8 +264,7 @@ public:
 
 		constexpr size_t _Size() { return sizeof(*this); }
 
-		inline void setSeed(lua_Integer seedv)
-		{
+		inline void setSeed(lua_Integer seedv) {
 			seed = seedv;
 			pcg_extras::seed_seq_from<UtilRandom::splitmix64> seed_rng(static_cast<typename UtilRandom::splitmix64::result_type>(seed));
 			rng.seed(seed_rng);
@@ -322,96 +279,72 @@ public:
 private:
 	static std::string_view const CreateID;
 
-	static int seed(lua_State* L)
-	{
+	static int seed(lua_State* L) {
 		Data* self = Cast(L, 1);
 		int const argc = lua_gettop(L);
-		if (argc == 1)
-		{
+		if (argc == 1) {
 			lua_pushinteger(L, self->seed);
 			return 1;
-		}
-		else if (argc == 2)
-		{
+		} else if (argc == 2) {
 			lua_Integer const seed = luaL_checkinteger(L, 2);
 			self->setSeed(seed);
 			return 0;
-		}
-		else
-		{
+		} else {
 			return luaL_error(L, "invalid parameter");
 		}
 	}
-	static int integer(lua_State* L)
-	{
+	static int integer(lua_State* L) {
 		Data* self = Cast(L, 1);
 		int const argc = lua_gettop(L);
-		if (argc == 1)
-		{
+		if (argc == 1) {
 			lua_pushinteger(L, self->int_gn(self->rng, std::uniform_int_distribution<lua_Integer>::param_type(
 				0, std::numeric_limits<lua_Integer>::max())));
 			return 1;
-		}
-		else if (argc == 2)
-		{
+		} else if (argc == 2) {
 			lua_Integer b = luaL_checkinteger(L, 2);
 			if (b < 0) b = -b;
 			lua_pushinteger(L, self->int_gn(self->rng, std::uniform_int_distribution<lua_Integer>::param_type(0, b)));
 			return 1;
-		}
-		else if (argc == 3)
-		{
+		} else if (argc == 3) {
 			lua_Integer a = luaL_checkinteger(L, 2);
 			lua_Integer b = luaL_checkinteger(L, 3);
 			if (a > b) std::swap(a, b);
 			lua_pushinteger(L, self->int_gn(self->rng, std::uniform_int_distribution<lua_Integer>::param_type(a, b)));
 			return 1;
-		}
-		else
-		{
+		} else {
 			return luaL_error(L, "invalid parameter");
 		}
 	}
-	static int number(lua_State* L)
-	{
+	static int number(lua_State* L) {
 		Data* self = Cast(L, 1);
 		int const argc = lua_gettop(L);
-		if (argc == 1)
-		{
+		if (argc == 1) {
 			lua_pushnumber(L, self->num_gn(self->rng, std::uniform_real_distribution<lua_Number>::param_type(
 				0.0, std::nextafter(1.0, std::numeric_limits<lua_Number>::max()))));
 			return 1;
-		}
-		else if (argc == 2)
-		{
+		} else if (argc == 2) {
 			lua_Number b = luaL_checknumber(L, 2);
 			if (b < 0.0) b = -b;
 			lua_pushnumber(L, self->num_gn(self->rng, std::uniform_real_distribution<lua_Number>::param_type(
 				0.0, std::nextafter(b, std::numeric_limits<lua_Number>::max()))));
 			return 1;
-		}
-		else if (argc == 3)
-		{
+		} else if (argc == 3) {
 			lua_Number a = luaL_checknumber(L, 2);
 			lua_Number b = luaL_checknumber(L, 3);
 			if (a > b) std::swap(a, b);
 			lua_pushnumber(L, self->num_gn(self->rng, std::uniform_real_distribution<lua_Number>::param_type(
 				a, std::nextafter(b, std::numeric_limits<lua_Number>::max()))));
 			return 1;
-		}
-		else
-		{
+		} else {
 			return luaL_error(L, "invalid parameter");
 		}
 	}
-	static int sign(lua_State* L)
-	{
+	static int sign(lua_State* L) {
 		Data* self = Cast(L, 1);
 		lua_pushinteger(L, self->int_gn(self->rng, std::uniform_int_distribution<lua_Integer>::param_type(0, 1)) * 2 - 1);
 		return 1;
 	}
-	static int clone(lua_State* L)
-	{
+	static int clone(lua_State* L) {
 		auto* self = Cast(L, 1);
 		auto* other = Create(L);
 		other->rng = self->rng;
@@ -420,53 +353,45 @@ private:
 		other->seed = self->seed;
 		return 1;
 	}
-	static int serialize(lua_State* L)
-	{
+	static int serialize(lua_State* L) {
 		Data* self = Cast(L, 1);
 		lua_pushstring(L, self->rng.serialize().c_str());
 		return 1;
 	}
-	static int deserialize(lua_State* L)
-	{
+	static int deserialize(lua_State* L) {
 		Data* self = Cast(L, 1);
 		lua_pushboolean(L, self->rng.deserialize(luaL_checkstring(L, 2)));
 		return 1;
 	}
 
-	static int __gc(lua_State* L)
-	{
+	static int __gc(lua_State* L) {
 		Data* self = Cast(L, 1);
 		self->~Data();
 		return 1;
 	}
-	static int __tostring(lua_State* L)
-	{
+	static int __tostring(lua_State* L) {
 		std::ignore = Cast(L, 1);
 		lua_push_string_view(L, ClassID);
 		return 1;
 	}
 
-	static int create(lua_State* L)
-	{
+	static int create(lua_State* L) {
 		std::ignore = Create(L);
 		return 1;
 	}
 
 public:
-	static Data* Cast(lua_State* L, int idx)
-	{
+	static Data* Cast(lua_State* L, int idx) {
 		return static_cast<Data*>(luaL_checkudata(L, idx, ClassID.data()));
 	}
-	static Data* Create(lua_State* L)
-	{
+	static Data* Create(lua_State* L) {
 		Data* self = static_cast<Data*>(lua_newuserdata(L, sizeof(Data)));
 		new(self) Data();
 		luaL_getmetatable(L, ClassID.data());
 		lua_setmetatable(L, -2);
 		return self;
 	}
-	static void Register(lua_State* L)
-	{
+	static void Register(lua_State* L) {
 		luaL_Reg const lib[] = {
 			{ "seed", &seed },
 			{ "integer", &integer },
@@ -508,18 +433,15 @@ public:
 	}
 };
 
-namespace UtilRandom
-{
-	class pcg32_oneseq_ex : public pcg32_oneseq
-	{
+namespace UtilRandom {
+	class pcg32_oneseq_ex : public pcg32_oneseq {
 	protected:
 		std::string_view name() { return "pcg32-oneseq"; }
 	public:
 		template<typename... Args>
 		pcg32_oneseq_ex(Args&&... args) : pcg32_oneseq(std::forward<Args>(args)...) {}
 
-		std::string serialize()
-		{
+		std::string serialize() {
 			std::ostringstream ss;
 			ss << name()
 				<< "-" << multiplier()
@@ -527,8 +449,7 @@ namespace UtilRandom
 				<< "-" << state_;
 			return ss.str();
 		}
-		bool deserialize(std::string const& data)
-		{
+		bool deserialize(std::string const& data) {
 			if (!data.starts_with(name())) {
 				return false;
 			}
@@ -547,11 +468,9 @@ namespace UtilRandom
 				bool good = true;
 				if (v_multiplier != multiplier()) {
 					good = false;
-				}
-				else if (can_specify_stream) {
+				} else if (can_specify_stream) {
 					set_stream(v_increment >> 1);
-				}
-				else if (v_increment != increment()) {
+				} else if (v_increment != increment()) {
 					good = false;
 				}
 				if (good) {
@@ -566,16 +485,14 @@ namespace UtilRandom
 		}
 	};
 
-	class pcg32_fast_ex : public pcg32_fast
-	{
+	class pcg32_fast_ex : public pcg32_fast {
 	protected:
 		std::string_view name() { return "pcg32-fast"; }
 	public:
 		template<typename... Args>
 		pcg32_fast_ex(Args&&... args) : pcg32_fast(std::forward<Args>(args)...) {}
 
-		std::string serialize()
-		{
+		std::string serialize() {
 			std::ostringstream ss;
 			ss << name()
 				<< "-" << multiplier()
@@ -583,8 +500,7 @@ namespace UtilRandom
 				<< "-" << state_;
 			return ss.str();
 		}
-		bool deserialize(std::string const& data)
-		{
+		bool deserialize(std::string const& data) {
 			if (!data.starts_with(name())) {
 				return false;
 			}
@@ -603,11 +519,9 @@ namespace UtilRandom
 				bool good = true;
 				if (v_multiplier != multiplier()) {
 					good = false;
-				}
-				else if (can_specify_stream) {
+				} else if (can_specify_stream) {
 					set_stream(v_increment >> 1);
-				}
-				else if (v_increment != increment()) {
+				} else if (v_increment != increment()) {
 					good = false;
 				}
 				if (good) {
@@ -622,16 +536,14 @@ namespace UtilRandom
 		}
 	};
 
-	class pcg64_oneseq_ex : public pcg64_oneseq
-	{
+	class pcg64_oneseq_ex : public pcg64_oneseq {
 	protected:
 		std::string_view name() { return "pcg64-oneseq"; }
 	public:
 		template<typename... Args>
 		pcg64_oneseq_ex(Args&&... args) : pcg64_oneseq(std::forward<Args>(args)...) {}
 
-		std::string serialize()
-		{
+		std::string serialize() {
 			std::ostringstream ss;
 			ss << name()
 #ifdef WIN32
@@ -645,8 +557,7 @@ namespace UtilRandom
 #endif
 			return ss.str();
 		}
-		bool deserialize(std::string const& data)
-		{
+		bool deserialize(std::string const& data) {
 			if (!data.starts_with(name())) {
 				return false;
 			}
@@ -665,11 +576,9 @@ namespace UtilRandom
 				bool good = true;
 				if (v_multiplier != multiplier()) {
 					good = false;
-				}
-				else if (can_specify_stream) {
+				} else if (can_specify_stream) {
 					set_stream(v_increment >> 1);
-				}
-				else if (v_increment != increment()) {
+				} else if (v_increment != increment()) {
 					good = false;
 				}
 				if (good) {
@@ -684,16 +593,14 @@ namespace UtilRandom
 		}
 	};
 
-	class pcg64_fast_ex : public pcg64_fast
-	{
+	class pcg64_fast_ex : public pcg64_fast {
 	protected:
 		std::string_view name() { return "pcg64-fast"; }
 	public:
 		template<typename... Args>
 		pcg64_fast_ex(Args&&... args) : pcg64_fast(std::forward<Args>(args)...) {}
 
-		std::string serialize()
-		{
+		std::string serialize() {
 			std::ostringstream ss;
 			ss << name()
 #ifdef WIN32
@@ -707,8 +614,7 @@ namespace UtilRandom
 #endif
 			return ss.str();
 		}
-		bool deserialize(std::string const& data)
-		{
+		bool deserialize(std::string const& data) {
 			if (!data.starts_with(name())) {
 				return false;
 			}
@@ -727,11 +633,9 @@ namespace UtilRandom
 				bool good = true;
 				if (v_multiplier != multiplier()) {
 					good = false;
-				}
-				else if (can_specify_stream) {
+				} else if (can_specify_stream) {
 					set_stream(v_increment >> 1);
-				}
-				else if (v_increment != increment()) {
+				} else if (v_increment != increment()) {
 					good = false;
 				}
 				if (good) {
@@ -766,11 +670,9 @@ MAKE_TYPE(pcg64_fast);
 #undef MAKE_TYPE
 
 template<typename RNG>
-class RandomBaseOther
-{
+class RandomBaseOther {
 public:
-	struct Data
-	{
+	struct Data {
 		RNG rng;
 		std::uniform_int_distribution<lua_Integer> int_gn;
 		std::uniform_real_distribution<lua_Number> num_gn;
@@ -778,17 +680,13 @@ public:
 
 		constexpr size_t _Size() { return sizeof(*this); }
 
-		inline void setSeed(lua_Integer seedv)
-		{
+		inline void setSeed(lua_Integer seedv) {
 			seed = seedv;
 			UtilRandom::splitmix64 seed_rng(static_cast<typename UtilRandom::splitmix64::result_type>(seed));
 			auto const a = static_cast<typename RNG::result_type>(seed_rng());
-			if constexpr (std::is_same<RNG, jsf32>() || std::is_same<RNG, jsf64>())
-			{
+			if constexpr (std::is_same<RNG, jsf32>() || std::is_same<RNG, jsf64>()) {
 				rng = RNG(a);
-			}
-			else
-			{
+			} else {
 				auto const b = static_cast<typename RNG::result_type>(seed_rng());
 				auto const c = static_cast<typename RNG::result_type>(seed_rng());
 				rng = RNG(a, b, c);
@@ -804,96 +702,72 @@ public:
 private:
 	static std::string_view const CreateID;
 
-	static int seed(lua_State* L)
-	{
+	static int seed(lua_State* L) {
 		Data* self = Cast(L, 1);
 		int const argc = lua_gettop(L);
-		if (argc == 1)
-		{
+		if (argc == 1) {
 			lua_pushinteger(L, self->seed);
 			return 1;
-		}
-		else if (argc == 2)
-		{
+		} else if (argc == 2) {
 			lua_Integer const seed = luaL_checkinteger(L, 2);
 			self->setSeed(seed);
 			return 0;
-		}
-		else
-		{
+		} else {
 			return luaL_error(L, "invalid parameter");
 		}
 	}
-	static int integer(lua_State* L)
-	{
+	static int integer(lua_State* L) {
 		Data* self = Cast(L, 1);
 		int const argc = lua_gettop(L);
-		if (argc == 1)
-		{
+		if (argc == 1) {
 			lua_pushinteger(L, self->int_gn(self->rng, std::uniform_int_distribution<lua_Integer>::param_type(
 				0, std::numeric_limits<lua_Integer>::max())));
 			return 1;
-		}
-		else if (argc == 2)
-		{
+		} else if (argc == 2) {
 			lua_Integer b = luaL_checkinteger(L, 2);
 			if (b < 0) b = -b;
 			lua_pushinteger(L, self->int_gn(self->rng, std::uniform_int_distribution<lua_Integer>::param_type(0, b)));
 			return 1;
-		}
-		else if (argc == 3)
-		{
+		} else if (argc == 3) {
 			lua_Integer a = luaL_checkinteger(L, 2);
 			lua_Integer b = luaL_checkinteger(L, 3);
 			if (a > b) std::swap(a, b);
 			lua_pushinteger(L, self->int_gn(self->rng, std::uniform_int_distribution<lua_Integer>::param_type(a, b)));
 			return 1;
-		}
-		else
-		{
+		} else {
 			return luaL_error(L, "invalid parameter");
 		}
 	}
-	static int number(lua_State* L)
-	{
+	static int number(lua_State* L) {
 		Data* self = Cast(L, 1);
 		int const argc = lua_gettop(L);
-		if (argc == 1)
-		{
+		if (argc == 1) {
 			lua_pushnumber(L, self->num_gn(self->rng, std::uniform_real_distribution<lua_Number>::param_type(
 				0.0, std::nextafter(1.0, std::numeric_limits<lua_Number>::max()))));
 			return 1;
-		}
-		else if (argc == 2)
-		{
+		} else if (argc == 2) {
 			lua_Number b = luaL_checknumber(L, 2);
 			if (b < 0.0) b = -b;
 			lua_pushnumber(L, self->num_gn(self->rng, std::uniform_real_distribution<lua_Number>::param_type(
 				0.0, std::nextafter(b, std::numeric_limits<lua_Number>::max()))));
 			return 1;
-		}
-		else if (argc == 3)
-		{
+		} else if (argc == 3) {
 			lua_Number a = luaL_checknumber(L, 2);
 			lua_Number b = luaL_checknumber(L, 3);
 			if (a > b) std::swap(a, b);
 			lua_pushnumber(L, self->num_gn(self->rng, std::uniform_real_distribution<lua_Number>::param_type(
 				a, std::nextafter(b, std::numeric_limits<lua_Number>::max()))));
 			return 1;
-		}
-		else
-		{
+		} else {
 			return luaL_error(L, "invalid parameter");
 		}
 	}
-	static int sign(lua_State* L)
-	{
+	static int sign(lua_State* L) {
 		Data* self = Cast(L, 1);
 		lua_pushinteger(L, self->int_gn(self->rng, std::uniform_int_distribution<lua_Integer>::param_type(0, 1)) * 2 - 1);
 		return 1;
 	}
-	static int clone(lua_State* L)
-	{
+	static int clone(lua_State* L) {
 		auto* self = Cast(L, 1);
 		auto* other = Create(L);
 		other->rng = self->rng;
@@ -903,40 +777,34 @@ private:
 		return 1;
 	}
 
-	static int __gc(lua_State* L)
-	{
+	static int __gc(lua_State* L) {
 		Data* self = Cast(L, 1);
 		self->~Data();
 		return 1;
 	}
-	static int __tostring(lua_State* L)
-	{
+	static int __tostring(lua_State* L) {
 		std::ignore = Cast(L, 1);
 		lua_push_string_view(L, ClassID);
 		return 1;
 	}
 
-	static int create(lua_State* L)
-	{
+	static int create(lua_State* L) {
 		std::ignore = Create(L);
 		return 1;
 	}
 
 public:
-	static Data* Cast(lua_State* L, int idx)
-	{
+	static Data* Cast(lua_State* L, int idx) {
 		return static_cast<Data*>(luaL_checkudata(L, idx, ClassID.data()));
 	}
-	static Data* Create(lua_State* L)
-	{
+	static Data* Create(lua_State* L) {
 		Data* self = static_cast<Data*>(lua_newuserdata(L, sizeof(Data)));
 		new(self) Data();
 		luaL_getmetatable(L, ClassID.data());
 		lua_setmetatable(L, -2);
 		return self;
 	}
-	static void Register(lua_State* L)
-	{
+	static void Register(lua_State* L) {
 		luaL_Reg const lib[] = {
 			{ "seed", &seed },
 			{ "integer", &integer },
@@ -995,8 +863,7 @@ MAKE_TYPE(sfc64);
 
 #undef MAKE_TYPE
 
-int luaopen_random(lua_State* L)
-{
+int luaopen_random(lua_State* L) {
 	luaL_Reg const empty[] = {
 			{ NULL, NULL }
 	};

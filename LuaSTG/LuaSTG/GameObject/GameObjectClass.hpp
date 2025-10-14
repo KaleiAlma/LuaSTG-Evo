@@ -8,17 +8,13 @@
 #define LGOBJ_CC_COLLI 5
 #define LGOBJ_CC_KILL 6
 
-namespace LuaSTGPlus
-{
+namespace LuaSTGPlus {
 #pragma warning(push)
 #pragma warning(disable:4201)
 
-	struct GameObjectClass
-	{
-		union
-		{
-			struct
-			{
+	struct GameObjectClass {
+		union {
+			struct {
 				uint32_t IsDefaultCreate : 1;
 				uint32_t IsDefaultDestroy : 1;
 				uint32_t IsDefaultUpdate : 1;

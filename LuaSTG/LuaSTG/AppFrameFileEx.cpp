@@ -1,12 +1,11 @@
-#include "stb_image.h"
+#include "stb/stb_image.h"
 
 #include "AppFrame.h"
 #include "Core/FileManager.hpp"
 
 using namespace LuaSTGPlus;
 
-int AppFrame::LoadCompressedTextFile(lua_State* L_, const char* path, const char *packname)noexcept
-{
+int AppFrame::LoadCompressedTextFile(lua_State* L_, const char* path, const char *packname)noexcept {
     if (ResourceMgr::GetResourceLoadingLog()) {
         if (packname)
             spdlog::info("[luastg] Reading compressed text file '{}' in package '{}'", packname, path);
@@ -15,16 +14,12 @@ int AppFrame::LoadCompressedTextFile(lua_State* L_, const char* path, const char
     }
     bool loaded = false;
     std::vector<uint8_t> src, decompressed;
-    if (packname)
-    {
+    if (packname) {
         auto& arc = GFileManager().getFileArchive(packname);
-        if (!arc.empty())
-        {
+        if (!arc.empty()) {
             loaded = arc.load(path, src);
         }
-    }
-    else
-    {
+    } else {
         loaded = GFileManager().loadEx(path, src);
     }
     if (!loaded) {

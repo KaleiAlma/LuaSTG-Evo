@@ -1,14 +1,12 @@
 ﻿#pragma once
 #include "Core/ApplicationModel.hpp"
-#include "Core/Graphics/Font.hpp"
+#include "Core/Graphics/Common/Font.hpp"
 #include "GameResource/ResourceManager.h"
 #include "GameObject/GameObjectPool.h"
 
-namespace LuaSTGPlus
-{
+namespace LuaSTGPlus {
     /// Application Status
-    enum class AppStatus
-    {
+    enum class AppStatus {
         NotInitialized,
         Initializing,
         Initialized,
@@ -17,8 +15,7 @@ namespace LuaSTGPlus
         Destroyed,
     };
 
-    struct ApplicationSetting
-    {
+    struct ApplicationSetting {
         // Display mode - Canvas size (not window size)
         Core::Vector2U canvas_size{ 640,480 };
         // Display mode - Fullscreen
@@ -41,8 +38,7 @@ namespace LuaSTGPlus
         float volume_music{ 1.0f };
     };
 
-    struct IRenderTargetManager
-    {
+    struct IRenderTargetManager {
         // Render Target Stack
 
         virtual bool BeginRenderTargetStack() = 0;
@@ -65,8 +61,7 @@ namespace LuaSTGPlus
         : public Core::IApplicationEventListener
         , public Core::Graphics::IWindowEventListener
         , public Core::Graphics::ISwapChainEventListener
-        , public IRenderTargetManager
-    {
+        , public IRenderTargetManager {
     private:
         AppStatus m_iStatus = AppStatus::NotInitialized;
 

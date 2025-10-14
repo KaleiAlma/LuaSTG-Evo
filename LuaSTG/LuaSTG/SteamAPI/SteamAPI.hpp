@@ -1,7 +1,6 @@
 ﻿#pragma once
 
-namespace LuaSTG::SteamAPI
-{
+namespace LuaSTG::SteamAPI {
     bool Init();
     void RunCallbacks();
     void Shutdown();

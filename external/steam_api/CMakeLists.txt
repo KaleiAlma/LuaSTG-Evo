@@ -73,7 +73,7 @@ else()
 endif()
 target_link_libraries(lua_steam_api PUBLIC
     # lua51static
-    libluajit
+    luajit
 )
 
 set_target_properties(lua_steam_api PROPERTIES FOLDER lualib)

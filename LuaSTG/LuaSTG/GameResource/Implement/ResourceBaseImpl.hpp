@@ -2,11 +2,9 @@
 #include "GameResource/ResourceBase.hpp"
 #include "Core/Object.hpp"
 
-namespace LuaSTGPlus
-{
+namespace LuaSTGPlus {
 	template<typename Base>
-	class ResourceBaseImpl : public Core::Object<Base>
-	{
+	class ResourceBaseImpl : public Core::Object<Base> {
 	private:
 		ResourceType m_resource_type;
 		std::string m_resource_name;

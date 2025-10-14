@@ -3,13 +3,10 @@
 #include "GameResource/ResourceTexture.hpp"
 #include "Particle/ParticleList.h"
 
-namespace LuaSTGPlus::Particle
-{
-    class TexParticlePool3D
-    {
+namespace LuaSTGPlus::Particle {
+    class TexParticlePool3D {
     public:
-        struct Particle
-        {
+        struct Particle {
             Core::Vector3F pos;
             Core::Vector3F vel;
             Core::Vector3F accel;

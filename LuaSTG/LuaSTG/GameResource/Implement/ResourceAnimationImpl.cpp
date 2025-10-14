@@ -2,8 +2,7 @@
 #include "GameResource/Implement/ResourceSpriteImpl.hpp"
 #include "AppFrame.h"
 
-namespace LuaSTGPlus
-{
+namespace LuaSTGPlus {
 	ResourceAnimationImpl::ResourceAnimationImpl(
 		const char* name, Core::ScopeObject<IResourceTexture> tex,
 		float x, float y, float w, float h,
@@ -14,21 +13,17 @@ namespace LuaSTGPlus
 		, m_HalfSizeX(a)
 		, m_HalfSizeY(b)
 		, m_bRectangle(rect)
-		, m_is_sprite_cloned(true)
-	{
+		, m_is_sprite_cloned(true) {
 		// 分割纹理
 		m_sprites.reserve(m * n);
-		for (int j = 0; j < m; ++j)  // 行
-		{
-			for (int i = 0; i < n; ++i)  // 列
-			{
+		for (int j = 0; j < m; ++j) { // 行
+			for (int i = 0; i < n; ++i) { // 列
 				Core::ScopeObject<Core::Graphics::ISprite> p_sprite_core;
 				if (!Core::Graphics::ISprite::create(
 					LAPP.GetAppModel()->getRenderer(),
 					tex->GetTexture(),
 					~p_sprite_core
-				))
-				{
+				)) {
 					throw std::runtime_error("ResourceAnimationImpl::ResourceAnimationImpl");
 				}
 				Core::RectF rc = Core::RectF(
@@ -58,33 +53,26 @@ namespace LuaSTGPlus
 		, m_HalfSizeX(a)
 		, m_HalfSizeY(b)
 		, m_bRectangle(rect)
-		, m_is_sprite_cloned(false)
-	{
+		, m_is_sprite_cloned(false) {
 		m_sprites.reserve(sprite_list.size());
-		for (auto v : sprite_list)
-		{
+		for (auto v : sprite_list) {
 			m_sprites.push_back(v);
 		}
 	}
 
-	IResourceSprite* ResourceAnimationImpl::GetSprite(uint32_t index)
-	{
-		if (index >= GetCount())
-		{
+	IResourceSprite* ResourceAnimationImpl::GetSprite(uint32_t index) {
+		if (index >= GetCount()) {
 			assert(false); return nullptr;
 		}
 		return m_sprites[index].get();
 	}
-	uint32_t ResourceAnimationImpl::GetSpriteIndexByTimer(int ani_timer)
-	{
+	uint32_t ResourceAnimationImpl::GetSpriteIndexByTimer(int ani_timer) {
 		return ((uint32_t)ani_timer / m_Interval) % GetCount();
 	}
-	IResourceSprite* ResourceAnimationImpl::GetSpriteByTimer(int ani_timer)
-	{
+	IResourceSprite* ResourceAnimationImpl::GetSpriteByTimer(int ani_timer) {
 		return m_sprites[GetSpriteIndexByTimer(ani_timer)].get();
 	}
-	void ResourceAnimationImpl::Render(int timer, float x, float y, float rot, float hscale, float vscale, float z)
-	{
+	void ResourceAnimationImpl::Render(int timer, float x, float y, float rot, float hscale, float vscale, float z) {
 		Core::Graphics::ISprite* pSprite = GetSpriteByTimer(timer)->GetSprite();
 		// 备份状态
 		Core::Color4B color_backup[4] = { 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF };
@@ -100,8 +88,7 @@ namespace LuaSTGPlus
 		pSprite->setColor(color_backup);
 		pSprite->setZ(z_backup);
 	}
-	void ResourceAnimationImpl::Render(int timer, float x, float y, float rot, float hscale, float vscale, BlendMode blend, Core::Color4B color, float z)
-	{
+	void ResourceAnimationImpl::Render(int timer, float x, float y, float rot, float hscale, float vscale, BlendMode blend, Core::Color4B color, float z) {
 		// 备份状态
 		BlendMode blend_backup = GetBlendMode();
 		Core::Color4B color_backup[4] = { 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF };

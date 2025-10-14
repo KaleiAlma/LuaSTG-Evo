@@ -5,15 +5,13 @@
 #include "lua.h"
 #include <cstdint>
 
-inline Core::Graphics::IWindow* _get_window()
-{
+inline Core::Graphics::IWindow* _get_window() {
     return LAPP.GetAppModel()->getWindow();
 }
 
 #define getwindow(__NAME__) auto* __NAME__ = _get_window()
 
-static int lib_setMouseEnable(lua_State* L)
-{
+static int lib_setMouseEnable(lua_State* L) {
     getwindow(window);
     bool const enable = lua_toboolean(L, 1);
     if (enable)
@@ -22,75 +20,59 @@ static int lib_setMouseEnable(lua_State* L)
         window->setCursor(Core::Graphics::WindowCursor::None);
     return 0;
 }
-static int lib_setCursorStyle(lua_State* L)
-{
+static int lib_setCursorStyle(lua_State* L) {
     getwindow(window);
     Core::Graphics::WindowCursor const style = (Core::Graphics::WindowCursor)luaL_checkinteger(L, 1);
     window->setCursor(style);
     return 0;
 }
-static int lib_setTitle(lua_State* L)
-{
+static int lib_setTitle(lua_State* L) {
     getwindow(window);
     std::string_view const text = luaL_check_string_view(L, 1);
     window->setTitleText(text);
     return 0;
 }
-static int lib_setCentered(lua_State* L)
-{
+static int lib_setCentered(lua_State* L) {
     getwindow(window);
-    if (lua_gettop(L) > 0)
-    {
+    if (lua_gettop(L) > 0) {
         uint32_t const index = (uint32_t)luaL_checkinteger(L, 1);
         window->setMonitorCentered(index);
-    }
-    else
-    {
+    } else {
         window->setMonitorCentered(0);
     }
     return 0;
 }
-static int lib_setFullScreen(lua_State* L)
-{
+static int lib_setFullScreen(lua_State* L) {
     getwindow(window);
-    if (lua_gettop(L) > 0)
-    {
+    if (lua_gettop(L) > 0) {
         uint32_t const index = (uint32_t)luaL_checkinteger(L, 1);
         window->setMonitorFullScreen(index);
-    }
-    else
-    {
+    } else {
         window->setMonitorFullScreen(0);
     }
     return 0;
 }
-static int lib_getFullScreenSize(lua_State* L)
-{
+static int lib_getFullScreenSize(lua_State* L) {
     getwindow(window);
-    if (lua_gettop(L) > 0)
-    {
+    if (lua_gettop(L) > 0) {
         uint32_t const index = (uint32_t)luaL_checkinteger(L, 1);
         Core::RectI const rc = window->getMonitorRect(index);
         lua_pushinteger(L, rc.b.x - rc.a.x);
         lua_pushinteger(L, rc.b.y - rc.a.y);
-    }
-    else
-    {
+    } else {
         Core::RectI const rc = window->getMonitorRect(0);
         lua_pushinteger(L, rc.b.x - rc.a.x);
         lua_pushinteger(L, rc.b.y - rc.a.y);
     }
     return 2;
 }
-static int lib_setStyle(lua_State* L)
-{
+static int lib_setStyle(lua_State* L) {
     getwindow(window);
     Core::Graphics::WindowFrameStyle style = (Core::Graphics::WindowFrameStyle)luaL_checkinteger(L, 1);
     window->setFrameStyle(style);
     return 0;
 }
-static int lib_setSize(lua_State* L)
-{
+static int lib_setSize(lua_State* L) {
     getwindow(window);
     uint32_t const width = (uint32_t)luaL_checkinteger(L, 1);
     uint32_t const height = (uint32_t)luaL_checkinteger(L, 2);
@@ -98,8 +80,7 @@ static int lib_setSize(lua_State* L)
     lua_pushboolean(L, result);
     return 1;
 }
-static int lib_setTopMost(lua_State* L)
-{
+static int lib_setTopMost(lua_State* L) {
     getwindow(window);
     bool const topmost = lua_toboolean(L, 1);
     if (topmost)
@@ -123,73 +104,63 @@ static int lib_setTopMost(lua_State* L)
 //     return 1;
 // }
 
-static int lib_setTextInputEnable(lua_State* L)
-{
+static int lib_setTextInputEnable(lua_State* L) {
     getwindow(window);
     const bool enable = lua_toboolean(L, 1);
     window->setTextInputEnable(enable);
     return 0;
 }
 
-static int lib_getTextInput(lua_State* L)
-{
+static int lib_getTextInput(lua_State* L) {
     getwindow(window);
     lua_pushstring(L, window->getTextInput().c_str());
     return 1;
 }
 
-static int lib_getIMEComp(lua_State* L)
-{
+static int lib_getIMEComp(lua_State* L) {
     getwindow(window);
     lua_pushstring(L, window->getIMEComp().c_str());
     return 1;
 }
 
-static int lib_setTextInput(lua_State* L)
-{
+static int lib_setTextInput(lua_State* L) {
     getwindow(window);
     std::string_view const text = luaL_check_string_view(L, 1);
     window->setTextInput(text);
     return 0;
 }
 
-static int lib_clearTextInput(lua_State*)
-{
+static int lib_clearTextInput(lua_State*) {
     getwindow(window);
     window->clearTextInput();
     return 0;
 }
 
-static int lib_getTextInputLength(lua_State* L)
-{
+static int lib_getTextInputLength(lua_State* L) {
     getwindow(window);
     lua_pushinteger(L, window->getTextInputLength());
     return 1;
 }
 
-static int lib_getTextCursorPos(lua_State* L)
-{
+static int lib_getTextCursorPos(lua_State* L) {
     getwindow(window);
     lua_pushinteger(L, window->getTextCursorPos());
     return 1;
 }
 
-static int lib_getTextCursorPosRaw(lua_State* L)
-{
+static int lib_getTextCursorPosRaw(lua_State* L) {
     getwindow(window);
     lua_pushinteger(L, window->getTextCursorPosRaw());
     return 1;
 }
 
-static int lib_getIMECursorPos(lua_State* L)
-{
+static int lib_getIMECursorPos(lua_State* L) {
     getwindow(window);
     lua_pushinteger(L, window->getIMECursorPos());
     return 1;
 }
 
-static int lib_setTextCursorPos(lua_State* L)
-{
+static int lib_setTextCursorPos(lua_State* L) {
     getwindow(window);
     int32_t pos = lua_tointeger(L, 1);
     if (pos < 0)
@@ -199,16 +170,14 @@ static int lib_setTextCursorPos(lua_State* L)
     return 0;
 }
 
-static int lib_insertInputTextAtCursor(lua_State* L)
-{
+static int lib_insertInputTextAtCursor(lua_State* L) {
     getwindow(window);
     std::string_view const text = luaL_check_string_view(L, 1);
     window->insertInputTextAtCursor(text, lua_toboolean(L, 2));
     return 0;
 }
 
-static int lib_insertInputText(lua_State* L)
-{
+static int lib_insertInputText(lua_State* L) {
     getwindow(window);
     std::string_view const text = luaL_check_string_view(L, 1);
     int32_t pos = lua_tointeger(L, 2);
@@ -219,16 +188,14 @@ static int lib_insertInputText(lua_State* L)
     return 0;
 }
 
-static int lib_removeInputTextAtCursor(lua_State* L)
-{
+static int lib_removeInputTextAtCursor(lua_State* L) {
     getwindow(window);
     uint32_t ret = window->removeInputTextAtCursor(lua_tointeger(L, 1), lua_toboolean(L, 2));
     lua_pushinteger(L, ret);
     return 1;
 }
 
-static int lib_removeInputText(lua_State* L)
-{
+static int lib_removeInputText(lua_State* L) {
     getwindow(window);
     int32_t pos = lua_tointeger(L, 2);
     if (pos < 0)
@@ -240,16 +207,14 @@ static int lib_removeInputText(lua_State* L)
     return 1;
 }
 
-static int lib_setTextInputReturnEnable(lua_State* L)
-{
+static int lib_setTextInputReturnEnable(lua_State* L) {
     getwindow(window);
     const bool enable = lua_toboolean(L, 1);
     window->setTextInputReturnEnable(enable);
     return 0;
 }
 
-inline Core::Vector2I MapLetterBoxingPosition(Core::Vector2U isize, Core::Vector2U osize, Core::Vector2I pos)
-{
+inline Core::Vector2I MapLetterBoxingPosition(Core::Vector2U isize, Core::Vector2U osize, Core::Vector2I pos) {
     float const hscale = (float)osize.x / (float)isize.x;
     float const vscale = (float)osize.y / (float)isize.y;
     float const scale = std::min(hscale, vscale);
@@ -264,8 +229,7 @@ inline Core::Vector2I MapLetterBoxingPosition(Core::Vector2U isize, Core::Vector
     return Core::Vector2I(x2, y2);
 }
 
-static int lib_setTextInputRect(lua_State* L)
-{
+static int lib_setTextInputRect(lua_State* L) {
     getwindow(window);
     Core::Vector2U csize = LAPP.GetAppModel()->getSwapChain()->getCanvasSize();
     Core::Vector2U wsize = window->getSize();
@@ -279,15 +243,13 @@ static int lib_setTextInputRect(lua_State* L)
     return 0;
 }
 
-static int lib_getClipboardText(lua_State* L)
-{
+static int lib_getClipboardText(lua_State* L) {
     getwindow(window);
     lua_pushstring(L, window->getClipboardText().c_str());
     return 1;
 }
 
-static int lib_setClipboardText(lua_State* L)
-{
+static int lib_setClipboardText(lua_State* L) {
     getwindow(window);
     std::string_view const text = luaL_check_string_view(L, 1);
     bool ret = window->setClipboardText(text);
@@ -337,23 +299,19 @@ static int lib_setClipboardText(lua_State* L)
 //     return 0;
 // }
 
-static int compat_SetSplash(lua_State* L)
-{
+static int compat_SetSplash(lua_State* L) {
     LAPP.SetSplash(lua_toboolean(L, 1));
     return 0;
 }
-static int compat_SetTitle(lua_State* L)
-{
+static int compat_SetTitle(lua_State* L) {
     LAPP.SetTitle(luaL_checkstring(L, 1));
     return 0;
 }
-static int compat_ListMonitor(lua_State* L)
-{
+static int compat_ListMonitor(lua_State* L) {
     getwindow(window);
     uint32_t const count = window->getMonitorCount();
     lua_createtable(L, (int)count, 0);           // t
-    for (uint32_t i = 0; i < count; i += 1)
-    {
+    for (uint32_t i = 0; i < count; i += 1) {
         Core::RectI const rect = window->getMonitorRect(i);
         lua_createtable(L, 0, 4);                // t t
         lua_pushinteger(L, rect.a.x);            // t t x
@@ -419,14 +377,12 @@ static const luaL_Reg lib[] = {
     {NULL, NULL},
 };
 
-static int molib_getCount(lua_State* L)
-{
+static int molib_getCount(lua_State* L) {
     getwindow(window);
     lua_pushinteger(L, (lua_Integer)window->getMonitorCount());
     return 1;
 }
-static int molib_getPos(lua_State* L)
-{
+static int molib_getPos(lua_State* L) {
     getwindow(window);
     uint32_t const index = (uint32_t)luaL_checkinteger(L, 1);
     Core::RectI const rc = window->getMonitorRect(index);
@@ -434,8 +390,7 @@ static int molib_getPos(lua_State* L)
     lua_pushinteger(L, rc.a.y);
     return 2;
 }
-static int molib_getSize(lua_State* L)
-{
+static int molib_getSize(lua_State* L) {
     getwindow(window);
     uint32_t const index = (uint32_t)luaL_checkinteger(L, 1);
     Core::RectI const rc = window->getMonitorRect(index);
@@ -451,8 +406,7 @@ static const luaL_Reg molib[] = {
     {NULL, NULL},
 };
 
-void LuaSTGPlus::LuaWrapper::WindowWrapper::Register(lua_State* L)noexcept
-{
+void LuaSTGPlus::LuaWrapper::WindowWrapper::Register(lua_State* L)noexcept {
     luaL_register(L, LUASTG_LUA_LIBNAME, compat); // ? t
     // Window
     lua_pushstring(L, "Window");                  // ? t k

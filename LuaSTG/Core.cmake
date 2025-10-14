@@ -31,29 +31,29 @@ set(Core_SRC
     Core/InitializeConfigure.hpp
     Core/InitializeConfigure.cpp
 
-    Core/Graphics/Window.hpp
-    Core/Graphics/Window_SDL.hpp
-    Core/Graphics/Window_SDL.cpp
+    Core/Window.hpp
+    Core/Window_SDL.hpp
+    Core/Window_SDL.cpp
     Core/Graphics/Format.hpp
-    Core/Graphics/Device.hpp
-    Core/Graphics/Device_OpenGL.hpp
-    Core/Graphics/Device_OpenGL.cpp
-    Core/Graphics/SwapChain.hpp
-    Core/Graphics/SwapChain_OpenGL.hpp
-    Core/Graphics/SwapChain_OpenGL.cpp
-    Core/Graphics/Renderer.hpp
-    Core/Graphics/Renderer_OpenGL.hpp
-    Core/Graphics/Renderer_OpenGL.cpp
-    Core/Graphics/Renderer_Shader_OpenGL.cpp
-    Core/Graphics/Model_OpenGL.hpp
-    Core/Graphics/Model_OpenGL.cpp
-    Core/Graphics/Model_Shader_OpenGL.cpp
-    Core/Graphics/Sprite.hpp
-    Core/Graphics/Sprite_OpenGL.hpp
-    Core/Graphics/Sprite_OpenGL.cpp
-    Core/Graphics/Font.hpp
-    Core/Graphics/Font_OpenGL.hpp
-    Core/Graphics/Font_OpenGL.cpp
+    Core/Graphics/Interface/Device.hpp
+    Core/Graphics/Interface/SwapChain.hpp
+    Core/Graphics/Interface/Renderer.hpp
+    Core/Graphics/Interface/Sprite.hpp
+    Core/Graphics/Interface/Font.hpp
+    Core/Graphics/Common/Sprite.hpp
+    Core/Graphics/Common/Sprite.cpp
+    Core/Graphics/Common/Font.hpp
+    Core/Graphics/Common/Font.cpp
+    Core/Graphics/OpenGL/Device.hpp
+    Core/Graphics/OpenGL/Device.cpp
+    Core/Graphics/OpenGL/SwapChain.hpp
+    Core/Graphics/OpenGL/SwapChain.cpp
+    Core/Graphics/OpenGL/Renderer.hpp
+    Core/Graphics/OpenGL/Renderer.cpp
+    Core/Graphics/OpenGL/Renderer_Shader.cpp
+    Core/Graphics/OpenGL/Model.hpp
+    Core/Graphics/OpenGL/Model.cpp
+    Core/Graphics/OpenGL/Model_Shader.cpp
     Core/Application.hpp
     Core/ApplicationModel.hpp
     Core/ApplicationModel_SDL.hpp
@@ -79,35 +79,31 @@ target_sources(Core PRIVATE
 target_link_libraries(Core PUBLIC
     # debug
     spdlog
-    tracy
-    imgui
-    implot
+    # tracy
+    # imgui
+    # implot
     # util
     # utility
     PlatformAPI
     # gfx
-    libqoi
-    SDL2-static
-    nothings_stb
+    # libqoi
+    SDL3
+    # nothings_stb
     glad
     # math
-    xmath
+    # xmath
     glm
     # file
     minizip
     # text
     freetype
-    uni-algo::uni-algo
+    uni-algo
     # model
-    tinygltf
+    # tinygltf
     # audio
-    dr_libs
-    Ogg::ogg
-    Vorbis::vorbis
-    Vorbis::vorbisfile
-    FLAC::FLAC
+    # dr_libs
     # database
-    nlohmann_json
+    # nlohmann_json
 )
 
 # add_dependencies(Core fuck_zlib_ng_and_minizip_ng)

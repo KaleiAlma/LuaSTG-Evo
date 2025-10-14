@@ -9,8 +9,7 @@
 #include "AppFrame.h"
 #include <limits>
 
-namespace LuaSTGPlus
-{
+namespace LuaSTGPlus {
     //【弃用】游戏碰撞体类型
     enum class GameObjectColliderType {
         None      = -1, // 关闭
@@ -26,8 +25,7 @@ namespace LuaSTGPlus
     };
     
     //【弃用】游戏碰撞体
-    struct GameObjectCollider
-    {
+    struct GameObjectCollider {
         GameObjectColliderType type;  //碰撞体类型
         float a;                      //椭圆半长轴、矩形半宽
         float b;                      //椭圆半短轴、矩形半高
@@ -53,8 +51,7 @@ namespace LuaSTGPlus
         }
         //计算外接圆和对应的XMath库碰撞体类型
         void calcircum() {
-            switch (type)
-            {
+            switch (type) {
             case GameObjectColliderType::Circle:
                 circum_r = a > b ? a : b;
                 xtype = XColliderType::Circle;
@@ -91,8 +88,7 @@ namespace LuaSTGPlus
         }
     };
     
-    void GameObject::Reset()
-    {
+    void GameObject::Reset() {
         pUpdatePrev = pUpdateNext = nullptr;
         pColliPrev = pColliNext = nullptr;
 
@@ -144,8 +140,7 @@ namespace LuaSTGPlus
         vertexcolor = 0xFFFFFFFF;
 #endif // USING_ADVANCE_GAMEOBJECT_CLASS
     }
-    void GameObject::DirtReset()
-    {
+    void GameObject::DirtReset() {
         status = GameObjectStatus::Active;
 
         x = y = 0.;
@@ -189,27 +184,22 @@ namespace LuaSTGPlus
 #endif // USING_ADVANCE_GAMEOBJECT_CLASS
     }
     
-    void GameObject::UpdateCollisionCircleRadius()
-    {
+    void GameObject::UpdateCollisionCircleRadius() {
         if (rect) {
             //矩形
             col_r = std::sqrt(a * a + b * b);
-        }
-        else if (!rect && (a != b)) {
+        } else if (!rect && (a != b)) {
             //椭圆
             col_r = a > b ? a : b;
-        }
-        else {
+        } else {
             //严格的正圆
             col_r = (a + b) / 2;
         }
     }
     
-    bool GameObject::ChangeResource(std::string_view const& res_name)
-    {
+    bool GameObject::ChangeResource(std::string_view const& res_name) {
         Core::ScopeObject<IResourceSprite> tSprite = LRES.FindSprite(res_name.data());
-        if (tSprite)
-        {
+        if (tSprite) {
             res = *tSprite;
             res->retain();
 #ifdef GLOBAL_SCALE_COLLI_SHAPE
@@ -225,8 +215,7 @@ namespace LuaSTGPlus
         }
 
         Core::ScopeObject<IResourceAnimation> tAnimation = LRES.FindAnimation(res_name.data());
-        if (tAnimation)
-        {
+        if (tAnimation) {
             res = *tAnimation;
             res->retain();
 #ifdef GLOBAL_SCALE_COLLI_SHAPE
@@ -242,11 +231,9 @@ namespace LuaSTGPlus
         }
 
         Core::ScopeObject<IResourceParticle> tParticle = LRES.FindParticle(res_name.data());
-        if (tParticle)
-        {
+        if (tParticle) {
             // 分配粒子池
-            if (!tParticle->CreateInstance(&ps))
-            {
+            if (!tParticle->CreateInstance(&ps)) {
                 res = nullptr;
                 spdlog::error("[luastg] ResParticle: 无法分配粒子池，内存不足");
                 return false;
@@ -272,12 +259,9 @@ namespace LuaSTGPlus
 
         return false;
     }
-    void GameObject::ReleaseResource()
-    {
-        if (res)
-        {
-            if (res->GetType() == ResourceType::Particle)
-            {
+    void GameObject::ReleaseResource() {
+        if (res) {
+            if (res->GetType() == ResourceType::Particle) {
                 assert(ps);
                 static_cast<IResourceParticle*>(res)->DestroyInstance(ps);
                 ps = nullptr;
@@ -286,24 +270,19 @@ namespace LuaSTGPlus
             res = nullptr;
         }
     }
-    void GameObject::ChangeLuaRC(lua_State* L, int idx)
-    {
-        if (luaclass.IsRenderClass && res && ps)
-        {
+    void GameObject::ChangeLuaRC(lua_State* L, int idx) {
+        if (luaclass.IsRenderClass && res && ps) {
             auto p = LuaWrapper::ParticleSystemWrapper::Create(L);
             p->res = dynamic_cast<IResourceParticle*>(res); res->retain();
             p->ptr = ps;
             lua_rawseti(L, idx, 4);
         }
     }
-    void GameObject::ReleaseLuaRC(lua_State* L, int idx)
-    {
+    void GameObject::ReleaseLuaRC(lua_State* L, int idx) {
         // release
         lua_rawgeti(L, idx, 4);
-        if (lua_isuserdata(L, -1))
-        {
-            if (auto p = LuaWrapper::ParticleSystemWrapper::Cast(L, -1))
-            {
+        if (lua_isuserdata(L, -1)) {
+            if (auto p = LuaWrapper::ParticleSystemWrapper::Cast(L, -1)) {
                 if (p->res) p->res->release();
                 p->ptr = nullptr; // 不要释放 ps，因为已经在 ReleaseResource 做过了
             }
@@ -314,29 +293,20 @@ namespace LuaSTGPlus
         lua_rawseti(L, idx, 4);
     }
     
-    void GameObject::Update()
-    {
+    void GameObject::Update() {
     #ifdef	LUASTG_ENABLE_GAME_OBJECT_PROPERTY_PAUSE
-        if (pause > 0)
-        {
+        if (pause > 0) {
             pause -= 1;
-        }
-        else
-        {
-            if (resolve_move)
-            {
-                if (touch_lastx_lasty)
-                {
+        } else {
+            if (resolve_move) {
+                if (touch_lastx_lasty) {
                     vx = x - lastx;
                     vy = y - lasty;
-                }
-                else
-                {
+                } else {
                     vx = 0.0;
                     vy = 0.0;
                 }
-            }
-            else
+            } else
     #endif
             {
                 // 更新速度
@@ -346,16 +316,12 @@ namespace LuaSTGPlus
                 // 单独应用重力加速度
                 vy -= ag;
                 // 速度限制，来自lua层
-                if (maxv <= std::numeric_limits<double>::min())
-                {
+                if (maxv <= std::numeric_limits<double>::min()) {
                     vx = 0.0;
                     vy = 0.0;
-                }
-                else
-                {
+                } else {
                     lua_Number const speed_ = std::sqrt(vx * vx + vy * vy);
-                    if (maxv < speed_ && speed_ > std::numeric_limits<double>::min())
-                    {
+                    if (maxv < speed_ && speed_ > std::numeric_limits<double>::min()) {
                         lua_Number const scale_ = maxv / speed_;
                         vx = scale_ * vx;
                         vy = scale_ * vy;
@@ -372,17 +338,13 @@ namespace LuaSTGPlus
             rot += omega;
 
             // 更新粒子系统（若有）
-            if (res && res->GetType() == ResourceType::Particle)
-            {
+            if (res && res->GetType() == ResourceType::Particle) {
                 ps->SetRotation((float)rot);
-                if (ps->IsActived()) // 兼容性处理
-                {
+                if (ps->IsActived()) { // 兼容性处理
                     ps->SetActive(false);
                     ps->SetCenter(Core::Vector2F((float)x, (float)y));
                     ps->SetActive(true);
-                }
-                else
-                {
+                } else {
                     ps->SetCenter(Core::Vector2F((float)x, (float)y));
                 }
                 ps->Update(1.0f / 60.f);
@@ -391,43 +353,33 @@ namespace LuaSTGPlus
         }
     #endif
     }
-    void GameObject::UpdateLast()
-    {
-        if (touch_lastx_lasty)
-        {
+    void GameObject::UpdateLast() {
+        if (touch_lastx_lasty) {
             dx = x - lastx;
             dy = y - lasty;
-        }
-        else
-        {
+        } else {
             dx = 0.0;
             dy = 0.0;
         }
         lastx = x;
         lasty = y;
         touch_lastx_lasty = true;
-        if (navi && (std::abs(dx) > std::numeric_limits<double>::min() || std::abs(dy) > std::numeric_limits<double>::min()))
-        {
+        if (navi && (std::abs(dx) > std::numeric_limits<double>::min() || std::abs(dy) > std::numeric_limits<double>::min())) {
             rot = std::atan2(dy, dx);
         }
     }
-    void GameObject::UpdateTimer()
-    {
+    void GameObject::UpdateTimer() {
         timer += 1;
         ani_timer += 1;
     }
 
-    void GameObject::Render()
-    {
-        if (res)
-        {
+    void GameObject::Render() {
+        if (res) {
             float const gscale = LRES.GetGlobalImageScaleFactor();
         #ifdef USING_ADVANCE_GAMEOBJECT_CLASS
-            if (!luaclass.IsRenderClass)
-            {
+            if (!luaclass.IsRenderClass) {
         #endif // USING_ADVANCE_GAMEOBJECT_CLASS
-                switch (res->GetType())
-                {
+                switch (res->GetType()) {
                 case ResourceType::Sprite:
                     static_cast<IResourceSprite*>(res)->Render(
                         static_cast<float>(x),
@@ -448,8 +400,7 @@ namespace LuaSTGPlus
                     );
                     break;
                 case ResourceType::Particle:
-                    if (ps)
-                    {
+                    if (ps) {
                         LAPP.Render(
                             ps,
                             static_cast<float>(hscale) * gscale,
@@ -459,11 +410,8 @@ namespace LuaSTGPlus
                     break;
                 }
         #ifdef USING_ADVANCE_GAMEOBJECT_CLASS
-            }
-            else
-            {
-                switch (res->GetType())
-                {
+            } else {
+                switch (res->GetType()) {
                 case ResourceType::Sprite:
                     static_cast<IResourceSprite*>(res)->Render(
                             static_cast<float>(x),
@@ -488,8 +436,7 @@ namespace LuaSTGPlus
                     );
                     break;
                 case ResourceType::Particle:
-                    if (ps)
-                    {
+                    if (ps) {
                         ps->SetBlendMode(blendmode);
                         ps->SetVertexColor(vertexcolor);
                         LAPP.Render(
@@ -505,19 +452,16 @@ namespace LuaSTGPlus
         }
     }
     
-    int GameObject::GetAttr(lua_State* L)
-    {
+    int GameObject::GetAttr(lua_State* L) {
     #define return_default(L) lua_rawget(L, 1)
         
         // self k
         std::string_view const key = luaL_check_string_view(L, 2);
-        switch (LuaSTG::MapGameObjectMember(key.data()))
-        {
+        switch (LuaSTG::MapGameObjectMember(key.data())) {
             // 基本信息
 
         case LuaSTG::GameObjectMember::STATUS:
-            switch (status)
-            {
+            switch (status) {
             default:
                 return luaL_error(L, "unknown lstg object status.");
             case GameObjectStatus::Active:
@@ -738,12 +682,10 @@ namespace LuaSTGPlus
 
     #undef return_default
     }
-    int GameObject::SetAttr(lua_State* L)
-    {
+    int GameObject::SetAttr(lua_State* L) {
         // self k v
         std::string_view const key = luaL_check_string_view(L, 2);
-        switch (LuaSTG::MapGameObjectMember(key.data()))
-        {
+        switch (LuaSTG::MapGameObjectMember(key.data())) {
             // 基本信息
 
         case LuaSTG::GameObjectMember::STATUS:
@@ -822,13 +764,10 @@ namespace LuaSTGPlus
             do {
                 lua_Number const cur_speed_ = std::sqrt(vx * vx + vy * vy);
                 lua_Number const new_speed_ = luaL_checknumber(L, 3);
-                if (cur_speed_ <= std::numeric_limits<double>::min())
-                {
+                if (cur_speed_ <= std::numeric_limits<double>::min()) {
                     vx = std::cos(rot) * new_speed_;
                     vy = std::sin(rot) * new_speed_;
-                }
-                else
-                {
+                } else {
                     lua_Number const a3 = new_speed_ / cur_speed_;
                     vx *= a3;
                     vy *= a3;
@@ -839,37 +778,30 @@ namespace LuaSTGPlus
             do {
                 lua_Number const cur_speed_ = std::sqrt(vx * vx + vy * vy);
                 lua_Number const new_angle_ = luaL_checknumber(L, 3) * L_DEG_TO_RAD;
-                if (cur_speed_ <= std::numeric_limits<double>::min())
-                {
+                if (cur_speed_ <= std::numeric_limits<double>::min()) {
                     rot = new_angle_;
-                }
-                else
-                {
+                } else {
                     vx = cur_speed_ * std::cos(new_angle_);
                     vy = cur_speed_ * std::sin(new_angle_);
                 }
             } while (false);
             return 0;  
-        case LuaSTG::GameObjectMember::VPOS:
-            {
+        case LuaSTG::GameObjectMember::VPOS: {
                 Core::Vector2F* const pos = LuaWrapper::Vector2Wrapper::Cast(L, 3);
                 x = pos->x;
                 y = pos->y;
             } return 0;
-        case LuaSTG::GameObjectMember::VVEL:
-            {
+        case LuaSTG::GameObjectMember::VVEL: {
                 Core::Vector2F* const vel = LuaWrapper::Vector2Wrapper::Cast(L, 3);
                 vx = vel->x;
                 vy = vel->y;
             } return 0;
-        case LuaSTG::GameObjectMember::VACCEL:
-            {
+        case LuaSTG::GameObjectMember::VACCEL: {
                 Core::Vector2F* const accel = LuaWrapper::Vector2Wrapper::Cast(L, 3);
                 ax = accel->x;
                 ay = accel->y;
             } return 0;
-        case LuaSTG::GameObjectMember::VVSCALE:
-            {
+        case LuaSTG::GameObjectMember::VVSCALE: {
                 Core::Vector2F* const scale = LuaWrapper::Vector2Wrapper::Cast(L, 3);
                 hscale = scale->x;
                 vscale = scale->y;
@@ -916,8 +848,7 @@ namespace LuaSTGPlus
             // 渲染
 
         case LuaSTG::GameObjectMember::LAYER:
-            do
-            {
+            do {
                 lua_Number const layer_ = luaL_checknumber(L, 3);
                 if (layer == layer_)
                     return 0;
@@ -944,12 +875,10 @@ namespace LuaSTGPlus
                 lua_rawset(L, 1);
             return 0;
         case LuaSTG::GameObjectMember::_COLOR:
-            if (luaclass.IsRenderClass)
-            {
+            if (luaclass.IsRenderClass) {
                 vertexcolor = LuaWrapper::ColorWrapper::Cast(L, 3)->color();
                 vertexcolor = ((vertexcolor & 0xFF00FF00) + ((vertexcolor & 0xFF0000) >> 16) + ((vertexcolor & 0xFF) << 16));
-            }
-            else
+            } else
                 lua_rawset(L, 1);
             return 0;
         case LuaSTG::GameObjectMember::_A:
@@ -987,20 +916,16 @@ namespace LuaSTGPlus
             return 0;
         case LuaSTG::GameObjectMember::IMG:
             do {
-                if (lua_isstring(L, 3))
-                {
+                if (lua_isstring(L, 3)) {
                     std::string_view const value = luaL_check_string_view(L, 3);
-                    if (!res || value != res->GetResName())
-                    {
+                    if (!res || value != res->GetResName()) {
                         ReleaseLuaRC(L, 1); // TODO: 默认 table 是第一个？
                         ReleaseResource();
                         if (!ChangeResource(value))
                             return luaL_error(L, "can't find resource '%s' in image/animation/particle pool.", value.data());
                         ChangeLuaRC(L, 1); // TODO: 默认 table 是第一个？
                     }
-                }
-                else
-                {
+                } else {
                     ReleaseLuaRC(L, 1); // TODO: 默认 table 是第一个？
                     ReleaseResource();
                 }
@@ -1040,8 +965,7 @@ namespace LuaSTGPlus
         }
     }
 
-    bool CollisionCheck(GameObject* p1, GameObject* p2) noexcept
-    {
+    bool CollisionCheck(GameObject* p1, GameObject* p2) noexcept {
         //忽略不碰撞对象
         if (!p1->colli || !p2->colli)
             return false;//返回点0
@@ -1050,8 +974,7 @@ namespace LuaSTGPlus
         if ((p1->x - p1->col_r >= p2->x + p2->col_r) ||
             (p1->x + p1->col_r <= p2->x - p2->col_r) ||
             (p1->y - p1->col_r >= p2->y + p2->col_r) ||
-            (p1->y + p1->col_r <= p2->y - p2->col_r))
-        {
+            (p1->y + p1->col_r <= p2->y - p2->col_r)) {
             return false;
         }
         
@@ -1082,22 +1005,16 @@ namespace LuaSTGPlus
             //椭圆、椭圆碰撞检测
             return xmath::collision::check(XVec2(x1, y1), a1, b1, rot1, XColliderType::Ellipse,
                 XVec2(x2, y2), a2, b2, rot2, XColliderType::Ellipse);
-        }
-        else if (p1->rect && p2->rect) {
+        } else if (p1->rect && p2->rect) {
             //矩形、矩形碰撞检测
             return xmath::collision::check(XVec2(x1, y1), a1, b1, rot1, XColliderType::OBB,
                 XVec2(x2, y2), a2, b2, rot2, XColliderType::OBB);
-        }
-        else
-        {
+        } else {
             //矩形、椭圆碰撞检测
-            if (p1->rect && (!p2->rect))
-            {
+            if (p1->rect && (!p2->rect)) {
                 return xmath::collision::check(XVec2(x1, y1), a1, b1, rot1, XColliderType::OBB,
                     XVec2(x2, y2), a2, b2, rot2, XColliderType::Ellipse);
-            }
-            else if ((!p1->rect) && p2->rect)
-            {
+            } else if ((!p1->rect) && p2->rect) {
                 return xmath::collision::check(XVec2(x1, y1), a1, b1, rot1, XColliderType::Ellipse,
                     XVec2(x2, y2), a2, b2, rot2, XColliderType::OBB);
             }

@@ -2,10 +2,8 @@
 #include "LuaBinding/lua_utility.hpp"
 #include "AppFrame.h"
 
-inline Core::RectI lua_to_Core_RectI(lua_State* L, int idx)
-{
-	if (!lua_istable(L, idx))
-	{
+inline Core::RectI lua_to_Core_RectI(lua_State* L, int idx) {
+	if (!lua_istable(L, idx)) {
 		return Core::RectI();
 	}
 
@@ -32,83 +30,69 @@ inline Core::RectI lua_to_Core_RectI(lua_State* L, int idx)
 	return Core::RectI(pos, pos + size);
 }
 
-void LuaSTGPlus::BuiltInFunctionWrapper::Register(lua_State* L)noexcept
-{
-	struct WrapperImplement
-	{
+void LuaSTGPlus::BuiltInFunctionWrapper::Register(lua_State* L)noexcept {
+	struct WrapperImplement {
 		#pragma region 框架函数
 		// 框架函数
-		static int GetVersionNumber(lua_State* L) noexcept
-		{
+		static int GetVersionNumber(lua_State* L) noexcept {
 			lua_pushinteger(L, LUASTG_VERSION_MAJOR);
 			lua_pushinteger(L, LUASTG_VERSION_MINOR);
 			lua_pushinteger(L, LUASTG_VERSION_PATCH);
 			return 3;
 		}
-		static int GetVersionName(lua_State* L) noexcept
-		{
+		static int GetVersionName(lua_State* L) noexcept {
 			lua_pushstring(L, LUASTG_INFO);
 			return 1;
 		}
-		static int SetWindowed(lua_State* L)noexcept
-		{
+		static int SetWindowed(lua_State* L)noexcept {
 			LAPP.SetWindowed(lua_toboolean(L, 1));
 			return 0;
 		}
-		static int SetVsync(lua_State* L)noexcept
-		{
+		static int SetVsync(lua_State* L)noexcept {
 			LAPP.SetVsync(lua_toboolean(L, 1));
 			return 0;
 		}
-		static int SetResolution(lua_State* L)
-		{
+		static int SetResolution(lua_State* L) {
 			LAPP.SetResolution(
 				(uint32_t)luaL_checkinteger(L, 1),
 				(uint32_t)luaL_checkinteger(L, 2)
 			);
 			return 0;
 		}
-		static int SetFPS(lua_State* L)
-		{
+		static int SetFPS(lua_State* L) {
 			int v = luaL_checkinteger(L, 1);
 			if (v <= 0)
 				v = 60;
 			LAPP.SetFPS((uint32_t)v);
 			return 0;
 		}
-		static int GetFPS(lua_State* L)noexcept
-		{
+		static int GetFPS(lua_State* L)noexcept {
 			lua_pushnumber(L, LAPP.GetFPS());
 			return 1;
 		}
-		static int Log(lua_State* L)
-		{
+		static int Log(lua_State* L) {
 			lua_Integer const level = luaL_checkinteger(L, 1);
 			std::string_view const msg = luaL_check_string_view(L, 2);
 			spdlog::log((spdlog::level::level_enum)level, "[lua] {}", msg);
 			return 0;
 		}
-		static int DoFile(lua_State* L)
-		{
+		static int DoFile(lua_State* L) {
 			int args = lua_gettop(L);//获取此时栈上的值的数量
 			LAPP.LoadScript(L, luaL_checkstring(L, 1), luaL_optstring(L, 2, NULL));
 			return (lua_gettop(L) - args);
 		}
-		static int LoadTextFile(lua_State* L)
-		{
+		static int LoadTextFile(lua_State* L) {
 			return LAPP.LoadTextFile(L, luaL_checkstring(L, 1), luaL_optstring(L, 2, NULL));
 	
 		}
-		static int LoadCompressedTextFile(lua_State* L)
-		{
+		static int LoadCompressedTextFile(lua_State* L) {
 			return LAPP.LoadCompressedTextFile(L, luaL_checkstring(L, 1), luaL_optstring(L, 2, NULL));
 		}
 		#pragma endregion
 		
 		#pragma region 窗口与交换链控制函数
 		// 窗口与交换链控制函数
-		static int ChangeVideoMode(lua_State* L)
-		{
+		static int ChangeVideoMode(lua_State* L) {
 			uint32_t const width = (uint32_t)luaL_checkinteger(L, 1);
 			uint32_t const height = (uint32_t)luaL_checkinteger(L, 2);
 			bool const windowed = lua_toboolean(L, 3);
@@ -116,21 +100,17 @@ void LuaSTGPlus::BuiltInFunctionWrapper::Register(lua_State* L)noexcept
 
 			auto const size = Core::Vector2U(width, height);
 
-			if (windowed)
-			{
+			if (windowed) {
 				bool const result = LAPP.SetDisplayModeWindow(size, vsync, 0, false);
 				lua_pushboolean(L, result);
-			}
-			else
-			{
+			} else {
 				bool const result = LAPP.SetDisplayModeExclusiveFullscreen(size, vsync, Core::Rational());
 				lua_pushboolean(L, result);
 			}
 
 			return 1;
 		}
-		static int VideoModeWindowed(lua_State* L)
-		{
+		static int VideoModeWindowed(lua_State* L) {
 			uint32_t const width = (uint32_t)luaL_checkinteger(L, 1);
 			uint32_t const height = (uint32_t)luaL_checkinteger(L, 2);
 			bool const vsync = lua_toboolean(L, 3);
@@ -143,8 +123,7 @@ void LuaSTGPlus::BuiltInFunctionWrapper::Register(lua_State* L)noexcept
 
 			return 1;
 		}
-		static int VideoModeFSExclusive(lua_State* L)
-		{
+		static int VideoModeFSExclusive(lua_State* L) {
 			uint32_t const width = (uint32_t)luaL_checkinteger(L, 1);
 			uint32_t const height = (uint32_t)luaL_checkinteger(L, 2);
 			bool const vsync = lua_toboolean(L, 3);
@@ -156,8 +135,7 @@ void LuaSTGPlus::BuiltInFunctionWrapper::Register(lua_State* L)noexcept
 
 			return 1;
 		}
-		static int VideoModeFSBorderless(lua_State* L)
-		{
+		static int VideoModeFSBorderless(lua_State* L) {
 			uint32_t const width = (uint32_t)luaL_checkinteger(L, 1);
 			uint32_t const height = (uint32_t)luaL_checkinteger(L, 2);
 			bool const vsync = lua_toboolean(L, 3);
@@ -170,8 +148,7 @@ void LuaSTGPlus::BuiltInFunctionWrapper::Register(lua_State* L)noexcept
 
 			return 1;
 		}
-		static int EnumResolutions(lua_State* L)
-		{
+		static int EnumResolutions(lua_State* L) {
 			lua_createtable(L, 5, 0);		// t
 			Core::Graphics::DisplayMode mode_list[5] = {
 				{ 640, 480, { 60, 1 }, Core::Graphics::Format::B8G8R8A8_UNORM },
@@ -180,8 +157,7 @@ void LuaSTGPlus::BuiltInFunctionWrapper::Register(lua_State* L)noexcept
 				{ 1024, 768, { 60, 1 }, Core::Graphics::Format::B8G8R8A8_UNORM },
 				{ 1280, 960, { 60, 1 }, Core::Graphics::Format::B8G8R8A8_UNORM },
 			};
-			for (int index = 0; index < 5; index += 1)
-			{
+			for (int index = 0; index < 5; index += 1) {
 				auto mode = mode_list[index];
 
 				lua_createtable(L, 4, 0);		// t t
@@ -274,7 +250,6 @@ void LuaSTGPlus::BuiltInFunctionWrapper::Register(lua_State* L)noexcept
 		// { "ChangeGPU", &WrapperImplement::ChangeGPU },
 		// { "GetCurrentGpuName", &WrapperImplement::GetCurrentGpuName },
 		#pragma endregion
-		
 		{ NULL, NULL },
 	};
 	

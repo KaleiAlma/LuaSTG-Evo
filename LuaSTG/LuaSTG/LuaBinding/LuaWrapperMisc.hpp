@@ -6,11 +6,9 @@
 #include "lauxlib.h"
 #include "lua.h"
 
-namespace LuaSTGPlus
-{
+namespace LuaSTGPlus {
 	//注册方法和元方法到名字为name的库和元表中，并保护元表不被修改
-	inline void RegisterMethodD(lua_State* L, const char* name, luaL_Reg* method, luaL_Reg* metamethod)
-	{
+	inline void RegisterMethodD(lua_State* L, const char* name, luaL_Reg* method, luaL_Reg* metamethod) {
 		luaL_register(L, name, method);     // t        //将方法注册到全局表(library)，作为静态方法
 		luaL_newmetatable(L, name);         // t mt     //在注册表中创建元表
 		luaL_register(L, NULL, metamethod); // t mt     //将元方法推入元表内
@@ -24,8 +22,7 @@ namespace LuaSTGPlus
 	}
 
 	//注册方法和元方法到名字为name的库和元表中，并保护元表不被修改，不自动注册__index元方法
-	inline void RegisterMethodS(lua_State* L, const char* name, luaL_Reg* method, luaL_Reg* metamethod)
-	{
+	inline void RegisterMethodS(lua_State* L, const char* name, luaL_Reg* method, luaL_Reg* metamethod) {
 		luaL_register(L, name, method);     // t        //将方法注册到全局表(library)，作为静态方法
 		luaL_newmetatable(L, name);         // t mt     //在注册表中创建元表
 		luaL_register(L, NULL, metamethod); // t mt     //将元方法推入元表内
@@ -37,8 +34,7 @@ namespace LuaSTGPlus
 	
 	//在栈顶的table创建一个名为name的新表，然后注册静态方法到该表中
 	//注册元方法到注册表中名为metaname的元表中，并保护元表不被修改
-	inline void RegisterClassIntoTable(lua_State* L, const char* name, luaL_Reg const* method, const char* metaname, luaL_Reg const* metamethod)
-	{
+	inline void RegisterClassIntoTable(lua_State* L, const char* name, luaL_Reg const* method, const char* metaname, luaL_Reg const* metamethod) {
 		// ... t
 		lua_pushstring(L, name);			// ... t s			//key
 		lua_newtable(L);					// ... t s t		//储存静态方法的table
@@ -58,8 +54,7 @@ namespace LuaSTGPlus
 	//在栈顶的table创建一个名为name的新表，然后注册静态方法到该表中
 	//注册元方法到注册表中名为metaname的元表中，并保护元表不被修改
 	//不注册index元方法
-	inline void RegisterClassIntoTable2(lua_State* L, const char* name, luaL_Reg* method, const char* metaname, luaL_Reg* metamethod)
-	{
+	inline void RegisterClassIntoTable2(lua_State* L, const char* name, luaL_Reg* method, const char* metaname, luaL_Reg* metamethod) {
 		// ... t
 		lua_pushstring(L, name);			// ... t s			//key
 		lua_newtable(L);					// ... t s t		//储存静态方法的table
@@ -74,8 +69,7 @@ namespace LuaSTGPlus
 	}
 	
 	//翻译字符串到混合模式
-	inline BlendMode TranslateBlendMode(lua_State* L, int argnum)
-	{
+	inline BlendMode TranslateBlendMode(lua_State* L, int argnum) {
 		size_t len = 0;
 		const char* key = luaL_checklstring(L, argnum, &len);
 		if (len == 0 || strcmp(key, "mul+alpha") == 0) {
@@ -90,8 +84,7 @@ namespace LuaSTGPlus
 	}
 	
 	//翻译混合模式回到lua string
-	static inline int TranslateBlendModeToString(lua_State* L, BlendMode blendmode)
-	{
+	static inline int TranslateBlendModeToString(lua_State* L, BlendMode blendmode) {
 		static const char* sc_sblendmodes[] = {
 			"",
 			"mul+alpha","mul+add","mul+rev","mul+sub",
@@ -107,11 +100,9 @@ namespace LuaSTGPlus
 		return 1;
 	}
 
-	static inline void TranslateAlignMode(lua_State* L, int argnum, FontAlignHorizontal& halign, FontAlignVertical& valign)
-	{
+	static inline void TranslateAlignMode(lua_State* L, int argnum, FontAlignHorizontal& halign, FontAlignVertical& valign) {
 		int e = (int)luaL_checkinteger(L, argnum);
-		switch (e & 0x03)  // HGETEXT_HORZMASK
-		{
+		switch (e & 0x03) { // HGETEXT_HORZMASK
 		case 0:  // HGETEXT_LEFT
 			halign = FontAlignHorizontal::Left;
 			break;
@@ -125,8 +116,7 @@ namespace LuaSTGPlus
 			luaL_error(L, "invalid align mode.");
 			return;
 		}
-		switch (e & 0x0C)  // HGETEXT_VERTMASK
-		{
+		switch (e & 0x0C) { // HGETEXT_VERTMASK
 		case 0:  // HGETEXT_TOP
 			valign = FontAlignVertical::Top;
 			break;
@@ -142,8 +132,7 @@ namespace LuaSTGPlus
 		}
 	}
 
-	inline bool TranslateTableToParticleInfo(lua_State* L, int argnum, hgeParticleSystemInfo& info)
-	{
+	inline bool TranslateTableToParticleInfo(lua_State* L, int argnum, hgeParticleSystemInfo& info) {
 		if (lua_istable(L, argnum)) {
 			#define GET_ATTR(luakey, cppkey, valuetype, valueproc) {\
 				lua_pushstring(L, luakey);\
@@ -194,11 +183,9 @@ namespace LuaSTGPlus
 			lua_pop(L, 1);
 			if (blend_dest == "alpha") {
 				info.iBlendInfo = 6 << 16;
-			}
-			else if (blend_dest == "add") {
+			} else if (blend_dest == "add") {
 				info.iBlendInfo = 4 << 16;
-			}
-			else {
+			} else {
 				info.iBlendInfo = 4 << 16;
 			}
 
@@ -217,8 +204,7 @@ namespace LuaSTGPlus
 			}
 			lua_pop(L, 2);
 			return true;
-		}
-		else {
+		} else {
 			return false;
 		}
 	}

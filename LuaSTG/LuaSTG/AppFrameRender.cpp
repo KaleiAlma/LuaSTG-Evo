@@ -1,13 +1,10 @@
 #include "AppFrame.h"
 
-namespace LuaSTGPlus
-{
-    void AppFrame::updateGraph2DBlendMode(BlendMode blend)
-    {
+namespace LuaSTGPlus {
+    void AppFrame::updateGraph2DBlendMode(BlendMode blend) {
         using namespace Core::Graphics;
         auto* ctx = m_pAppModel->getRenderer();
-        switch (blend)
-        {
+        switch (blend) {
         default:
         case LuaSTGPlus::BlendMode::MulAlpha:
             ctx->setVertexColorBlendState(IRenderer::VertexColorBlendState::Mul);
@@ -116,8 +113,7 @@ namespace LuaSTGPlus
         }
     }
     
-    bool AppFrame::Render(IParticlePool* p, float hscale, float vscale) noexcept
-    {
+    bool AppFrame::Render(IParticlePool* p, float hscale, float vscale) noexcept {
         assert(p);
 
         // 设置混合
@@ -128,24 +124,19 @@ namespace LuaSTGPlus
         return true;
     }
 
-    void AppFrame::SnapShot(const char* path) noexcept
-    {
-        if (!GetAppModel()->getSwapChain()->saveSnapshotToFile(path))
-        {
+    void AppFrame::SnapShot(const char* path) noexcept {
+        if (!GetAppModel()->getSwapChain()->saveSnapshotToFile(path)) {
             spdlog::error("[luastg] SnapShot: Failed to save screenshot to '{}'", path);
             return;
         }
     }
-    void AppFrame::SaveTexture(const char* tex_name, const char* path) noexcept
-    {
+    void AppFrame::SaveTexture(const char* tex_name, const char* path) noexcept {
         Core::ScopeObject<IResourceTexture> resTex = LRES.FindTexture(tex_name);
-        if (!resTex)
-        {
+        if (!resTex) {
             spdlog::error("[luastg] SaveTexture: Texture not found: '{}'", tex_name);
             return;
         }
-        if (!resTex->GetTexture()->saveToFile(path))
-        {
+        if (!resTex->GetTexture()->saveToFile(path)) {
             spdlog::error("[luastg] SaveTexture: Failed to save texture '{}' to '{}'", tex_name, path);
             return;
         }

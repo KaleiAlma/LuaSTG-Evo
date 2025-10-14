@@ -1,11 +1,9 @@
 ﻿#include "GameResource/ResourceManager.h"
 
-namespace LuaSTGPlus
-{
+namespace LuaSTGPlus {
 	ResourceMgr::ResourceMgr()
 		: m_GlobalResourcePool(this, ResourcePoolType::Global)
-		, m_StageResourcePool(this, ResourcePoolType::Stage)
-	{
+		, m_StageResourcePool(this, ResourcePoolType::Stage) {
 	}
 
 	// 资源池管理
@@ -106,8 +104,7 @@ namespace LuaSTGPlus
 		return tRet;
 	}
 
-	Core::ScopeObject<IResourceModel> ResourceMgr::FindModel(const char* name) noexcept
-	{
+	Core::ScopeObject<IResourceModel> ResourceMgr::FindModel(const char* name) noexcept {
 		Core::ScopeObject<IResourceModel> tRet;
 		if (!(tRet = m_StageResourcePool.GetModel(name)))
 			tRet = m_GlobalResourcePool.GetModel(name);
@@ -132,14 +129,11 @@ namespace LuaSTGPlus
 			spdlog::error("[luastg] CacheTTFFontString: 缓存字形时未找到指定字体'{}'", name);
 	}
 
-	void ResourceMgr::UpdateSound()
-	{
-		for (auto& snd : m_GlobalResourcePool.m_SoundSpritePool)
-		{
+	void ResourceMgr::UpdateSound() {
+		for (auto& snd : m_GlobalResourcePool.m_SoundSpritePool) {
 			snd.second->FlushCommand();
 		}
-		for (auto& snd : m_StageResourcePool.m_SoundSpritePool)
-		{
+		for (auto& snd : m_StageResourcePool.m_SoundSpritePool) {
 			snd.second->FlushCommand();
 		}
 	}

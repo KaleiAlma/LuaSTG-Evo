@@ -1,10 +1,8 @@
 ﻿#pragma once
 #include "Core/Type.hpp"
 
-namespace Core::Audio
-{
-	struct IDecoder : public IObject
-	{
+namespace Core::Audio {
+	struct IDecoder : public IObject {
 		virtual uint16_t getSampleSize() = 0;   // 1byte(8bit) 2bytes(16bits) 3byte(24bits) 4byte(32bits)
 		virtual uint16_t getChannelCount() = 0; // 1channels 2channels
 		virtual uint16_t getFrameSize() = 0;    // = getChannelCount() * getSampleSize()

@@ -10,31 +10,24 @@
 #undef PlaySound
 #endif
 
-void LuaSTGPlus::LuaWrapper::AudioWrapper::Register(lua_State* L)noexcept
-{
-    struct Wrapper
-    {
-        static int ListAudioDevice(lua_State* L)
-        {
-            if (!LAPP.GetAppModel()->getAudioDevice())
-            {
+void LuaSTGPlus::LuaWrapper::AudioWrapper::Register(lua_State* L)noexcept {
+    struct Wrapper {
+        static int ListAudioDevice(lua_State* L) {
+            if (!LAPP.GetAppModel()->getAudioDevice()) {
                 return luaL_error(L, "engine not initialized");
             }
             lua::stack_t S(L);
             auto const refresh = S.get_value<bool>(1);
             uint32_t const count = LAPP.GetAppModel()->getAudioDevice()->getAudioDeviceCount(refresh);
             S.create_array(count);
-            for (uint32_t i = 0; i < count; i += 1)
-            {
+            for (uint32_t i = 0; i < count; i += 1) {
                 auto const name = LAPP.GetAppModel()->getAudioDevice()->getAudioDeviceName(i);
                 S.set_array_value_zero_base<std::string_view>(i, name);
             }
             return 1;
         }
-        static int ChangeAudioDevice(lua_State* L)
-        {
-            if (!LAPP.GetAppModel()->getAudioDevice())
-            {
+        static int ChangeAudioDevice(lua_State* L) {
+            if (!LAPP.GetAppModel()->getAudioDevice()) {
                 return luaL_error(L, "engine not initialized");
             }
             lua::stack_t S(L);
@@ -43,10 +36,8 @@ void LuaSTGPlus::LuaWrapper::AudioWrapper::Register(lua_State* L)noexcept
             S.push_value<bool>(result);
             return 1;
         }
-        static int GetCurrentAudioDeviceName(lua_State* L)
-        {
-            if (!LAPP.GetAppModel()->getAudioDevice())
-            {
+        static int GetCurrentAudioDeviceName(lua_State* L) {
+            if (!LAPP.GetAppModel()->getAudioDevice()) {
                 return luaL_error(L, "engine not initialized");
             }
             lua::stack_t S(L);
@@ -55,8 +46,7 @@ void LuaSTGPlus::LuaWrapper::AudioWrapper::Register(lua_State* L)noexcept
             return 1;
         }
 
-        static int PlaySound(lua_State* L)
-        {
+        static int PlaySound(lua_State* L) {
             const char* s = luaL_checkstring(L, 1);
             Core::ScopeObject<IResourceSoundEffect> p = LRES.FindSound(s);
             if (!p)
@@ -64,8 +54,7 @@ void LuaSTGPlus::LuaWrapper::AudioWrapper::Register(lua_State* L)noexcept
             p->Play((float)luaL_checknumber(L, 2), (float)luaL_optnumber(L, 3, 0.0));
             return 0;
         }
-        static int StopSound(lua_State* L)
-        {
+        static int StopSound(lua_State* L) {
             const char* s = luaL_checkstring(L, 1);
             Core::ScopeObject<IResourceSoundEffect> p = LRES.FindSound(s);
             if (!p)
@@ -73,8 +62,7 @@ void LuaSTGPlus::LuaWrapper::AudioWrapper::Register(lua_State* L)noexcept
             p->Stop();
             return 0;
         }
-        static int PauseSound(lua_State* L)
-        {
+        static int PauseSound(lua_State* L) {
             const char* s = luaL_checkstring(L, 1);
             Core::ScopeObject<IResourceSoundEffect> p = LRES.FindSound(s);
             if (!p)
@@ -82,8 +70,7 @@ void LuaSTGPlus::LuaWrapper::AudioWrapper::Register(lua_State* L)noexcept
             p->Pause();
             return 0;
         }
-        static int ResumeSound(lua_State* L)
-        {
+        static int ResumeSound(lua_State* L) {
             const char* s = luaL_checkstring(L, 1);
             Core::ScopeObject<IResourceSoundEffect> p = LRES.FindSound(s);
             if (!p)
@@ -91,8 +78,7 @@ void LuaSTGPlus::LuaWrapper::AudioWrapper::Register(lua_State* L)noexcept
             p->Resume();
             return 0;
         }
-        static int GetSoundState(lua_State* L)
-        {
+        static int GetSoundState(lua_State* L) {
             const char* s = luaL_checkstring(L, 1);
             Core::ScopeObject<IResourceSoundEffect> p = LRES.FindSound(s);
             if (!p)
@@ -105,14 +91,12 @@ void LuaSTGPlus::LuaWrapper::AudioWrapper::Register(lua_State* L)noexcept
                 lua_pushstring(L, "paused");
             return 1;
         }
-        static int SetSEVolume(lua_State* L)
-        {
+        static int SetSEVolume(lua_State* L) {
             float v = static_cast<float>(luaL_checknumber(L, 1));
             LAPP.SetSEVolume(v);
             return 0;
         }
-        static int GetSEVolume(lua_State* L)
-        {
+        static int GetSEVolume(lua_State* L) {
             lua_pushnumber(L, LAPP.GetSEVolume());
             return 1;
         }
@@ -134,15 +118,13 @@ void LuaSTGPlus::LuaWrapper::AudioWrapper::Register(lua_State* L)noexcept
             lua_pushnumber(L, p->GetSpeed());
             return 1;
         }
-        static int UpdateSound(lua_State*)noexcept
-        {
+        static int UpdateSound(lua_State*)noexcept {
             // Removed method
             // TODO: why?
             return 0;
         }
 
-        static int PlayMusic(lua_State* L)
-        {
+        static int PlayMusic(lua_State* L) {
             const char* s = luaL_checkstring(L, 1);
             Core::ScopeObject<IResourceMusic> p = LRES.FindMusic(s);
             if (!p)
@@ -150,8 +132,7 @@ void LuaSTGPlus::LuaWrapper::AudioWrapper::Register(lua_State* L)noexcept
             p->Play((float)luaL_optnumber(L, 2, 1.), luaL_optnumber(L, 3, 0.));
             return 0;
         }
-        static int StopMusic(lua_State* L)
-        {
+        static int StopMusic(lua_State* L) {
             const char* s = luaL_checkstring(L, 1);
             Core::ScopeObject<IResourceMusic> p = LRES.FindMusic(s);
             if (!p)
@@ -159,8 +140,7 @@ void LuaSTGPlus::LuaWrapper::AudioWrapper::Register(lua_State* L)noexcept
             p->Stop();
             return 0;
         }
-        static int PauseMusic(lua_State* L)
-        {
+        static int PauseMusic(lua_State* L) {
             const char* s = luaL_checkstring(L, 1);
             Core::ScopeObject<IResourceMusic> p = LRES.FindMusic(s);
             if (!p)
@@ -168,8 +148,7 @@ void LuaSTGPlus::LuaWrapper::AudioWrapper::Register(lua_State* L)noexcept
             p->Pause();
             return 0;
         }
-        static int ResumeMusic(lua_State* L)
-        {
+        static int ResumeMusic(lua_State* L) {
             const char* s = luaL_checkstring(L, 1);
             Core::ScopeObject<IResourceMusic> p = LRES.FindMusic(s);
             if (!p)
@@ -177,34 +156,28 @@ void LuaSTGPlus::LuaWrapper::AudioWrapper::Register(lua_State* L)noexcept
             p->Resume();
             return 0;
         }
-        static int GetMusicState(lua_State* L)
-        {
+        static int GetMusicState(lua_State* L) {
             const char* s = luaL_checkstring(L, 1);
             Core::ScopeObject<IResourceMusic> p = LRES.FindMusic(s);
             if (!p)
                 return luaL_error(L, "music '%s' not found.", s);
-            if (p->IsPlaying())
-            {
+            if (p->IsPlaying()) {
                 assert(!p->IsPaused() && !p->IsStopped());
                 lua_pushstring(L, "playing");
-            }
-            else if (p->IsPaused())
-            {
+            } else if (p->IsPaused()) {
                 assert(!p->IsStopped());
                 lua_pushstring(L, "paused");
             }
             //else if (p->IsStopped())
                 //lua_pushstring(L, "stopped");
-            else
-            {
+            else {
                 assert(p->IsStopped());
                 lua_pushstring(L, "stopped");
             }
             //lua_pushstring(L, "paused");
             return 1;
         }
-        static int GetMusicFFT(lua_State* L)
-        {
+        static int GetMusicFFT(lua_State* L) {
             const char* s = luaL_checkstring(L, 1);
             Core::ScopeObject<IResourceMusic> p = LRES.FindMusic(s);
             if (!p)
@@ -212,26 +185,20 @@ void LuaSTGPlus::LuaWrapper::AudioWrapper::Register(lua_State* L)noexcept
             p->GetAudioPlayer()->updateFFT();
             size_t sz = p->GetAudioPlayer()->getFFTSize();
             float* fdata = p->GetAudioPlayer()->getFFT();
-            if (!lua_istable(L, 2))
-            {
+            if (!lua_istable(L, 2)) {
                 lua_createtable(L, (int)sz, 0);
             }
-            for (int i = 0; i < (int)sz; i += 1)
-            {
+            for (int i = 0; i < (int)sz; i += 1) {
                 lua_pushnumber(L, (lua_Number)fdata[i]);
                 lua_rawseti(L, 2, i + 1);
             }
             return 1;
         }
-        static int SetBGMVolume(lua_State* L)
-        {
-            if (lua_gettop(L) <= 1)
-            {
+        static int SetBGMVolume(lua_State* L) {
+            if (lua_gettop(L) <= 1) {
                 float x = static_cast<float>(luaL_checknumber(L, 1));
                 LAPP.SetBGMVolume(x);
-            }
-            else
-            {
+            } else {
                 const char* s = luaL_checkstring(L, 1);
                 float x = static_cast<float>(luaL_checknumber(L, 2));
                 Core::ScopeObject<IResourceMusic> p = LRES.FindMusic(s);
@@ -241,14 +208,10 @@ void LuaSTGPlus::LuaWrapper::AudioWrapper::Register(lua_State* L)noexcept
             }
             return 0;
         }
-        static int GetBGMVolume(lua_State* L)
-        {
-            if (lua_gettop(L) == 0)
-            {
+        static int GetBGMVolume(lua_State* L) {
+            if (lua_gettop(L) == 0) {
                 lua_pushnumber(L, LAPP.GetBGMVolume());
-            }
-            else if (lua_gettop(L) == 1)
-            {
+            } else if (lua_gettop(L) == 1) {
                 const char* s = luaL_checkstring(L, 1);
                 Core::ScopeObject<IResourceMusic> p = LRES.FindMusic(s);
                 if (!p)

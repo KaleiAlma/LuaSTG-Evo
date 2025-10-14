@@ -1,31 +1,24 @@
 ﻿#include "LuaBinding/LuaWrapper.hpp"
 #include "LuaBinding/PostEffectShader.hpp"
 
-namespace LuaSTGPlus
-{
-	void LuaWrapper::Register(lua_State* L) noexcept
-	{
-		struct Function
-		{
-			static int StopWatch(lua_State* L) noexcept
-			{
+namespace LuaSTGPlus {
+	void LuaWrapper::Register(lua_State* L) noexcept {
+		struct Function {
+			static int StopWatch(lua_State* L) noexcept {
 				StopWatchWrapper::CreateAndPush(L);
 				return 1;
 			}
-			static int Rand(lua_State* L) noexcept
-			{
+			static int Rand(lua_State* L) noexcept {
 				RandomizerWrapper::CreateAndPush(L);
 				return 1;
 			}
-			static int BentLaser(lua_State* L) noexcept
-			{
+			static int BentLaser(lua_State* L) noexcept {
 				BentLaserWrapper::CreateAndPush(L);
 				return 1;
 			}
 		};
 			
-		luaL_Reg tMethod[] =
-		{
+		luaL_Reg tMethod[] = {
 			{ "StopWatch", &Function::StopWatch },
 			{ "Rand", &Function::Rand },
 			{ "BentLaserData", &Function::BentLaser },
@@ -51,8 +44,7 @@ namespace LuaSTGPlus
 		lua_pop(L, 1);									// ?
 	}
 	
-	void RegistBuiltInClassWrapper(lua_State* L) noexcept
-	{
+	void RegistBuiltInClassWrapper(lua_State* L) noexcept {
 		LuaWrapper::Register(L);
 		BuiltInFunctionWrapper::Register(L);  // 内建函数库
 		LuaWrapper::InputWrapper::Register(L);

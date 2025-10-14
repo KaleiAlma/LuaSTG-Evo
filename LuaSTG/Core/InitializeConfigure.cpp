@@ -4,12 +4,10 @@
 #include "nlohmann/json.hpp"
 // #include "utf8.hpp"
 
-namespace Core
-{
+namespace Core {
     constexpr int const json_indent = 2;
 
-    inline void to_json(nlohmann::json& j, InitializeConfigure const& p)
-    {
+    inline void to_json(nlohmann::json& j, InitializeConfigure const& p) {
     #define SET(name) j[#name] = p.name;
 
         SET(target_graphics_device);
@@ -43,8 +41,7 @@ namespace Core
 
     #undef SET
     }
-    inline void from_json(nlohmann::json const& j, InitializeConfigure& p)
-    {
+    inline void from_json(nlohmann::json const& j, InitializeConfigure& p) {
     #define GET(name) if (j.contains(#name)) { j.at(#name).get_to(p.name); }
 
         GET(target_graphics_device);
@@ -79,38 +76,32 @@ namespace Core
     #undef GET
     }
 
-    inline bool from_file(nlohmann::json& j, std::string_view const path)
-    {
+    inline bool from_file(nlohmann::json& j, std::string_view const path) {
         // std::wstring wpath(utf8::to_wstring(path));
         std::string spath(path);
         std::error_code ec;
-        if (!std::filesystem::is_regular_file(path, ec))
-        {
+        if (!std::filesystem::is_regular_file(path, ec)) {
             return false;
         }
         std::ifstream file(spath, std::ios::in | std::ios::binary);
-        if (!file.is_open())
-        {
+        if (!file.is_open()) {
             return false;
         }
         file >> j;
         return true;
     }
-    inline bool to_file(nlohmann::json const& j, std::string_view const path)
-    {
+    inline bool to_file(nlohmann::json const& j, std::string_view const path) {
         // std::wstring wpath(utf8::to_wstring(path));
         std::string spath(path);
         std::ofstream file(spath, std::ios::out | std::ios::binary | std::ios::trunc);
-        if (!file.is_open())
-        {
+        if (!file.is_open()) {
             return false;
         }
         file << std::setw(json_indent) << j;
         return true;
     }
 
-    void InitializeConfigure::reset()
-    {
+    void InitializeConfigure::reset() {
         target_graphics_device.clear();
 
         canvas_width = 640;
@@ -140,67 +131,54 @@ namespace Core
 
         debug_track_window_focus = false;
     }
-    bool InitializeConfigure::load(std::string_view const source) noexcept
-    {
-        try
-        {
+    bool InitializeConfigure::load(std::string_view const source) noexcept {
+        try {
             nlohmann::json json = nlohmann::json::parse(source);
             from_json(json, *this);
             return true;
         }
-        catch (std::exception const&)
-        {
+        catch (std::exception const&) {
             reset();
             return false;
         }
     }
-    bool InitializeConfigure::save(std::string_view const source, std::string& buffer) noexcept
-    {
-        try
-        {
+    bool InitializeConfigure::save(std::string_view const source, std::string& buffer) noexcept {
+        try {
             nlohmann::json json = nlohmann::json::parse(source);
             to_json(json, *this);
             buffer = std::move(json.dump(json_indent));
             return true;
         }
-        catch (std::exception const&)
-        {
+        catch (std::exception const&) {
             return false;
         }
     }
-    bool InitializeConfigure::loadFromFile(std::string_view const path) noexcept
-    {
-        try
-        {
+    bool InitializeConfigure::loadFromFile(std::string_view const path) noexcept {
+        try {
             nlohmann::json json;
             if (!from_file(json, path)) return false;
             from_json(json, *this);
             return true;
         }
-        catch (std::exception const&)
-        {
+        catch (std::exception const&) {
             reset();
             return false;
         }
     }
-    bool InitializeConfigure::saveToFile(std::string_view const path) noexcept
-    {
-        try
-        {
+    bool InitializeConfigure::saveToFile(std::string_view const path) noexcept {
+        try {
             nlohmann::json json;
             if (!from_file(json, path)) return false;
             to_json(json, *this);
             if (!to_file(json, path)) return false;
             return true;
         }
-        catch (std::exception const&)
-        {
+        catch (std::exception const&) {
             return false;
         }
     }
 
-    inline bool parser_path(std::string_view const path, std::string& buffer)
-    {
+    inline bool parser_path(std::string_view const path, std::string& buffer) {
         // std::string_view const mark_app_data("${AppData}");
         // std::string_view const mark_local_app_data("${LocalAppData}");
         // std::string_view const mark_temp("${Temp}");
@@ -248,17 +226,14 @@ namespace Core
         return true;
     }
 
-    bool InitializeConfigure::parserDirectory(std::string_view const path, std::string& buffer__, bool create_directories) noexcept
-    {
+    bool InitializeConfigure::parserDirectory(std::string_view const path, std::string& buffer__, bool create_directories) noexcept {
         std::string buffer;
         if (!parser_path(path, buffer)) return false;
 
         std::filesystem::path fs_path(buffer, std::filesystem::path::generic_format);
-        if (create_directories)
-        {
+        if (create_directories) {
             std::error_code ec;
-            if (!std::filesystem::is_directory(fs_path, ec))
-            {
+            if (!std::filesystem::is_directory(fs_path, ec)) {
                 std::filesystem::create_directories(fs_path, ec);
             }
         }
@@ -266,18 +241,15 @@ namespace Core
         buffer__ = fs_path.string();
         return true;
     }
-    bool InitializeConfigure::parserFilePath(std::string_view const path, std::string& buffer__, bool create_parent_directories) noexcept
-    {
+    bool InitializeConfigure::parserFilePath(std::string_view const path, std::string& buffer__, bool create_parent_directories) noexcept {
         std::string buffer;
         if (!parser_path(path, buffer)) return false;
 
         std::filesystem::path fs_path(buffer, std::filesystem::path::generic_format);
-        if (create_parent_directories && fs_path.has_parent_path())
-        {
+        if (create_parent_directories && fs_path.has_parent_path()) {
             std::filesystem::path fs_parent_path(fs_path.parent_path());
             std::error_code ec;
-            if (!std::filesystem::is_directory(fs_parent_path, ec))
-            {
+            if (!std::filesystem::is_directory(fs_parent_path, ec)) {
                 std::filesystem::create_directories(fs_parent_path, ec);
             }
         }

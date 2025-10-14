@@ -18,11 +18,9 @@
 #define LUASTG_LUA_TYPENAME_RESOURCE "lstgResource"
 #define LUASTG_LUA_TYPENAME_ARCHIVE "lstgArchive"
 
-namespace LuaSTGPlus
-{
+namespace LuaSTGPlus {
 	//内建函数包装
-	class BuiltInFunctionWrapper
-	{
+	class BuiltInFunctionWrapper {
 	public:
 		/// @brief 向lua注册包装类
 		static void Register(lua_State* L) noexcept;
@@ -43,52 +41,42 @@ namespace LuaSTGPlus
 		static void Register(lua_State* L) noexcept;
 	};
 
-	namespace LuaWrapper
-	{
-		class WindowWrapper
-		{
+	namespace LuaWrapper {
+		class WindowWrapper {
 		public:
 			static void Register(lua_State* L) noexcept;
 		};
-		class InputWrapper
-		{
-		public:
-			static void Register(lua_State* L) noexcept;
-		};
-		
-		class RenderWrapper
-		{
-		public:
-			static void Register(lua_State* L) noexcept;
-		};
-		class RendererWrapper
-		{
-		public:
-			static void Register(lua_State* L) noexcept;
-		};
-		class GameObjectManagerWrapper
-		{
-		public:
-			static void Register(lua_State* L) noexcept;
-		};
-		class ResourceMgrWrapper
-		{
-		public:
-			static void Register(lua_State* L) noexcept;
-		};
-		class AudioWrapper
-		{
-		public:
-			static void Register(lua_State* L) noexcept;
-		};
-		class PlatformWrapper
-		{
+		class InputWrapper {
 		public:
 			static void Register(lua_State* L) noexcept;
 		};
 		
-		class ColorWrapper
-		{
+		class RenderWrapper {
+		public:
+			static void Register(lua_State* L) noexcept;
+		};
+		class RendererWrapper {
+		public:
+			static void Register(lua_State* L) noexcept;
+		};
+		class GameObjectManagerWrapper {
+		public:
+			static void Register(lua_State* L) noexcept;
+		};
+		class ResourceMgrWrapper {
+		public:
+			static void Register(lua_State* L) noexcept;
+		};
+		class AudioWrapper {
+		public:
+			static void Register(lua_State* L) noexcept;
+		};
+		class PlatformWrapper {
+		public:
+			static void Register(lua_State* L) noexcept;
+		};
+		
+		class ColorWrapper {
 		public:
 			static std::string_view const ClassID;
 			static Core::Color4B* Cast(lua_State* L, int idx);
@@ -96,8 +84,7 @@ namespace LuaSTGPlus
 			static void CreateAndPush(lua_State* L, Core::Color4B const& color);
 		};
 
-		class RectWrapper
-		{
+		class RectWrapper {
 		public:
 			static std::string_view const ClassID;
 			static Core::RectF* Cast(lua_State* L, int idx);
@@ -105,8 +92,7 @@ namespace LuaSTGPlus
 			static void CreateAndPush(lua_State* L, Core::RectF const& v);
 		};
 
-		class Vector2Wrapper
-		{
+		class Vector2Wrapper {
 		public:
 			static std::string_view const ClassID;
 			static Core::Vector2F* Cast(lua_State* L, int idx);
@@ -114,8 +100,7 @@ namespace LuaSTGPlus
 			static void CreateAndPush(lua_State* L, Core::Vector2F const& v);
 		};
 
-		class Vector3Wrapper
-		{
+		class Vector3Wrapper {
 		public:
 			static std::string_view const ClassID;
 			static Core::Vector3F* Cast(lua_State* L, int idx);
@@ -123,8 +108,7 @@ namespace LuaSTGPlus
 			static void CreateAndPush(lua_State* L, Core::Vector3F const& v);
 		};
 
-		class Vector4Wrapper
-		{
+		class Vector4Wrapper {
 		public:
 			static std::string_view const ClassID;
 			static Core::Vector4F* Cast(lua_State* L, int idx);
@@ -132,8 +116,7 @@ namespace LuaSTGPlus
 			static void CreateAndPush(lua_State* L, Core::Vector4F const& v);
 		};
 
-		class Matrix2Wrapper
-		{
+		class Matrix2Wrapper {
 		public:
 			static std::string_view const ClassID;
 			static Core::Matrix2F* Cast(lua_State* L, int idx);
@@ -141,8 +124,7 @@ namespace LuaSTGPlus
 			static void CreateAndPush(lua_State* L, Core::Matrix2F const& m);
 		};
 
-		class Matrix3Wrapper
-		{
+		class Matrix3Wrapper {
 		public:
 			static std::string_view const ClassID;
 			static Core::Matrix3F* Cast(lua_State* L, int idx);
@@ -150,8 +132,7 @@ namespace LuaSTGPlus
 			static void CreateAndPush(lua_State* L, Core::Matrix3F const& m);
 		};
 
-		class Matrix4Wrapper
-		{
+		class Matrix4Wrapper {
 		public:
 			static std::string_view const ClassID;
 			static Core::Matrix4F* Cast(lua_State* L, int idx);
@@ -159,22 +140,19 @@ namespace LuaSTGPlus
 			static void CreateAndPush(lua_State* L, Core::Matrix4F const& m);
 		};
 
-		class StopWatchWrapper
-		{
+		class StopWatchWrapper {
 		public:
 			static void Register(lua_State* L) noexcept;
 			static void CreateAndPush(lua_State* L);
 		};
 
-		class RandomizerWrapper
-		{
+		class RandomizerWrapper {
 		public:
 			static void Register(lua_State* L) noexcept;
 			static void CreateAndPush(lua_State* L);
 		};
 
-		class BentLaserWrapper
-		{
+		class BentLaserWrapper {
 		private:
 			struct Wrapper;
 		public:
@@ -188,11 +166,9 @@ namespace LuaSTGPlus
 		// 	static void Register(lua_State* L) noexcept;
 		// };
 		
-		class ParticleSystemWrapper
-		{
+		class ParticleSystemWrapper {
 		public:
-			struct UserData
-			{
+			struct UserData {
 				IResourceParticle* res;
 				IParticlePool* ptr;
 				void ReleaseAll();
@@ -203,8 +179,7 @@ namespace LuaSTGPlus
 			static void Register(lua_State* L);
 		};
 
-		class MeshBinding
-		{
+		class MeshBinding {
 		public:
 			static std::string_view const ClassID;
 			static Mesh* Cast(lua_State* L, int idx);
