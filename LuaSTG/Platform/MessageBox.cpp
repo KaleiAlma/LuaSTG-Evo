@@ -4,6 +4,12 @@
 #include "spdlog/spdlog.h"
 #include <SDL3/SDL.h>
 
+// FUCK MICROSOFT
+
+#ifdef MessageBox
+#undef MessageBox
+#endif
+
 namespace Platform {
     bool MessageBox::Show(int type, std::string_view title, std::string_view message, SDL_Window* window) {
         // std::string str_title(std::move(title));
