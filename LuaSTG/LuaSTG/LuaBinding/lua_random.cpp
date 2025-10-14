@@ -11,7 +11,6 @@
 #include "Utility/sfc.hpp"
 #include "Utility/jsf.hpp"
 
-#ifndef _WIN32
 std::istream& operator>>(std::istream& src, __uint128_t& value) {
 	std::string input;
 	src >> input;
@@ -24,6 +23,7 @@ std::istream& operator>>(std::istream& src, __uint128_t& value) {
 	}
 	return src;
 }
+#ifndef _WIN32
 static std::string u128_tostring(__uint128_t u128) {
 	std::string ret;
 	if (u128 > UINT64_MAX) {
