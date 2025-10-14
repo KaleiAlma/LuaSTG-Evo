@@ -546,15 +546,15 @@ namespace UtilRandom {
 		std::string serialize() {
 			std::ostringstream ss;
 			ss << name()
-#ifdef _WIN32
-				<< "-" << multiplier()
-				<< "-" << increment()
-				<< "-" << state_;
-#else
+// #ifdef _WIN32
+// 				<< "-" << multiplier()
+// 				<< "-" << increment()
+// 				<< "-" << state_;
+// #else
 				<< "-" << u128_tostring(multiplier())
 				<< "-" << u128_tostring(increment())
 				<< "-" << u128_tostring(state_);
-#endif
+// #endif
 			return ss.str();
 		}
 		bool deserialize(std::string const& data) {
