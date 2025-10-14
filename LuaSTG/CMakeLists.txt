@@ -210,8 +210,7 @@ target_link_libraries(LuaSTG PRIVATE
 
 # hacky fix
 if(LINUX AND LSTGEXT_LIB STREQUAL "STATIC")
-    find_package(OpenSSL)
-    target_link_libraries(LuaSTG PRIVATE zstd lzma ${OPENSSL_LIBRARIES})
+    target_link_libraries(LuaSTG PRIVATE zstd lzma ssl crypto eay32)
 endif()
 
 set(LUASTG_BUILD_OUTPUT_DIR ${CMAKE_BINARY_DIR}/bin)
