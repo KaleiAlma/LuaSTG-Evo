@@ -24,7 +24,7 @@ jobs:
       #
       # To add more build types (Release, Debug, RelWithDebInfo, etc.) customize the build_type list.
       matrix:
-        os: [ubuntu-24.04, windows-latest, macos-14]
+        os: [ubuntu-22.04, windows-latest, macos-14]
         # build_type: [Release]
         # build_type: [Release, RelWithDebInfo, Debug]
         target_arch:
@@ -51,20 +51,20 @@ jobs:
       run: |
         sudo dpkg --add-architecture arm64
         sudo sed -i "/Components: /a Architectures: amd64" /etc/apt/sources.list.d/ubuntu.sources
-        sudo sed -Ei 's/deb (\w)/deb [arch=amd64] \1/g' /etc/apt/sources.list
-        echo "deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports jammy main restricted"                                | sudo tee -a /etc/apt/sources.list > /dev/null
-        echo "deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports jammy-updates main restricted"                        | sudo tee -a /etc/apt/sources.list > /dev/null
-        echo "deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports jammy universe"                                       | sudo tee -a /etc/apt/sources.list > /dev/null
-        echo "deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports jammy-updates universe"                               | sudo tee -a /etc/apt/sources.list > /dev/null
-        echo "deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports jammy multiverse"                                     | sudo tee -a /etc/apt/sources.list > /dev/null
-        echo "deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports jammy-updates multiverse"                             | sudo tee -a /etc/apt/sources.list > /dev/null
-        echo "deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports jammy-backports main restricted universe multiverse"  | sudo tee -a /etc/apt/sources.list > /dev/null
-        echo "deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports jammy-security main restricted"                       | sudo tee -a /etc/apt/sources.list > /dev/null
-        echo "deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports jammy-security universe"                              | sudo tee -a /etc/apt/sources.list > /dev/null
-        echo "deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports jammy-security multiverse"                            | sudo tee -a /etc/apt/sources.list > /dev/null
+        # sudo sed -Ei 's/deb (\w)/deb [arch=amd64] \1/g' /etc/apt/sources.list
+        echo "deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports noble main restricted"                                | sudo tee -a /etc/apt/sources.list > /dev/null
+        echo "deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports noble-updates main restricted"                        | sudo tee -a /etc/apt/sources.list > /dev/null
+        echo "deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports noble universe"                                       | sudo tee -a /etc/apt/sources.list > /dev/null
+        echo "deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports noble-updates universe"                               | sudo tee -a /etc/apt/sources.list > /dev/null
+        echo "deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports noble multiverse"                                     | sudo tee -a /etc/apt/sources.list > /dev/null
+        echo "deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports noble-updates multiverse"                             | sudo tee -a /etc/apt/sources.list > /dev/null
+        echo "deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports noble-backports main restricted universe multiverse"  | sudo tee -a /etc/apt/sources.list > /dev/null
+        echo "deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports noble-security main restricted"                       | sudo tee -a /etc/apt/sources.list > /dev/null
+        echo "deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports noble-security universe"                              | sudo tee -a /etc/apt/sources.list > /dev/null
+        echo "deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports noble-security multiverse"                            | sudo tee -a /etc/apt/sources.list > /dev/null
         sudo apt update
         sudo apt install \
-          libssl-dev:arm64 gcc-10-aarch64-linux-gnu libstdc++-10-dev-arm64-cross binutils-aarch64-linux-gnu \
+          libssl-dev:arm64 gcc-14-aarch64-linux-gnu libstdc++-14-dev-arm64-cross binutils-aarch64-linux-gnu \
           libx11-dev:arm64 libwayland-dev:arm64 liblzma-dev:arm64 libzstd-dev:arm64
     - name: Configure Linux
       if: ${{ runner.os == 'Linux' }}
