@@ -24,7 +24,7 @@ jobs:
       #
       # To add more build types (Release, Debug, RelWithDebInfo, etc.) customize the build_type list.
       matrix:
-        os: [ubuntu-24.04, windows-latest, macos-13]
+        os: [ubuntu-22.04, windows-latest, macos-14]
         build_type: [Release]
         # build_type: [Release, RelWithDebInfo, Debug]
         target_arch:
@@ -67,16 +67,54 @@ jobs:
     steps:
     - run: echo ${{ runner.os }}
 
-    - if: ${{ runner.os == 'Linux' }}
-      run: sudo apt update && sudo apt install ninja-build mesa-utils mesa-common-dev libxext-dev libasound2-dev libsdl2-dev && sudo bash -c "$(wget -O - https://apt.llvm.org/llvm.sh)"
-    - if: ${{ runner.os == 'Windows' }}
-      run: choco install ninja
-    - if: ${{ runner.os == 'macOS' }}
-      run: brew install ninja llvm@18 dylibbundler
-
-    # - if: ${{ runner.os == 'Windows' }}
+    - name: Configure Linux (arm)
+      if: ${{ runner.os == 'Linux' && matrix.target_arch.main == 'arm64' }}
+      run: |
+        sudo dpkg --add-architecture arm64
+        # sudo sed -i "/Components: /a Architectures: amd64" /etc/apt/sources.list.d/ubuntu.sources
+        sudo sed -Ei 's/deb (\w)/deb [arch=amd64] \1/g' /etc/apt/sources.list
+        echo "deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports jammy main restricted"                                | sudo tee -a /etc/apt/sources.list > /dev/null
+        echo "deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports jammy-updates main restricted"                        | sudo tee -a /etc/apt/sources.list > /dev/null
+        echo "deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports jammy universe"                                       | sudo tee -a /etc/apt/sources.list > /dev/null
+        echo "deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports jammy-updates universe"                               | sudo tee -a /etc/apt/sources.list > /dev/null
+        echo "deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports jammy multiverse"                                     | sudo tee -a /etc/apt/sources.list > /dev/null
+        echo "deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports jammy-updates multiverse"                             | sudo tee -a /etc/apt/sources.list > /dev/null
+        echo "deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports jammy-backports main restricted universe multiverse"  | sudo tee -a /etc/apt/sources.list > /dev/null
+        echo "deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports jammy-security main restricted"                       | sudo tee -a /etc/apt/sources.list > /dev/null
+        echo "deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports jammy-security universe"                              | sudo tee -a /etc/apt/sources.list > /dev/null
+        echo "deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports jammy-security multiverse"                            | sudo tee -a /etc/apt/sources.list > /dev/null
+        sudo apt update
+        sudo apt install \
+          libssl-dev:arm64 gcc-10-aarch64-linux-gnu libstdc++-10-dev-arm64-cross binutils-aarch64-linux-gnu \
+          libx11-dev:arm64 libwayland-dev:arm64 liblzma-dev:arm64 libzstd-dev:arm64
+    - name: Configure Linux
+      if: ${{ runner.os == 'Linux' }}
+      run: |
+        echo "deb http://apt.llvm.org/jammy/ llvm-toolchain-jammy-20 main"     | sudo tee -a /etc/apt/sources.list > /dev/null
+        echo "deb-src http://apt.llvm.org/jammy/ llvm-toolchain-jammy-20 main" | sudo tee -a /etc/apt/sources.list > /dev/null
+        wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
+        sudo apt update
+        sudo apt install cmake llvm-20 clang-20 lld-20 clang-tools-20 \
+          ninja-build mesa-utils mesa-common-dev libxext-dev libasound2-dev \
+          libpipewire-0.3-dev libaudio-dev libjack-dev libsndio-dev \
+          libasound2-dev libpulse-dev libpulse-mainloop-glib0 libglib2.0-dev libxkbcommon-dev
+    - name: Configure Windows
+      if: ${{ runner.os == 'Windows' }}
+      run: |
+        choco install ninja
+        Install-Module -Name VCVars -Confirm:$false -Force
+        git config --system core.longpaths true
+        choco install llvm --version=20.1.8
+        (vcvars ${{ matrix.target_arch.main_win }}).GetEnumerator()
+        | Foreach { "$($_.Key)=$($_.Value)" >> "$env:GITHUB_ENV" }
+    - name: Configure macOS
+      if: ${{ runner.os == 'macOS' }}
+      run: |
+        brew install llvm@20 dylibbundler lld
+        echo SDKROOT=$(xcrun --sdk macosx --show-sdk-path) >> $GITHUB_ENV
     
-    - uses: actions/checkout@v4
+    - name: Checkout Repo
+      uses: actions/checkout@v4
       with:
         submodules: 'recursive'
 
@@ -100,19 +138,36 @@ jobs:
     - name: Configure CMake (Use Shared Libs)
       run: >
         cmake -B ${{ github.workspace }}/build -S ${{ github.workspace }}
-        -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}/cmake/toolchain/${{ runner.os }}-${{ matrix.target_arch.main }}${{ env.LSTGEXT_MSVC }}.cmake
+        -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}/cmake/toolchain/${{ runner.os }}-${{ matrix.target_arch.main }}.cmake
         -DCMAKE_BUILD_TYPE=Release
         -DTARGET_ARCH_REV="${{ matrix.target_arch.rev }}"
         -DTARGET_ARCH_REV_WIN="${{ matrix.target_arch.rev_win }}"
         -DLSTGEXT_REPO=KaleiAlma/LSTG-Evo-External
-        -DLSTGEXT_LIB
+        -DLSTGEXT_LIB=SHARED
         -DLSTG_EXTERNAL_INSTALL_SUBDIR=shared/lstgext
-        -DLSTGEXT_BUILD=${{ inputs.build }}
         -DCPM_SOURCE_CACHE=${{ github.workspace }}/build/cpm-cache
-        ${{ inputs.sdl3 && '-DLSTGEXT_SDL3_DIR=SDL3-shared' || '' }}
         -G Ninja
 
     - name: Build With CMake (Use Shared Libs)
+      run: >
+        cmake --build ${{ github.workspace }}/build --config Release --target external-build
+        &&
+        cmake --install ${{ github.workspace }}/build
+
+    - name: Configure CMake (Use Static Libs)
+      run: >
+        cmake -B ${{ github.workspace }}/build -S ${{ github.workspace }}
+        -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}/cmake/toolchain/${{ runner.os }}-${{ matrix.target_arch.main }}.cmake
+        -DCMAKE_BUILD_TYPE=Release
+        -DTARGET_ARCH_REV="${{ matrix.target_arch.rev }}"
+        -DTARGET_ARCH_REV_WIN="${{ matrix.target_arch.rev_win }}"
+        -DLSTGEXT_REPO=KaleiAlma/LSTG-Evo-External
+        -DLSTGEXT_LIB=STATIC
+        -DLSTG_EXTERNAL_INSTALL_SUBDIR=shared/lstgext
+        -DCPM_SOURCE_CACHE=${{ github.workspace }}/build/cpm-cache
+        -G Ninja
+
+    - name: Build With CMake (Use Static Libs)
       run: >
         cmake --build ${{ github.workspace }}/build --config Release --target external-build
         &&
