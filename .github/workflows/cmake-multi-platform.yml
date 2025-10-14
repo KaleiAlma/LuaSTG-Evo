@@ -24,7 +24,7 @@ jobs:
       #
       # To add more build types (Release, Debug, RelWithDebInfo, etc.) customize the build_type list.
       matrix:
-        os: [ubuntu-22.04, windows-latest, macos-14]
+        os: [ubuntu-24.04, windows-latest, macos-14]
         # build_type: [Release]
         # build_type: [Release, RelWithDebInfo, Debug]
         target_arch:
@@ -50,7 +50,7 @@ jobs:
       if: ${{ runner.os == 'Linux' && matrix.target_arch.main == 'arm64' }}
       run: |
         sudo dpkg --add-architecture arm64
-        # sudo sed -i "/Components: /a Architectures: amd64" /etc/apt/sources.list.d/ubuntu.sources
+        sudo sed -i "/Components: /a Architectures: amd64" /etc/apt/sources.list.d/ubuntu.sources
         sudo sed -Ei 's/deb (\w)/deb [arch=amd64] \1/g' /etc/apt/sources.list
         echo "deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports jammy main restricted"                                | sudo tee -a /etc/apt/sources.list > /dev/null
         echo "deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports jammy-updates main restricted"                        | sudo tee -a /etc/apt/sources.list > /dev/null
