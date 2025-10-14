@@ -75,8 +75,9 @@ jobs:
         sudo apt update
         sudo apt install cmake llvm-20 clang-20 lld-20 clang-tools-20 \
           ninja-build mesa-utils mesa-common-dev libxext-dev libasound2-dev \
-          libpipewire-0.3-dev libaudio-dev libjack-dev libsndio-dev libssl-dev libzstd-dev \
-          libasound2-dev libpulse-dev libpulse-mainloop-glib0 libglib2.0-dev libxkbcommon-dev
+          libpipewire-0.3-dev libaudio-dev libjack-dev libsndio-dev \
+          libasound2-dev libpulse-dev libpulse-mainloop-glib0 libglib2.0-dev libxkbcommon-dev \
+          libssl-dev libzstd-dev liblzma-dev
     - name: Configure Windows
       if: ${{ runner.os == 'Windows' }}
       run: |
