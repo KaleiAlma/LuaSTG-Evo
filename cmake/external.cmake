@@ -41,7 +41,7 @@ endif()
 
 FetchContent_MakeAvailable(lstgext)
 
-set(lstgext_SOURCE_DIR ${CMAKE_BINARY_DIR}/_deps/lstgext-src/)
+# set(lstgext_SOURCE_DIR ${CMAKE_BINARY_DIR}/_deps/lstgext-src/)
 # set(lstgext_SOURCE_DIR ${CMAKE_BINARY_DIR}/lstgext/)
 
 if(NOT LSTGEXT_COMPILE)
