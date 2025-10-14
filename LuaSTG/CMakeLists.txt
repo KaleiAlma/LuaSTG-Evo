@@ -218,7 +218,7 @@ if(APPLE)
     add_custom_command(TARGET LuaSTG POST_BUILD
         # apple fixes
         COMMAND echo Dylibbundler
-        COMMAND dylibbundler -of -cd -b -x ${CMAKE_BINARY_DIR}/LuaSTG/LuaSTG.app/Contents/MacOS/LuaSTG -d ${CMAKE_BINARY_DIR}/LuaSTG/LuaSTG.app/Contents/Frameworks -p @executable_path/../Frameworks/
+        # COMMAND dylibbundler -of -cd -b -x ${CMAKE_BINARY_DIR}/LuaSTG/LuaSTG.app/Contents/MacOS/LuaSTG -d ${CMAKE_BINARY_DIR}/LuaSTG/LuaSTG.app/Contents/Frameworks -p @executable_path/../Frameworks/
         COMMAND echo Create Dir
         COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/LuaSTG/LuaSTG.app/Contents/Resources
         
