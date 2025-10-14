@@ -693,9 +693,7 @@ namespace Core::Graphics {
     }
 
     bool Window_SDL::setClipboardText(StringView text) {
-        if (SDL_SetClipboardText(std::string(text).c_str()) < 0)
-            return false;
-        return true;
+        return SDL_SetClipboardText(std::string(text).c_str());
     }
 
 
