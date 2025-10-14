@@ -80,10 +80,9 @@ jobs:
     - name: Configure Windows
       if: ${{ runner.os == 'Windows' }}
       run: |
-        choco install ninja
+        choco install llvm --version=20.1.8
         Install-Module -Name VCVars -Confirm:$false -Force
         git config --system core.longpaths true
-        choco install llvm --version=20.1.8
         (vcvars ${{ matrix.target_arch.main_win }}).GetEnumerator()
         | Foreach { "$($_.Key)=$($_.Value)" >> "$env:GITHUB_ENV" }
     - name: Configure macOS
