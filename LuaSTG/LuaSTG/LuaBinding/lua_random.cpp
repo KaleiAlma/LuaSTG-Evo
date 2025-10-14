@@ -11,7 +11,7 @@
 #include "Utility/sfc.hpp"
 #include "Utility/jsf.hpp"
 
-#ifndef WIN32
+#ifndef _WIN32
 std::istream& operator>>(std::istream& src, __uint128_t& value) {
 	std::string input;
 	src >> input;
