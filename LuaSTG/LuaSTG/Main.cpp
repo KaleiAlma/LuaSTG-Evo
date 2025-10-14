@@ -11,7 +11,7 @@
 
 #ifdef SDL_PLATFORM_APPLE
 #include <unistd.h>
-#include "SDL_filesystem.h"
+#include "SDL3/SDL_filesystem.h"
 #endif
 
 #ifdef _WIN32
