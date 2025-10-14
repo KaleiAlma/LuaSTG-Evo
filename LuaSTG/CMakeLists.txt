@@ -208,6 +208,11 @@ target_link_libraries(LuaSTG PRIVATE
     # xxhash
 )
 
+# hacky fix
+if(LINUX AND LSTGEXT_LIB STREQUAL "STATIC")
+    target_link_libraries(LuaSTG PRIVATE zstd ssl)
+endif()
+
 set(LUASTG_BUILD_OUTPUT_DIR ${CMAKE_BINARY_DIR}/bin)
 if(APPLE)
     add_custom_command(TARGET LuaSTG POST_BUILD
