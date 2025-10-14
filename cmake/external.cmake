@@ -45,17 +45,17 @@ set(lstgext_SOURCE_DIR ${CMAKE_BINARY_DIR}/_deps/lstgext-src/)
 # set(lstgext_SOURCE_DIR ${CMAKE_BINARY_DIR}/lstgext/)
 
 if(NOT LSTGEXT_COMPILE)
-    link_directories(${lstgext_SOURCE_DIR}/lib)
+    link_directories(${lstgext_SOURCE_DIR}/lstgext/lib)
     include_directories(
-        ${lstgext_SOURCE_DIR}/include
-        ${lstgext_SOURCE_DIR}/include/imgui
-        ${lstgext_SOURCE_DIR}/include/imgui/misc/cpp
-        ${lstgext_SOURCE_DIR}/include/imgui/misc/freetype
-        ${lstgext_SOURCE_DIR}/include/pcg
-        ${lstgext_SOURCE_DIR}/include/xmath
-        ${lstgext_SOURCE_DIR}/include/luajit
-        ${lstgext_SOURCE_DIR}/include/tracy
-        ${lstgext_SOURCE_DIR}/include/freetype2
+        ${lstgext_SOURCE_DIR}/lstgext/include
+        ${lstgext_SOURCE_DIR}/lstgext/include/imgui
+        ${lstgext_SOURCE_DIR}/lstgext/include/imgui/misc/cpp
+        ${lstgext_SOURCE_DIR}/lstgext/include/imgui/misc/freetype
+        ${lstgext_SOURCE_DIR}/lstgext/include/pcg
+        ${lstgext_SOURCE_DIR}/lstgext/include/xmath
+        ${lstgext_SOURCE_DIR}/lstgext/include/luajit
+        ${lstgext_SOURCE_DIR}/lstgext/include/tracy
+        ${lstgext_SOURCE_DIR}/lstgext/include/freetype2
     )
 endif()
 
