@@ -64,3 +64,4 @@ if(NOT LSTGEXT_COMPILE)
     )
 endif()
 
+find_package(SDL3)
