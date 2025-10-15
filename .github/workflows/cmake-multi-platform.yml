@@ -11,9 +11,9 @@ jobs:
   build:
     runs-on: ${{ matrix.os }}
     env:
-      CCACHE_VERSION: 4.6
-      CCACHE_BASEDIR: ${GITHUB_WORKSPACE}
-      CCACHE_DIR: ${GITHUB_WORKSPACE}/.ccache
+      CCACHE_VERSION: 4.7.3
+      CCACHE_BASEDIR: ${{ github.workspace }}
+      CCACHE_DIR: ${{ github.workspace }}/.ccache
       CCACHE_COMPRESS: true
       CCACHE_COMPRESSLEVEL: 6
       CCACHE_MAXSIZE: 400M
@@ -96,7 +96,7 @@ jobs:
         file(DOWNLOAD "${ccache_url}" ./ccache.tar.xz SHOW_PROGRESS)
         execute_process(COMMAND ${CMAKE_COMMAND} -E tar xvf ./ccache.tar.xz)
     - name: Add ccache to PATH
-      run: echo "$(pwd)" >> $GITHUB_PATH
+      run: echo "${{ github.workspace }}" >> "$GITHUB_PATH"
     
     - name: Checkout Repo
       uses: actions/checkout@v4
