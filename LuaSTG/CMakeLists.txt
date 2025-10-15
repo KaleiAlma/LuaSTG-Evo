@@ -189,7 +189,7 @@ target_link_libraries(LuaSTG PRIVATE
     Core
     # xmath
     # fmt
-    luajit
+    # luajit
     # imgui
     # implot
     lstgext
@@ -208,9 +208,14 @@ target_link_libraries(LuaSTG PRIVATE
     # xxhash
 )
 
-# hacky fix
+# hacky fixes
 if(LINUX AND LSTGEXT_LIB STREQUAL "STATIC")
-    target_link_libraries(LuaSTG PRIVATE zstd lzma ssl crypto)
+    target_link_libraries(LuaSTG PRIVATE zstd lzma ssl crypto z-ng bzip2)
+endif()
+if(WIN32)
+    target_link_libraries(LuaSTG PRIVATE lua51)
+else()
+    target_link_libraries(LuaSTG PRIVATE luajit)
 endif()
 
 set(LUASTG_BUILD_OUTPUT_DIR ${CMAKE_BINARY_DIR}/bin)

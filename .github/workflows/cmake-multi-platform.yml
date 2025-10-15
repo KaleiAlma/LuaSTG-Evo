@@ -105,36 +105,30 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-cpm-
 
-    - name: Set Windows VCVars
-      if: ${{ runner.os == 'Windows' }}
-      run: |
-        (vcvars ${{ matrix.target_arch.main_win }}).GetEnumerator()
-        | Foreach { "$($_.Key)=$($_.Value)" >> "$env:GITHUB_ENV" }
-      
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
       # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
-    - name: Configure CMake (Use Shared Libs)
-      run: >
-        cmake -B ${{ github.workspace }}/build -S ${{ github.workspace }}
-        -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}/cmake/toolchain/${{ runner.os }}-${{ matrix.target_arch.main }}.cmake
-        -DCMAKE_BUILD_TYPE=Release
-        -DTARGET_ARCH_REV="${{ matrix.target_arch.rev }}"
-        -DTARGET_ARCH_REV_WIN="${{ matrix.target_arch.rev_win }}"
-        -DLSTGEXT_LIB=SHARED
-        -DCPM_SOURCE_CACHE=${{ github.workspace }}/build/cpm-cache
-        -G Ninja
+    # - name: Configure CMake (Use Shared Libs)
+    #   run: >
+    #     cmake -B ${{ github.workspace }}/build -S ${{ github.workspace }}
+    #     -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}/cmake/toolchain/${{ runner.os }}-${{ matrix.target_arch.main }}.cmake
+    #     -DCMAKE_BUILD_TYPE=Release
+    #     -DTARGET_ARCH_REV="${{ matrix.target_arch.rev }}"
+    #     -DTARGET_ARCH_REV_WIN="${{ matrix.target_arch.rev_win }}"
+    #     -DLSTGEXT_LIB=SHARED
+    #     -DCPM_SOURCE_CACHE=${{ github.workspace }}/build/cpm-cache
+    #     -G Ninja
 
-    - name: Build With CMake (Use Shared Libs)
-      run: >
-        cmake --build ${{ github.workspace }}/build --config Release --target LuaSTG
+    # - name: Build With CMake (Use Shared Libs)
+    #   run: >
+    #     cmake --build ${{ github.workspace }}/build --config Release --target LuaSTG
 
-    - name: Archive artifacts (Shared Libs)
-      uses: actions/upload-artifact@v4
-      with:
-        name: bin-${{ runner.os }}-${{ matrix.target_arch.main }}-${{ matrix.target_arch.rev_win }}-shared
-        path: |
-          build/bin
-        retention-days: 7
+    # - name: Archive artifacts (Shared Libs)
+    #   uses: actions/upload-artifact@v4
+    #   with:
+    #     name: bin-${{ runner.os }}-${{ matrix.target_arch.main }}-${{ matrix.target_arch.rev_win }}-shared
+    #     path: |
+    #       build/bin
+    #     retention-days: 7
 
     - name: Configure CMake (Use Static Libs)
       run: >
