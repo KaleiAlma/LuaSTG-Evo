@@ -88,7 +88,7 @@ target_link_libraries(Core PUBLIC
     PlatformAPI
     # gfx
     # libqoi
-    SDL3
+    SDL3-static
     nothings_stb
     glad
     # lstgext
