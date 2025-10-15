@@ -13,7 +13,7 @@ jobs:
     env:
       CCACHE_VERSION: 4.7.3
       CCACHE_BASEDIR: ${{ github.workspace }}
-      CCACHE_DIR: ${{ github.workspace }}/.ccache
+      CCACHE_DIR: ${{ github.workspace }}/build/.ccache
       CCACHE_COMPRESS: true
       CCACHE_COMPRESSLEVEL: 6
       CCACHE_MAXSIZE: 400M
@@ -104,20 +104,12 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-${{ matrix.target_arch.rev_win }}-cpm-
 
-    - name: Prepare ccache timestamp
-      id: ccache_cache_timestamp
-      shell: cmake -P {0}
-      run: |
-        string(TIMESTAMP current_date "%Y-%m-%d-%H;%M;%S" UTC)
-        # message("::set-output name=timestamp::${current_date}")
-        file(APPEND $ENV{GITHUB_OUTPUT} "timestamp=${current_date}")
-
     - name: ccache cache files
       id: ccache_cache
       uses: actions/cache@v4
       with:
-        path: .ccache
-        key: ${{ runner.os }}-${{ matrix.target_arch.rev_win }}-ccache-${{ steps.ccache_cache_timestamp.outputs.timestamp }}
+        path: ${{ github.workspace }}/build/.ccache
+        key: ${{ runner.os }}-${{ matrix.target_arch.rev_win }}-ccache-${{ hashFiles('**/') }}
         restore-keys: |
           ${{ runner.os }}-${{ matrix.target_arch.rev_win }}-ccache-
 
