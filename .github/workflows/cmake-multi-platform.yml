@@ -135,6 +135,7 @@ jobs:
         -DCMAKE_BUILD_TYPE=Release
         -DTARGET_ARCH_REV="${{ matrix.target_arch.rev }}"
         -DTARGET_ARCH_REV_WIN="${{ matrix.target_arch.rev_win }}"
+        -DCCACHE_PATH="${{ github.workspace }}/ccache"
         -DCPM_SOURCE_CACHE=${{ github.workspace }}/build/cpm-cache
         -G Ninja
 
