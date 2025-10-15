@@ -67,8 +67,8 @@ jobs:
     - name: Configure Linux
       if: ${{ runner.os == 'Linux' }}
       run: |
-        echo "deb http://apt.llvm.org/jammy/ llvm-toolchain-jammy-20 main"     | sudo tee -a /etc/apt/sources.list > /dev/null
-        echo "deb-src http://apt.llvm.org/jammy/ llvm-toolchain-jammy-20 main" | sudo tee -a /etc/apt/sources.list > /dev/null
+        echo "deb http://apt.llvm.org/noble/ llvm-toolchain-noble-20 main"     | sudo tee -a /etc/apt/sources.list > /dev/null
+        echo "deb-src http://apt.llvm.org/noble/ llvm-toolchain-noble-20 main" | sudo tee -a /etc/apt/sources.list > /dev/null
         wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
         sudo apt update
         sudo apt install cmake llvm-20 clang-20 lld-20 clang-tools-20 \
