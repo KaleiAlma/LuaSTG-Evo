@@ -17,6 +17,7 @@ if(WIN32)
     set(SPDLOG_WIN32_OPTS
         "SPDLOG_WCHAR_FILENAMES ON"
         "SPDLOG_WCHAR_SUPPORT ON"
+        "SPDLOG_WCHAR_CONSOLE ON"
     )
 endif()
 

@@ -12,9 +12,9 @@ namespace LuaSTG::Debugger {
     static bool enable_console = false;
     static bool open_console = false;
     static bool wait_console = false;
-    static void openWin32Console();
-    static void closeWin32Console();
-    static std::string make_time_path();
+    // static void openWin32Console();
+    // static void closeWin32Console();
+    // static std::string make_time_path();
 
     void Logger::create() {
         Core::InitializeConfigure config;
@@ -29,10 +29,14 @@ namespace LuaSTG::Debugger {
         std::vector<spdlog::sink_ptr> sinks;
 
         if (config.log_file_enable) {
-            std::string parser_path;
+            // std::string parser_path;
             // if (config.log_file_path.empty())
             // {
-                parser_path = "engine.log";
+#if _WIN32
+                std::wstring parser_path = "engine.log";
+#else
+                std::string parser_path = "engine.log";
+#endif
             // }
             // else
             // {
