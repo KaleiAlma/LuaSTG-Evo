@@ -60,9 +60,7 @@ namespace LuaSTGPlus {
 					(uint64_t)p_tex->getNativeHandle(),
 					ImVec2(scale * (float)size.x, scale * (float)size.y),
 					ImVec2(0.0f, 0.0f),
-					ImVec2(1.0f, 1.0f),
-					ImVec4(1.0f, 1.0f, 1.0f, 1.0f),
-					ImVec4(0.5f, 0.5f, 0.5f, 1.0f));
+					ImVec2(1.0f, 1.0f));
 			};
 			auto draw_texture = [](IResourceTexture* p_res, bool show_info, float scale) -> void {
 				auto const size = p_res->GetTexture()->getSize();
@@ -77,9 +75,7 @@ namespace LuaSTGPlus {
 					(uint64_t)p_res->GetTexture()->getNativeHandle(),
 					ImVec2(scale * (float)size.x, scale * (float)size.y),
 					ImVec2(0.0f, 0.0f),
-					ImVec2(1.0f, 1.0f),
-					ImVec4(1.0f, 1.0f, 1.0f, 1.0f),
-					ImVec4(0.5f, 0.5f, 0.5f, 1.0f));
+					ImVec2(1.0f, 1.0f));
 			};
 			auto draw_sprite = [](Core::Graphics::ISprite* p_res, bool show_info, bool focus, float scale) -> void {
 				auto color = ImVec4(0.5f, 0.5f, 0.5f, 1.0f);
@@ -100,9 +96,7 @@ namespace LuaSTGPlus {
 					(uint64_t)p_tex->getNativeHandle(),
 					ImVec2(scale * (rc.b.x - rc.a.x), scale * (rc.b.y - rc.a.y)),
 					ImVec2(rc.a.x / (float)tex_size.x, rc.a.y / (float)tex_size.y),
-					ImVec2(rc.b.x / (float)tex_size.x, rc.b.y / (float)tex_size.y),
-					ImVec4(1.0f, 1.0f, 1.0f, 1.0f),
-					color);
+					ImVec2(rc.b.x / (float)tex_size.x, rc.b.y / (float)tex_size.y));
 			};
 			
 			if (p_pool) {

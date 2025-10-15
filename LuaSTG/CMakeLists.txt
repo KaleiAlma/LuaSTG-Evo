@@ -167,6 +167,7 @@ endif()
 source_group(TREE ${CMAKE_CURRENT_LIST_DIR} FILES ${LUASTG_ENGINE_SOURCES})
 target_sources(LuaSTG PRIVATE
     ${LUASTG_ENGINE_SOURCES}
+    ${IMGUI_SOURCES}
 )
 
 set(LUASTG_RESDIR ${CMAKE_CURRENT_LIST_DIR}/LuaSTG/Custom CACHE PATH "LuaSTG custom build configuration")
@@ -189,34 +190,24 @@ target_link_libraries(LuaSTG PRIVATE
     Core
     # xmath
     # fmt
-    # luajit
+    luajit
     # imgui
     # implot
-    lstgext
+    # lstgext
     # lua_cjson
     # toml.lua
     # lua_filesystem
     # luasocket
-    # lua_imgui
+    lua_imgui
     # imgui_impl_sdl2
     # imgui_impl_opengl3
     lua_steam_api
     # tracy
     # libqoi
-    # pcg_cpp
+    pcg_cpp
     pugixml
-    # xxhash
+    xxhash
 )
-
-# hacky fixes
-if(LINUX AND LSTGEXT_LIB STREQUAL "STATIC")
-    target_link_libraries(LuaSTG PRIVATE zstd lzma ssl crypto z-ng bzip2)
-endif()
-if(WIN32)
-    target_link_libraries(LuaSTG PRIVATE lua51 SDL3-static)
-else()
-    target_link_libraries(LuaSTG PRIVATE luajit SDL3)
-endif()
 
 set(LUASTG_BUILD_OUTPUT_DIR ${CMAKE_BINARY_DIR}/bin)
 if(APPLE)

@@ -3,10 +3,10 @@
 #include <fstream>
 // #include "utf8.hpp"
 // #include "utility/path.hpp"
-#include "minizip/mz.h"
-#include "minizip/mz_strm.h"
-#include "minizip/mz_zip.h"
-#include "minizip/mz_zip_rw.h"
+#include "mz.h"
+#include "mz_strm.h"
+#include "mz_zip.h"
+#include "mz_zip_rw.h"
 
 // inline bool is_file_path_case_correct(std::wstring_view file_path)
 // {

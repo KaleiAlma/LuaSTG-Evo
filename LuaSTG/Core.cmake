@@ -6,7 +6,7 @@ luastg_target_common_options(Core)
 luastg_target_more_warning(Core)
 target_compile_definitions(Core PRIVATE
     LUASTG_CORE_USING_IMGUI
-    MA_USE_STDINT
+    # MA_USE_STDINT
 )
 target_include_directories(Core PUBLIC
     .
@@ -74,6 +74,7 @@ target_precompile_headers(Core PRIVATE
 )
 target_sources(Core PRIVATE
     ${Core_SRC}
+    ../external/headerlibs.cpp
 )
 
 target_link_libraries(Core PUBLIC
@@ -87,11 +88,12 @@ target_link_libraries(Core PUBLIC
     PlatformAPI
     # gfx
     # libqoi
-    # SDL3
-    # nothings_stb
+    SDL3
+    nothings_stb
     glad
+    # lstgext
     # math
-    # xmath
+    xmath
     glm
     # file
     minizip
@@ -99,13 +101,13 @@ target_link_libraries(Core PUBLIC
     freetype
     uni-algo
     # model
-    # tinygltf
+    tinygltf
     # audio
     # dr_libs
     # database
-    # nlohmann_json
+    nlohmann_json
 )
 
-target_link_libraries(Core INTERFACE SDL3)
+# target_link_libraries(Core INTERFACE SDL3)
 
 # add_dependencies(Core fuck_zlib_ng_and_minizip_ng)

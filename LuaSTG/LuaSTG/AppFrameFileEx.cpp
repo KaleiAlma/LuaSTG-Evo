@@ -1,4 +1,4 @@
-#include "stb/stb_image.h"
+#include "stb_image.h"
 
 #include "AppFrame.h"
 #include "Core/FileManager.hpp"

@@ -71,7 +71,7 @@ else()
     )
     message("Ignore Steamworks SDK")
 endif()
-target_link_libraries(lua_steam_api INTERFACE
+target_link_libraries(lua_steam_api PUBLIC
     # lua51static
     luajit
 )

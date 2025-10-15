@@ -9,9 +9,9 @@ function(luastg_target_common_options __TARGET__)
             "/DEPENDENTLOADFLAG:0x800" # Windows 10 1607+ 强制 DLL 搜索目录为系统目录
         )
         if(CMAKE_SIZEOF_VOID_P EQUAL 4)
-            target_compile_options(${__TARGET__} PRIVATE
-                "/arch:SSE2"
-            )
+            # target_compile_options(${__TARGET__} PRIVATE
+            #     "/arch:SSE2"
+            # )
             target_link_options(${__TARGET__} PRIVATE
                 "$<$<CONFIG:Debug>:/SAFESEH:NO>"
             )
@@ -60,9 +60,9 @@ function(luastg_target_common_options2 __TARGET__)
             "/DEPENDENTLOADFLAG:0x800" # Windows 10 1607+ 强制 DLL 搜索目录为系统目录
         )
         if(CMAKE_SIZEOF_VOID_P EQUAL 4)
-            target_compile_options(${__TARGET__} PRIVATE
-                "/arch:SSE2"
-            )
+            # target_compile_options(${__TARGET__} PRIVATE
+            #     "/arch:SSE2"
+            # )
             target_link_options(${__TARGET__} PRIVATE
                 "$<$<CONFIG:Debug>:/SAFESEH:NO>"
             )
@@ -84,18 +84,64 @@ function(luastg_target_more_warning __TARGET__)
     endif()
 endfunction()
 
-function(luastg_target_copy_to_output_directory __AFTER_TARGET__ __TARGET__)
-    add_custom_command(TARGET ${__AFTER_TARGET__} POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_SOURCE_DIR}/engine
-        COMMAND ${CMAKE_COMMAND} -E rm -f ${CMAKE_SOURCE_DIR}/engine/"$<TARGET_FILE_NAME:${__TARGET__}>"
-        COMMAND ${CMAKE_COMMAND} -E copy  "$<TARGET_FILE:${__TARGET__}>" ${CMAKE_SOURCE_DIR}/engine
+# function(luastg_target_copy_to_output_directory __AFTER_TARGET__ __TARGET__)
+#     add_custom_command(TARGET ${__AFTER_TARGET__} POST_BUILD
+#         COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_SOURCE_DIR}/engine
+#         COMMAND ${CMAKE_COMMAND} -E rm -f ${CMAKE_SOURCE_DIR}/engine/"$<TARGET_FILE_NAME:${__TARGET__}>"
+#         COMMAND ${CMAKE_COMMAND} -E copy  "$<TARGET_FILE:${__TARGET__}>" ${CMAKE_SOURCE_DIR}/engine
+#     )
+# endfunction()
+
+# function(luastg_target_platform_windows_7 __TARGET__)
+#     target_compile_definitions(${__TARGET__}
+#     PRIVATE
+#         _WIN32_WINNT=0x0601       # _WIN32_WINNT_WIN7
+#         NTDDI_VERSION=0x06010000  # NTDDI_WIN7
+#     )
+# endfunction()
+
+
+set(LSTG_COMPILE_OPTS "-march=${TARGET_ARCH_REV}")
+set(LSTG_COMPILE_OPTS_WIN "/arch:${TARGET_ARCH_REV_WIN}")
+
+if(MSVC)
+    add_compile_options(
+        "/MP"
+        "$<$<CONFIG:Debug>:/ZI>"
+    )
+    add_link_options(
+        # Windows 10 1607+ forces the DLL search directory to be the system directory
+        "/DEPENDENTLOADFLAG:0x800"
+    )
+endif()
+
+set(CMAKE_C_STANDARD 11)
+set(CMAKE_C_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+if(NOT WIN32)
+    add_compile_definitions(
+        _FILE_OFFSET_BITS=64
+    )
+endif()
+
+
+if(MSVC)
+    add_compile_options(${LSTG_COMPILE_OPTS_WIN})
+else()
+    add_compile_options(${LSTG_COMPILE_OPTS})
+endif()
+
+
+function(lstgext_tgtopts_unicode __TARGET__)
+    target_compile_definitions(${__TARGET__} PUBLIC
+        _UNICODE
+        UNICODE
     )
 endfunction()
 
-function(luastg_target_platform_windows_7 __TARGET__)
-    target_compile_definitions(${__TARGET__}
-    PRIVATE
-        _WIN32_WINNT=0x0601       # _WIN32_WINNT_WIN7
-        NTDDI_VERSION=0x06010000  # NTDDI_WIN7
-    )
+function(lstgext_tgtopts_full __TARGET__)
+    lstgext_tgtopts_unicode(${__TARGET__})
 endfunction()
+

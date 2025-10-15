@@ -1,7 +1,9 @@
 include(FetchContent)
 
-set(LSTGEXT_LIB "SHARED" CACHE STRING "Whether to use static or shared libraries for the engine.")
+set(LSTGEXT_LIB "STATIC" CACHE STRING "Whether to use static or shared libraries for the engine.")
 set(LSTGEXT_REPO "KaleiAlma/LSTG-Evo-External" CACHE STRING "Evo external repository.")
+set(LSTGEXT_COMPILE ON CACHE BOOL "Whether to compile the external packages.")
+set(LSTGEXT_RELEASE "d071f9d5ef78cc83fa097bab9ebc512cca99b544")
 
 string(TOUPPER ${LSTGEXT_LIB} LSTGEXT_LIB)
 
@@ -64,4 +66,4 @@ if(NOT LSTGEXT_COMPILE)
     )
 endif()
 
-find_package(SDL3)
+

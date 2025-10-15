@@ -7,6 +7,8 @@ if(APPLE)
     set(CMAKE_EXE_LINKER_FLAGS "-L/usr/local/opt/llvm@20/lib/c++ -Wl,-rpath,/usr/local/opt/llvm@20/lib/c++")
 endif()
 
+option(BUILD_SHARED_LIBS OFF)
+
 set(DEFAULT_x86_64_REVISION "westmere" CACHE STRING "Clang x86_64 CPU revision")
 set(DEFAULT_x86_64_REVISION_WINDOWS "SSE4.2" CACHE STRING "MSVC x64 architecture flag")
 set(DEFAULT_ARM64_REVISION "armv8.2-a" CACHE STRING "Clang ARM64 CPU revision")
@@ -35,18 +37,22 @@ endif()
 # set(CMAKE_VERBOSE_MAKEFILE ON CACHE BOOL "ON" FORCE)
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+set(USE_CCACHE ON)
 include(cmake/TargetCommonOptions.cmake)
 include(cmake/loader.cpm.cmake)
 
 CPMInitialize()
 
-include(cmake/external.cmake)
-include(cmake/pugixml.cmake)
-# include(cmake/packages.cpm.cmake)
-# include(cmake/packages.xiph.cmake)
-# include(cmake/packages.z.cmake)
+
+# include(cmake/external.cmake)
+# include(cmake/pugixml.cmake)
+include(cmake/packages.cpm.cmake)
+include(cmake/packages.gfx.cmake)
+include(cmake/packages.imgui.cmake)
+include(cmake/packages.xiph.cmake)
+include(cmake/packages.z.cmake)
 add_subdirectory(external)
-# include(cmake/packages.lua.cmake)
+include(cmake/packages.lua.cmake)
 
 # add_subdirectory(imgui)
 

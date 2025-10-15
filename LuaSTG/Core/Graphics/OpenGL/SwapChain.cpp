@@ -7,7 +7,7 @@
 #include "glad/gl.h"
 #include <SDL3/SDL.h>
 #include "spdlog/spdlog.h"
-#include "stb/stb_image_write.h"
+#include "stb_image_write.h"
 
 //#define _log(x) OutputDebugStringA(x "\n")
 #define _log(x)

@@ -802,7 +802,7 @@ namespace Core::Audio {
     }
 }
 
-#include "xmath/XFFT.h"
+#include "XFFT.h"
 
 namespace Core::Audio {
     void StreamAudioPlayer_SDL::updateFFT() {
