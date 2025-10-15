@@ -93,10 +93,11 @@ jobs:
       shell: cmake -P {0}
       run: |
         set(ccache_url "https://github.com/cristianadam/ccache/releases/download/v$ENV{CCACHE_VERSION}/${{ runner.os }}.tar.xz")
-        file(DOWNLOAD "${ccache_url}" ./ccache.tar.xz SHOW_PROGRESS)
-        execute_process(COMMAND ${CMAKE_COMMAND} -E tar xvf ./ccache.tar.xz)
+        file(MAKE_DIRECTORY $ENV{HOME}/bin)
+        file(DOWNLOAD "${ccache_url}" $ENV{HOME}/bin/ccache.tar.xz SHOW_PROGRESS)
+        execute_process(COMMAND ${CMAKE_COMMAND} -E chdir $ENV{HOME}/bin tar xvf $ENV{HOME}/bin/ccache.tar.xz)
     - name: Add ccache to PATH
-      run: echo "${{ github.workspace }}" >> "$GITHUB_PATH"
+      run: echo "$HOME/bin" >> "${{ github.path }}"
     
     - name: Checkout Repo
       uses: actions/checkout@v4
@@ -117,7 +118,8 @@ jobs:
       shell: cmake -P {0}
       run: |
         string(TIMESTAMP current_date "%Y-%m-%d-%H;%M;%S" UTC)
-        message("::set-output name=timestamp::${current_date}")
+        # message("::set-output name=timestamp::${current_date}")
+        file(APPEND $ENV{GITHUB_OUTPUT} "timestamp=${current_date}")
 
     - name: ccache cache files
       id: ccache_cache
@@ -135,7 +137,7 @@ jobs:
         -DCMAKE_BUILD_TYPE=Release
         -DTARGET_ARCH_REV="${{ matrix.target_arch.rev }}"
         -DTARGET_ARCH_REV_WIN="${{ matrix.target_arch.rev_win }}"
-        -DCCACHE_PATH="${{ github.workspace }}/ccache"
+        -DCCACHE_PATH="$HOME/bin/ccache"
         -DCPM_SOURCE_CACHE=${{ github.workspace }}/build/cpm-cache
         -G Ninja
 
