@@ -70,12 +70,8 @@ include(cmake/loader.cpm.cmake)
 
 CPMInitialize()
 
-if(NOT CCACHE_PATH)
-    set(CCACHE_PATH ccache)
-endif()
-
-set(CMAKE_C_COMPILER_LAUNCHER ${CCACHE_PATH} CACHE STRING "" FORCE)
-set(CMAKE_CXX_COMPILER_LAUNCHER ${CCACHE_PATH} CACHE STRING "" FORCE)
+set(CMAKE_C_COMPILER_LAUNCHER ccache CACHE STRING "" FORCE)
+set(CMAKE_CXX_COMPILER_LAUNCHER ccache CACHE STRING "" FORCE)
 
 # include(cmake/external.cmake)
 # include(cmake/pugixml.cmake)
