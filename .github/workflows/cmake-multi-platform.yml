@@ -80,7 +80,6 @@ jobs:
     - name: Configure Windows
       if: ${{ runner.os == 'Windows' }}
       run: |
-        choco install llvm --version=20.1.8
         Install-Module -Name VCVars -Confirm:$false -Force
         git config --system core.longpaths true
         (vcvars ${{ matrix.target_arch.main_win }}).GetEnumerator()
