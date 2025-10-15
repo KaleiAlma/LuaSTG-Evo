@@ -843,7 +843,7 @@ namespace Core::Graphics {
     }
 }
 
-#ifdef WIN32
+#ifdef _WIN32
 #include <ShlObj.h>
 
 bool findSystemFont(std::string_view name, std::string& u8_path) {

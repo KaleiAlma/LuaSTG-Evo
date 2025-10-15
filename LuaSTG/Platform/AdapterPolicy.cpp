@@ -1,6 +1,6 @@
 #include "AdapterPolicy.hpp"
 
-#ifdef WIN32
+#ifdef _WIN32
 using uint32 = unsigned int;
 
 static_assert(sizeof(uint32) == 4);
