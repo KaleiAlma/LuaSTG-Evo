@@ -222,18 +222,13 @@ set(LUASTG_BUILD_OUTPUT_DIR ${CMAKE_BINARY_DIR}/bin)
 if(APPLE)
     add_custom_command(TARGET LuaSTG POST_BUILD
         # apple fixes
-        COMMAND echo Dylibbundler
-        # COMMAND dylibbundler -of -cd -b -x ${CMAKE_BINARY_DIR}/LuaSTG/LuaSTG.app/Contents/MacOS/LuaSTG -d ${CMAKE_BINARY_DIR}/LuaSTG/LuaSTG.app/Contents/Frameworks -p @executable_path/../Frameworks/
-        COMMAND echo Create Dir
+        COMMAND dylibbundler -of -cd -b -x ${CMAKE_BINARY_DIR}/LuaSTG/LuaSTG.app/Contents/MacOS/LuaSTG -d ${CMAKE_BINARY_DIR}/LuaSTG/LuaSTG.app/Contents/Frameworks -p @executable_path/../Frameworks/
         COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/LuaSTG/LuaSTG.app/Contents/Resources
         
-        COMMAND echo Create Dir
         COMMAND ${CMAKE_COMMAND} -E make_directory ${LUASTG_BUILD_OUTPUT_DIR}
 
-        COMMAND echo Delete Zip
         COMMAND ${CMAKE_COMMAND} -E rm -f ${LUASTG_BUILD_OUTPUT_DIR}/LuaSTG.zip
         # COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/LuaSTG/LuaSTG.app ${LUASTG_BUILD_OUTPUT_DIR}/
-        COMMAND echo Create Zip
         COMMAND ${CMAKE_COMMAND} -E tar cfv ${LUASTG_BUILD_OUTPUT_DIR}/LuaSTG.zip --format=zip ${CMAKE_BINARY_DIR}/LuaSTG/LuaSTG.app
 
         #COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_RUNTIME_DLLS:LuaSTG> $<TARGET_FILE_DIR:LuaSTG>
