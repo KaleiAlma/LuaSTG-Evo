@@ -17,7 +17,7 @@ luastg_target_common_options(PlatformAPI)
 luastg_target_more_warning(PlatformAPI)
 target_include_directories(PlatformAPI PUBLIC
     .
-    ${CMAKE_SOURCE_DIR}/external/sdl2/include/
+    ${SDL3_SOURCE_DIR}/include/
 )
 target_sources(PlatformAPI PRIVATE
     ${PLATFORM_SOURCES}
