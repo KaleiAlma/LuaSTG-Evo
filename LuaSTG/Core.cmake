@@ -87,7 +87,7 @@ target_link_libraries(Core PUBLIC
     PlatformAPI
     # gfx
     # libqoi
-    SDL3
+    # SDL3
     # nothings_stb
     glad
     # math
@@ -105,5 +105,7 @@ target_link_libraries(Core PUBLIC
     # database
     # nlohmann_json
 )
+
+target_link_libraries(Core INTERFACE SDL3)
 
 # add_dependencies(Core fuck_zlib_ng_and_minizip_ng)

@@ -184,7 +184,7 @@ target_link_libraries(LuaSTG PRIVATE
     spdlog
     # utility
     PlatformAPI
-    SDL3
+    # SDL3
     # SDL2main
     Core
     # xmath
@@ -213,9 +213,9 @@ if(LINUX AND LSTGEXT_LIB STREQUAL "STATIC")
     target_link_libraries(LuaSTG PRIVATE zstd lzma ssl crypto z-ng bzip2)
 endif()
 if(WIN32)
-    target_link_libraries(LuaSTG PRIVATE lua51)
+    target_link_libraries(LuaSTG PRIVATE lua51 SDL3-static)
 else()
-    target_link_libraries(LuaSTG PRIVATE luajit)
+    target_link_libraries(LuaSTG PRIVATE luajit SDL3)
 endif()
 
 set(LUASTG_BUILD_OUTPUT_DIR ${CMAKE_BINARY_DIR}/bin)
