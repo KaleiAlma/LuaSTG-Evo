@@ -121,7 +121,7 @@ jobs:
 
     - name: ccache cache files
       id: ccache_cache
-      uses: actions/cache@v2
+      uses: actions/cache@v4
       with:
         path: .ccache
         key: ${{ runner.os }}-${{ matrix.target_arch.rev_win }}-ccache-${{ steps.ccache_cache_timestamp.outputs.timestamp }}
