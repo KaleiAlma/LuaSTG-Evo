@@ -58,6 +58,10 @@ elseif(TARGET_ARCHITECTURE STREQUAL "aarch64")
     set(LSTG_ARM64 ON)
 endif()
 
+if(LINUX AND LSTG_ARM64)
+    set(CMAKE_BUILD_RPATH /usr/lib/aarch64-linux-gnu)
+endif()
+
 #option(LINK_STEAM_API "Enable Steam API" OFF)
 #option(LUASTG_RESDIR "Custom configurations" "res")
 
