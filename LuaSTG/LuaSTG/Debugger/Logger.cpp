@@ -33,7 +33,7 @@ namespace LuaSTG::Debugger {
             // if (config.log_file_path.empty())
             // {
 #if _WIN32
-                std::wstring parser_path = "engine.log";
+                std::wstring parser_path = L"engine.log";
 #else
                 std::string parser_path = "engine.log";
 #endif
