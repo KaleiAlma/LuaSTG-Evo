@@ -60,6 +60,7 @@ endif()
 
 if(LINUX AND CMAKE_CROSSCOMPILING AND LSTG_ARM64)
     set(CMAKE_INSTALL_RPATH /usr/lib/aarch64-linux-gnu)
+    link_directories(BEFORE /usr/lib/aarch64-linux-gnu)
     set(CMAKE_BUILD_WITH_INSTALL_RPATH ON)
 endif()
 
