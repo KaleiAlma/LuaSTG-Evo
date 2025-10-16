@@ -62,10 +62,10 @@ jobs:
         echo "deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports noble-security multiverse"                            | sudo tee -a /etc/apt/sources.list > /dev/null
         sudo apt update
         sudo apt install \
-          libssl-dev:arm64 gcc-14-aarch64-linux-gnu libstdc++-14-dev-arm64-cross binutils-aarch64-linux-gnu \
-          libx11-dev:arm64 libwayland-dev:arm64 ubuntu-dev-tools sbuild schroot debootstrap
-        sudo usermod -aG sbuild $USER
-        mk-sbuild --arch=arm64 --name=ubuntu-noble noble
+          gcc-14-aarch64-linux-gnu libstdc++-14-dev-arm64-cross binutils-aarch64-linux-gnu \
+          libx11-dev:arm64 libwayland-dev:arm64 libssl-dev:arm64
+        echo "CMAKE_C_IMPLICIT_LINK_DIRECTORIES_EXCLUDE=/usr/lib/x86_64-linux-gnu" >> $GITHUB_ENV
+        echo "CMAKE_CXX_IMPLICIT_LINK_DIRECTORIES_EXCLUDE=/usr/lib/x86_64-linux-gnu" >> $GITHUB_ENV
     - name: Configure Linux
       if: ${{ runner.os == 'Linux' }}
       run: |
