@@ -72,7 +72,7 @@ jobs:
 
         [Ubuntu]
         source=http://archive.ubuntu.com/ubuntu/
-        keyring=ubuntu-archive-keyring
+        keyring=ubuntu-keyring
         suite=noble
         packages=libx11-dev libwayland-dev libssl-dev mesa-utils mesa-common-dev libxext-dev libasound2-dev libpipewire-0.3-dev libaudio-dev libjack-dev libsndio-dev libpulse-dev libpulse-mainloop-glib0 libglib2.0-dev libxkbcommon-dev
         __EOF__
