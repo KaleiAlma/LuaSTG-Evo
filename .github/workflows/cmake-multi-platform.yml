@@ -63,7 +63,8 @@ jobs:
         sudo apt update
         sudo apt install \
           libssl-dev:arm64 gcc-14-aarch64-linux-gnu libstdc++-14-dev-arm64-cross binutils-aarch64-linux-gnu \
-          libx11-dev:arm64 libwayland-dev:arm64 ubuntu-dev-tools
+          libx11-dev:arm64 libwayland-dev:arm64 ubuntu-dev-tools sbuild schroot debootstrap
+        sudo usermod -aG sbuild $USER
         mk-sbuild --arch=arm64 --name=ubuntu-noble noble
     - name: Configure Linux
       if: ${{ runner.os == 'Linux' }}
