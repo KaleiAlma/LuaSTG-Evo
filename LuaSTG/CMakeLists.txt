@@ -8,6 +8,8 @@ include(Core.cmake)
 
 if(APPLE)
     add_executable(LuaSTG MACOSX_BUNDLE)
+elseif(WIN32)
+    add_executable(LuaSTG WIN32)
 else()
     add_executable(LuaSTG)
 endif()
