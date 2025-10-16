@@ -64,6 +64,7 @@ jobs:
         sudo apt install \
           libssl-dev:arm64 gcc-14-aarch64-linux-gnu libstdc++-14-dev-arm64-cross binutils-aarch64-linux-gnu \
           libx11-dev:arm64 libwayland-dev:arm64
+        mk-sbuild --arch=arm64 --name=ubuntu-noble noble
     - name: Configure Linux
       if: ${{ runner.os == 'Linux' }}
       run: |
@@ -121,6 +122,7 @@ jobs:
         -DTARGET_ARCH_REV="${{ matrix.target_arch.rev }}"
         -DTARGET_ARCH_REV_WIN="${{ matrix.target_arch.rev_win }}"
         -DCPM_SOURCE_CACHE=${{ github.workspace }}/build/cpm-cache
+        -DGITHUB_ACTIONS=ON
         -G Ninja
 
     - name: Build With CMake
