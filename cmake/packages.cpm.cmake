@@ -60,8 +60,8 @@ target_include_directories(nothings_stb INTERFACE ${nothings_stb_SOURCE_DIR})
 
 CPMAddPackage(
     NAME pcg_cpp
-    GITHUB_REPOSITORY imneme/pcg-cpp
-    GIT_TAG 428802d1a5634f96bcd0705fab379ff0113bcf13
+    GITHUB_REPOSITORY Legacy-LuaSTG-Engine/pcg-cpp
+    GIT_TAG efd443581e18067a7080af1944ae2402a1349544
     DOWNLOAD_ONLY YES
 )
 
