@@ -66,6 +66,7 @@ jobs:
           libx11-dev:arm64 libwayland-dev:arm64 libssl-dev:arm64
         echo "CMAKE_C_IMPLICIT_LINK_DIRECTORIES_EXCLUDE=/usr/lib/x86_64-linux-gnu" >> $GITHUB_ENV
         echo "CMAKE_CXX_IMPLICIT_LINK_DIRECTORIES_EXCLUDE=/usr/lib/x86_64-linux-gnu" >> $GITHUB_ENV
+        echo "LIBRARY_PATH=/usr/lib/aarch64-linux-gnu" >> $GITHUB_ENV
     - name: Configure Linux
       if: ${{ runner.os == 'Linux' }}
       run: |
