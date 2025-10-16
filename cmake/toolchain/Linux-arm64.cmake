@@ -14,12 +14,3 @@ set(CMAKE_LINKER_TYPE LLD)
 
 set(CMAKE_C_COMPILER_TARGET aarch64-linux-gnu)
 set(CMAKE_CXX_COMPILER_TARGET aarch64-linux-gnu)
-
-if(GITHUB_ACTIONS)
-    set(CMAKE_SYSROOT /var/chroot/noble-arm64)
-
-    set(CMAKE_C_STANDARD_LINK_DIRECTORIES /usr/lib/aarch64-linux-gnu)
-    set(CMAKE_CXX_STANDARD_LINK_DIRECTORIES /usr/lib/aarch64-linux-gnu)
-
-    set(CMAKE_EXE_LINKER_FLAGS -L/usr/lib/aarch64-linux-gnu)
-endif()
