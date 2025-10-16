@@ -5,7 +5,7 @@ on:
 
 jobs:
   build:
-    runs-on: ${{ matrix.os }}
+    runs-on: ${{ matrix.config.os }}
     env:
       CCACHE_VERSION: 4.7.3
       CCACHE_BASEDIR: ${{ github.workspace }}
@@ -18,27 +18,33 @@ jobs:
       fail-fast: false
 
       matrix:
-        os: [ubuntu-24.04, ubuntu-24.04-arm, windows-latest, windows-11-arm, macos-15-intel, macos-15]
+        config:
+        - os: ubuntu-24.04
+          rev: westmere
+          rev_win: SSE4.2
+        - os: ubuntu-24.04
+          rev: haswell
+          rev_win: AVX2
+        - os: ubuntu-24.04-arm
+          rev: armv8.2-a
+          rev_win: armv8.2
+        - os: windows-latest
+          rev: westmere
+          rev_win: SSE4.2
+        - os: windows-latest
+          rev: haswell
+          rev_win: AVX2
+        - os: windows-11-arm
+          rev: armv8.2-a
+          rev_win: armv8.2
+        - os: macos-15-intel
+          rev: westmere
+          rev_win: SSE4.2
+        - os: macos-15
+          rev: armv8.2-a
+          rev_win: armv8.2
         # build_type: [Release]
         # build_type: [Release, RelWithDebInfo, Debug]
-        include:
-          - os: ubuntu-24.04
-            rev: westmere
-            rev_win: SSE4.2
-          - os: ubuntu-24.04
-            rev: haswell
-            rev_win: AVX2
-          - os: windows-latest
-            rev: westmere
-            rev_win: SSE4.2
-          - os: windows-latest
-            rev: haswell
-            rev_win: AVX2
-          - os: macos-15-intel
-            rev: westmere
-            rev_win: SSE4.2
-          - rev: armv8.2-a
-            rev_win: armv8.2
 
     steps:
     - name: Configure Linux
@@ -76,26 +82,26 @@ jobs:
       uses: actions/cache@v4
       with:
         path: ${{ github.workspace }}/build/cpm-cache
-        key: ${{ runner.os }}-${{ matrix.rev_win }}-cpm-${{ hashFiles('**/') }}
+        key: ${{ runner.os }}-${{ matrix.config.rev_win }}-cpm-${{ hashFiles('**/') }}
         restore-keys: |
-          ${{ runner.os }}-${{ matrix.rev_win }}-cpm-
+          ${{ runner.os }}-${{ matrix.config.rev_win }}-cpm-
 
     - name: ccache cache files
       id: ccache_cache
       uses: actions/cache@v4
       with:
         path: ${{ github.workspace }}/build/.ccache
-        key: ${{ runner.os }}-${{ matrix.rev_win }}-ccache-${{ hashFiles('**/') }}
+        key: ${{ runner.os }}-${{ matrix.config.rev_win }}-ccache-${{ hashFiles('**/') }}
         restore-keys: |
-          ${{ runner.os }}-${{ matrix.rev_win }}-ccache-
+          ${{ runner.os }}-${{ matrix.config.rev_win }}-ccache-
 
     - name: Configure CMake
       run: >
         cmake -B ${{ github.workspace }}/build -S ${{ github.workspace }}
         -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}/cmake/toolchain/${{ runner.os }}-${{ runner.arch == 'X64' && 'x86_64' || 'arm64' }}.cmake
         -DCMAKE_BUILD_TYPE=Release
-        -DTARGET_ARCH_REV="${{ matrix.rev }}"
-        -DTARGET_ARCH_REV_WIN="${{ matrix.rev_win }}"
+        -DTARGET_ARCH_REV="${{ matrix.config.rev }}"
+        -DTARGET_ARCH_REV_WIN="${{ matrix.config.rev_win }}"
         -DCPM_SOURCE_CACHE=${{ github.workspace }}/build/cpm-cache
         -DGITHUB_ACTIONS=ON
         -G Ninja
@@ -107,7 +113,7 @@ jobs:
     - name: Archive artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: bin-${{ runner.os }}-${{ runner.arch }}-${{ matrix.rev_win }}
+        name: bin-${{ runner.os }}-${{ runner.arch }}-${{ matrix.config.rev_win }}
         path: |
           build/bin
         retention-days: 7
