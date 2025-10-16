@@ -11,6 +11,7 @@
 #include "Utility/sfc.hpp"
 #include "Utility/jsf.hpp"
 
+#ifndef _MSC_VER
 std::istream& operator>>(std::istream& src, __uint128_t& value) {
 	std::string input;
 	src >> input;
@@ -23,7 +24,6 @@ std::istream& operator>>(std::istream& src, __uint128_t& value) {
 	}
 	return src;
 }
-// #ifndef _WIN32
 static std::string u128_tostring(__uint128_t u128) {
 	std::string ret;
 	if (u128 > UINT64_MAX) {
@@ -35,7 +35,7 @@ static std::string u128_tostring(__uint128_t u128) {
 		return std::to_string(u64);
 	}
 }
-// #endif
+#endif
 
 static std::string_view const LibraryID("random");
 
@@ -546,15 +546,15 @@ namespace UtilRandom {
 		std::string serialize() {
 			std::ostringstream ss;
 			ss << name()
-// #ifdef _WIN32
-// 				<< "-" << multiplier()
-// 				<< "-" << increment()
-// 				<< "-" << state_;
-// #else
+#ifdef _MSC_VER
+				<< "-" << multiplier()
+				<< "-" << increment()
+				<< "-" << state_;
+#else
 				<< "-" << u128_tostring(multiplier())
 				<< "-" << u128_tostring(increment())
 				<< "-" << u128_tostring(state_);
-// #endif
+#endif
 			return ss.str();
 		}
 		bool deserialize(std::string const& data) {
@@ -603,15 +603,15 @@ namespace UtilRandom {
 		std::string serialize() {
 			std::ostringstream ss;
 			ss << name()
-// #ifdef _WIN32
-// 				<< "-" << multiplier()
-// 				<< "-" << increment()
-// 				<< "-" << state_;
-// #else
+#ifdef _MSC_VER
+				<< "-" << multiplier()
+				<< "-" << increment()
+				<< "-" << state_;
+#else
 				<< "-" << u128_tostring(multiplier())
 				<< "-" << u128_tostring(increment())
 				<< "-" << u128_tostring(state_);
-// #endif
+#endif
 			return ss.str();
 		}
 		bool deserialize(std::string const& data) {
