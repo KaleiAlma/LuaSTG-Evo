@@ -1,6 +1,11 @@
 # minizip
 # Load zip files
 
+if(WIN32 AND LSTG_ARM64 AND CMAKE_CROSSCOMPILING)
+    set(CMAKE_C_COMPILER cl)
+    set(CMAKE_CXX_COMPILER cl)
+endif()
+
 CPMAddPackage(
     NAME minizip_ng
     GITHUB_REPOSITORY zlib-ng/minizip-ng
@@ -20,6 +25,11 @@ CPMAddPackage(
         "WITH_AVX512 ${LSTG_AVX512F}"
 )
 
+
+if(WIN32 AND LSTG_ARM64 AND CMAKE_CROSSCOMPILING)
+    set(CMAKE_C_COMPILER clang)
+    set(CMAKE_CXX_COMPILER clang++)
+endif()
 # if(LINUX AND LSTG_ARM64 AND CMAKE_CROSSCOMPILING) # lld is broken when cross-compiling
 #     set_target_properties(minizip PROPERTIES LINKER_TYPE BFD)
 # endif()
