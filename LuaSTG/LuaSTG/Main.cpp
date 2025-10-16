@@ -18,7 +18,7 @@
 #pragma comment(linker, "/SUBSYSTEM:windows /ENTRY:mainCRTStartup")
 #endif // _WIN32
 
-int main(int argc, char *argv[]) {
+int main(int argc, char** argv) {
 #ifdef _DEBUG
 #ifdef _WIN32
 	_CrtSetDbgFlag(_CrtSetDbgFlag(_CRTDBG_REPORT_FLAG) | _CRTDBG_LEAK_CHECK_DF);
