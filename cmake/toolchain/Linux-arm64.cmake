@@ -14,12 +14,10 @@ set(CMAKE_LINKER_TYPE LLD)
 
 set(CMAKE_C_COMPILER_TARGET aarch64-linux-gnu)
 set(CMAKE_CXX_COMPILER_TARGET aarch64-linux-gnu)
-set(CMAKE_C_STANDARD_LINK_DIRECTORIES /usr/lib/aarch64-linux-gnu)
-set(CMAKE_CXX_STANDARD_LINK_DIRECTORIES /usr/lib/aarch64-linux-gnu)
 
-set(CMAKE_IGNORE_PATH
-    /usr/lib/x86_64-linux-gnu
-    /usr/include/x86_64-linux-gnu
-    /usr/lib64
-    /usr/lib
-)
+if(GITHUB_ACTIONS)
+    set(CMAKE_C_STANDARD_LINK_DIRECTORIES /usr/lib/aarch64-linux-gnu)
+    set(CMAKE_CXX_STANDARD_LINK_DIRECTORIES /usr/lib/aarch64-linux-gnu)
+
+    set(CMAKE_EXE_LINKER_FLAGS -L/usr/lib/aarch64-linux-gnu)
+endif()
