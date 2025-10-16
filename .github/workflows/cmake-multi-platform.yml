@@ -63,10 +63,19 @@ jobs:
         sudo apt update
         sudo apt install \
           gcc-14-aarch64-linux-gnu libstdc++-14-dev-arm64-cross binutils-aarch64-linux-gnu \
-          libx11-dev:arm64 libwayland-dev:arm64 libssl-dev:arm64
-        echo "CMAKE_C_IMPLICIT_LINK_DIRECTORIES_EXCLUDE=/usr/lib/x86_64-linux-gnu" >> $GITHUB_ENV
-        echo "CMAKE_CXX_IMPLICIT_LINK_DIRECTORIES_EXCLUDE=/usr/lib/x86_64-linux-gnu" >> $GITHUB_ENV
-        echo "LIBRARY_PATH=/usr/lib/aarch64-linux-gnu" >> $GITHUB_ENV
+          multistrap
+        cat <<- __EOF__ > multistrap.conf
+        [General]
+        noauth=true
+        aptsources=Ubuntu
+        bootstrap=Ubuntu
+
+        [Ubuntu]
+        source=http://archive.ubuntu.com/ubuntu/
+        suite=noble
+        packages=libx11-dev libwayland-dev libssl-dev mesa-utils mesa-common-dev libxext-dev libasound2-dev libpipewire-0.3-dev libaudio-dev libjack-dev libsndio-dev libpulse-dev libpulse-mainloop-glib0 libglib2.0-dev libxkbcommon-dev
+        __EOF__
+        sudo multistrap -a arm64 -d /var/chroot/noble-arm64 -f multistrap.conf
     - name: Configure Linux
       if: ${{ runner.os == 'Linux' }}
       run: |
@@ -77,8 +86,7 @@ jobs:
         sudo apt install cmake ninja-build llvm-20 clang-20 lld-20 clang-tools-20 \
           ccache mesa-utils mesa-common-dev libxext-dev libasound2-dev \
           libpipewire-0.3-dev libaudio-dev libjack-dev libsndio-dev libssl-dev \
-          libasound2-dev libpulse-dev libpulse-mainloop-glib0 libglib2.0-dev \
-          libxkbcommon-dev
+          libpulse-dev libpulse-mainloop-glib0 libglib2.0-dev libxkbcommon-dev
     - name: Configure Windows
       if: ${{ runner.os == 'Windows' }}
       run: |
