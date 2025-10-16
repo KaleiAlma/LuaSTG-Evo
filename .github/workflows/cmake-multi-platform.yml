@@ -63,19 +63,10 @@ jobs:
         sudo apt update
         sudo apt install \
           gcc-14-aarch64-linux-gnu libstdc++-14-dev-arm64-cross binutils-aarch64-linux-gnu \
-          multistrap
-        cat <<- __EOF__ > multistrap.conf
-        [General]
-        noauth=false
-        aptsources=Ubuntu
-        bootstrap=Ubuntu
-
-        [Ubuntu]
-        source=http://archive.ubuntu.com/ubuntu/
-        suite=noble
-        packages=libx11-dev libwayland-dev libssl-dev mesa-utils mesa-common-dev libxext-dev libasound2-dev libpipewire-0.3-dev libaudio-dev libjack-dev libsndio-dev libpulse-dev libpulse-mainloop-glib0 libglib2.0-dev libxkbcommon-dev
-        __EOF__
-        sudo multistrap -a arm64 -d /var/chroot/noble-arm64 -f multistrap.conf
+          mmdebstrap
+        sudo mmdebstrap --arch=arm64 --variant=minbase \
+          --include=build-essential,symlinks,libx11-dev,libwayland-dev,libssl-dev,mesa-utils,mesa-common-dev,libxext-dev,libasound2-dev,libpipewire-0.3-dev,libaudio-dev,libjack-dev,libsndio-dev,libpulse-dev,libpulse-mainloop-glib0,libglib2.0-dev,libxkbcommon-dev \
+          noble /var/chroot/noble-arm64 http://archive.ubuntu.com/ubuntu/
     - name: Configure Linux
       if: ${{ runner.os == 'Linux' }}
       run: |
