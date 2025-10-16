@@ -11,7 +11,7 @@
 #include "Utility/sfc.hpp"
 #include "Utility/jsf.hpp"
 
-#if !(defined(_WIN32) && defined(_M_ARM64))
+#ifndef _WIN32
 std::istream& operator>>(std::istream& src, __uint128_t& value) {
 	std::string input;
 	src >> input;
@@ -546,7 +546,7 @@ namespace UtilRandom {
 		std::string serialize() {
 			std::ostringstream ss;
 			ss << name()
-#if defined(_WIN32) && defined(_M_ARM64)
+#ifdef _WIN32
 				<< "-" << multiplier()
 				<< "-" << increment()
 				<< "-" << state_;
@@ -603,7 +603,7 @@ namespace UtilRandom {
 		std::string serialize() {
 			std::ostringstream ss;
 			ss << name()
-#if defined(_WIN32) && defined(_M_ARM64)
+#ifdef _WIN32
 				<< "-" << multiplier()
 				<< "-" << increment()
 				<< "-" << state_;
