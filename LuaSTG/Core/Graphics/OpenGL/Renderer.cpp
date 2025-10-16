@@ -449,8 +449,10 @@ namespace Core::Graphics::OpenGL {
     void Renderer::bindTextureSamplerState(ITexture2D* texture) {
         std::optional<Graphics::SamplerState> sampler_from_texture = texture ? texture->getSamplerState() : std::optional<Graphics::SamplerState>();
         Graphics::SamplerState sampler = sampler_from_texture.value_or(_sampler_state[IDX(_state_set.sampler_state)]);
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, static_cast<Texture2D*>(texture)->GetResource());
+        if (texture) {
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_2D, static_cast<Texture2D*>(texture)->GetResource());
+        }
         setSamplerState(sampler, 0);
         // glBindSampler(0, static_cast<SamplerState*>(sampler)->GetState());
     }
@@ -794,12 +796,11 @@ namespace Core::Graphics::OpenGL {
     }
 
     void Renderer::setTexture(ITexture2D* texture) {
-        if (!texture) return;
         if (_draw_list.command.size > 0 && is_same(_draw_list.command.data[_draw_list.command.size - 1].texture, texture)) {
             // Can merge
         } else {
             // New render command
-            if ((_draw_list.command.capacity - _draw_list.command.size) < 1) {
+            if (_draw_list.command.size > _draw_list.command.capacity - 1) {
                 batchFlush(); // Free up space
             }
             _draw_list.command.size += 1;
@@ -812,6 +813,7 @@ namespace Core::Graphics::OpenGL {
         if (!is_same(_state_texture, texture)) {
             _state_texture = static_cast<Texture2D*>(texture);
         }
+        if (!texture) return;
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, static_cast<Texture2D*>(texture)->GetResource());
     }
@@ -898,11 +900,11 @@ namespace Core::Graphics::OpenGL {
             assert(false); return false;
         }
 
-        if ((_draw_list.vertex.capacity - _draw_list.vertex.size) < nvert || (_draw_list.index.capacity - _draw_list.index.size) < nidx) {
+        if ((_draw_list.vertex.capacity - _draw_list.vertex.size) < nvert || (_draw_list.index.capacity - _draw_list.index.size) < nidx || _draw_list.command.size <= 0) {
             if (!batchFlush()) return false;
         }
 
-        // assert(_draw_list.command.size > 0);
+        assert(_draw_list.command.size > 0 && _draw_list.command.size < _draw_list.command.capacity);
         DrawCommand& cmd_ = _draw_list.command.data[_draw_list.command.size - 1];
 
         *ppvert = _draw_list.vertex.data + _draw_list.vertex.size;

@@ -66,17 +66,17 @@ namespace Core::Graphics::OpenGL {
 
 	struct DrawList {
 		struct VertexBuffer {
-			const size_t capacity = 32768;
+			static const size_t capacity = 32768;
 			size_t size = 0;
 			IRenderer::DrawVertex data[32768] = {};
 		} vertex;
 		struct IndexBuffer {
-			const size_t capacity = 32768;
+			static const size_t capacity = 32768;
 			size_t size = 0;
 			IRenderer::DrawIndex data[32768] = {};
 		} index;
 		struct DrawCommandBuffer {
-			const size_t capacity = 2048;
+			static const size_t capacity = 2048;
 			size_t size = 0;
 			DrawCommand data[2048] = {};
 		} command;
