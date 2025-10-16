@@ -60,6 +60,11 @@ elseif(TARGET_ARCHITECTURE STREQUAL "aarch64")
     set(LSTG_ARM64 ON)
 endif()
 
+if(LINUX AND CMAKE_CROSSCOMPILING AND LSTG_ARM64 AND GITHUB_ACTIONS)
+    set(CMAKE_INSTALL_RPATH /usr/lib/aarch64-linux-gnu)
+    link_directories(BEFORE /usr/lib/aarch64-linux-gnu)
+    set(CMAKE_BUILD_WITH_INSTALL_RPATH ON)
+endif()
 
 #option(LINK_STEAM_API "Enable Steam API" OFF)
 #option(LUASTG_RESDIR "Custom configurations" "res")
@@ -73,15 +78,8 @@ include(cmake/loader.cpm.cmake)
 
 CPMInitialize()
 
-
-if(LINUX AND CMAKE_CROSSCOMPILING AND LSTG_ARM64 AND GITHUB_ACTIONS)
-    set(CMAKE_INSTALL_RPATH /usr/lib/aarch64-linux-gnu)
-    link_directories(BEFORE /usr/lib/aarch64-linux-gnu)
-    set(CMAKE_BUILD_WITH_INSTALL_RPATH ON)
-else()
-    set(CMAKE_C_COMPILER_LAUNCHER ccache CACHE STRING "" FORCE)
-    set(CMAKE_CXX_COMPILER_LAUNCHER ccache CACHE STRING "" FORCE)
-endif()
+set(CMAKE_C_COMPILER_LAUNCHER ccache CACHE STRING "" FORCE)
+set(CMAKE_CXX_COMPILER_LAUNCHER ccache CACHE STRING "" FORCE)
 
 # include(cmake/external.cmake)
 # include(cmake/pugixml.cmake)
