@@ -2,8 +2,8 @@
 # Load zip files
 
 if(WIN32 AND LSTG_ARM64 AND CMAKE_CROSSCOMPILING)
-    set(CMAKE_C_COMPILER cl)
-    set(CMAKE_CXX_COMPILER cl)
+    set(CMAKE_C_COMPILER "C:/Program Files/Microsoft Visual Studio/2022/Enterprise/VC/Tools/MSVC/14.44.35207/bin/HostX64/ARM64/cl")
+    set(CMAKE_CXX_COMPILER "C:/Program Files/Microsoft Visual Studio/2022/Enterprise/VC/Tools/MSVC/14.44.35207/bin/HostX64/ARM64/cl")
 endif()
 
 CPMAddPackage(
