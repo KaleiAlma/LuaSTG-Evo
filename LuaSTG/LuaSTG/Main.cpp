@@ -7,7 +7,13 @@
 #include "AppFrame.h"
 #include "RuntimeCheck.hpp"
 
+#ifdef UNICODE
+    #undef UNICODE
+#endif
 #include "SDL3/SDL_main.h"
+#ifdef _UNICODE
+    #define UNICODE 1
+#endif
 
 #ifdef SDL_PLATFORM_APPLE
 #include <unistd.h>
@@ -21,37 +27,37 @@
 int main(int argc, char** argv) {
 #ifdef _DEBUG
 #ifdef _WIN32
-	_CrtSetDbgFlag(_CrtSetDbgFlag(_CRTDBG_REPORT_FLAG) | _CRTDBG_LEAK_CHECK_DF);
-	// _CrtSetBreakAlloc(5351);
+    _CrtSetDbgFlag(_CrtSetDbgFlag(_CRTDBG_REPORT_FLAG) | _CRTDBG_LEAK_CHECK_DF);
+    // _CrtSetBreakAlloc(5351);
 #endif
 #endif
-	Platform::CommandLineArguments::Get().Update(argc, argv);
+    Platform::CommandLineArguments::Get().Update(argc, argv);
 
 #ifdef SDL_PLATFORM_APPLE
-	chdir(SDL_GetBasePath());
+    chdir(SDL_GetBasePath());
 #endif
 
-	LuaSTG::Debugger::Logger::create();
+    LuaSTG::Debugger::Logger::create();
 
-	int result = EXIT_SUCCESS;
-	if (LuaSTG::SteamAPI::Init()) {
-		if (LAPP.Init()) {
-			LAPP.Run();
-			result = EXIT_SUCCESS;
-		} else {
-			Platform::MessageBox::Error(LUASTG_INFO,
-				"Engine Initialization Failed!\n"
-				"See engine.log for details.\n"
-				"Please try relaunching. If the problem persists, try contacting the developer.");
-			result = EXIT_FAILURE;
-		}
-		LAPP.Shutdown();
-		LuaSTG::SteamAPI::Shutdown();
-	} else {
-		result = EXIT_FAILURE;
-	}
+    int result = EXIT_SUCCESS;
+    if (LuaSTG::SteamAPI::Init()) {
+        if (LAPP.Init()) {
+            LAPP.Run();
+            result = EXIT_SUCCESS;
+        } else {
+            Platform::MessageBox::Error(LUASTG_INFO,
+                "Engine Initialization Failed!\n"
+                "See engine.log for details.\n"
+                "Please try relaunching. If the problem persists, try contacting the developer.");
+            result = EXIT_FAILURE;
+        }
+        LAPP.Shutdown();
+        LuaSTG::SteamAPI::Shutdown();
+    } else {
+        result = EXIT_FAILURE;
+    }
 
-	LuaSTG::Debugger::Logger::destroy();
+    LuaSTG::Debugger::Logger::destroy();
 
-	return result;
+    return result;
 }
