@@ -1,5 +1,6 @@
 ﻿#include "LuaBinding/LuaInternalSource.hpp"
 
+#if _WIN32
 #pragma region x86 lib
 static const std::string _InternalSource_x86 = R"(
 
@@ -19,6 +20,47 @@ package.cpath = package.cpath .. ".\\?.dll;"
 
 )";
 #pragma endregion
+
+#pragma region arm64 lib
+static const std::string _InternalSource_arm64 = R"(
+
+package.cpath = ""
+package.cpath = package.cpath .. ".\\arm64\\?.dll;"
+package.cpath = package.cpath .. ".\\?.dll;"
+
+)";
+#pragma endregion
+#else
+#pragma region x86 lib
+static const std::string _InternalSource_x86 = R"(
+
+package.cpath = ""
+package.cpath = package.cpath .. ".\\x86\\?.so;"
+package.cpath = package.cpath .. ".\\?.so;"
+
+)";
+#pragma endregion
+
+#pragma region x64 lib
+static const std::string _InternalSource_amd64 = R"(
+
+package.cpath = ""
+package.cpath = package.cpath .. ".\\amd64\\?.so;"
+package.cpath = package.cpath .. ".\\?.so;"
+
+)";
+#pragma endregion
+
+#pragma region arm64 lib
+static const std::string _InternalSource_arm64 = R"(
+
+package.cpath = ""
+package.cpath = package.cpath .. ".\\arm64\\?.so;"
+package.cpath = package.cpath .. ".\\?.so;"
+
+)";
+#pragma endregion
+#endif
 
 #pragma region main
 static const std::string _InternalSource_Main = R"(
@@ -78,10 +120,6 @@ end
 
 print = lstg.Print
 
-if cjson then
-    package.loaded["cjson"] = cjson -- fuck you cjson
-end
-
 local rad = math.rad
 local deg = math.deg
 local sin = math.sin
@@ -103,14 +141,21 @@ function lstg.atan2(y, x) return deg(atan2(y, x)) end
 #pragma endregion
 
 namespace LuaSTGPlus {
-	std::string LuaInternalSource_1() {
-		if constexpr (sizeof(void*) >= 8) {
-			return _InternalSource_amd64 + _InternalSource_Main;
-		} else {
-			return _InternalSource_x86 + _InternalSource_Main;
-		}
-	}
-	std::string LuaInternalSource_2() {
-		return _InternalSource_API;
-	}
+    std::string LuaInternalSource_1() {
+        // if constexpr (sizeof(void*) >= 8) {
+        // 	return _InternalSource_amd64 + _InternalSource_Main;
+        // } else {
+        // 	return _InternalSource_x86 + _InternalSource_Main;
+        // }
+        return
+#if defined(__aarch64__) || defined(_M_ARM64)
+            _InternalSource_arm64
+#elif defined(__x86_64) || defined(__x86_64__) || defined(__amd64) || defined(_M_X64)
+            _InternalSource_amd64
+#endif
+            + _InternalSource_Main;
+    }
+    std::string LuaInternalSource_2() {
+        return _InternalSource_API;
+    }
 }
