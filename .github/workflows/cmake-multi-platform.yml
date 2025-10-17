@@ -41,8 +41,8 @@ jobs:
           rev: westmere
           rev_win: SSE4.2
         - os: macos-15
-          rev: armv8.2-a
-          rev_win: armv8.2
+          rev: armv8-a
+          rev_win: armv8
         # build_type: [Release]
         # build_type: [Release, RelWithDebInfo, Debug]
 
