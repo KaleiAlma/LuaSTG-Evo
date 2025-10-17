@@ -1,10 +1,10 @@
 #define TINYGLTF_IMPLEMENTATION
 #include "tiny_gltf.h"
 #include "stb_vorbis.c"
+#undef L // fuck stb_vorbis
 #define MA_IMPLEMENTATION
 #define MA_USE_STDINT
 #include "miniaudio.h"
-#undef L // fuck stb_vorbis
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 #define STB_IMAGE_WRITE_IMPLEMENTATION
