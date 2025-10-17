@@ -488,7 +488,7 @@ namespace Core::Graphics::OpenGL {
                         bindTextureSamplerState(cmd_.texture.get());
                         glUseProgram(_programs[IDX(_state_set.vertex_color_blend_state)][IDX(_state_set.fog_state)][IDX(_state_set.texture_alpha_type)]);
                         // glDrawElementsBaseVertex(GL_TRIANGLES, cmd_.index_count, GL_UNSIGNED_SHORT, 0, vi_.index_offset);
-                        glDrawElementsBaseVertex(GL_TRIANGLES, cmd_.index_count, GL_UNSIGNED_SHORT, (void*)(vi_.index_offset * sizeof(DrawIndex)), vi_.vertex_offset);
+                        // glDrawElementsBaseVertex(GL_TRIANGLES, cmd_.index_count, GL_UNSIGNED_SHORT, (void*)(vi_.index_offset * sizeof(DrawIndex)), vi_.vertex_offset);
                     }
                     vi_.vertex_offset += cmd_.vertex_count;
                     vi_.index_offset += cmd_.index_count;
