@@ -6,12 +6,12 @@
 #include "LuaBinding/LuaInternalSource.hpp"
 #include "LuaBinding/LuaWrapper.hpp"
 extern "C" {
-// #include "lua_cjson.h"
-// #include "lfs.h"
-// extern int luaopen_utf8(lua_State* L);
-// extern int luaopen_string_pack(lua_State* L);
-// extern int luaopen_mime_core(lua_State* L);
-// extern int luaopen_socket_core(lua_State* L);
+#include "lua_cjson.h"
+#include "lfs.h"
+extern int luaopen_utf8(lua_State* L);
+extern int luaopen_string_pack(lua_State* L);
+extern int luaopen_mime_core(lua_State* L);
+extern int luaopen_socket_core(lua_State* L);
 // extern int luaopen_toml(lua_State * L);
 }
 #include "lua_steam.h"
@@ -228,9 +228,9 @@ namespace LuaSTGPlus {
                 spdlog::error("[luajit] Error in built-in script 'internal.main'");
                 return false;
             }
-            
-            // luaopen_cjson(L);
-            // luaopen_lfs(L);
+
+            luaopen_cjson(L);
+            luaopen_lfs(L);
             //lua_xlsx_open(L);
             //lua_csv_open(L);
             lua_steam_open(L);
@@ -238,20 +238,20 @@ namespace LuaSTGPlus {
             // luaopen_dwrite(L);
             luaopen_particle(L);
             luaopen_random(L);
-            // luaopen_utf8(L);
-            // luaopen_string_pack(L);
-            // {
-            //     lua_getfield(L, LUA_REGISTRYINDEX, "_LOADED"); // ... _LOADED
-            //     {
-            //         luaopen_socket_core(L);        // ... _LOADED socket
-            //         lua_setfield(L, -2, "socket.core"); // ... _LOADED
-            //         luaopen_mime_core(L);          // ... _LOADED mime
-            //         lua_setfield(L, -2, "mime.core");   // ... _LOADED
-            //         luaopen_toml(L);               // ... _LOADED toml
-            //         lua_setfield(L, -2, "toml");   // ... _LOADED
-            //     }
-            //     lua_pop(L, 1); // ...
-            // }
+            luaopen_utf8(L);
+            luaopen_string_pack(L);
+            {
+                lua_getfield(L, LUA_REGISTRYINDEX, "_LOADED"); // ... _LOADED
+                {
+                    luaopen_socket_core(L);        // ... _LOADED socket
+                    lua_setfield(L, -2, "socket.core"); // ... _LOADED
+                    luaopen_mime_core(L);          // ... _LOADED mime
+                    lua_setfield(L, -2, "mime.core");   // ... _LOADED
+                    // luaopen_toml(L);               // ... _LOADED toml
+                    // lua_setfield(L, -2, "toml");   // ... _LOADED
+                }
+                lua_pop(L, 1); // ...
+            }
             lua_settop(L, 0);
             
             RegistBuiltInClassWrapper(L);  // register built-in classes (luastg lib)

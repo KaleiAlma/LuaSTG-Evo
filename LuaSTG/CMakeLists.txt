@@ -199,10 +199,10 @@ target_link_libraries(LuaSTG PRIVATE
     # imgui
     # implot
     # lstgext
-    # lua_cjson
+    lua_cjson
     # toml.lua
-    # lua_filesystem
-    # luasocket
+    lua_filesystem
+    luasocket
     lua_imgui
     # imgui_impl_sdl2
     # imgui_impl_opengl3
