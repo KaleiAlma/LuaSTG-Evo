@@ -27,7 +27,7 @@ jobs:
           rev_win: AVX2
         - os: ubuntu-24.04-arm
           rev: armv8-a
-          rev_win: armv8
+          rev_win: armv8.0
         - os: windows-latest
           rev: westmere
           rev_win: SSE4.2
@@ -36,7 +36,7 @@ jobs:
           rev_win: AVX2
         - os: windows-11-arm
           rev: armv8-a
-          rev_win: armv8
+          rev_win: armv8.0
         - os: macos-15-intel
           rev: westmere
           rev_win: SSE4.2
