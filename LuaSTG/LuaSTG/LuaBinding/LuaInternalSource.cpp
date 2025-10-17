@@ -35,8 +35,8 @@ package.cpath = package.cpath .. ".\\?.dll;"
 static const std::string _InternalSource_x86 = R"(
 
 package.cpath = ""
-package.cpath = package.cpath .. ".\\x86\\?.so;"
-package.cpath = package.cpath .. ".\\?.so;"
+package.cpath = package.cpath .. "./x86/?.so;"
+package.cpath = package.cpath .. "./?.so;"
 
 )";
 #pragma endregion
@@ -45,8 +45,8 @@ package.cpath = package.cpath .. ".\\?.so;"
 static const std::string _InternalSource_amd64 = R"(
 
 package.cpath = ""
-package.cpath = package.cpath .. ".\\amd64\\?.so;"
-package.cpath = package.cpath .. ".\\?.so;"
+package.cpath = package.cpath .. "./amd64/?.so;"
+package.cpath = package.cpath .. "./?.so;"
 
 )";
 #pragma endregion
@@ -55,8 +55,8 @@ package.cpath = package.cpath .. ".\\?.so;"
 static const std::string _InternalSource_arm64 = R"(
 
 package.cpath = ""
-package.cpath = package.cpath .. ".\\arm64\\?.so;"
-package.cpath = package.cpath .. ".\\?.so;"
+package.cpath = package.cpath .. "./arm64/?.so;"
+package.cpath = package.cpath .. "./?.so;"
 
 )";
 #pragma endregion
@@ -66,13 +66,9 @@ package.cpath = package.cpath .. ".\\?.so;"
 static const std::string _InternalSource_Main = R"(
 
 package.path = ""
-package.path = package.path .. "?.lua;"
-package.path = package.path .. "?/init.lua;"
-package.path = package.path .. "src/?.lua;"
-
-package.path = package.path .. ".\\?.lua;"
-package.path = package.path .. ".\\?\\init.lua;"
-package.path = package.path .. ".\\src\\?.lua;"
+package.path = package.path .. "./?.lua;"
+package.path = package.path .. "./?/init.lua;"
+package.path = package.path .. "./src/?.lua;"
 
 function GameInit()
 end
