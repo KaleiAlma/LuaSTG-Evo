@@ -13,7 +13,9 @@
 
 // Default Fragment Shader
 const constexpr GLchar default_fragment[]{R"(
-#version 410 core
+#version 140
+#extension GL_ARB_separate_shader_objects : require
+#extension GL_ARB_explicit_attrib_location : require
 
 #define {}
 #define {}
@@ -205,7 +207,9 @@ const constexpr std::string_view dfrag_sv{default_fragment};
 
 // Default Vertex Shader
 const constexpr GLchar default_vertex[]{R"(
-#version 410 core
+#version 140
+#extension GL_ARB_separate_shader_objects : require
+#extension GL_ARB_explicit_attrib_location : require
 
 #define VVAL{}
 

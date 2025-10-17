@@ -15,7 +15,9 @@
 
 // Default Fragment Shader
 const GLchar sc_frag[]{R"(
-#version 410 core
+#version 140
+#extension GL_ARB_separate_shader_objects : require
+#extension GL_ARB_explicit_attrib_location : require
 uniform sampler2D sampler0;
 
 layout(location = 0) in vec2 TexCoord;
@@ -28,7 +30,9 @@ void main() {
 
 // Default Vertex Shader
 const GLchar sc_vert[]{R"(
-#version 410 core
+#version 140
+#extension GL_ARB_separate_shader_objects : require
+#extension GL_ARB_explicit_attrib_location : require
 layout(location = 0) in vec2 pos;
 layout(location = 0) out vec2 TexCoord;
 
