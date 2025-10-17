@@ -26,8 +26,8 @@ jobs:
           rev: haswell
           rev_win: AVX2
         - os: ubuntu-24.04-arm
-          rev: armv8.2-a
-          rev_win: armv8.2
+          rev: armv8-a
+          rev_win: armv8
         - os: windows-latest
           rev: westmere
           rev_win: SSE4.2
@@ -35,14 +35,14 @@ jobs:
           rev: haswell
           rev_win: AVX2
         - os: windows-11-arm
-          rev: armv8.2-a
-          rev_win: armv8.2
+          rev: armv8-a
+          rev_win: armv8
         - os: macos-15-intel
           rev: westmere
           rev_win: SSE4.2
         - os: macos-15
-          rev: armv8-a
-          rev_win: armv8
+          rev: armv8.2-a
+          rev_win: armv8.2
         # build_type: [Release]
         # build_type: [Release, RelWithDebInfo, Debug]
 
