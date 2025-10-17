@@ -1,5 +1,6 @@
 #define TINYGLTF_IMPLEMENTATION
 #include "tiny_gltf.h"
+#include "stb_vorbis.c"
 #define MA_IMPLEMENTATION
 #define MA_USE_STDINT
 #include "miniaudio.h"

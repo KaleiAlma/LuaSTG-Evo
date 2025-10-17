@@ -51,7 +51,7 @@ CPMAddPackage(
     DOWNLOAD_ONLY YES
 )
 
-add_library(nothings_stb INTERFACE ${nothings_stb_SOURCE_DIR}/stb_vorbis.c)
+add_library(nothings_stb INTERFACE)
 target_include_directories(nothings_stb INTERFACE ${nothings_stb_SOURCE_DIR})
 
 
