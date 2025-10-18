@@ -3,7 +3,7 @@
 CPMAddPackage(
     NAME SDL3
     GITHUB_REPOSITORY libsdl-org/SDL
-    GIT_TAG release-3.2.22
+    GIT_TAG release-3.2.24
     OPTIONS
         "SDL_INSTALL_CPACK OFF"
         "SDL_INSTALL_DOCS OFF"
