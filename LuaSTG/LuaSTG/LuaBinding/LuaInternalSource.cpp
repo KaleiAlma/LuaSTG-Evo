@@ -116,6 +116,10 @@ end
 
 print = lstg.Print
 
+if cjson then
+    package.loaded["cjson"] = cjson -- fuck you cjson
+end
+
 local rad = math.rad
 local deg = math.deg
 local sin = math.sin

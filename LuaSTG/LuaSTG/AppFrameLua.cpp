@@ -12,7 +12,7 @@ extern int luaopen_utf8(lua_State* L);
 extern int luaopen_string_pack(lua_State* L);
 extern int luaopen_mime_core(lua_State* L);
 extern int luaopen_socket_core(lua_State* L);
-// extern int luaopen_toml(lua_State * L);
+extern int luaopen_toml(lua_State * L);
 }
 #include "lua_steam.h"
 #include "LuaBinding/lua_random.hpp"
@@ -230,7 +230,7 @@ namespace LuaSTGPlus {
             }
 
             luaopen_cjson(L);
-            luaopen_lfs(L);
+            // luaopen_lfs(L);
             //lua_xlsx_open(L);
             //lua_csv_open(L);
             lua_steam_open(L);
@@ -243,12 +243,14 @@ namespace LuaSTGPlus {
             {
                 lua_getfield(L, LUA_REGISTRYINDEX, "_LOADED"); // ... _LOADED
                 {
+                    luaopen_lfs(L);
+                    lua_setfield(L, -2, "lfs"); // ... _LOADED
                     luaopen_socket_core(L);        // ... _LOADED socket
                     lua_setfield(L, -2, "socket.core"); // ... _LOADED
                     luaopen_mime_core(L);          // ... _LOADED mime
                     lua_setfield(L, -2, "mime.core");   // ... _LOADED
-                    // luaopen_toml(L);               // ... _LOADED toml
-                    // lua_setfield(L, -2, "toml");   // ... _LOADED
+                    luaopen_toml(L);               // ... _LOADED toml
+                    lua_setfield(L, -2, "toml");   // ... _LOADED
                 }
                 lua_pop(L, 1); // ...
             }

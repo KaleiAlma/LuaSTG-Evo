@@ -200,7 +200,7 @@ target_link_libraries(LuaSTG PRIVATE
     # implot
     # lstgext
     lua_cjson
-    # toml.lua
+    toml.lua
     lua_filesystem
     luasocket
     lua_imgui
