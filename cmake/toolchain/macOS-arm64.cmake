@@ -2,11 +2,11 @@
 if(NOT CMAKE_HOST_SYSTEM_NAME STREQUAL "Darwin")
     set(CMAKE_SYSTEM_NAME Darwin)
 endif()
-if(NOT CMAKE_HOST_SYSTEM_PROCESSOR STREQUAL "arm64")
-    set(CMAKE_SYSTEM_NAME Darwin)
-    set(CMAKE_SYSTEM_PROCESSOR arm64)
-endif()
-set(CMAKE_OSX_ARCHITECTURES "arm64" CACHE INTERNAL "")
+# if(NOT CMAKE_HOST_SYSTEM_PROCESSOR STREQUAL "arm64")
+#     set(CMAKE_SYSTEM_NAME Darwin)
+#     set(CMAKE_SYSTEM_PROCESSOR arm64)
+# endif()
+set(CMAKE_OSX_ARCHITECTURES "arm64;x86_64" CACHE INTERNAL "")
 
 execute_process(
     COMMAND brew --prefix llvm@20
@@ -26,6 +26,6 @@ set(CMAKE_CXX_COMPILER ${LLVM_DIR}/bin/clang++)
 
 set(CMAKE_LINKER_TYPE LLD)
 
-set(CMAKE_C_COMPILER_TARGET aarch64-apple-darwin)
-set(CMAKE_CXX_COMPILER_TARGET aarch64-apple-darwin)
+# set(CMAKE_C_COMPILER_TARGET aarch64-apple-darwin)
+# set(CMAKE_CXX_COMPILER_TARGET aarch64-apple-darwin)
 

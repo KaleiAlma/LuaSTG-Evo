@@ -100,9 +100,10 @@ endfunction()
 #     )
 # endfunction()
 
-
-set(LSTG_COMPILE_OPTS "-march=${TARGET_ARCH_REV}")
-set(LSTG_COMPILE_OPTS_WIN "/arch:${TARGET_ARCH_REV_WIN}")
+if(NOT APPLE)
+    set(LSTG_COMPILE_OPTS "-march=${TARGET_ARCH_REV}")
+    set(LSTG_COMPILE_OPTS_WIN "/arch:${TARGET_ARCH_REV_WIN}")
+endif()
 
 if(MSVC)
     add_compile_options(
