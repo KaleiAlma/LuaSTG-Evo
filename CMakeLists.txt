@@ -13,8 +13,8 @@ option(BUILD_SHARED_LIBS OFF)
 
 set(DEFAULT_x86_64_REVISION "westmere" CACHE STRING "Clang x86_64 CPU revision")
 set(DEFAULT_x86_64_REVISION_WINDOWS "SSE4.2" CACHE STRING "MSVC x64 architecture flag")
-set(DEFAULT_ARM64_REVISION "armv8.2-a" CACHE STRING "Clang ARM64 CPU revision")
-set(DEFAULT_ARM64_REVISION_WINDOWS "armv8.2" CACHE STRING "MSVC ARM64 architecture flag")
+set(DEFAULT_ARM64_REVISION "armv8-a" CACHE STRING "Clang ARM64 CPU revision")
+set(DEFAULT_ARM64_REVISION_WINDOWS "armv8.0" CACHE STRING "MSVC ARM64 architecture flag")
 
 include(cmake/architecture.cmake)
 target_architecture(TARGET_ARCHITECTURE)
