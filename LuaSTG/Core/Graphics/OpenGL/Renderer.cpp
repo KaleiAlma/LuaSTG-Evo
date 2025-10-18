@@ -862,7 +862,6 @@ namespace Core::Graphics::OpenGL {
         vbuf_[3] = v4;
         _draw_list.vertex.size += 4;
         DrawIndex* ibuf_ = _draw_list.index.data + _draw_list.index.size;
-        spdlog::debug("[core] current index: {} | current command: {}", vi_.vertex_offset + cmd_.vertex_count, _draw_list.command.size - 1);
         ibuf_[0] = vi_.vertex_offset + cmd_.vertex_count;
         ibuf_[1] = vi_.vertex_offset + cmd_.vertex_count + 1;
         ibuf_[2] = vi_.vertex_offset + cmd_.vertex_count + 2;
