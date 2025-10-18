@@ -7,7 +7,6 @@ CPMAddPackage(
     GITHUB_REPOSITORY nlohmann/json
     OPTIONS
     "JSON_BuildTests OFF"
-    "JSON_Install ON"
 )
 
 # gabime spdlog
@@ -28,7 +27,6 @@ CPMAddPackage(
     OPTIONS
     ${SPDLOG_WIN32_OPTS}
     "SPDLOG_DISABLE_DEFAULT_LOGGER ON"
-    "SPDLOG_INSTALL ON"
 )
 
 lstgext_tgtopts_full(spdlog)
