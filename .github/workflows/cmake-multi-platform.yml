@@ -38,8 +38,7 @@ jobs:
           rev: armv8-a
           rev_win: armv8.0
         - os: macos-15
-          rev: armv8.2-a
-          rev_win: armv8.2
+          rev_win: universal # just a placeholder
         # build_type: [Release]
         # build_type: [Release, RelWithDebInfo, Debug]
 
