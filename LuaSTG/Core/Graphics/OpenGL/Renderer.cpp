@@ -307,6 +307,7 @@ namespace Core::Graphics::OpenGL {
         setViewport(_state_set.viewport);
         setScissorRect(_state_set.scissor_rect);
 
+        clearDrawList();
         setVertexColorBlendState(_state_set.vertex_color_blend_state);
         setTexture(_state_texture.get());
         setSamplerState(_state_set.sampler_state, 0);
@@ -489,6 +490,7 @@ namespace Core::Graphics::OpenGL {
                         glUseProgram(_programs[IDX(_state_set.vertex_color_blend_state)][IDX(_state_set.fog_state)][IDX(_state_set.texture_alpha_type)]);
                         // glDrawElementsBaseVertex(GL_TRIANGLES, cmd_.index_count, GL_UNSIGNED_SHORT, 0, vi_.index_offset);
                         // glDrawElementsBaseVertex(GL_TRIANGLES, cmd_.index_count, GL_UNSIGNED_SHORT, (void*)(vi_.index_offset * sizeof(DrawIndex)), vi_.vertex_offset);
+                        glDrawElements(GL_TRIANGLES, cmd_.index_count, GL_UNSIGNED_SHORT, (void*)(vi_.index_offset * sizeof(DrawIndex)));
                     }
                     vi_.vertex_offset += cmd_.vertex_count;
                     vi_.index_offset += cmd_.index_count;
@@ -564,6 +566,9 @@ namespace Core::Graphics::OpenGL {
         glBindBufferBase(GL_UNIFORM_BUFFER, 3, _fog_data_buffer);
         // };
         // glBindBuffersBase(GL_UNIFORM_BUFFER, 0, 4, bufs);
+
+        _vi_buffer[_vi_buffer_index].vertex_offset = 0;
+        _vi_buffer[_vi_buffer_index].index_offset = 0;
 
         initState();
 
@@ -824,15 +829,17 @@ namespace Core::Graphics::OpenGL {
         }
         assert(_draw_list.command.size > 0);
         DrawCommand& cmd_ = _draw_list.command.data[_draw_list.command.size - 1];
+        VertexIndexBuffer& vi_ = _vi_buffer[_vi_buffer_index];
+
         IRenderer::DrawVertex* vbuf_ = _draw_list.vertex.data + _draw_list.vertex.size;
         vbuf_[0] = v1;
         vbuf_[1] = v2;
         vbuf_[2] = v3;
         _draw_list.vertex.size += 3;
         DrawIndex* ibuf_ = _draw_list.index.data + _draw_list.index.size;
-        ibuf_[0] = cmd_.vertex_count;
-        ibuf_[1] = cmd_.vertex_count + 1;
-        ibuf_[2] = cmd_.vertex_count + 2;
+        ibuf_[0] = vi_.vertex_offset + cmd_.vertex_count;
+        ibuf_[1] = vi_.vertex_offset + cmd_.vertex_count + 1;
+        ibuf_[2] = vi_.vertex_offset + cmd_.vertex_count + 2;
         _draw_list.index.size += 3;
         cmd_.vertex_count += 3;
         cmd_.index_count += 3;
@@ -847,6 +854,7 @@ namespace Core::Graphics::OpenGL {
         }
         assert(_draw_list.command.size > 0);
         DrawCommand& cmd_ = _draw_list.command.data[_draw_list.command.size - 1];
+        VertexIndexBuffer& vi_ = _vi_buffer[_vi_buffer_index];
         IRenderer::DrawVertex* vbuf_ = _draw_list.vertex.data + _draw_list.vertex.size;
         vbuf_[0] = v1;
         vbuf_[1] = v2;
@@ -854,12 +862,13 @@ namespace Core::Graphics::OpenGL {
         vbuf_[3] = v4;
         _draw_list.vertex.size += 4;
         DrawIndex* ibuf_ = _draw_list.index.data + _draw_list.index.size;
-        ibuf_[0] = cmd_.vertex_count;
-        ibuf_[1] = cmd_.vertex_count + 1;
-        ibuf_[2] = cmd_.vertex_count + 2;
-        ibuf_[3] = cmd_.vertex_count;
-        ibuf_[4] = cmd_.vertex_count + 2;
-        ibuf_[5] = cmd_.vertex_count + 3;
+        spdlog::debug("[core] current index: {} | current command: {}", vi_.vertex_offset + cmd_.vertex_count, _draw_list.command.size - 1);
+        ibuf_[0] = vi_.vertex_offset + cmd_.vertex_count;
+        ibuf_[1] = vi_.vertex_offset + cmd_.vertex_count + 1;
+        ibuf_[2] = vi_.vertex_offset + cmd_.vertex_count + 2;
+        ibuf_[3] = vi_.vertex_offset + cmd_.vertex_count;
+        ibuf_[4] = vi_.vertex_offset + cmd_.vertex_count + 2;
+        ibuf_[5] = vi_.vertex_offset + cmd_.vertex_count + 3;
         _draw_list.index.size += 6;
         cmd_.vertex_count += 4;
         cmd_.index_count += 6;
@@ -879,6 +888,7 @@ namespace Core::Graphics::OpenGL {
 
         assert(_draw_list.command.size > 0);
         DrawCommand& cmd_ = _draw_list.command.data[_draw_list.command.size - 1];
+        VertexIndexBuffer& vi_ = _vi_buffer[_vi_buffer_index];
 
         IRenderer::DrawVertex* vbuf_ = _draw_list.vertex.data + _draw_list.vertex.size;
         std::memcpy(vbuf_, pvert, nvert * sizeof(IRenderer::DrawVertex));
@@ -886,7 +896,7 @@ namespace Core::Graphics::OpenGL {
 
         DrawIndex* ibuf_ = _draw_list.index.data + _draw_list.index.size;
         for (size_t idx_ = 0; idx_ < nidx; idx_ += 1) {
-            ibuf_[idx_] = cmd_.vertex_count + pidx[idx_];
+            ibuf_[idx_] = vi_.vertex_offset + cmd_.vertex_count + pidx[idx_];
         }
         _draw_list.index.size += nidx;
 
@@ -906,6 +916,7 @@ namespace Core::Graphics::OpenGL {
 
         assert(_draw_list.command.size > 0 && _draw_list.command.size < _draw_list.command.capacity);
         DrawCommand& cmd_ = _draw_list.command.data[_draw_list.command.size - 1];
+        VertexIndexBuffer& vi_ = _vi_buffer[_vi_buffer_index];
 
         *ppvert = _draw_list.vertex.data + _draw_list.vertex.size;
         _draw_list.vertex.size += nvert;
@@ -913,7 +924,7 @@ namespace Core::Graphics::OpenGL {
         *ppidx = _draw_list.index.data + _draw_list.index.size;
         _draw_list.index.size += nidx;
 
-        *idxoffset = cmd_.vertex_count; // Output vertex offset
+        *idxoffset = vi_.vertex_offset + cmd_.vertex_count; // Output vertex offset
         cmd_.vertex_count += nvert;
         cmd_.index_count += nidx;
 
