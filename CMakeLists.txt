@@ -75,8 +75,6 @@ CPMInitialize()
 set(CMAKE_C_COMPILER_LAUNCHER ccache CACHE STRING "" FORCE)
 set(CMAKE_CXX_COMPILER_LAUNCHER ccache CACHE STRING "" FORCE)
 
-# include(cmake/external.cmake)
-# include(cmake/pugixml.cmake)
 include(cmake/packages.cpm.cmake)
 include(cmake/packages.gfx.cmake)
 include(cmake/packages.imgui.cmake)
