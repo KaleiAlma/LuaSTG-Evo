@@ -182,8 +182,8 @@ namespace LuaSTGPlus
     private:
         // 用于多world
         
-        lua_Integer m_iWorld = 15; // 当前的 world mask
-        std::array<lua_Integer, 4> m_Worlds = { 15, 0, 0, 0 }; // 预置的 world mask
+        lua_Integer m_iWorld = 0x00000001; // 当前的 world mask
+        lua_Integer m_ActiveWorldMask = 0xFFFFFFFF;
     public:
         // 用于多world
         
@@ -196,23 +196,18 @@ namespace LuaSTGPlus
             return m_iWorld;
         }
         // 设置预置的world mask
-        inline void ActiveWorlds(lua_Integer a, lua_Integer b, lua_Integer c, lua_Integer d) noexcept {
-            m_Worlds[0] = a;
-            m_Worlds[1] = b;
-            m_Worlds[2] = c;
-            m_Worlds[3] = d;
+        inline void SetActiveWorlds(lua_Integer activeMask) noexcept {
+            m_ActiveWorldMask = activeMask;
         }
-        // 检查两个world mask位与或的结果 //静态函数，不应该只用于类内
-        static inline bool CheckWorld(lua_Integer gameworld, lua_Integer objworld) {
-            return (gameworld == objworld) || (gameworld & objworld);
+        inline lua_Integer GetActiveWorlds() noexcept {
+            return m_ActiveWorldMask;
         }
-        // 对两个world mask，分别与预置的world mask位与或，用于检查是否在同一个world内
-        bool CheckWorlds(int a, int b) noexcept {
-            if (CheckWorld(a, m_Worlds[0]) && CheckWorld(b, m_Worlds[0]))return true;
-            if (CheckWorld(a, m_Worlds[1]) && CheckWorld(b, m_Worlds[1]))return true;
-            if (CheckWorld(a, m_Worlds[2]) && CheckWorld(b, m_Worlds[2]))return true;
-            if (CheckWorld(a, m_Worlds[3]) && CheckWorld(b, m_Worlds[3]))return true;
-            return false;
+
+        static inline bool CheckWorlds(lua_Integer a, lua_Integer b, lua_Integer activeMask = 0xFFFFFFFF) noexcept {
+            return a & b & activeMask;
+        }
+        inline bool IsSameWorld(lua_Integer otherMask) const noexcept {
+            return CheckWorlds(m_iWorld, otherMask, m_ActiveWorldMask);
         }
     private:
         // 用于超级暂停

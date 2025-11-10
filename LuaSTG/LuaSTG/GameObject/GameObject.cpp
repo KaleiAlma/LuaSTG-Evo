@@ -133,7 +133,7 @@ namespace LuaSTGPlus
         ignore_superpause = false;
         touch_lastx_lasty = false;
 
-        world = 15;
+        world = 0xFFFF;
 
         rect = false;
         a = b = 0.;
@@ -177,7 +177,7 @@ namespace LuaSTGPlus
         ignore_superpause = false;
         touch_lastx_lasty = false;
 
-        world = 15;
+        world = 0xFFFF;
 
         rect = false;
         a = b = 0.;

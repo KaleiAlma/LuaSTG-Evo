@@ -317,8 +317,8 @@ namespace LuaSTGPlus
         // 重置整个对象池，恢复为线性状态
         m_ObjectPool.clear();
         // 重置其他数据
-        m_iWorld = 15;
-        m_Worlds = { 15, 0, 0, 0 };
+        m_iWorld = 0x00000001;
+		m_ActiveWorldMask = 0xFFFFFFFF;
         m_pCurrentObject = nullptr;
         m_superpause = 0;
         m_nextsuperpause = 0;
@@ -367,7 +367,7 @@ namespace LuaSTGPlus
         for (auto& p : m_RenderList)
         {
     #ifdef USING_MULTI_GAME_WORLD
-            if (!p->hide && CheckWorld(p->world, world))  // 只渲染可见对象
+            if (!p->hide && CheckWorlds(p->world, world))  // 只渲染可见对象
     #else // USING_MULTI_GAME_WORLD
             if (!p->hide)  // 只渲染可见对象
     #endif // USING_MULTI_GAME_WORLD
@@ -406,7 +406,7 @@ namespace LuaSTGPlus
         for (GameObject* p = m_UpdateLinkList.first.pUpdateNext; p != &m_UpdateLinkList.second; p = p->pUpdateNext)
         {
         #ifdef USING_MULTI_GAME_WORLD
-            if (CheckWorld(p->world, world))
+            if (CheckWorlds(p->world, world))
             {
         #endif // USING_MULTI_GAME_WORLD
                 if (!_ObjectBoundCheck(p))
@@ -782,7 +782,7 @@ namespace LuaSTGPlus
         for (GameObject* p = m_ColliLinkList[groupId].first.pColliNext; p != &m_ColliLinkList[groupId].second; p = p->pColliNext)
         {
         #ifdef USING_MULTI_GAME_WORLD
-            if (p->colli && CheckWorld(p->world, world))
+            if (p->colli && CheckWorlds(p->world, world))
         #else // !USING_MULTI_GAME_WORLD
             if (p->colli)
         #endif // USING_MULTI_GAME_WORLD
